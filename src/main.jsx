@@ -6,6 +6,7 @@ import {
   galleryItems,
   guestNotes,
   navigationItems,
+  shopRules,
   shopInfo,
   staffMembers,
   updates,
@@ -198,11 +199,14 @@ function HomePage({ navigate }) {
       </section>
 
       <section className="section sectionOverlap">
-        <div className="infoStrip">
-          <InfoBlock label="伺服器" value={shopInfo.server} />
-          <InfoBlock label="房區" value={shopInfo.address} />
-          <InfoBlock label="入場提示" value={shopInfo.entryNote} />
-        </div>
+        <DarkCard className="aboutCard">
+          <SectionTitle eyebrow="About Us" title="關於暮光沙龍" />
+          <div className="aboutText">
+            {shopInfo.about.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
+          </div>
+        </DarkCard>
       </section>
 
       <section className="section twoColumn">
@@ -232,6 +236,20 @@ function HomePage({ navigate }) {
             ))}
           </div>
           <p className="softText">{shopInfo.pricingNote}</p>
+        </DarkCard>
+      </section>
+
+      <section className="section">
+        <DarkCard className="rulesCard">
+          <SectionTitle eyebrow="House Rules" title="店內規則" />
+          <div className="rulesList">
+            {shopRules.map((rule, index) => (
+              <div className="ruleItem" key={rule}>
+                <span>{String(index + 1).padStart(2, '0')}</span>
+                <p>{rule}</p>
+              </div>
+            ))}
+          </div>
         </DarkCard>
       </section>
 
@@ -498,15 +516,6 @@ function DarkCard({ className = '', children }) {
 
 function StatusBadge({ tone = 'accent', children }) {
   return <span className={`statusBadge ${tone}`}>{children}</span>;
-}
-
-function InfoBlock({ label, value }) {
-  return (
-    <div className="infoBlock">
-      <span>{label}</span>
-      <strong>{value}</strong>
-    </div>
-  );
 }
 
 function Modal({ title, children, onClose }) {

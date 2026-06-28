@@ -7,9 +7,6 @@ export const navigationItems = [
   { label: '首頁', href: '/home' },
   { label: '店員珍藏', href: '/staff' },
   { label: '慶典情報', href: '/event' },
-  { label: '艾歐澤亞週報', href: '/gallery' },
-  { label: '留聲機', href: '/guestbook' },
-  { label: '店舖動態', href: '/updates' },
 ];
 
 export const shopInfo = {
@@ -21,6 +18,11 @@ export const shopInfo = {
   server: 'Elemental / Aegis',
   address: '薰衣草苗圃 第 12 區 斜坡小屋',
   entryNote: '入場前請先閱讀消費說明與 RP 禮儀',
+  about: [
+    '暮光沙龍是一間以深夜貴賓廳為主題的 FF14 RP 店，提供陪談、指名陪伴、活動企劃與角色沉浸式互動。',
+    '我們位於 Elemental / Aegis，薰衣草苗圃第 12 區斜坡小屋，歡迎想放慢腳步的冒險者入席。',
+    '店內重視彼此尊重與舒適節奏，第一次來訪也可以由店員協助說明入場、指名與拍照流程。',
+  ],
   footerText: '燭火、杯影與低聲的故事，為每位來訪者保留一席安靜的夜晚。',
   heroImage: image('暮光沙龍 Hero'),
   pricingNote: '第一版價格為 demo mock data，正式營運前可由後台或 API 維護。',
@@ -30,6 +32,13 @@ export const shopInfo = {
     { name: '包廂預約', price: '120,000 Gil / 場' },
   ],
 };
+
+export const shopRules = [
+  '店內全面禁止使用任何具有攻擊性、干擾他人 RP 體驗的技能與特效。',
+  '點選女僕指名服務時，請尊重店員，嚴禁使用過度越軌的言詞或情感動作。',
+  '拍照留念時請開啟 Gpose，並歡迎在社群平台上標註本店活動 Tag。',
+  '若店內當前人數過多，包廂將採取計時 60 分鐘制，敬請冒險者配合。',
+];
 
 export const staffMembers = [
   {

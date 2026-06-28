@@ -15,8 +15,23 @@ const routeAliases = {
   '/': '/home',
 };
 
+const appBase = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+function stripBasePath(pathname) {
+  if (!appBase || appBase === '') return pathname;
+  if (pathname === appBase) return '/';
+  if (pathname.startsWith(`${appBase}/`)) return pathname.slice(appBase.length);
+  return pathname;
+}
+
 function normalizePath(pathname) {
-  return routeAliases[pathname] || pathname || '/home';
+  const appPath = stripBasePath(pathname);
+  return routeAliases[appPath] || appPath || '/home';
+}
+
+function toBrowserPath(route) {
+  const normalized = normalizePath(route);
+  return `${appBase}${normalized}`;
 }
 
 function useRoute() {
@@ -30,7 +45,7 @@ function useRoute() {
 
   const navigate = (to) => {
     const normalized = normalizePath(to);
-    window.history.pushState({}, '', normalized);
+    window.history.pushState({}, '', toBrowserPath(normalized));
     setRoute(normalized);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };

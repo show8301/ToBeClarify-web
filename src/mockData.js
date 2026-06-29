@@ -61,8 +61,8 @@ export const staffMembers = [
       { name: '包廂陪伴', price: '120,000 Gil' },
     ],
     specialServices: [
-      { name: '星盤短占', price: '60,000 Gil' },
-      { name: '角色背景共創', price: '80,000 Gil' },
+      { name: '星盤短占', description: '以角色設定與當晚情境抽取短籤，延伸一段適合入戲的占星回饋。', price: '60,000 Gil' },
+      { name: '角色背景共創', description: '陪同梳理角色過往、人際關係與入店動機，適合想補完設定的冒險者。', price: '80,000 Gil' },
     ],
   },
   {
@@ -85,8 +85,8 @@ export const staffMembers = [
       { name: '包廂陪伴', price: '120,000 Gil' },
     ],
     specialServices: [
-      { name: '即興劇情開場', price: '70,000 Gil' },
-      { name: '吧台秘飲 RP', price: '55,000 Gil' },
+      { name: '即興劇情開場', description: '由店員替客人建立一段開場衝突或相遇橋段，降低第一次互動的尷尬感。', price: '70,000 Gil' },
+      { name: '吧台秘飲 RP', description: '依角色心情調製一杯店內秘飲，並以飲品作為短篇對話主題。', price: '55,000 Gil' },
     ],
   },
   {
@@ -109,8 +109,8 @@ export const staffMembers = [
       { name: '包廂陪伴', price: '120,000 Gil' },
     ],
     specialServices: [
-      { name: '棚拍陪同', price: '75,000 Gil' },
-      { name: '紀念照構圖', price: '65,000 Gil' },
+      { name: '棚拍陪同', description: '陪同挑選店內棚景、協助安排站位與氛圍，適合留下完整活動紀念。', price: '75,000 Gil' },
+      { name: '紀念照構圖', description: '提供雙人或多人合照構圖建議，讓照片更符合角色關係與場景故事。', price: '65,000 Gil' },
     ],
   },
   {
@@ -133,8 +133,8 @@ export const staffMembers = [
       { name: '包廂陪伴', price: '120,000 Gil' },
     ],
     specialServices: [
-      { name: '初訪導覽', price: '40,000 Gil' },
-      { name: '貴賓廳儀式 RP', price: '90,000 Gil' },
+      { name: '初訪導覽', description: '說明入場、指名、包廂與拍照流程，適合第一次接觸 RP 店的客人。', price: '40,000 Gil' },
+      { name: '貴賓廳儀式 RP', description: '以正式迎賓、席間禮儀與送客橋段組成完整貴賓廳體驗。', price: '90,000 Gil' },
     ],
   },
 ];

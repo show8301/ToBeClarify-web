@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 export function Modal({ title, children, onClose }) {
   useEffect(() => {
@@ -13,7 +14,7 @@ export function Modal({ title, children, onClose }) {
     };
   }, [onClose]);
 
-  return (
+  return createPortal(
     <div className="modalBackdrop" role="presentation" onMouseDown={onClose}>
       <section
         className="modalPanel"
@@ -27,6 +28,7 @@ export function Modal({ title, children, onClose }) {
         </button>
         {children}
       </section>
-    </div>
+    </div>,
+    document.body,
   );
 }

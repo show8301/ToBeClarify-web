@@ -7,10 +7,21 @@ export const navigationItems = [
   { label: '首頁', href: '/home' },
   { label: '店員珍藏', href: '/staff' },
   { label: '慶典情報', href: '/event' },
+  { label: '艾歐澤亞週報', href: '/gallery' },
+  { label: '留聲機', href: '/guestbook' },
+  { label: '店舖動態', href: '/liveupdate' },
+  {
+    label: '榮譽殿堂',
+    href: '/staffRanking',
+    children: [
+      { label: '店員榜', href: '/staffRanking' },
+      { label: '消費榜', href: '/monetaryRanking' },
+    ],
+  },
 ];
 
 export const shopInfo = {
-  name: '暮光沙龍',
+  name: '35女王古殿',
   shortName: 'Twilight Salon',
   subtitle: '一處替旅人留燈的深夜貴賓廳，提供陪伴、談心、占卜與沉浸式 RP 接待。',
   businessStatus: '今日營業 21:30 開席',
@@ -19,12 +30,12 @@ export const shopInfo = {
   address: '薰衣草苗圃 第 12 區 斜坡小屋',
   entryNote: '入場前請先閱讀消費說明與 RP 禮儀',
   about: [
-    '暮光沙龍是一間以深夜貴賓廳為主題的 FF14 RP 店，提供陪談、指名陪伴、活動企劃與角色沉浸式互動。',
+    '35女王古殿是一間以深夜貴賓廳為主題的 FF14 RP 店，提供陪談、指名陪伴、活動企劃與角色沉浸式互動。',
     '我們位於 Elemental / Aegis，薰衣草苗圃第 12 區斜坡小屋，歡迎想放慢腳步的冒險者入席。',
     '店內重視彼此尊重與舒適節奏，第一次來訪也可以由店員協助說明入場、指名與拍照流程。',
   ],
   footerText: '燭火、杯影與低聲的故事，為每位來訪者保留一席安靜的夜晚。',
-  heroImage: image('暮光沙龍 Hero'),
+  heroImage: image('35女王古殿 Hero'),
   pricingNote: '第一版價格為 demo mock data，正式營運前可由後台或 API 維護。',
   pricing: [
     { name: '入場席費', price: '30,000 Gil' },
@@ -145,9 +156,9 @@ export const events = [
     title: '月下祝杯夜',
     summary: '以月光、低酒精調飲與雙人短談為主題的週末限定場。',
     period: '2026/07/03 - 2026/07/04',
+    endAt: '2026-07-04',
     status: '生效中',
     imageUrl: image('月下祝杯夜'),
-    hiddenByAge: false,
     details: [
       '活動期間每位來客可獲得一張月色籤詩，由當班店員依籤詩延伸一段短篇 RP。',
       '本場適合想輕量體驗陪談、初次入店或與朋友一起參與的客人。',
@@ -159,9 +170,9 @@ export const events = [
     title: '水晶留信企劃',
     summary: '替指定角色留下一封匿名短箋，活動結束後由店員朗讀或轉交。',
     period: '2026/06/21 - 2026/07/12',
+    endAt: '2026-07-12',
     status: '生效中',
     imageUrl: image('水晶留信企劃'),
-    hiddenByAge: false,
     details: [
       '客人可在店內填寫一封不含現實個資的角色短箋，指定公開朗讀或私下轉交。',
       '內容需符合店內 RP 禮儀，工作人員會保留審核與婉拒權利。',
@@ -172,9 +183,9 @@ export const events = [
     title: '燼火小舞會',
     summary: '已結束的舞會主題夜，保留給想回顧規則與照片的客人。',
     period: '2026/05/24 - 2026/05/25',
+    endAt: '2026-05-25',
     status: '已失效',
     imageUrl: image('燼火小舞會'),
-    hiddenByAge: false,
     details: [
       '燼火小舞會已結束，第一版 demo 保留一個失效活動案例。',
       '過期超過一個月的活動會在前端資料層排除，不再顯示於列表。',
@@ -185,68 +196,138 @@ export const events = [
     title: '舊日沙龍夜',
     summary: '超過一個月的歷史活動，依規格不顯示於活動列表。',
     period: '2026/04/12 - 2026/04/13',
+    endAt: '2026-04-13',
     status: '已失效',
     imageUrl: image('舊日沙龍夜'),
-    hiddenByAge: true,
     details: ['這筆資料用於驗證過期活動不顯示。'],
   },
 ];
 
 export const galleryItems = [
   {
-    title: '月下祝杯佈置預覽',
-    category: '活動',
-    description: '吧台周邊將以低光燭台與淡紫花材裝飾。',
-    imageUrl: image('月下祝杯佈置預覽', 900, 700),
+    id: 'moon-toast-gallery',
+    title: '月下祝杯夜',
+    period: '2026/07/03 - 2026/07/04',
+    endAt: '2026-07-04',
+    description: '以月光、低酒精調飲與雙人短談為主題的週末限定花絮。',
+    imageUrl: image('月下祝杯夜 花絮', 900, 700),
+    details: [
+      '本輯收錄月下祝杯夜的吧台佈置、座席燭光、店員互動與客人紀念照。',
+      '照片以活動氛圍展示為主，正式上線後可接後台審核與公開狀態。',
+    ],
+    photos: [
+      image('月下祝杯 01', 900, 1200),
+      image('月下祝杯 02', 1200, 800),
+      image('月下祝杯 03', 800, 1100),
+      image('月下祝杯 04', 1100, 900),
+      image('月下祝杯 05', 900, 900),
+      image('月下祝杯 06', 1200, 1000),
+      image('月下祝杯 07', 800, 1000),
+      image('月下祝杯 08', 1100, 760),
+    ],
   },
   {
-    title: '貴賓廳棚景測試',
-    category: '店員',
-    description: '為店員珍藏準備的沙龍照測試場景。',
-    imageUrl: image('貴賓廳棚景測試', 900, 700),
+    id: 'crystal-letter-gallery',
+    title: '水晶留信企劃',
+    period: '2026/06/21 - 2026/07/12',
+    endAt: '2026-07-12',
+    description: '匿名短箋、朗讀席與水晶燈影構成的活動紀錄。',
+    imageUrl: image('水晶留信企劃 花絮', 900, 700),
+    details: [
+      '花絮聚焦留言卡、朗讀桌、店內水晶裝飾與活動期間的安靜角落。',
+      '為避免暴露客人資訊，正式資料應只展示已審核的公開投稿。',
+    ],
+    photos: [
+      image('水晶留信 01', 900, 1100),
+      image('水晶留信 02', 1200, 780),
+      image('水晶留信 03', 840, 1050),
+      image('水晶留信 04', 1100, 1100),
+      image('水晶留信 05', 900, 760),
+      image('水晶留信 06', 1200, 900),
+    ],
   },
   {
-    title: '週末散場紀錄',
-    category: '日常',
-    description: '營業結束後保留下來的一盞燈與留言卡。',
-    imageUrl: image('週末散場紀錄', 900, 700),
+    id: 'ember-ball-gallery',
+    title: '燼火小舞會',
+    period: '2026/05/24 - 2026/05/25',
+    endAt: '2026-05-25',
+    description: '已超過一個月的活動相簿，依規格不顯示於列表。',
+    imageUrl: image('燼火小舞會 花絮', 900, 700),
+    details: ['這筆資料保留作為過期過一個月相簿不顯示的測試資料。'],
+    photos: [image('燼火小舞會 01', 900, 700)],
   },
 ];
 
-export const guestNotes = [
+export const guestbookMessages = [
   {
-    name: '匿名旅人',
-    badge: '初訪',
-    date: '2026/06/22',
-    message: '第一次來也不會緊張，店員把流程說得很清楚，整晚節奏很舒服。',
+    id: 'PIN-001',
+    authorId: '暮光櫃台',
+    message: '歡迎留下不含現實個資的 RP 感想。正式版會接審核流程，第一版僅作畫面展示。',
+    createdAt: '2026-07-01T20:40:00+08:00',
+    isPinned: true,
   },
   {
-    name: '白銀鄉的常客',
-    badge: '回訪',
-    date: '2026/06/15',
-    message: '喜歡這裡的低光佈置，適合把角色故事慢慢講完。',
+    id: 'PIN-002',
+    authorId: '店內公告',
+    message: '留言請保持角色內禮儀，避免攻擊性文字、過度越界內容或破壞他人沉浸體驗。',
+    createdAt: '2026-07-01T20:30:00+08:00',
+    isPinned: true,
   },
+  ...Array.from({ length: 18 }, (_, index) => {
+    const number = index + 1;
+    const day = String(30 - (index % 8)).padStart(2, '0');
+    const hour = String(23 - (index % 5)).padStart(2, '0');
+    const minute = String((index * 7) % 60).padStart(2, '0');
+    return {
+      id: `MSG-${String(number).padStart(3, '0')}`,
+      authorId: ['匿名旅人', '白銀鄉常客', '月下來客', '初訪冒險者'][index % 4],
+      message: [
+        '第一次來也不會緊張，店員把流程說得很清楚，整晚節奏很舒服。',
+        '喜歡這裡的低光佈置，適合把角色故事慢慢講完。',
+        '月下祝杯的氣氛很漂亮，短籤詩讓角色有了新的靈感。',
+        '包廂陪談節奏剛好，適合想安靜聊天的晚上。',
+      ][index % 4],
+      createdAt: `2026-06-${day}T${hour}:${minute}:00+08:00`,
+      isPinned: false,
+    };
+  }),
 ];
 
-export const updates = [
-  {
-    type: '班表',
-    tone: 'success',
-    title: '本週五營業確認',
-    description: '賽琳、諾亞與亞修將於晚間 21:30 後陸續入席。',
-    action: { label: '查看店員', href: '/staff' },
-  },
-  {
-    type: '公告',
-    tone: 'accent',
-    title: '月下祝杯夜開放預約',
-    description: '包廂名額採現場與預約並行，請留意活動頁說明。',
-    action: { label: '查看活動', href: '/event' },
-  },
-  {
-    type: '規劃',
-    tone: 'muted',
-    title: '後端專案預留',
-    description: '正式版可由 C# API 提供店員、活動、班表與留言資料。',
-  },
+export const liveUpdate = {
+  lastUpdatedAt: '2026-07-01T22:18:36+08:00',
+  openSeats: [
+    { id: 'A1', label: '開放席 A1', status: 'occupied', guestName: '白銀鄉常客', staffId: 'selene', position: { x: 24, y: 38 } },
+    { id: 'A2', label: '開放席 A2', status: 'available', guestName: '', staffId: null, position: { x: 42, y: 34 } },
+    { id: 'A3', label: '開放席 A3', status: 'occupied', guestName: '月下來客', staffId: 'noir', position: { x: 60, y: 39 } },
+    { id: 'B1', label: '開放席 B1', status: 'available', guestName: '', staffId: null, position: { x: 30, y: 70 } },
+    { id: 'B2', label: '開放席 B2', status: 'reserved', guestName: '預約席', staffId: 'ash', position: { x: 52, y: 68 } },
+    { id: 'B3', label: '開放席 B3', status: 'available', guestName: '', staffId: null, position: { x: 74, y: 64 } },
+  ],
+  rooms: [
+    { id: 'VIP-01', name: '月影包廂', status: 'occupied', guestName: '匿名旅人', staffId: 'ash' },
+    { id: 'VIP-02', name: '水晶包廂', status: 'available', guestName: '', staffId: null },
+    { id: 'VIP-03', name: '燭火包廂', status: 'reserved', guestName: '預約中', staffId: 'selene' },
+  ],
+  staffStatuses: [
+    { staffId: 'selene', status: 'busy', label: '~23:00' },
+    { staffId: 'noir', status: 'available', label: '空閒中' },
+    { staffId: 'lumi', status: 'off', label: '未上班' },
+    { staffId: 'ash', status: 'busy', label: '~22:45' },
+  ],
+};
+
+export const staffRankings = [
+  { staffId: 'selene', nominations: 86, declaration: '願每一位旅人都能在夜裡找到被溫柔接住的位置。' },
+  { staffId: 'noir', nominations: 73 },
+  { staffId: 'ash', nominations: 61 },
+  { staffId: 'lumi', nominations: 48 },
+];
+
+export const guestRankings = [
+  { guestId: 'Moonlit-042', totalAmount: 1860000, title: '月冠貴賓' },
+  { guestId: 'Aegis-Tea-17', totalAmount: 1520000, title: '水晶贊助者' },
+  { guestId: 'Lavender-09', totalAmount: 1285000, title: '燭光守望者' },
+  { guestId: 'Silent-Guest-31', totalAmount: 940000 },
+  { guestId: 'SilverBell-22', totalAmount: 810000 },
+  { guestId: 'Nocturne-58', totalAmount: 680000 },
 ];

@@ -31,7 +31,7 @@ export function HomePage({ navigate }) {
 
       <section className="section sectionOverlap">
         <DarkCard className="aboutCard">
-          <SectionTitle eyebrow="About Us" title="關於暮光沙龍" />
+          <SectionTitle eyebrow="About Us" title="關於35女王古殿" />
           <div className="aboutText">
             {shopInfo.about.map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>

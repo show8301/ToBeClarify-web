@@ -4,10 +4,16 @@ import { PageFrame } from '../components/PageFrame.jsx';
 import { StatusBadge } from '../components/StatusBadge.jsx';
 import { events } from '../mockData.js';
 
+const today = new Date('2026-07-01T00:00:00+08:00');
+
+function isExpired(event) {
+  return new Date(`${event.endAt}T23:59:59+08:00`) < today;
+}
+
 export function EventPage() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const visibleEvents = events
-    .filter((event) => !event.hiddenByAge)
+    .filter((event) => !isExpired(event))
     .sort((a, b) => Number(b.status === '生效中') - Number(a.status === '生效中'));
 
   return (

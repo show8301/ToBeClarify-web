@@ -1,6 +1,10 @@
 import { navigationItems, shopInfo } from '../mockData.js';
 
 export function Footer({ navigate }) {
+  const footerMainLinks = navigationItems.filter((item) => !item.children);
+  const footerRankingLinks =
+    navigationItems.find((item) => item.label === '榮譽殿堂')?.children || [];
+
   return (
     <footer className="footer">
       <div>
@@ -10,15 +14,8 @@ export function Footer({ navigate }) {
       </div>
       <div className="footerGrid">
         <FooterColumn title="店舖資訊" items={[shopInfo.server, shopInfo.address, shopInfo.openHours]} />
-        <FooterColumn
-          title="快速入口"
-          items={['店員珍藏', '慶典情報', '店舖動態']}
-          onItemClick={(label) => {
-            const item = navigationItems.find((nav) => nav.label === label);
-            if (item) navigate(item.href);
-          }}
-        />
-        <FooterColumn title="Demo Note" items={['純靜態展示', 'Mock data', '後端 API 預留']} />
+        <FooterColumn title="主要導覽" items={footerMainLinks} onItemClick={(item) => navigate(item.href)} />
+        <FooterColumn title="榮譽殿堂" items={footerRankingLinks} onItemClick={(item) => navigate(item.href)} />
       </div>
     </footer>
   );
@@ -30,8 +27,8 @@ function FooterColumn({ title, items, onItemClick }) {
       <h3>{title}</h3>
       {items.map((item) =>
         onItemClick ? (
-          <button type="button" key={item} onClick={() => onItemClick(item)}>
-            {item}
+          <button type="button" key={item.href} onClick={() => onItemClick(item)}>
+            {item.label}
           </button>
         ) : (
           <span key={item}>{item}</span>

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import brandMark from '../assets/brand-mark.svg';
 import { navigationItems, shopInfo } from '../mockData.js';
 
 export function Navbar({ route, navigate }) {
@@ -47,7 +48,7 @@ export function Navbar({ route, navigate }) {
     <header className="navbar">
       <button className="brandButton" type="button" onClick={() => handleNavigate('/home')}>
         <span className="brandMark">
-          <img src="https://huiji-public.huijistatic.com/ff14/uploads/7/7f/246367.png" alt="" />
+          <img src={brandMark} alt="" />
         </span>
         <span>
           <strong>{shopInfo.name}</strong>

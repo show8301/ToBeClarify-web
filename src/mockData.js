@@ -265,6 +265,14 @@ export const guestbookMessages = [
     message: '歡迎留下不含現實個資的 RP 感想。正式版會接審核流程，第一版僅作畫面展示。',
     createdAt: '2026-07-01T20:40:00+08:00',
     isPinned: true,
+    replies: [
+      {
+        id: 'PIN-001-R01',
+        authorId: '水晶櫃檯',
+        message: '正式版會再加入審核與隱藏流程，demo 先保留公開展示。',
+        createdAt: '2026-07-01T20:48:00+08:00',
+      },
+    ],
   },
   {
     id: 'PIN-002',
@@ -272,6 +280,7 @@ export const guestbookMessages = [
     message: '留言請保持角色內禮儀，避免攻擊性文字、過度越界內容或破壞他人沉浸體驗。',
     createdAt: '2026-07-01T20:30:00+08:00',
     isPinned: true,
+    replies: [],
   },
   ...Array.from({ length: 18 }, (_, index) => {
     const number = index + 1;
@@ -289,28 +298,76 @@ export const guestbookMessages = [
       ][index % 4],
       createdAt: `2026-06-${day}T${hour}:${minute}:00+08:00`,
       isPinned: false,
+      replies:
+        index % 5 === 0
+          ? [
+              {
+                id: `MSG-${String(number).padStart(3, '0')}-R01`,
+                authorId: '櫃檯回覆',
+                message: '謝謝你的留言，期待下次再一起補完角色故事。',
+                createdAt: `2026-06-${day}T${hour}:${String((Number(minute) + 8) % 60).padStart(2, '0')}:00+08:00`,
+              },
+            ]
+          : [],
     };
   }),
 ];
 
 export const liveUpdate = {
   lastUpdatedAt: '2026-07-01T22:18:36+08:00',
-  openSeats: [
-    { id: 'A1', label: '開放席 A1', status: 'occupied', guestName: '白銀鄉常客', staffId: 'selene', position: { x: 24, y: 38 } },
-    { id: 'A2', label: '開放席 A2', status: 'available', guestName: '', staffId: null, position: { x: 42, y: 34 } },
-    { id: 'A3', label: '開放席 A3', status: 'occupied', guestName: '月下來客', staffId: 'noir', position: { x: 60, y: 39 } },
-    { id: 'B1', label: '開放席 B1', status: 'available', guestName: '', staffId: null, position: { x: 30, y: 70 } },
-    { id: 'B2', label: '開放席 B2', status: 'reserved', guestName: '預約席', staffId: 'ash', position: { x: 52, y: 68 } },
-    { id: 'B3', label: '開放席 B3', status: 'available', guestName: '', staffId: null, position: { x: 74, y: 64 } },
-  ],
-  rooms: [
-    { id: 'VIP-01', name: '月影包廂', status: 'occupied', guestName: '匿名旅人', staffId: 'ash' },
-    { id: 'VIP-02', name: '水晶包廂', status: 'available', guestName: '', staffId: null },
-    { id: 'VIP-03', name: '燭火包廂', status: 'reserved', guestName: '預約中', staffId: 'selene' },
+  scheduleStart: '20:00',
+  scheduleEnd: '25:00',
+  timeSlots: ['20:00', '20:30', '21:00', '21:30', '22:00', '22:30', '23:00', '23:30', '24:00', '24:30', '25:00'],
+  reservations: [
+    {
+      id: 'RSV-001',
+      staffId: 'selene',
+      guestName: '白銀鄉常客',
+      serviceName: '星盤短占',
+      startAt: '21:30',
+      endAt: '22:10',
+      status: 'finished',
+    },
+    {
+      id: 'RSV-002',
+      staffId: 'selene',
+      guestName: '水晶信使',
+      serviceName: '角色背景共創',
+      startAt: '22:30',
+      endAt: '23:00',
+      status: 'reserved',
+    },
+    {
+      id: 'RSV-003',
+      staffId: 'noir',
+      guestName: '月下來客',
+      serviceName: '即興劇情開場',
+      startAt: '22:00',
+      endAt: '22:45',
+      status: 'active',
+    },
+    {
+      id: 'RSV-004',
+      staffId: 'ash',
+      guestName: '匿名旅人',
+      serviceName: '初訪導覽',
+      startAt: '21:30',
+      endAt: '22:45',
+      status: 'active',
+    },
+    {
+      id: 'RSV-005',
+      staffId: 'ash',
+      guestName: '銀鈴貴賓',
+      serviceName: '貴賓廳儀式 RP',
+      startAt: '23:00',
+      endAt: '23:30',
+      status: 'reserved',
+    },
   ],
   staffStatuses: [
-    { staffId: 'selene', status: 'busy', label: '~23:00' },
-    { staffId: 'noir', status: 'available', label: '空閒中' },
+    { staffId: 'selene', status: 'available', label: '空閒中' },
+    { staffId: 'noir', status: 'busy', label: '~22:45' },
     { staffId: 'lumi', status: 'off', label: '未上班' },
     { staffId: 'ash', status: 'busy', label: '~22:45' },
   ],

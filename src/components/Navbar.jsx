@@ -90,8 +90,10 @@ export function Navbar({ route, navigate }) {
                   type="button"
                   aria-haspopup="menu"
                   aria-expanded={openDropdown === item.label}
-                  onFocus={() => openDropdownMenu(item.label)}
-                  onClick={(event) => event.preventDefault()}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    setOpenDropdown((current) => (current === item.label ? null : item.label));
+                  }}
                 >
                   {item.label}
                 </button>

@@ -1,62 +1,60 @@
-import { useMemo, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { PageFrame } from '../components/PageFrame.jsx';
-import { menuSections } from '../mockData.js';
+import { menuSections, shopInfo } from '../mockData.js';
 
 export function MenuPage() {
-  const [activeSectionId, setActiveSectionId] = useState(menuSections[0]?.id);
-  const activeSection = useMemo(
-    () => menuSections.find((section) => section.id === activeSectionId) ?? menuSections[0],
-    [activeSectionId],
-  );
-
   return (
-    <PageFrame eyebrow="Salon Menu" title="佳餚名錄" intro="以分類切換瀏覽店內餐點，正式版可改由後台維護價格與圖片。">
+    <PageFrame eyebrow="Salon Menu" title="佳餚名錄" intro="先確認消費規則，再瀏覽本週提供的餐點與套餐。">
       <section className="menuPanel">
-        <div className="menuCategoryBar" aria-label="餐點分類">
-          {menuSections.map((section) => (
-            <button
-              className={section.id === activeSection.id ? 'menuCategory active' : 'menuCategory'}
-              type="button"
-              key={section.id}
-              onClick={() => setActiveSectionId(section.id)}
-            >
-              {section.label}
-            </button>
-          ))}
-        </div>
-
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            className="menuSection"
-            key={activeSection.id}
-            initial={{ opacity: 0, y: 14, scale: 0.985, filter: 'blur(10px)' }}
-            animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-            exit={{ opacity: 0, y: -10, scale: 0.99, filter: 'blur(8px)' }}
-            transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
-          >
+        <motion.div
+          className="menuSectionsStack"
+          initial={{ opacity: 0, y: 14, filter: 'blur(8px)' }}
+          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          transition={{ duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <section className="menuSection">
+            <div className="menuSectionDivider" aria-hidden="true" />
             <div className="menuSectionHeader">
-              <p className="eyebrow">Category</p>
-              <h2>{activeSection.label}</h2>
-              <p>{activeSection.intro}</p>
+              <h2>消費規則</h2>
+              <p>入席前請先確認基本收費與預約方式，正式營運前價格可再由後台或 API 維護。</p>
             </div>
 
-            <div className="menuItemGrid">
-              {activeSection.items.map((item) => (
-                <article className="menuItemCard" key={item.id}>
-                  <img src={item.imageUrl} alt="" loading="lazy" />
-                  <div className="menuItemBody">
-                    <div>
-                      <h3>{item.name}</h3>
-                      <p>{item.description}</p>
-                    </div>
-                    <strong>{item.price}</strong>
-                  </div>
-                </article>
+            <div className="menuPricingGrid">
+              {shopInfo.pricing.map((item) => (
+                <div className="priceRow" key={item.name}>
+                  <span>{item.name}</span>
+                  <strong>{item.price}</strong>
+                </div>
               ))}
             </div>
-          </motion.div>
-        </AnimatePresence>
+            <p className="softText">{shopInfo.pricingNote}</p>
+          </section>
+
+          {menuSections.map((section) => (
+            <section className="menuSection" key={section.id}>
+              <div className="menuSectionDivider" aria-hidden="true" />
+              <div className="menuSectionHeader">
+                <h2>{section.label}</h2>
+                <p>{section.intro}</p>
+              </div>
+
+              <div className="menuItemGrid">
+                {section.items.map((item) => (
+                  <article className="menuItemCard" key={item.id}>
+                    <img src={item.imageUrl} alt="" loading="lazy" />
+                    <div className="menuItemBody">
+                      <div>
+                        <h3>{item.name}</h3>
+                        <p>{item.description}</p>
+                      </div>
+                      <strong>{item.price}</strong>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
+          ))}
+        </motion.div>
       </section>
     </PageFrame>
   );

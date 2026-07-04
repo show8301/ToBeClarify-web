@@ -6,7 +6,6 @@ const image = (text, width = 1400, height = 900) => {
 export const navigationItems = [
   { label: '首頁', href: '/home' },
   { label: '店員珍藏', href: '/staff' },
-  { label: '慶典情報', href: '/event' },
   { label: '艾歐澤亞週報', href: '/gallery' },
   { label: '佳餚名錄', href: '/menu' },
   { label: '留聲機', href: '/guestbook' },
@@ -177,6 +176,34 @@ export const events = [
     details: [
       '客人可在店內填寫一封不含現實個資的角色短箋，指定公開朗讀或私下轉交。',
       '內容需符合店內 RP 禮儀，工作人員會保留審核與婉拒權利。',
+    ],
+  },
+  {
+    id: 'queen-tea-party',
+    title: '女王花園茶會',
+    summary: '以雙人茶席、輕量角色訪談與庭園拍照為主軸的午後系夜場。',
+    period: '2026/07/18 - 2026/07/19',
+    endAt: '2026-07-19',
+    status: '未開始',
+    imageUrl: image('女王花園茶會'),
+    details: [
+      '活動期間會開放花園主題茶席，店員會依來客角色設定安排一段短篇迎賓對話。',
+      '本場適合想拍攝紀念照、體驗低壓互動，或與朋友一起入席的客人。',
+      '茶席名額依當日店員人力調整，正式預約請以店舖動態公告為準。',
+    ],
+  },
+  {
+    id: 'midnight-oracle',
+    title: '午夜神諭占卜夜',
+    summary: '由當班店員以籤詩與角色提問延伸一段沉浸式占卜互動。',
+    period: '2026/07/25 - 2026/07/26',
+    endAt: '2026-07-26',
+    status: '未開始',
+    imageUrl: image('午夜神諭占卜夜'),
+    details: [
+      '來客可準備一個角色內問題，由店員抽取神諭籤並給予一段可延伸 RP 的回應。',
+      '占卜內容以角色敘事與氣氛演出為主，不涉及現實人生、健康或財務判斷。',
+      '若客人希望保留結果，可於活動後至留聲機留下角色回饋。',
     ],
   },
   {

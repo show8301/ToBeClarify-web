@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Modal } from '../components/Modal.jsx';
+import { EventModal } from '../components/EventModal.jsx';
 import { PageFrame } from '../components/PageFrame.jsx';
 import { StatusBadge } from '../components/StatusBadge.jsx';
 import { events } from '../mockData.js';
@@ -36,27 +36,5 @@ export function EventPage() {
 
       <EventModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />
     </PageFrame>
-  );
-}
-
-function EventModal({ event, onClose }) {
-  if (!event) return null;
-
-  return (
-    <Modal title={event.title} onClose={onClose}>
-      <div className="eventDialog">
-        {event.imageUrl ? <img src={event.imageUrl} alt={`${event.title} 活動照片`} /> : null}
-        <div>
-          <div className="cardMeta">
-            <StatusBadge tone={event.status === '生效中' ? 'accent' : 'muted'}>{event.status}</StatusBadge>
-            <span>{event.period}</span>
-          </div>
-          <h2>{event.title}</h2>
-          {event.details.map((paragraph) => (
-            <p key={paragraph}>{paragraph}</p>
-          ))}
-        </div>
-      </div>
-    </Modal>
   );
 }

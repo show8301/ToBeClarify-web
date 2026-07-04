@@ -1,10 +1,34 @@
+import { useMemo, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { DarkCard } from '../components/DarkCard.jsx';
+import { EventModal } from '../components/EventModal.jsx';
 import { SectionTitle } from '../components/SectionTitle.jsx';
 import { StatusBadge } from '../components/StatusBadge.jsx';
 import { events, shopInfo, shopRules } from '../mockData.js';
 
 export function HomePage({ navigate }) {
-  const featuredEvent = events.find((event) => event.status === '生效中') || events[0];
+  const carouselEvents = useMemo(() => events.filter((event) => event.status !== '已失效'), []);
+  const [activeEventIndex, setActiveEventIndex] = useState(0);
+  const [eventDirection, setEventDirection] = useState(1);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const activeEvent = carouselEvents[activeEventIndex] ?? events[0];
+  const hasMultipleEvents = carouselEvents.length > 1;
+
+  const moveEvent = (direction) => {
+    setEventDirection(direction);
+    setActiveEventIndex((currentIndex) => {
+      const nextIndex = currentIndex + direction;
+      if (nextIndex < 0) return carouselEvents.length - 1;
+      if (nextIndex >= carouselEvents.length) return 0;
+      return nextIndex;
+    });
+  };
+
+  const jumpToEvent = (nextIndex) => {
+    if (nextIndex === activeEventIndex) return;
+    setEventDirection(nextIndex > activeEventIndex ? 1 : -1);
+    setActiveEventIndex(nextIndex);
+  };
 
   return (
     <>
@@ -22,8 +46,8 @@ export function HomePage({ navigate }) {
             <button className="btnPrimary" type="button" onClick={() => navigate('/staff')}>
               查看店員珍藏
             </button>
-            <button className="btnSecondary" type="button" onClick={() => navigate('/event')}>
-              慶典情報
+            <button className="btnSecondary" type="button" onClick={() => navigate('/menu')}>
+              佳餚名錄
             </button>
           </div>
         </div>
@@ -40,33 +64,76 @@ export function HomePage({ navigate }) {
         </DarkCard>
       </section>
 
-      <section className="section twoColumn">
-        <DarkCard className="featuredEvent">
-          <SectionTitle eyebrow="Tonight" title="今夜主打" />
-          <h3>{featuredEvent.title}</h3>
-          <p>{featuredEvent.summary}</p>
-          <div className="cardMeta">
-            <StatusBadge tone={featuredEvent.status === '生效中' ? 'accent' : 'muted'}>
-              {featuredEvent.status}
-            </StatusBadge>
-            <span>{featuredEvent.period}</span>
-          </div>
-          <button className="textButton" type="button" onClick={() => navigate('/event')}>
-            查看完整活動
-          </button>
-        </DarkCard>
-
-        <DarkCard>
-          <SectionTitle eyebrow="Menu" title="消費說明" />
-          <div className="priceList">
-            {shopInfo.pricing.map((item) => (
-              <div className="priceRow" key={item.name}>
-                <span>{item.name}</span>
-                <strong>{item.price}</strong>
+      <section className="section">
+        <DarkCard className="eventCarouselCard">
+          <div className="eventCarouselHeader">
+            <SectionTitle eyebrow="Festival Briefing" title="慶典情報" />
+            {hasMultipleEvents ? (
+              <div className="carouselControls" aria-label="活動輪播控制">
+                <button type="button" onClick={() => moveEvent(-1)} aria-label="上一個活動">
+                  ←
+                </button>
+                <button type="button" onClick={() => moveEvent(1)} aria-label="下一個活動">
+                  →
+                </button>
               </div>
-            ))}
+            ) : null}
           </div>
-          <p className="softText">{shopInfo.pricingNote}</p>
+
+          <div className="eventCarouselViewport">
+            <AnimatePresence mode="wait" custom={eventDirection}>
+              <motion.div
+                className="eventCarouselBody"
+                key={activeEvent.id}
+                custom={eventDirection}
+                initial={(direction) => ({
+                  opacity: 0,
+                  x: direction > 0 ? 72 : -72,
+                  rotateY: direction > 0 ? -18 : 18,
+                  scale: 0.96,
+                })}
+                animate={{
+                  opacity: 1,
+                  x: 0,
+                  rotateY: 0,
+                  scale: 1,
+                }}
+                exit={(direction) => ({
+                  opacity: 0,
+                  x: direction > 0 ? -72 : 72,
+                  rotateY: direction > 0 ? 18 : -18,
+                  scale: 0.96,
+                })}
+                transition={{ duration: 0.46, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <img src={activeEvent.imageUrl} alt="" loading="lazy" />
+                <div>
+                  <div className="cardMeta">
+                    <span>{activeEvent.period}</span>
+                  </div>
+                  <h3>{activeEvent.title}</h3>
+                  <p>{activeEvent.summary}</p>
+                  <button className="textButton" type="button" onClick={() => setSelectedEvent(activeEvent)}>
+                    查看完整活動
+                  </button>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {hasMultipleEvents ? (
+            <div className="carouselDots" aria-label="活動輪播頁碼">
+              {carouselEvents.map((event, index) => (
+                <button
+                  className={index === activeEventIndex ? 'active' : ''}
+                  type="button"
+                  key={event.id}
+                  onClick={() => jumpToEvent(index)}
+                  aria-label={`切換到 ${event.title}`}
+                />
+              ))}
+            </div>
+          ) : null}
         </DarkCard>
       </section>
 
@@ -83,6 +150,8 @@ export function HomePage({ navigate }) {
           </div>
         </DarkCard>
       </section>
+
+      <EventModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />
     </>
   );
 }

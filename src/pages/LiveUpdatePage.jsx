@@ -162,6 +162,27 @@ export function LiveUpdatePage() {
         <strong>{formatLiveTime(liveUpdate.lastUpdatedAt)}</strong>
       </section>
 
+      <section className="staffStatusSection">
+        <div className="sectionTitle">
+          <p className="eyebrow">Staff Status</p>
+          <h2>店員狀態</h2>
+        </div>
+        <div className="staffStatusGrid">
+          {staffStatusRows.map(({ staff, status, label }) => (
+            <button
+              className={`staffStatusCard ${status}`}
+              type="button"
+              key={staff.id}
+              onClick={() => setSelectedStaff(staff)}
+            >
+              <img src={staff.avatarUrl} alt={`${staff.nickname} 頭貼`} loading="lazy" />
+              <span>{staff.nickname}</span>
+              <StatusBadge tone={statusTone(status)}>{label}</StatusBadge>
+            </button>
+          ))}
+        </div>
+      </section>
+
       <section className="bookingTimelineSection">
         <div className="sectionTitle">
           <p className="eyebrow">Reservation Timeline</p>
@@ -233,27 +254,6 @@ export function LiveUpdatePage() {
                 )}
               </div>
             </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="staffStatusSection">
-        <div className="sectionTitle">
-          <p className="eyebrow">Staff Status</p>
-          <h2>店員狀態</h2>
-        </div>
-        <div className="staffStatusGrid">
-          {staffStatusRows.map(({ staff, status, label }) => (
-            <button
-              className={`staffStatusCard ${status}`}
-              type="button"
-              key={staff.id}
-              onClick={() => setSelectedStaff(staff)}
-            >
-              <img src={staff.avatarUrl} alt={`${staff.nickname} 頭貼`} loading="lazy" />
-              <span>{staff.nickname}</span>
-              <StatusBadge tone={statusTone(status)}>{label}</StatusBadge>
-            </button>
           ))}
         </div>
       </section>

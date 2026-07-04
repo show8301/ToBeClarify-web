@@ -9,6 +9,7 @@ import { GalleryPage } from './pages/GalleryPage.jsx';
 import { GuestbookPage } from './pages/GuestbookPage.jsx';
 import { HomePage } from './pages/HomePage.jsx';
 import { LiveUpdatePage } from './pages/LiveUpdatePage.jsx';
+import { MenuPage } from './pages/MenuPage.jsx';
 import { NotFoundPage } from './pages/NotFoundPage.jsx';
 import { RankingPage } from './pages/RankingPage.jsx';
 import { StaffPage } from './pages/StaffPage.jsx';
@@ -74,6 +75,7 @@ function App() {
     if (route === '/staff') return <StaffPage />;
     if (route === '/event') return <EventPage />;
     if (route === '/gallery') return <GalleryPage />;
+    if (route === '/menu') return <MenuPage />;
     if (route === '/guestbook') return <GuestbookPage />;
     if (route === '/liveupdate') return <LiveUpdatePage />;
     if (route === '/staffRanking') return <RankingPage variant="staff" />;

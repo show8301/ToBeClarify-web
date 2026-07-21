@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import brandMark from '../assets/brand-mark.svg';
-import { navigationItems, shopInfo } from '../mockData.js';
 
-export function Navbar({ route, navigate }) {
+export function Navbar({ route, navigate, navigationItems, shopInfo }) {
   const [isOpen, setIsOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
   const closeDropdownTimer = useRef(null);

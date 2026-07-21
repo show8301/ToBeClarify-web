@@ -1,19 +1,15 @@
 import { useState } from 'react';
 import { EventModal } from '../components/EventModal.jsx';
+import { ImageWithLoading } from '../components/ImageWithLoading.jsx';
 import { PageFrame } from '../components/PageFrame.jsx';
 import { StatusBadge } from '../components/StatusBadge.jsx';
-import { events } from '../mockData.js';
-
-const today = new Date('2026-07-01T00:00:00+08:00');
-
-function isExpired(event) {
-  return new Date(`${event.endAt}T23:59:59+08:00`) < today;
-}
+import { useApiData } from '../data/ApiDataContext.jsx';
 
 export function EventPage() {
+  const { events } = useApiData();
   const [selectedEvent, setSelectedEvent] = useState(null);
   const visibleEvents = events
-    .filter((event) => !isExpired(event))
+    .filter((event) => event.status !== '已失效')
     .sort((a, b) => Number(b.status === '生效中') - Number(a.status === '生效中'));
 
   return (
@@ -21,7 +17,7 @@ export function EventPage() {
       <div className="eventList">
         {visibleEvents.map((event) => (
           <button className="eventCard" type="button" key={event.id} onClick={() => setSelectedEvent(event)}>
-            <img src={event.imageUrl} alt="" loading="lazy" />
+            <ImageWithLoading src={event.imageUrl} alt="" />
             <div>
               <div className="cardMeta">
                 <StatusBadge tone={event.status === '生效中' ? 'accent' : 'muted'}>{event.status}</StatusBadge>

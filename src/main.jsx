@@ -13,6 +13,9 @@ import { MenuPage } from './pages/MenuPage.jsx';
 import { NotFoundPage } from './pages/NotFoundPage.jsx';
 import { RankingPage } from './pages/RankingPage.jsx';
 import { StaffPage } from './pages/StaffPage.jsx';
+import { ApiDataProvider, useApiData } from './data/ApiDataContext.jsx';
+import { ApiState } from './components/ApiState.jsx';
+import { AdminRouter } from './admin/AdminRouter.jsx';
 import './styles.css';
 
 const routeAliases = {
@@ -59,12 +62,25 @@ function useRoute() {
 
 function App() {
   const { route, navigate } = useRoute();
-  const [isLoading, setIsLoading] = useState(true);
+  const isAdminRoute = route === '/admin' || route.startsWith('/admin/');
+
+  if (isAdminRoute) return <AdminRouter route={route} navigate={navigate} />;
+
+  return (
+    <ApiDataProvider>
+      <PublicApp route={route} navigate={navigate} />
+    </ApiDataProvider>
+  );
+}
+
+function PublicApp({ route, navigate }) {
+  const apiData = useApiData();
+  const [isIntroLoading, setIsIntroLoading] = useState(true);
   const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      setIsLoading(false);
+      setIsIntroLoading(false);
     }, shouldReduceMotion ? 450 : 1600);
 
     return () => window.clearTimeout(timer);
@@ -83,17 +99,22 @@ function App() {
     return <NotFoundPage navigate={navigate} />;
   }, [route, navigate]);
 
+  if (apiData.error) {
+    return <ApiState loading={false} error={apiData.error} onRetry={apiData.reload} />;
+  }
+
+  if (apiData.loading || isIntroLoading) return <AppLoader />;
+
   return (
     <>
-      <AnimatePresence>{isLoading ? <AppLoader /> : null}</AnimatePresence>
-      <PublicLayout route={route} navigate={navigate}>
+      <PublicLayout route={route} navigate={navigate} apiData={apiData}>
         {page}
       </PublicLayout>
     </>
   );
 }
 
-function PublicLayout({ children, route, navigate }) {
+function PublicLayout({ children, route, navigate, apiData }) {
   const shouldReduceMotion = useReducedMotion();
   const pageMotion = shouldReduceMotion
     ? {
@@ -111,7 +132,7 @@ function PublicLayout({ children, route, navigate }) {
 
   return (
     <div className="appShell">
-      <Navbar route={route} navigate={navigate} />
+      <Navbar route={route} navigate={navigate} navigationItems={apiData.navigationItems} shopInfo={apiData.shopInfo} />
       <main className="pageTransitionShell">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div key={route} className="pageTransition" {...pageMotion}>
@@ -119,9 +140,11 @@ function PublicLayout({ children, route, navigate }) {
           </motion.div>
         </AnimatePresence>
       </main>
-      <Footer navigate={navigate} />
+      <Footer navigate={navigate} navigationItems={apiData.navigationItems} shopInfo={apiData.shopInfo} />
     </div>
   );
 }
 
-createRoot(document.getElementById('root')).render(<App />);
+createRoot(document.getElementById('root')).render(
+  <App />,
+);

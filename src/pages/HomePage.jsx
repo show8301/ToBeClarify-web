@@ -1,25 +1,31 @@
 import { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { AdminEasterEgg } from '../components/AdminEasterEgg.jsx';
 import { DarkCard } from '../components/DarkCard.jsx';
 import { EventModal } from '../components/EventModal.jsx';
+import { ImageWithLoading } from '../components/ImageWithLoading.jsx';
 import { SectionTitle } from '../components/SectionTitle.jsx';
 import { StatusBadge } from '../components/StatusBadge.jsx';
-import { events, shopInfo, shopRules } from '../mockData.js';
+import { useApiData } from '../data/ApiDataContext.jsx';
 
 export function HomePage({ navigate }) {
-  const carouselEvents = useMemo(() => events.filter((event) => event.status !== '已失效'), []);
+  const { carouselEvents, shopInfo, shopRules } = useApiData();
+  const visibleCarouselEvents = useMemo(
+    () => carouselEvents.filter((event) => event.status !== '已失效'),
+    [carouselEvents],
+  );
   const [activeEventIndex, setActiveEventIndex] = useState(0);
   const [eventDirection, setEventDirection] = useState(1);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const activeEvent = carouselEvents[activeEventIndex] ?? events[0];
-  const hasMultipleEvents = carouselEvents.length > 1;
+  const activeEvent = visibleCarouselEvents[activeEventIndex];
+  const hasMultipleEvents = visibleCarouselEvents.length > 1;
 
   const moveEvent = (direction) => {
     setEventDirection(direction);
     setActiveEventIndex((currentIndex) => {
       const nextIndex = currentIndex + direction;
-      if (nextIndex < 0) return carouselEvents.length - 1;
-      if (nextIndex >= carouselEvents.length) return 0;
+      if (nextIndex < 0) return visibleCarouselEvents.length - 1;
+      if (nextIndex >= visibleCarouselEvents.length) return 0;
       return nextIndex;
     });
   };
@@ -33,7 +39,7 @@ export function HomePage({ navigate }) {
   return (
     <>
       <section className="hero">
-        <img className="heroImage" src={shopInfo.heroImage} alt="" loading="eager" />
+        <ImageWithLoading className="heroImage" src={shopInfo.heroImage} alt="" loading="eager" fetchPriority="high" />
         <div className="heroContent">
           <p className="eyebrow">FF14 Roleplay Lounge</p>
           <h1>{shopInfo.name}</h1>
@@ -51,6 +57,7 @@ export function HomePage({ navigate }) {
             </button>
           </div>
         </div>
+        <AdminEasterEgg onActivate={() => navigate('/admin/login')} />
       </section>
 
       <section className="section sectionOverlap">
@@ -80,7 +87,7 @@ export function HomePage({ navigate }) {
             ) : null}
           </div>
 
-          <div className="eventCarouselViewport">
+          {activeEvent ? <div className="eventCarouselViewport">
             <AnimatePresence mode="wait" custom={eventDirection}>
               <motion.div
                 className="eventCarouselBody"
@@ -106,7 +113,7 @@ export function HomePage({ navigate }) {
                 })}
                 transition={{ duration: 0.46, ease: [0.22, 1, 0.36, 1] }}
               >
-                <img src={activeEvent.imageUrl} alt="" loading="lazy" />
+                <ImageWithLoading src={activeEvent.imageUrl} alt="" />
                 <div>
                   <div className="cardMeta">
                     <span>{activeEvent.period}</span>
@@ -119,11 +126,11 @@ export function HomePage({ navigate }) {
                 </div>
               </motion.div>
             </AnimatePresence>
-          </div>
+          </div> : <p className="softText">目前沒有公開活動。</p>}
 
           {hasMultipleEvents ? (
             <div className="carouselDots" aria-label="活動輪播頁碼">
-              {carouselEvents.map((event, index) => (
+              {visibleCarouselEvents.map((event, index) => (
                 <button
                   className={index === activeEventIndex ? 'active' : ''}
                   type="button"
@@ -142,7 +149,7 @@ export function HomePage({ navigate }) {
           <SectionTitle eyebrow="House Rules" title="店內規則" />
           <div className="rulesList">
             {shopRules.map((rule, index) => (
-              <div className="ruleItem" key={rule}>
+              <div className="ruleItem" key={`${index}-${rule}`}>
                 <span>{String(index + 1).padStart(2, '0')}</span>
                 <p>{rule}</p>
               </div>

@@ -1,11 +1,22 @@
 import { motion } from 'framer-motion';
+import { adaptMenu } from '../api/adapters.js';
+import { clientApi } from '../api/client.js';
+import { ApiState } from '../components/ApiState.jsx';
+import { ImageWithLoading } from '../components/ImageWithLoading.jsx';
 import { PageFrame } from '../components/PageFrame.jsx';
-import { menuSections, shopInfo } from '../mockData.js';
+import { useApiData } from '../data/ApiDataContext.jsx';
+import { useApiResource } from '../data/useApiResource.js';
 
 export function MenuPage() {
+  const { shopInfo } = useApiData();
+  const resource = useApiResource(async (signal) => adaptMenu(await clientApi.getMenu(signal)), []);
+  const menuSections = resource.data?.sections || [];
+  const pricing = resource.data?.pricing || [];
+
   return (
     <PageFrame eyebrow="Salon Menu" title="佳餚名錄" intro="先確認消費規則，再瀏覽本週提供的餐點與套餐。">
-      <section className="menuPanel">
+      <ApiState loading={resource.loading} error={resource.error} onRetry={resource.reload}>
+        <section className="menuPanel">
         <motion.div
           className="menuSectionsStack"
           initial={{ opacity: 0, y: 14, filter: 'blur(8px)' }}
@@ -20,8 +31,8 @@ export function MenuPage() {
             </div>
 
             <div className="menuPricingGrid">
-              {shopInfo.pricing.map((item) => (
-                <div className="priceRow" key={item.name}>
+              {pricing.map((item) => (
+                <div className="priceRow" key={item.id}>
                   <span>{item.name}</span>
                   <strong>{item.price}</strong>
                 </div>
@@ -41,7 +52,7 @@ export function MenuPage() {
               <div className="menuItemGrid">
                 {section.items.map((item) => (
                   <article className="menuItemCard" key={item.id}>
-                    <img src={item.imageUrl} alt="" loading="lazy" />
+                    <ImageWithLoading src={item.imageUrl} alt="" />
                     <div className="menuItemBody">
                       <div>
                         <h3>{item.name}</h3>
@@ -55,7 +66,8 @@ export function MenuPage() {
             </section>
           ))}
         </motion.div>
-      </section>
+        </section>
+      </ApiState>
     </PageFrame>
   );
 }

@@ -1,7 +1,10 @@
 import { useMemo, useState } from 'react';
+import { adaptGuestbookComment } from '../api/adapters.js';
+import { clientApi } from '../api/client.js';
+import { ApiState } from '../components/ApiState.jsx';
 import { PageFrame } from '../components/PageFrame.jsx';
 import { StatusBadge } from '../components/StatusBadge.jsx';
-import { guestbookMessages } from '../mockData.js';
+import { useApiResource } from '../data/useApiResource.js';
 
 function formatMessageTime(value) {
   return new Intl.DateTimeFormat('zh-TW', {
@@ -29,7 +32,14 @@ export function GuestbookPage() {
   const [expandedReplies, setExpandedReplies] = useState(() => new Set());
   const [replyDrafts, setReplyDrafts] = useState({});
   const [messageDraft, setMessageDraft] = useState('');
-  const [messages, setMessages] = useState(() => getSortedMessages(guestbookMessages));
+  const [mutationError, setMutationError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const resource = useApiResource(async (signal) => {
+    const page = await clientApi.getGuestbook({ page: 1, pageSize: 50 }, signal);
+    return page.items.map(adaptGuestbookComment);
+  }, []);
+  const messages = resource.data || [];
+  const setMessages = resource.setData;
   const sortedMessages = useMemo(() => getSortedMessages(messages), [messages]);
   const pinnedCount = sortedMessages.filter((message) => message.isPinned).length;
 
@@ -55,59 +65,59 @@ export function GuestbookPage() {
     setReplyDrafts((current) => ({ ...current, [messageId]: value }));
   };
 
-  const submitReply = (event, messageId) => {
+  const submitReply = async (event, messageId) => {
     event.preventDefault();
 
     const draft = replyDrafts[messageId]?.trim();
     if (!draft) return;
 
-    const now = new Date();
-    setMessages((current) =>
-      current.map((message) =>
-        message.id === messageId
-          ? {
-              ...message,
-              replies: [
-                ...(message.replies ?? []),
-                {
-                  id: `${messageId}-DEMO-${now.getTime()}`,
-                  authorId: loginForm.id.trim(),
-                  message: draft,
-                  createdAt: now.toISOString(),
-                },
-              ],
-            }
-          : message,
-      ),
-    );
-    setReplyDrafts((current) => ({ ...current, [messageId]: '' }));
-    setExpandedReplies((current) => new Set(current).add(messageId));
+    setMutationError(null);
+    setIsSubmitting(true);
+    try {
+      const reply = adaptGuestbookComment({ replies: [await clientApi.createGuestbookReply(messageId, {
+        displayName: loginForm.id.trim(),
+        content: draft,
+        userToken: loginForm.password,
+      })] }).replies[0];
+      setMessages(messages.map((message) => (
+        message.id === messageId ? { ...message, replies: [...(message.replies || []), reply] } : message
+      )));
+      setReplyDrafts((current) => ({ ...current, [messageId]: '' }));
+      setExpandedReplies((current) => new Set(current).add(messageId));
+    } catch (error) {
+      setMutationError(error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const submitMessage = (event) => {
+  const submitMessage = async (event) => {
     event.preventDefault();
 
     const draft = messageDraft.trim();
     if (!draft) return;
 
-    const now = new Date();
-    setMessages((current) => [
-      {
-        id: `MSG-DEMO-${now.getTime()}`,
-        authorId: loginForm.id.trim(),
-        message: draft,
-        createdAt: now.toISOString(),
-        isPinned: false,
-        replies: [],
-      },
-      ...current,
-    ]);
-    setMessageDraft('');
+    setMutationError(null);
+    setIsSubmitting(true);
+    try {
+      const created = await clientApi.createGuestbookComment({
+        displayName: loginForm.id.trim(),
+        content: draft,
+        userToken: loginForm.password,
+      });
+      setMessages([adaptGuestbookComment(created), ...messages]);
+      setMessageDraft('');
+    } catch (error) {
+      setMutationError(error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <PageFrame eyebrow="Guestbook" title="留聲機" intro="旅人留下的短箋會在此排列，置頂訊息優先顯示。">
-      <section className="guestbookPanel">
+      <ApiState loading={resource.loading} error={resource.error} onRetry={resource.reload}>
+        <section className="guestbookPanel">
         <div className="guestbookToolbar">
           <div>
             <p className="eyebrow">Guestbook</p>
@@ -144,7 +154,7 @@ export function GuestbookPage() {
                   <small>{messageDraft.length} / 200</small>
                 </label>
                 <div className="guestbookComposerActions">
-                  <button className="btnPrimary" type="submit">
+                  <button className="btnPrimary" type="submit" disabled={isSubmitting}>
                     新增留言
                   </button>
                 </div>
@@ -227,15 +237,17 @@ export function GuestbookPage() {
                         placeholder="回覆這則留言"
                         onChange={(event) => updateReplyDraft(message.id, event.target.value)}
                       />
-                      <button type="submit">回覆</button>
+                      <button type="submit" disabled={isSubmitting}>回覆</button>
                     </form>
                   ) : null}
                 </article>
               );
             })}
           </div>
+          {mutationError ? <p className="inlineApiError" role="alert">{mutationError.message}</p> : null}
         </div>
-      </section>
+        </section>
+      </ApiState>
     </PageFrame>
   );
 }

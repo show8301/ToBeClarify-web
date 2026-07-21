@@ -1,12 +1,16 @@
 import { useMemo, useState } from 'react';
 import Timeline, { DateHeader, SidebarHeader, TimelineHeaders } from 'react-calendar-timeline';
 import 'react-calendar-timeline/style.css';
+import { adaptStaff, formatScheduleTime } from '../api/adapters.js';
+import { clientApi } from '../api/client.js';
+import { ApiState } from '../components/ApiState.jsx';
+import { ImageWithLoading } from '../components/ImageWithLoading.jsx';
 import { PageFrame } from '../components/PageFrame.jsx';
 import { StaffDetailModal } from '../components/StaffDetailModal.jsx';
 import { StatusBadge } from '../components/StatusBadge.jsx';
-import { liveUpdate, staffMembers } from '../mockData.js';
+import { useApiData } from '../data/ApiDataContext.jsx';
+import { useApiResource } from '../data/useApiResource.js';
 
-const TIMELINE_DAY = new Date(2026, 6, 1, 0, 0, 0, 0).getTime();
 const HOUR = 60 * 60 * 1000;
 
 function formatLiveTime(value) {
@@ -25,19 +29,15 @@ function parseTimeToMinutes(value) {
   return hour * 60 + minute;
 }
 
-function timeToTimestamp(value) {
-  return TIMELINE_DAY + parseTimeToMinutes(value) * 60 * 1000;
+function timeToTimestamp(value, timelineDay) {
+  return timelineDay + parseTimeToMinutes(value) * 60 * 1000;
 }
 
-function formatTimelineTime(timestamp) {
-  const totalMinutes = Math.round((timestamp - TIMELINE_DAY) / 60000);
+function formatTimelineTime(timestamp, timelineDay) {
+  const totalMinutes = Math.round((timestamp - timelineDay) / 60000);
   const hour = String(Math.floor(totalMinutes / 60)).padStart(2, '0');
   const minute = String(totalMinutes % 60).padStart(2, '0');
   return `${hour}:${minute}`;
-}
-
-function getStaff(staffId) {
-  return staffMembers.find((staff) => staff.id === staffId);
 }
 
 function statusTone(status) {
@@ -71,19 +71,48 @@ function clampVisibleRange(start, end, minTime, maxTime) {
 }
 
 export function LiveUpdatePage() {
+  const { liveUpdateConfig, staffMembers } = useApiData();
   const [selectedStaff, setSelectedStaff] = useState(null);
-  const minTime = timeToTimestamp(liveUpdate.scheduleStart);
-  const maxTime = timeToTimestamp(liveUpdate.scheduleEnd);
+  const [detailError, setDetailError] = useState(null);
+  const baseDate = useMemo(() => new Date(liveUpdateConfig.lastUpdatedAt || Date.now()), [liveUpdateConfig.lastUpdatedAt]);
+  const timelineDay = useMemo(() => {
+    const value = new Date(baseDate);
+    value.setHours(0, 0, 0, 0);
+    return value.getTime();
+  }, [baseDate]);
+  const scheduleStart = liveUpdateConfig.scheduleStart || '20:00';
+  const scheduleEnd = liveUpdateConfig.scheduleEnd || '25:00';
+  const rangeFrom = new Date(timelineDay).toISOString();
+  const rangeTo = new Date(timelineDay + 2 * 24 * HOUR).toISOString();
+  const reservationResource = useApiResource(
+    (signal) => clientApi.getReservations({ from: rangeFrom, to: rangeTo }, signal),
+    [rangeFrom, rangeTo],
+  );
+  const reservations = useMemo(
+    () => (reservationResource.data || []).map((reservation) => ({
+      id: reservation.id,
+      staffId: reservation.staffId,
+      serviceName: reservation.serviceLabel || '預約服務',
+      startAt: formatScheduleTime(reservation.startsAt, baseDate),
+      endAt: formatScheduleTime(reservation.endsAt, baseDate),
+      status: reservation.status,
+    })),
+    [baseDate, reservationResource.data],
+  );
+  const minTime = timeToTimestamp(scheduleStart, timelineDay);
+  const maxTime = timeToTimestamp(scheduleEnd, timelineDay);
   const initialVisibleEnd = Math.min(maxTime, minTime + 3 * HOUR);
   const [visibleRange, setVisibleRange] = useState([minTime, initialVisibleEnd]);
 
   const staffStatusRows = useMemo(
     () =>
-      liveUpdate.staffStatuses.map((row) => ({
-        ...row,
-        staff: getStaff(row.staffId),
+      staffMembers.map((staff) => ({
+        staffId: staff.id,
+        staff,
+        status: staff.status,
+        label: staff.statusText || (staff.status === 'off' ? '未上班' : staff.status),
       })),
-    [],
+    [staffMembers],
   );
 
   const workingStaffRows = useMemo(
@@ -108,12 +137,12 @@ export function LiveUpdatePage() {
 
   const items = useMemo(
     () =>
-      liveUpdate.reservations.map((reservation) => ({
+      reservations.map((reservation) => ({
         id: reservation.id,
         group: reservation.staffId,
         title: `${reservation.serviceName} ${reservation.startAt} - ${reservation.endAt}`,
-        start_time: timeToTimestamp(reservation.startAt),
-        end_time: timeToTimestamp(reservation.endAt),
+        start_time: timeToTimestamp(reservation.startAt, timelineDay),
+        end_time: timeToTimestamp(reservation.endAt, timelineDay),
         serviceName: reservation.serviceName,
         status: reservation.status,
         statusLabel: reservationLabel(reservation.status),
@@ -124,7 +153,7 @@ export function LiveUpdatePage() {
         canResize: false,
         canChangeGroup: false,
       })),
-    [],
+    [reservations, timelineDay],
   );
 
   const compactScheduleRows = useMemo(
@@ -132,18 +161,27 @@ export function LiveUpdatePage() {
       staffStatusRows
         .filter(({ staff }) => staff)
         .map(({ staff, status, label }) => {
-          const reservations = liveUpdate.reservations.filter((reservation) => reservation.staffId === staff.id);
-          const currentReservation = reservations.find((reservation) => reservation.status === 'active');
+          const staffReservations = reservations.filter((reservation) => reservation.staffId === staff.id);
+          const currentReservation = staffReservations.find((reservation) => reservation.status === 'active');
 
           return {
             staff,
             statusLabel: label,
             dotStatus: currentReservation?.status || getScheduleStatus(status),
-            reservations,
+            reservations: staffReservations,
           };
         }),
-    [staffStatusRows],
+    [reservations, staffStatusRows],
   );
+
+  const selectStaff = async (staff) => {
+    setDetailError(null);
+    try {
+      setSelectedStaff(adaptStaff(await clientApi.getStaffDetail(staff.id), true));
+    } catch (error) {
+      setDetailError(error);
+    }
+  };
 
   const handleTimeChange = (visibleTimeStart, visibleTimeEnd, updateScrollCanvas) => {
     const [nextStart, nextEnd] = clampVisibleRange(visibleTimeStart, visibleTimeEnd, minTime, maxTime);
@@ -159,7 +197,7 @@ export function LiveUpdatePage() {
     >
       <section className="liveHeader">
         <p>最後更新時間</p>
-        <strong>{formatLiveTime(liveUpdate.lastUpdatedAt)}</strong>
+        <strong>{formatLiveTime(liveUpdateConfig.lastUpdatedAt || Date.now())}</strong>
       </section>
 
       <section className="staffStatusSection">
@@ -173,9 +211,9 @@ export function LiveUpdatePage() {
               className={`staffStatusCard ${status}`}
               type="button"
               key={staff.id}
-              onClick={() => setSelectedStaff(staff)}
+              onClick={() => selectStaff(staff)}
             >
-              <img src={staff.avatarUrl} alt={`${staff.nickname} 頭貼`} loading="lazy" />
+              <ImageWithLoading src={staff.avatarUrl} alt={`${staff.nickname} 頭貼`} />
               <span>{staff.nickname}</span>
               <StatusBadge tone={statusTone(status)}>{label}</StatusBadge>
             </button>
@@ -183,7 +221,8 @@ export function LiveUpdatePage() {
         </div>
       </section>
 
-      <section className="bookingTimelineSection">
+      <ApiState loading={reservationResource.loading} error={reservationResource.error} onRetry={reservationResource.reload}>
+        <section className="bookingTimelineSection">
         <div className="sectionTitle">
           <p className="eyebrow">Reservation Timeline</p>
           <h2>預約狀態</h2>
@@ -225,11 +264,11 @@ export function LiveUpdatePage() {
               </SidebarHeader>
               <DateHeader
                 unit="hour"
-                labelFormat={([startTime]) => formatTimelineTime(startTime.valueOf())}
+                labelFormat={([startTime]) => formatTimelineTime(startTime.valueOf(), timelineDay)}
               />
               <DateHeader
                 unit="minute"
-                labelFormat={([startTime]) => formatTimelineTime(startTime.valueOf())}
+                labelFormat={([startTime]) => formatTimelineTime(startTime.valueOf(), timelineDay)}
               />
             </TimelineHeaders>
           </Timeline>
@@ -256,7 +295,10 @@ export function LiveUpdatePage() {
             </article>
           ))}
         </div>
-      </section>
+        </section>
+      </ApiState>
+
+      {detailError ? <p className="inlineApiError" role="alert">{detailError.message}</p> : null}
 
       <StaffDetailModal staff={selectedStaff} onClose={() => setSelectedStaff(null)} />
     </PageFrame>
@@ -266,7 +308,7 @@ export function LiveUpdatePage() {
 function TimelineGroup({ group }) {
   return (
     <div className={`timelineGroup ${group.status}`}>
-      <img src={group.avatarUrl} alt="" loading="lazy" />
+      <ImageWithLoading src={group.avatarUrl} alt="" />
       <div>
         <strong>{group.title}</strong>
         <StatusBadge tone={statusTone(group.status)}>{group.label}</StatusBadge>

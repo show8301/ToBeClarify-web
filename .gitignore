@@ -1,4 +1,25 @@
 node_modules/
 dist/
+outputs/
+
+# Documentation and database scripts are kept outside the Web repository
+*.[mM][dD]
+*.[sS][qQ][lL]
+
+# Vite and local tooling cache
+.vite/
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Test and coverage output
+coverage/
+
+# Package manager logs
 .DS_Store
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*

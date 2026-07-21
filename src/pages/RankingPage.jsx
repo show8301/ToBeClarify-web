@@ -1,10 +1,9 @@
+import { clientApi } from '../api/client.js';
+import { ApiState } from '../components/ApiState.jsx';
+import { ImageWithLoading } from '../components/ImageWithLoading.jsx';
 import { PageFrame } from '../components/PageFrame.jsx';
 import { StatusBadge } from '../components/StatusBadge.jsx';
-import { guestRankings, staffMembers, staffRankings } from '../mockData.js';
-
-function getStaff(staffId) {
-  return staffMembers.find((staff) => staff.id === staffId);
-}
+import { useApiResource } from '../data/useApiResource.js';
 
 function formatGil(value) {
   return `${new Intl.NumberFormat('zh-TW').format(value)} Gil`;
@@ -14,6 +13,9 @@ const podiumOrder = [1, 0, 2];
 
 export function RankingPage({ variant = 'staff' }) {
   const isStaffRanking = variant === 'staff';
+  const type = isStaffRanking ? 'staffRanking' : 'monetaryRanking';
+  const resource = useApiResource((signal) => clientApi.getRankings(type, null, signal), [type]);
+  const rankings = resource.data || [];
 
   return (
     <PageFrame
@@ -21,27 +23,29 @@ export function RankingPage({ variant = 'staff' }) {
       title={isStaffRanking ? '店員榜' : '消費榜'}
       intro={isStaffRanking ? '展示最近 30 天的店員指名人氣排行。' : '展示貴賓公開 ID 的累計消費排行。'}
     >
-      {isStaffRanking ? (
+      <ApiState loading={resource.loading} error={resource.error} onRetry={resource.reload}>
+        {isStaffRanking ? (
         <RankingSection
           eyebrow="Staff Ranking"
           title="店員榜"
           description="最近 30 天被指名次數排行。"
-          podiumItems={staffRankings.slice(0, 3)}
-          listItems={staffRankings.slice(3)}
-          renderPodium={(item, index) => <StaffPodiumCard item={item} rank={index + 1} />}
-          renderRow={(item, index) => <StaffRankingRow item={item} rank={index + 4} />}
+          podiumItems={rankings.slice(0, 3)}
+          listItems={rankings.slice(3)}
+          renderPodium={(item) => <StaffPodiumCard item={item} rank={item.rankPosition} />}
+          renderRow={(item) => <StaffRankingRow item={item} rank={item.rankPosition} />}
         />
       ) : (
         <RankingSection
           eyebrow="Guest Ranking"
           title="消費榜"
           description="依照已消費總金額排序，僅顯示公開用客人 ID。"
-          podiumItems={guestRankings.slice(0, 3)}
-          listItems={guestRankings.slice(3)}
-          renderPodium={(item, index) => <GuestPodiumCard item={item} rank={index + 1} />}
-          renderRow={(item, index) => <GuestRankingRow item={item} rank={index + 4} />}
+          podiumItems={rankings.slice(0, 3)}
+          listItems={rankings.slice(3)}
+          renderPodium={(item) => <GuestPodiumCard item={item} rank={item.rankPosition} />}
+          renderRow={(item) => <GuestRankingRow item={item} rank={item.rankPosition} />}
         />
-      )}
+        )}
+      </ApiState>
     </PageFrame>
   );
 }
@@ -59,9 +63,9 @@ function RankingSection({ eyebrow, title, description, podiumItems, listItems, r
       </div>
 
       <div className="podiumGrid">
-        {podiumOrder.map((itemIndex) => (
+        {podiumOrder.filter((itemIndex) => itemIndex < podiumItems.length).map((itemIndex) => (
           <div className={`podiumSlot rank${itemIndex + 1}`} key={itemIndex}>
-            {renderPodium(podiumItems[itemIndex], itemIndex)}
+            {renderPodium(podiumItems[itemIndex])}
           </div>
         ))}
       </div>
@@ -69,8 +73,8 @@ function RankingSection({ eyebrow, title, description, podiumItems, listItems, r
       {listItems.length > 0 ? (
         <div className="rankingList">
           {listItems.map((item, index) => (
-            <div className="rankingRowWrap" key={item.staffId || item.guestId}>
-              {renderRow(item, index)}
+            <div className="rankingRowWrap" key={item.id}>
+              {renderRow(item)}
             </div>
           ))}
         </div>
@@ -80,15 +84,13 @@ function RankingSection({ eyebrow, title, description, podiumItems, listItems, r
 }
 
 function StaffPodiumCard({ item, rank }) {
-  const staff = getStaff(item.staffId);
-
   return (
     <article className="podiumCard staffPodium">
       <span className="rankBadge">No.{rank}</span>
-      <img src={staff.avatarUrl} alt={`${staff.nickname} 頭貼`} loading="lazy" />
-      <h3>{staff.nickname}</h3>
-      <strong>{item.nominations} 次指名</strong>
-      {rank === 1 ? <p className="declaration">「{item.declaration}」</p> : null}
+      <ImageWithLoading src={item.avatar} alt={`${item.displayName} 頭貼`} />
+      <h3>{item.displayName}</h3>
+      <strong>{item.scoreLabel || `${item.scoreValue} 次指名`}</strong>
+      {rank === 1 && item.titleBadge ? <p className="declaration">「{item.titleBadge}」</p> : null}
     </article>
   );
 }
@@ -97,21 +99,19 @@ function GuestPodiumCard({ item, rank }) {
   return (
     <article className="podiumCard guestPodium">
       <span className="rankBadge">No.{rank}</span>
-      <h3>{item.guestId}</h3>
-      <StatusBadge tone="accent">{item.title}</StatusBadge>
-      <strong>{formatGil(item.totalAmount)}</strong>
+      <h3>{item.displayName}</h3>
+      {item.titleBadge ? <StatusBadge tone="accent">{item.titleBadge}</StatusBadge> : null}
+      <strong>{item.scoreLabel || formatGil(item.scoreValue)}</strong>
     </article>
   );
 }
 
 function StaffRankingRow({ item, rank }) {
-  const staff = getStaff(item.staffId);
-
   return (
     <article className="rankingRow">
       <span>No.{rank}</span>
-      <strong>{staff.nickname}</strong>
-      <em>{item.nominations} 次指名</em>
+      <strong>{item.displayName}</strong>
+      <em>{item.scoreLabel || `${item.scoreValue} 次指名`}</em>
     </article>
   );
 }
@@ -120,8 +120,8 @@ function GuestRankingRow({ item, rank }) {
   return (
     <article className="rankingRow">
       <span>No.{rank}</span>
-      <strong>{item.guestId}</strong>
-      <em>{formatGil(item.totalAmount)}</em>
+      <strong>{item.displayName}</strong>
+      <em>{item.scoreLabel || formatGil(item.scoreValue)}</em>
     </article>
   );
 }

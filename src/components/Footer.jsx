@@ -1,6 +1,4 @@
-import { navigationItems, shopInfo } from '../mockData.js';
-
-export function Footer({ navigate }) {
+export function Footer({ navigate, navigationItems, shopInfo }) {
   const footerMainLinks = navigationItems.filter((item) => !item.children);
   const footerRankingLinks =
     navigationItems.find((item) => item.label === '榮譽殿堂')?.children || [];

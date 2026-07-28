@@ -43,7 +43,7 @@ export function GalleryPage() {
   );
 }
 
-function GalleryModal({ item, onClose }) {
+export function GalleryModal({ item, onClose }) {
   if (!item) return null;
 
   return (

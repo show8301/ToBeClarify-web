@@ -4,7 +4,6 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { AppLoader } from './components/AppLoader.jsx';
 import { Footer } from './components/Footer.jsx';
 import { Navbar } from './components/Navbar.jsx';
-import { EventPage } from './pages/EventPage.jsx';
 import { GalleryPage } from './pages/GalleryPage.jsx';
 import { GuestbookPage } from './pages/GuestbookPage.jsx';
 import { HomePage } from './pages/HomePage.jsx';
@@ -15,6 +14,7 @@ import { RankingPage } from './pages/RankingPage.jsx';
 import { StaffPage } from './pages/StaffPage.jsx';
 import { ApiDataProvider, useApiData } from './data/ApiDataContext.jsx';
 import { ApiState } from './components/ApiState.jsx';
+import { BackgroundBubbles } from './components/BackgroundBubbles.jsx';
 import { AdminRouter } from './admin/AdminRouter.jsx';
 import './styles.css';
 
@@ -89,7 +89,7 @@ function PublicApp({ route, navigate }) {
   const page = useMemo(() => {
     if (route === '/home') return <HomePage navigate={navigate} />;
     if (route === '/staff') return <StaffPage />;
-    if (route === '/event') return <EventPage />;
+    if (route === '/event') return <GalleryPage />;
     if (route === '/gallery') return <GalleryPage />;
     if (route === '/menu') return <MenuPage />;
     if (route === '/guestbook') return <GuestbookPage />;
@@ -132,6 +132,7 @@ function PublicLayout({ children, route, navigate, apiData }) {
 
   return (
     <div className="appShell">
+      <BackgroundBubbles />
       <Navbar route={route} navigate={navigate} navigationItems={apiData.navigationItems} shopInfo={apiData.shopInfo} />
       <main className="pageTransitionShell">
         <AnimatePresence mode="wait" initial={false}>

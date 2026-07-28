@@ -20,7 +20,7 @@ export function AppLoader() {
         animate={shouldReduceMotion ? false : { opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
       >
-        <span>TC</span>
+        <span>✨</span>
       </motion.div>
       <motion.div
         className="loaderCopy"
@@ -29,8 +29,8 @@ export function AppLoader() {
         transition={{ duration: 0.58, delay: 0.18, ease: 'easeOut' }}
       >
         <p className="eyebrow">Now Opening</p>
-        <h1>To Be Clarify</h1>
-        <small>午夜沙龍準備中</small>
+        <h1>Lucid Dream</h1>
+        <small>正在編織一個新的夢</small>
       </motion.div>
       <motion.div
         className="loaderLine"

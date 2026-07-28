@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { adaptEvent, adaptNavigation, adaptStaff } from '../api/adapters.js';
+import { adaptGalleryAlbum, adaptNavigation, adaptStaff } from '../api/adapters.js';
 import { clientApi } from '../api/client.js';
 
 const ApiDataContext = createContext(null);
@@ -10,11 +10,12 @@ export function ApiDataProvider({ children }) {
   const load = useCallback(async (signal) => {
     setState((current) => ({ ...current, loading: true, error: null }));
     try {
-      const [home, events] = await Promise.all([
+      const [home, albums] = await Promise.all([
         clientApi.getHome(signal),
-        clientApi.getEvents({}, signal),
+        clientApi.getGalleryAlbums(signal),
       ]);
-      setState({ loading: false, error: null, data: { home, events } });
+      const reports = await Promise.all(albums.map((album) => clientApi.getGalleryAlbum(album.id, signal)));
+      setState({ loading: false, error: null, data: { home, reports } });
     } catch (error) {
       if (error.name !== 'AbortError') setState({ loading: false, error, data: null });
     }
@@ -30,12 +31,24 @@ export function ApiDataProvider({ children }) {
 
   const value = useMemo(() => {
     if (!state.data) return { ...state, reload };
-    const { home, events } = state.data;
-    const settings = Object.fromEntries((home.siteSettings || []).map((item) => [item.settingKey, item.settingValue]));
-    const adaptedEvents = events.map(adaptEvent);
-    const eventById = new Map(adaptedEvents.map((event) => [event.id, event]));
-    const carouselEvents = (home.carousels || [])
-      .map((carousel) => eventById.get(carousel.eventId))
+    const { home, reports } = state.data;
+      const settings = Object.fromEntries((home.siteSettings || []).map((item) => [item.settingKey, item.settingValue]));
+    const adaptedReports = reports.map(adaptGalleryAlbum);
+    const reportById = new Map(adaptedReports.map((report) => [report.id, report]));
+    const carouselReports = (home.carousels || [])
+      .map((carousel) => {
+        const report = reportById.get(carousel.albumId);
+        if (report) {
+          return {
+            ...report,
+            title: carousel.title || report.title,
+            summary: carousel.summary || report.description,
+            imageUrl: carousel.imageUrl || report.imageUrl,
+            period: carousel.eventTime || report.period,
+          };
+        }
+        return null;
+      })
       .filter(Boolean);
 
     return {
@@ -43,12 +56,13 @@ export function ApiDataProvider({ children }) {
       error: state.error,
       reload,
       shopInfo: settings.shopInfo || {},
+      homeSlides: (home.slides || []).filter((slide) => slide.imageUrl),
       liveUpdateConfig: settings.liveUpdateConfig || {},
       navigationItems: adaptNavigation(home.navigation),
       shopRules: (home.shopRules || []).map((rule) => rule.ruleText),
       staffMembers: (home.staff || []).map((staff) => adaptStaff(staff)),
-      events: adaptedEvents,
-      carouselEvents: carouselEvents.length ? carouselEvents : adaptedEvents,
+      reports: adaptedReports,
+      carouselReports,
     };
   }, [reload, state]);
 

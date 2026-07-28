@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Modal } from './Modal.jsx';
-import { StatusBadge } from './StatusBadge.jsx';
 import { ImageWithLoading } from './ImageWithLoading.jsx';
 
 export function StaffDetailModal({ staff, onClose }) {
@@ -38,9 +37,6 @@ export function StaffDetailModal({ staff, onClose }) {
         <div className="dialogContent">
           <p className="eyebrow">{staff.role}</p>
           <h2>{staff.nickname}</h2>
-          <StatusBadge tone={staff.todayShift === '休假' ? 'muted' : 'success'}>
-            {staff.todayShift}
-          </StatusBadge>
           <p>{staff.detail}</p>
           <ServiceTable title="共通服務" services={staff.commonServices} />
           <ServiceTable title="個人特殊服務" services={staff.specialServices} />

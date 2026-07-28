@@ -1,24 +1,59 @@
-import { useMemo, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useMemo, useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { AdminEasterEgg } from '../components/AdminEasterEgg.jsx';
 import { DarkCard } from '../components/DarkCard.jsx';
-import { EventModal } from '../components/EventModal.jsx';
 import { ImageWithLoading } from '../components/ImageWithLoading.jsx';
 import { SectionTitle } from '../components/SectionTitle.jsx';
 import { StatusBadge } from '../components/StatusBadge.jsx';
 import { useApiData } from '../data/ApiDataContext.jsx';
+import { GalleryModal } from './GalleryPage.jsx';
 
 export function HomePage({ navigate }) {
-  const { carouselEvents, shopInfo, shopRules } = useApiData();
+  const { carouselReports, homeSlides, shopInfo, shopRules } = useApiData();
   const visibleCarouselEvents = useMemo(
-    () => carouselEvents.filter((event) => event.status !== '已失效'),
-    [carouselEvents],
+    () => carouselReports,
+    [carouselReports],
   );
   const [activeEventIndex, setActiveEventIndex] = useState(0);
   const [eventDirection, setEventDirection] = useState(1);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const activeEvent = visibleCarouselEvents[activeEventIndex];
   const hasMultipleEvents = visibleCarouselEvents.length > 1;
+  const slideshowImages = useMemo(
+    () => homeSlides.length ? homeSlides : (shopInfo.heroImage ? [{ id: 'legacy-hero', imageUrl: shopInfo.heroImage }] : []),
+    [homeSlides, shopInfo.heroImage],
+  );
+  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+  const [loadedSlides, setLoadedSlides] = useState({});
+  const shouldReduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    setActiveSlideIndex(0);
+    setLoadedSlides({});
+  }, [homeSlides, shopInfo.heroImage]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const loadedIds = slideshowImages
+        .filter((slide) => {
+          const image = document.querySelector(`.heroSlide[data-slide-id="${slide.id}"]`);
+          return image?.complete && image.naturalWidth > 0;
+        })
+        .map((slide) => slide.id);
+      if (loadedIds.length) setLoadedSlides((current) => ({ ...current, ...Object.fromEntries(loadedIds.map((id) => [id, true])) }));
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [slideshowImages]);
+
+  useEffect(() => {
+    if (shouldReduceMotion || slideshowImages.length < 2) return undefined;
+    const timer = window.setInterval(() => {
+      setActiveSlideIndex((currentIndex) => (currentIndex + 1) % slideshowImages.length);
+    }, 10000);
+    return () => window.clearInterval(timer);
+  }, [shouldReduceMotion, slideshowImages.length]);
+
+  const markSlideLoaded = (id) => setLoadedSlides((current) => ({ ...current, [id]: true }));
 
   const moveEvent = (direction) => {
     setEventDirection(direction);
@@ -39,7 +74,21 @@ export function HomePage({ navigate }) {
   return (
     <>
       <section className="hero">
-        <ImageWithLoading className="heroImage" src={shopInfo.heroImage} alt="" loading="eager" fetchPriority="high" />
+        <div className="heroSlideshow" aria-hidden="true">
+          {slideshowImages.map((slide, index) => (
+            <img
+              className={`heroSlide ${index === activeSlideIndex ? 'isActive' : ''} ${loadedSlides[slide.id] ? 'isLoaded' : ''}`.trim()}
+              data-slide-id={slide.id}
+              key={slide.id}
+              src={slide.imageUrl}
+              alt=""
+              loading={index === 0 ? 'eager' : 'lazy'}
+              fetchPriority={index === 0 ? 'high' : 'auto'}
+              decoding="async"
+              onLoad={() => markSlideLoaded(slide.id)}
+            />
+          ))}
+        </div>
         <div className="heroContent">
           <p className="eyebrow">FF14 Roleplay Lounge</p>
           <h1>{shopInfo.name}</h1>
@@ -62,7 +111,7 @@ export function HomePage({ navigate }) {
 
       <section className="section sectionOverlap">
         <DarkCard className="aboutCard">
-          <SectionTitle eyebrow="About Us" title="關於35女王古殿" />
+          <SectionTitle eyebrow="About Us" title="關於清醒夢" />
           <div className="aboutText">
             {shopInfo.about.map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>
@@ -158,7 +207,7 @@ export function HomePage({ navigate }) {
         </DarkCard>
       </section>
 
-      <EventModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />
+      <GalleryModal item={selectedEvent} onClose={() => setSelectedEvent(null)} />
     </>
   );
 }

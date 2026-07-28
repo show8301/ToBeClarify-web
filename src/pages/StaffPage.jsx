@@ -41,7 +41,7 @@ function StaffCard({ staff, onSelect }) {
     <button className="staffCard" type="button" onClick={onSelect}>
       <div className="staffPortrait">
         <ImageWithLoading src={staff.avatarUrl} alt={`${staff.nickname} 頭貼`} />
-        <StatusBadge tone={staff.todayShift === '休假' ? 'muted' : 'success'}>{staff.todayShift}</StatusBadge>
+        <StatusBadge tone={staff.isWorkingToday ? 'success' : 'muted'}>{staff.isWorkingToday ? '今天上班' : '今天休假'}</StatusBadge>
       </div>
       <div className="staffCardBody">
         <p className="eyebrow">{staff.role}</p>

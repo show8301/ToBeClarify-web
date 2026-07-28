@@ -1,15 +1,3 @@
-const eventStatusLabels = {
-  active: '生效中',
-  scheduled: '未開始',
-  ended: '已失效',
-};
-
-function formatDate(value) {
-  if (!value) return '';
-  const date = new Date(value);
-  return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
-}
-
 function formatGil(value) {
   return `${new Intl.NumberFormat('zh-TW').format(value)} Gil`;
 }
@@ -37,6 +25,7 @@ export function adaptStaff(staff, detail = false) {
     nickname: staff.nickname || staff.displayName,
     displayName: staff.displayName,
     role: staff.roleTitle || '',
+    isWorkingToday: staff.isWorkingToday !== false,
     todayShift: staff.todayShift || '未排班',
     avatarUrl: staff.avatarUrl,
     intro: staff.shortBio || '',
@@ -46,20 +35,6 @@ export function adaptStaff(staff, detail = false) {
     gallery: detail ? (staff.gallery || []).map((item) => item.imageUrl) : [],
     commonServices: (staff.commonServices || []).map(adaptService),
     specialServices: (staff.specialServices || []).map(adaptService),
-  };
-}
-
-export function adaptEvent(event) {
-  return {
-    id: event.id,
-    title: event.title,
-    summary: event.summary,
-    imageUrl: event.coverImageUrl,
-    startsAt: event.startsAt,
-    endAt: event.endsAt,
-    period: `${formatDate(event.startsAt)} - ${formatDate(event.endsAt)}`,
-    status: eventStatusLabels[event.status] || event.status,
-    details: event.details || [],
   };
 }
 
@@ -73,8 +48,11 @@ export function adaptGalleryAlbum(album) {
     endAt: album.endsAt,
     details: album.details || [],
     photos: (album.items || []).map((item) => ({
+      id: item.id,
       imageUrl: item.imageUrl,
       thumbnailUrl: item.thumbnailUrl || item.imageUrl,
+      title: item.title || '',
+      caption: item.caption || '',
     })),
   };
 }

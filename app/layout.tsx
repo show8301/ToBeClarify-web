@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -14,18 +13,14 @@ const geistMono = Geist_Mono({
 });
 
 export async function generateMetadata():Promise<Metadata> {
-  const incoming = await headers();
-  const host = incoming.get("host") || "localhost:3000";
-  const protocol = incoming.get("x-forwarded-proto") || (host.startsWith("localhost") ? "http" : "https");
-  const origin = `${protocol}://${host}`;
-  const title = "March Group｜店員名鑑";
-  const description = "走進清醒夢境，認識 March Group 的每一位店員。";
+  const title = "清醒夢 Lucid Dream｜店員名鑑";
+  const description = "走進清醒夢境，認識 Lucid Dream 的每一位店員。";
   return {
     title,
     description,
-    icons:{ icon:"/favicon.svg", shortcut:"/favicon.svg" },
-    openGraph:{ title, description, type:"website", images:[{ url:`${origin}/og.png`, width:1733, height:909, alt:"March Group Staff Archive" }] },
-    twitter:{ card:"summary_large_image", title, description, images:[`${origin}/og.png`] },
+    icons:{ icon:"/favicon.ico", shortcut:"/favicon.ico" },
+    openGraph:{ title, description, type:"website" },
+    twitter:{ card:"summary", title, description },
   };
 }
 

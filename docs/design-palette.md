@@ -85,3 +85,7 @@ Recommended balance: 44% pearl and silver-blue surfaces, 24% dreamy lilac, 18% s
 Dreamlike motion is deliberately slow and peripheral: overlapping image dissolves, moving water-light, low fog, almost-imperceptible title echoes, and a brief submerged route transition. The global depth system adds near-field pearl bubbles that drift downward with scroll, a slower counter-moving mist layer, and abstract seafoam/lilac coral silhouettes around the staff roster. Content surfaces remain stable. Mobile layouts use fewer bubbles, and every ambient animation or parallax transform is disabled when `prefers-reduced-motion` is enabled.
 
 The staff roster avoids square personnel cards. Portraits use tall pearl-like arches, staggered vertical rhythm, full-bleed photography, and a floating glass caption at the base so the people feel suspended in the scene rather than filed into a grid.
+
+### Soft gradient revision
+
+Refined after stakeholder feedback: lavender, mist blue and blush pink are no longer assigned to separate blocks. They appear as oversized, blurred gradients that overlap across the page, while glass surfaces stay neutral enough to reveal the colour underneath. Blush pink `#E8C7DA`, mist blue `#A9C7EA`, and lavender `#C1B9DF` form the primary atmosphere; seafoam is reduced to a minor aquatic highlight. Pearl bubbles use translucent iridescent reflections from the same three colours.

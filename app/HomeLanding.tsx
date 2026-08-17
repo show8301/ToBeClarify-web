@@ -40,7 +40,7 @@ export default function HomeLanding({home}:{home:HomeData}){
         <span>WELCOME TO THE WAKING DREAM</span>
         <h1><i>LUCID</i><br/>DREAM</h1>
         <p>{home.shopInfo.subtitle}</p>
-        <div><b>{home.shopInfo.businessStatus}</b><span>{home.shopInfo.openHours}</span></div>
+        <div className="home-business-status"><b><i aria-hidden="true"/><span><small>LIVE STATUS</small>{home.shopInfo.businessStatus}</span></b><span>{home.shopInfo.openHours}</span></div>
         <a href="/staff">MEET THE DREAMERS <i>↗</i></a>
       </motion.div>
       <div className="home-hero-ticket"><span>SERVER</span><b>{home.shopInfo.server}</b><span>ADDRESS</span><b>{home.shopInfo.address}</b><em>LD · 2026</em></div>

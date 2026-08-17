@@ -1388,3 +1388,147 @@ body{background-image:radial-gradient(ellipse 75% 55% at 4% 4%,rgba(232,199,218,
     width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.7)
   }
 }
+
+/* Staff roster v4: return to the original tall collectible-card rhythm. */
+.staff-gallery{grid-template-columns:repeat(12,minmax(0,1fr));gap:32px 24px}
+.dreamer-card{
+  grid-column:span 3;min-height:700px;grid-template-columns:1fr;grid-template-rows:410px minmax(0,1fr);
+  border-radius:18px;background:linear-gradient(180deg,rgba(230,229,247,.94),rgba(177,192,230,.88));
+  box-shadow:0 20px 48px rgba(101,120,159,.15),inset 0 1px rgba(255,255,255,.96)
+}
+.dreamer-card:nth-child(3n+2),.dreamer-card:nth-child(3n+3){background:linear-gradient(180deg,rgba(235,229,246,.94),rgba(169,190,226,.88))}
+.dreamer-card-photo{height:410px;aspect-ratio:auto;border-bottom:1px solid rgba(255,255,255,.72)}
+.dreamer-card-photo::after{background:linear-gradient(180deg,rgba(49,51,74,.02) 0 56%,rgba(120,125,178,.12) 72%,rgba(131,143,197,.68) 100%)}
+.dreamer-role-ribbon{
+  position:absolute;z-index:3;left:0;top:22px;max-width:78%;height:43px;padding:0 32px 0 18px;
+  display:flex;align-items:center;gap:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  clip-path:polygon(0 0,88% 0,100% 50%,88% 100%,0 100%);
+  background:linear-gradient(90deg,rgba(129,124,190,.9),rgba(163,161,216,.86));color:white;
+  font-size:12px;font-weight:680;letter-spacing:.04em;backdrop-filter:blur(10px)
+}
+.dreamer-role-ribbon i{font-size:9px;font-style:normal;opacity:.9}
+.dreamer-file-number{left:auto;right:13px;top:13px;min-width:34px;height:27px;padding-inline:8px;background:rgba(247,247,251,.76);font-size:8px}
+.dreamer-duty{left:auto;right:14px;top:auto;bottom:14px;max-width:62%;min-height:32px;padding:5px 9px;background:rgba(247,247,251,.76)}
+.dreamer-duty small{font-size:6px}.dreamer-duty b{font-size:9px}
+.dreamer-card-body{min-height:0;padding:28px 22px 20px;align-items:center;text-align:center;background:linear-gradient(150deg,rgba(193,185,223,.24),rgba(169,199,234,.28) 58%,rgba(232,199,218,.2))}
+.dreamer-card-heading{width:100%}.dreamer-card-heading>strong{font-size:clamp(22px,1.65vw,26px);font-weight:620;line-height:1.2}
+.dreamer-card-heading>em{margin-top:10px;color:rgba(49,51,74,.62);font:normal 10px/1.45 var(--font-geist-mono),monospace}
+.dreamer-card-bio{margin-top:20px;max-width:31ch;font-size:12px;line-height:1.8;-webkit-line-clamp:4}
+.dreamer-card-bio::after{content:"";display:block;width:52px;margin:20px auto 0;border-top:1px solid rgba(255,255,255,.72)}
+.dreamer-services{width:100%;margin-top:20px;justify-content:center;flex-wrap:wrap;overflow:visible}
+.dreamer-services>b,.dreamer-services>i{background:rgba(255,255,255,.3);font-size:9px}
+.dreamer-card-link{width:100%;margin-top:auto;padding-top:14px}.dreamer-card-link>small{font-size:7px!important}.dreamer-card-link>b{font-size:8px!important}
+
+@media(max-width:1180px){
+  .dreamer-card{grid-column:span 4;min-height:680px;grid-template-rows:390px minmax(0,1fr)}
+  .dreamer-card-photo{height:390px}
+}
+@media(max-width:820px){
+  .dreamer-card{grid-column:span 6}
+}
+@media(max-width:620px){
+  .staff-gallery{gap:22px;padding-inline:18px}
+  .dreamer-card{
+    grid-column:span 12;width:min(100%,430px);min-height:640px;justify-self:center;
+    grid-template-columns:1fr;grid-template-rows:350px minmax(0,1fr);border-radius:16px
+  }
+  .dreamer-card-photo{height:350px;aspect-ratio:auto}
+  .dreamer-role-ribbon{top:18px;height:39px;padding-left:15px;font-size:11px}
+  .dreamer-file-number{left:auto;right:11px;top:11px}
+  .dreamer-duty{left:auto;right:12px;top:auto;bottom:12px;max-width:62%}
+  .dreamer-duty small{display:block}
+  .dreamer-card-body{min-height:0;padding:24px 20px 18px}
+  .dreamer-card-heading>strong{font-size:23px}.dreamer-card-heading>em{font-size:9px}
+  .dreamer-card-bio{margin-top:17px;font-size:12px;line-height:1.75;-webkit-line-clamp:4}
+  .dreamer-services{margin-top:16px;align-items:center}.dreamer-services>b,.dreamer-services>i{font-size:9px}
+  .dreamer-card-link{align-items:center}.dreamer-card-link>b{font-size:8px!important}.dreamer-card-link i{margin-left:5px;font-size:12px}
+}
+
+/* Profile photo controls: smaller captions, metadata outside the photograph. */
+.photo-caption{left:16px;right:auto;bottom:14px;width:auto;max-width:calc(100% - 32px);padding:9px 12px;gap:22px;border-radius:10px;background:rgba(245,243,249,.78);box-shadow:0 7px 20px rgba(49,51,74,.1)}
+.photo-caption b{font-size:15px}.photo-caption i{font-size:7px}
+.back-label-short{display:none}
+@media(max-width:820px){
+  .profile-modal-head{grid-template-columns:minmax(0,1fr) 66px}
+  .profile-modal-head .back-to-staff{
+    width:66px;min-width:66px;height:54px;min-height:54px;padding:0 9px;display:flex;
+    align-items:center;justify-content:center;gap:6px;font-size:7px;line-height:1;border-radius:12px
+  }
+  .profile-modal-head .back-to-staff .back-label-wide{display:none}
+  .profile-modal-head .back-to-staff .back-label-short{display:block;font:700 7px/1 var(--font-geist-mono),monospace;letter-spacing:.1em}
+  .profile-modal-head .back-to-staff i{font-size:14px;line-height:1}
+  .portrait-zone{padding:20px 0 72px}
+  .status-stamp{
+    left:auto;right:18px;top:auto;bottom:26px;max-width:none;min-height:31px;padding:7px 10px;
+    grid-template-columns:8px auto;background:rgba(245,245,250,.82);box-shadow:0 7px 20px rgba(101,120,159,.12)
+  }
+  .status-stamp small,.status-stamp>em{display:none}.status-stamp b{font-size:10px}.status-stamp>i{width:7px;height:7px}
+  .portrait-swipe-hint{left:18px;bottom:37px;transform:none;font-size:6px}
+  .photo-caption{left:12px;right:auto;bottom:12px;padding:8px 11px;gap:18px}.photo-caption b{font-size:14px}
+}
+@media(max-width:430px){
+  .profile-modal-head{grid-template-columns:minmax(0,1fr) 58px}
+  .profile-modal-head .back-to-staff{width:58px;min-width:58px;padding-inline:6px}
+  .profile-switcher>button{padding-inline:7px}.profile-switcher>button b{font-size:10px}.profile-switcher>em{padding-inline:4px;font-size:7px}
+  .portrait-zone{padding-bottom:68px}
+  .status-stamp{right:14px;bottom:24px}
+  .portrait-swipe-hint{left:14px;bottom:35px}
+}
+
+/* Homepage action and live status: optically centered and clearly stateful. */
+.home-hero-copy>a{align-items:center;line-height:1.15}
+.home-hero-copy>a i{flex:0 0 22px;width:22px;height:22px;display:grid;place-items:center;line-height:1}
+.home-hero-copy>.home-business-status{align-items:center;gap:16px}
+.home-business-status>b{
+  min-height:48px;padding:8px 15px!important;display:flex;align-items:center;gap:10px;
+  border:1px solid rgba(255,255,255,.96)!important;background:linear-gradient(115deg,rgba(160,217,214,.92),rgba(184,187,216,.7))!important;
+  box-shadow:0 9px 24px rgba(101,120,159,.14)
+}
+.home-business-status>b>i{flex:0 0 9px;width:9px;height:9px;border-radius:50%;background:#35bf87;box-shadow:0 0 0 5px rgba(53,191,135,.14)}
+.home-business-status>b>span{display:grid;gap:3px;font-size:13px;line-height:1.15}
+.home-business-status>b small{font:700 6px/1 var(--font-geist-mono),monospace;letter-spacing:.16em;opacity:.55}
+.home-business-status>span{font-size:13px!important}
+@media(max-width:560px){
+  .home-hero-copy>.home-business-status{align-items:flex-start;gap:10px}
+  .home-business-status>b{width:max-content;min-height:44px}
+}
+
+/* Roster photo transition: a light tonal bridge, without a hard dark band. */
+.dreamer-card-photo::after{background:linear-gradient(180deg,transparent 0 78%,rgba(133,147,202,.24) 100%)}
+.dreamer-role-ribbon{
+  max-width:76%;padding-right:18px;clip-path:none;border-radius:0 10px 10px 0;
+  background:rgba(133,130,196,.84);box-shadow:none
+}
+
+/* Every roster portrait keeps one photographic ratio at every breakpoint. */
+.dreamer-card{grid-template-rows:auto minmax(0,1fr)}
+.dreamer-card-photo{height:auto;aspect-ratio:4/5}
+.dreamer-card-photo::after{
+  background:linear-gradient(180deg,
+    transparent 0 74%,
+    rgba(151,160,210,.06) 78%,
+    rgba(145,156,209,.2) 88%,
+    rgba(140,152,207,.48) 100%)
+}
+.dreamer-card-body{background:linear-gradient(180deg,rgba(181,191,229,.9),rgba(193,185,223,.28) 54%,rgba(169,199,234,.3) 100%)}
+@media(max-width:1180px){.dreamer-card{grid-template-rows:auto minmax(0,1fr)}.dreamer-card-photo{height:auto;aspect-ratio:4/5}}
+@media(max-width:620px){.dreamer-card{grid-template-rows:auto minmax(0,1fr)}.dreamer-card-photo{height:auto;aspect-ratio:4/5}}
+
+/* Keep the menu-card tape fully inside its clipped paper frame. */
+.menu-cover-card::before{
+  top:9px;width:96px;height:19px;border-radius:2px;opacity:.72;
+  transform:translateX(-50%) rotate(-3deg)
+}
+
+/* Profile portraits use the same stable 4:5 photographic frame as the roster. */
+.main-polaroid{height:auto;max-height:none;aspect-ratio:4/5}
+@media(max-width:820px){.main-polaroid{aspect-ratio:4/5}}
+
+/* Optical centering for the footer CTA and its arrow. */
+.site-footer>a{
+  min-height:48px;display:flex;align-items:center;justify-content:space-between;
+  line-height:1
+}
+.site-footer>a i{
+  width:22px;height:22px;margin-left:18px;display:grid;place-items:center;line-height:1
+}

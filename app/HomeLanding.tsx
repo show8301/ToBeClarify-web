@@ -50,7 +50,7 @@ export default function HomeLanding({home}:{home:HomeData}){
 
     {!!home.carousels.length&&<section className="home-events">
       <header><div><span>EORZEA WEEKLY</span><h2>本期夢境</h2></div><a href="/gallery">VIEW ALL REPORTS ↗</a></header>
-      <div className="home-event-track">{home.carousels.map((event,index)=><a href={`/gallery?album=${event.albumId}`} className="home-event-card" key={event.id}><img src={event.imageUrl} alt={event.title}/><span>{event.eventTime}</span><div><small>REPORT / {String(index+1).padStart(2,"0")}</small><h3>{event.title}</h3><p>{event.summary}</p><b>{event.ctaLabel} ↗</b></div></a>)}</div>
+      <div className="home-event-track">{home.carousels.map((event,index)=><a href={`/gallery/${event.albumId}`} className="home-event-card" key={event.id}><img src={event.imageUrl} alt={event.title}/><span>{event.eventTime}</span><div><small>REPORT / {String(index+1).padStart(2,"0")}</small><h3>{event.title}</h3><p>{event.summary}</p><b>{event.ctaLabel} ↗</b></div></a>)}</div>
     </section>}
 
     <section className="home-rules">

@@ -1,21 +1,56 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useCallback, useEffect, useState } from "react";
+import { AnimatePresence, motion, useDragControls, useReducedMotion } from "motion/react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { GalleryAlbum } from "./site-types";
 
-export default function GalleryArchive({albums}:{albums:GalleryAlbum[]}){
-  const [selected,setSelected]=useState<GalleryAlbum|null>(null);
+export default function GalleryArchive({albums,initialAlbumId=null}:{albums:GalleryAlbum[];initialAlbumId?:string|null}){
+  const [selected,setSelected]=useState<GalleryAlbum|null>(()=>albums.find((album)=>album.id===initialAlbumId)??null);
   const [photoIndex,setPhotoIndex]=useState<number|null>(null);
   const reduceMotion=useReducedMotion();
+  const dragControls=useDragControls();
+  const sheetRef=useRef<HTMLDivElement|null>(null);
+  const dragStartY=useRef<number|null>(null);
+  const sheetTouchStartY=useRef<number|null>(null);
+  const openedFromGallery=useRef(false);
   const photos=selected?.items??[];
-  const close=useCallback(()=>{if(photoIndex!==null)setPhotoIndex(null);else setSelected(null)},[photoIndex]);
+  const syncAlbumFromPath=useCallback(()=>{
+    const match=window.location.pathname.match(/^\/gallery\/([^/]+)\/?$/);
+    const album=match?albums.find((item)=>item.id===decodeURIComponent(match[1])):null;
+    setPhotoIndex(null);
+    setSelected(album??null);
+  },[albums]);
+  const openAlbum=useCallback((album:GalleryAlbum)=>{
+    openedFromGallery.current=true;
+    window.history.pushState({galleryModal:true},"",`/gallery/${album.id}`);
+    setSelected(album);
+  },[]);
+  const closeAlbum=useCallback(()=>{
+    if(photoIndex!==null){setPhotoIndex(null);return}
+    if(window.location.pathname.startsWith("/gallery/")&&openedFromGallery.current){
+      openedFromGallery.current=false;
+      window.history.back();
+      return;
+    }
+    window.history.replaceState({},"","/gallery");
+    setSelected(null);
+  },[photoIndex]);
+  const close=useCallback(()=>closeAlbum(),[closeAlbum]);
   const step=useCallback((amount:number)=>setPhotoIndex(index=>index===null||!photos.length?null:(index+amount+photos.length)%photos.length),[photos.length]);
 
   useEffect(()=>{
+    setPhotoIndex(null);
+    setSelected(initialAlbumId?albums.find((album)=>album.id===initialAlbumId)??null:null);
+  },[albums,initialAlbumId]);
+  useEffect(()=>{
     const requested=new URLSearchParams(window.location.search).get("album");
-    if(requested){const album=albums.find(item=>item.id===requested);if(album)setSelected(album)}
-  },[albums]);
+    if(requested){
+      const album=albums.find(item=>item.id===requested);
+      if(album){window.history.replaceState({},"",`/gallery/${album.id}`);setSelected(album)}
+    }
+    window.addEventListener("popstate",syncAlbumFromPath);
+    return()=>window.removeEventListener("popstate",syncAlbumFromPath);
+  },[albums,syncAlbumFromPath]);
   useEffect(()=>{
     if(!selected)return;
     document.body.classList.add("modal-open");
@@ -33,15 +68,16 @@ export default function GalleryArchive({albums}:{albums:GalleryAlbum[]}){
     </section>
 
     <section className="weekly-grid" aria-label="活動相簿">
-      {albums.map((album,index)=><motion.button key={album.id} className={`weekly-card weekly-card-${index%4}`} onClick={()=>setSelected(album)} initial={reduceMotion?false:{opacity:0,y:35}} whileInView={{opacity:1,y:0}} viewport={{once:true,amount:.15}} transition={{duration:.5,delay:Math.min(index*.08,.24),ease:[.22,1,.36,1]}}>
+      {albums.map((album,index)=><motion.a href={`/gallery/${album.id}`} key={album.id} className={`weekly-card weekly-card-${index%4}`} onClick={(event)=>{if(!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){event.preventDefault();openAlbum(album)}}} initial={reduceMotion?false:{opacity:0,y:35}} whileInView={{opacity:1,y:0}} viewport={{once:true,amount:.15}} transition={{duration:.5,delay:Math.min(index*.08,.24),ease:[.22,1,.36,1]}}>
         <span className="weekly-card-photo"><img src={album.coverImageUrl} alt={album.albumTitle}/><i>OPEN REPORT ↗</i></span>
         <span className="weekly-card-copy"><small>ISSUE / {String(index+1).padStart(2,"0")}</small><em>{album.periodText}</em><strong>{album.albumTitle}</strong><p>{album.albumDescription}</p><b>{String(album.items.length).padStart(2,"0")} PHOTOS</b></span>
-      </motion.button>)}
+      </motion.a>)}
     </section>
 
-    <AnimatePresence>{selected&&<motion.div className="weekly-modal" role="dialog" aria-modal="true" aria-label={`${selected.albumTitle} 活動相簿`} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
-      <motion.div className="weekly-modal-sheet" initial={reduceMotion?false:{y:"100%"}} animate={{y:0}} exit={{y:"100%"}} transition={{duration:.52,ease:[.22,1,.36,1]}}>
-        <header><div><span>EORZEA WEEKLY · PHOTO REPORT</span><b>{selected.periodText}</b></div><button onClick={()=>setSelected(null)}>CLOSE <i>×</i></button></header>
+    <AnimatePresence>{selected&&<motion.div className="weekly-modal" role="dialog" aria-modal="true" aria-label={`${selected.albumTitle} 活動相簿`} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} onPointerDown={(event)=>{if(event.target===event.currentTarget)closeAlbum()}}>
+      <motion.div ref={sheetRef} className="weekly-modal-sheet" drag="y" dragListener={false} dragControls={dragControls} dragConstraints={{top:0,bottom:0}} dragElastic={{top:0,bottom:.72}} onDragEnd={(_,info)=>{if(info.offset.y>95||info.velocity.y>650)closeAlbum()}} onTouchStart={(event)=>{sheetTouchStartY.current=(sheetRef.current?.scrollTop??0)<=0?event.touches[0]?.clientY??null:null}} onTouchEnd={(event)=>{const endY=event.changedTouches[0]?.clientY;const distance=sheetTouchStartY.current===null||endY===undefined?0:endY-sheetTouchStartY.current;sheetTouchStartY.current=null;if(distance>110)closeAlbum()}} onTouchCancel={()=>{sheetTouchStartY.current=null}} initial={reduceMotion?false:{y:"100%"}} animate={{y:0}} exit={{y:"100%"}} transition={{duration:.52,ease:[.22,1,.36,1]}}>
+        <button className="weekly-sheet-grabber" aria-label="向下拖曳關閉相簿" onPointerDown={(event)=>{if((sheetRef.current?.scrollTop??0)<=0){dragStartY.current=event.clientY;dragControls.start(event);event.currentTarget.setPointerCapture(event.pointerId)}}} onPointerUp={(event)=>{const distance=dragStartY.current===null?0:event.clientY-dragStartY.current;dragStartY.current=null;if(distance>85)closeAlbum()}} onPointerCancel={()=>{dragStartY.current=null}}><i/><span>DRAG DOWN TO CLOSE</span></button>
+        <header><div><span>EORZEA WEEKLY · PHOTO REPORT</span><b>{selected.periodText}</b></div><button onClick={closeAlbum}>CLOSE <i>×</i></button></header>
         <div className="weekly-modal-intro"><span>THE STORY</span><h2>{selected.albumTitle}</h2><p>{selected.albumDescription}</p>{selected.details.map((detail,index)=><p key={index}>{detail}</p>)}<b>{String(photos.length).padStart(2,"0")} VISUAL RECORDS</b></div>
         <div className="weekly-collage">{photos.map((photo,index)=><button key={photo.id} onClick={()=>setPhotoIndex(index)} className={`photo-${index%5}`}><img src={photo.thumbnailUrl||photo.imageUrl} alt={photo.title}/><span>{String(index+1).padStart(2,"0")}</span></button>)}</div>
       </motion.div>

@@ -1413,7 +1413,7 @@ body{background-image:radial-gradient(ellipse 75% 55% at 4% 4%,rgba(232,199,218,
 .dreamer-card-body{min-height:0;padding:28px 22px 20px;align-items:center;text-align:center;background:linear-gradient(150deg,rgba(193,185,223,.24),rgba(169,199,234,.28) 58%,rgba(232,199,218,.2))}
 .dreamer-card-heading{width:100%}.dreamer-card-heading>strong{font-size:clamp(22px,1.65vw,26px);font-weight:620;line-height:1.2}
 .dreamer-card-heading>em{margin-top:10px;color:rgba(49,51,74,.62);font:normal 10px/1.45 var(--font-geist-mono),monospace}
-.dreamer-card-bio{margin-top:20px;max-width:31ch;font-size:12px;line-height:1.8;-webkit-line-clamp:4}
+.dreamer-card-bio{margin-top:20px;max-width:31ch;font-size:12px;line-height:1.8;-webkit-line-clamp:3}
 .dreamer-card-bio::after{content:"";display:block;width:52px;margin:20px auto 0;border-top:1px solid rgba(255,255,255,.72)}
 .dreamer-services{width:100%;margin-top:20px;justify-content:center;flex-wrap:wrap;overflow:visible}
 .dreamer-services>b,.dreamer-services>i{background:rgba(255,255,255,.3);font-size:9px}
@@ -1439,7 +1439,7 @@ body{background-image:radial-gradient(ellipse 75% 55% at 4% 4%,rgba(232,199,218,
   .dreamer-duty small{display:block}
   .dreamer-card-body{min-height:0;padding:24px 20px 18px}
   .dreamer-card-heading>strong{font-size:23px}.dreamer-card-heading>em{font-size:9px}
-  .dreamer-card-bio{margin-top:17px;font-size:12px;line-height:1.75;-webkit-line-clamp:4}
+  .dreamer-card-bio{margin-top:17px;font-size:12px;line-height:1.75;-webkit-line-clamp:3}
   .dreamer-services{margin-top:16px;align-items:center}.dreamer-services>b,.dreamer-services>i{font-size:9px}
   .dreamer-card-link{align-items:center}.dreamer-card-link>b{font-size:8px!important}.dreamer-card-link i{margin-left:5px;font-size:12px}
 }
@@ -1496,8 +1496,18 @@ body{background-image:radial-gradient(ellipse 75% 55% at 4% 4%,rgba(232,199,218,
 /* Roster photo transition: a light tonal bridge, without a hard dark band. */
 .dreamer-card-photo::after{background:linear-gradient(180deg,transparent 0 78%,rgba(133,147,202,.24) 100%)}
 .dreamer-role-ribbon{
-  max-width:76%;padding-right:18px;clip-path:none;border-radius:0 10px 10px 0;
-  background:rgba(133,130,196,.84);box-shadow:none
+  top:18px;max-width:calc(100% - 76px);height:36px;padding:0 13px;gap:7px;
+  clip-path:none;border-radius:0 9px 9px 0;
+  background:rgba(133,130,196,.84);box-shadow:none;font-size:12px
+}
+.dreamer-role-ribbon>b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:inherit}
+.dreamer-role-ribbon>i{flex:0 0 auto}
+.dreamer-file-number{
+  right:15px;top:22px;min-width:0;height:auto;padding:0;
+  border:0;border-radius:0;background:transparent;box-shadow:none;backdrop-filter:none;
+  color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.92);
+  font-family:var(--font-geist-mono),monospace;font-size:28px;font-weight:760;line-height:1;
+  letter-spacing:-.08em;text-shadow:0 2px 5px rgba(49,51,74,.28)
 }
 
 /* Every roster portrait keeps one photographic ratio at every breakpoint. */
@@ -1544,3 +1554,23 @@ body.modal-open .site-parallax-bubbles i{animation-play-state:paused}
 .weekly-modal-intro{backdrop-filter:none}
 .weekly-collage button{content-visibility:auto;contain-intrinsic-size:320px 240px}
 @media(max-width:560px){.weekly-modal{backdrop-filter:blur(7px)}}
+
+/* Decorative service-chip symbols supplied by the venue. */
+.dreamer-services>b,.dreamer-services>i{
+  display:inline-flex;align-items:center;gap:5px;
+  border-radius:999px;
+  color:#31334a;
+  border-color:rgba(116,122,170,.42);
+  background:linear-gradient(135deg,rgba(184,187,216,.72),rgba(139,179,226,.5));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.58),0 3px 10px rgba(101,120,159,.08)
+}
+.dreamer-services>i{background:linear-gradient(135deg,rgba(160,217,214,.68),rgba(184,187,216,.66))}
+.dreamer-services img{
+  flex:0 0 15px;width:15px;height:15px;object-fit:contain;
+  filter:saturate(1.12) contrast(1.08) drop-shadow(0 1px 2px rgba(70,73,112,.2))
+}
+@media(max-width:620px){
+  .dreamer-role-ribbon{top:14px;height:33px;padding-inline:11px;gap:6px;font-size:11px}
+  .dreamer-file-number{right:12px;top:19px;font-size:24px}
+  .dreamer-services img{flex-basis:13px;width:13px;height:13px}
+}

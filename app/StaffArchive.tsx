@@ -116,7 +116,9 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
                 transition={{duration:.38,delay:Math.min(index*.025,.2),ease:[.22,1,.36,1]}} aria-label={`查看 ${person.displayName} 的完整介紹`}>
                 <span className="dreamer-card-photo">
                   <img src={person.avatarUrl || fallbackPortrait} alt={`${person.displayName} 的店員照片`} loading={index > 5 ? "lazy" : "eager"} decoding="async"/>
-                  <span className="dreamer-role-ribbon"><i>✦</i>{person.roleTitle || "DREAM STAFF"}<i>✦</i></span>
+                  <span className="dreamer-role-ribbon" title={person.roleTitle || "DREAM STAFF"}>
+                    <i>✦</i><b>{person.roleTitle || "DREAM STAFF"}</b><i>✦</i>
+                  </span>
                   <span className="dreamer-file-number">{fileNumber}</span>
                   <span className={`dreamer-duty${person.isWorkingToday ? " is-online" : ""}`}>
                     <i aria-hidden="true"/><span><small>{person.isWorkingToday ? "ON DUTY" : "OFF DUTY"}</small><b>{person.statusText || "未排班"}</b></span>
@@ -126,8 +128,8 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
                   <span className="dreamer-card-heading"><strong>{person.displayName}</strong>{person.nickname && <em>✦　暱稱｜{person.nickname}　✦</em>}</span>
                   <span className="dreamer-card-bio">{person.shortBio || "這位夢境成員正在準備自己的介紹。"}</span>
                   {services.length > 0 && <span className="dreamer-services" aria-label="可提供服務">
-                    {services.slice(0,2).map((service)=><b key={service.id}>{service.serviceName}</b>)}
-                    {services.length > 2 && <i>+{services.length-2}</i>}
+                    {services.slice(0,2).map((service,serviceIndex)=><b key={service.id}><img src={`/assets/staff-card-chip-icon-${serviceIndex===0?"a":"b"}.png`} alt="" aria-hidden="true"/>{service.serviceName}</b>)}
+                    {services.length > 2 && <i><img src="/assets/staff-card-chip-icon-c.png" alt="" aria-hidden="true"/>+{services.length-2}</i>}
                   </span>}
                   <span className="dreamer-card-link"><small>FILE · {fileNumber}</small><b>VIEW PROFILE <i>↗</i></b></span>
                 </span>

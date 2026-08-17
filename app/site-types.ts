@@ -72,6 +72,10 @@ export type RankingItem = {
   scoreValue:number; scoreLabel:string; periodLabel:string;
 };
 
+export type StaffReservation = {
+  id:string; staffId:string; serviceLabel:string; startsAt:string; endsAt:string; status:string;
+};
+
 export type SiteSnapshot = {
   generatedAt:string;
   home:HomeData;

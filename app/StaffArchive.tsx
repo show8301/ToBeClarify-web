@@ -107,22 +107,32 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
 
       <section className="staff-gallery" aria-label="店員視覺名單">
         <AnimatePresence mode="popLayout">
-          {filtered.map((person, index) => (
-            <motion.a layout href={`/staff/${person.id}`} onClick={(event) => openProfile(event, `/staff/${person.id}`)} key={person.id} className={`staff-card card-${index % 6}`}
-              initial={reduceMotion ? {opacity:0}:{opacity:0,y:28}} animate={{opacity:1,y:0}} exit={{opacity:0,scale:.96}}
-              transition={{duration:.4,delay:Math.min(index*.035,.28),ease:[.22,1,.36,1]}} aria-label={`查看 ${person.displayName} 的完整介紹`}>
-              <span className="staff-card-photo"><img src={person.avatarUrl || fallbackPortrait} alt={`${person.displayName} 的店員照片`}/><i className="photo-wash"/></span>
-              <span className="staff-card-top"><b>{String(index + 1).padStart(2,"0")}</b><i className={person.isWorkingToday ? "online" : ""}><em>{person.isWorkingToday ? "ON DUTY" : "OFF DUTY"}</em><span>{person.statusText || "未排班"}</span></i></span>
-              <span className="card-stamp" aria-hidden="true">LUCID DREAM / STAFF FILE</span>
-              {[...(person.commonServices ?? []), ...(person.specialServices ?? [])].length > 0 && <span className="staff-card-services">
-                <small>AVAILABLE SERVICES</small>
-                <span>{[...(person.commonServices ?? []), ...(person.specialServices ?? [])].slice(0,2).map((service)=><b key={service.id}>{service.serviceName}</b>)}</span>
-                {[...(person.commonServices ?? []), ...(person.specialServices ?? [])].length > 2 && <i>+{[...(person.commonServices ?? []), ...(person.specialServices ?? [])].length-2}</i>}
-              </span>}
-              <span className="staff-card-copy"><span className="card-copy-meta"><small>{person.roleTitle || "DREAM STAFF"}</small><b>FILE.{String(index + 1).padStart(2,"0")}</b></span><strong>{person.displayName}</strong>{person.nickname && <i>“ {person.nickname} ”</i>}<p>{person.shortBio || "這位夢境成員正在準備自己的介紹。"}</p></span>
-              <span className="card-action"><i>PERSONNEL FILE</i><span>VIEW PROFILE</span><b>↗</b></span>
-            </motion.a>
-          ))}
+          {filtered.map((person, index) => {
+            const services = [...(person.commonServices ?? []), ...(person.specialServices ?? [])];
+            const fileNumber = String(index + 1).padStart(2,"0");
+            return (
+              <motion.a layout href={`/staff/${person.id}`} onClick={(event) => openProfile(event, `/staff/${person.id}`)} key={person.id} className="dreamer-card"
+                initial={reduceMotion ? {opacity:0}:{opacity:0,y:24}} animate={{opacity:1,y:0}} exit={{opacity:0,scale:.98}}
+                transition={{duration:.38,delay:Math.min(index*.025,.2),ease:[.22,1,.36,1]}} aria-label={`查看 ${person.displayName} 的完整介紹`}>
+                <span className="dreamer-card-photo">
+                  <img src={person.avatarUrl || fallbackPortrait} alt={`${person.displayName} 的店員照片`} loading={index > 5 ? "lazy" : "eager"} decoding="async"/>
+                  <span className="dreamer-file-number">{fileNumber}</span>
+                  <span className={`dreamer-duty${person.isWorkingToday ? " is-online" : ""}`}>
+                    <i aria-hidden="true"/><span><small>{person.isWorkingToday ? "ON DUTY" : "OFF DUTY"}</small><b>{person.statusText || "未排班"}</b></span>
+                  </span>
+                </span>
+                <span className="dreamer-card-body">
+                  <span className="dreamer-card-heading"><small>{person.roleTitle || "DREAM STAFF"}</small><strong>{person.displayName}</strong>{person.nickname && <em>“ {person.nickname} ”</em>}</span>
+                  <span className="dreamer-card-bio">{person.shortBio || "這位夢境成員正在準備自己的介紹。"}</span>
+                  {services.length > 0 && <span className="dreamer-services" aria-label="可提供服務">
+                    {services.slice(0,2).map((service)=><b key={service.id}>{service.serviceName}</b>)}
+                    {services.length > 2 && <i>+{services.length-2}</i>}
+                  </span>}
+                  <span className="dreamer-card-link"><small>FILE · {fileNumber}</small><b>VIEW PROFILE <i>↗</i></b></span>
+                </span>
+              </motion.a>
+            );
+          })}
         </AnimatePresence>
         {!filtered.length && <div className="empty-state"><b>NO MATCHES</b><p>換一個關鍵字，再找找看。</p></div>}
       </section>

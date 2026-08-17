@@ -1205,7 +1205,7 @@ body{background-image:radial-gradient(ellipse 75% 55% at 4% 4%,rgba(232,199,218,
   .intro-feature-copy strong{max-width:78%;font-size:27px}
 }
 
-/* Corner hierarchy: modest radii for content, arches reserved for staff portraits. */
+/* Corner hierarchy: modest radii across content and portraits. */
 .site-header nav{border-radius:16px}
 .home-pricing article,.home-event-card,.weekly-card,.menu-cover-card,.menu-sets article,.live-clock,.live-status a,.staff-honor a,.guest-podium article,.guest-composer,.guest-note,.intro-note,.timeline-board{border-radius:16px}
 .home-hero-visual{border-radius:22px}.home-about-photo{border-radius:18px}.home-hero-ticket{border-radius:14px}
@@ -1225,4 +1225,56 @@ body{background-image:radial-gradient(ellipse 75% 55% at 4% 4%,rgba(232,199,218,
   .weekly-collage img{height:auto;object-fit:contain;display:block}
   .weekly-photo-stage figure{border-radius:14px}.weekly-photo-stage figure img{border-radius:8px}
   .dossier{border-radius:18px}
+}
+
+/* Staff roster v3: editorial portrait cards with a clear, unoccluded reading order. */
+.staff-gallery{grid-template-columns:repeat(12,minmax(0,1fr));gap:34px 26px;align-items:stretch}
+.dreamer-card{
+  grid-column:span 4;min-width:0;display:grid;grid-template-rows:auto 1fr;position:relative;overflow:hidden;
+  border:1px solid rgba(255,255,255,.9);border-radius:16px;
+  background:linear-gradient(150deg,rgba(255,255,255,.72),rgba(245,240,248,.48) 54%,rgba(227,235,247,.5));
+  box-shadow:0 20px 48px rgba(118,121,161,.13),inset 0 1px rgba(255,255,255,.94);
+  color:var(--ink);content-visibility:auto;contain-intrinsic-size:560px;
+  transition:transform .4s cubic-bezier(.22,1,.36,1),box-shadow .4s ease,border-color .4s ease;
+}
+.dreamer-card:nth-child(3n+2){background:linear-gradient(150deg,rgba(255,255,255,.72),rgba(234,230,247,.48) 52%,rgba(244,229,238,.46))}
+.dreamer-card:nth-child(3n+3){background:linear-gradient(150deg,rgba(255,255,255,.72),rgba(228,237,248,.5) 52%,rgba(240,232,247,.46))}
+.dreamer-card:hover{transform:translateY(-7px);border-color:rgba(255,255,255,1);box-shadow:0 30px 68px rgba(118,121,161,.19),0 10px 30px rgba(232,199,218,.12)}
+.dreamer-card-photo{min-width:0;aspect-ratio:4/5;position:relative;display:block;overflow:hidden;background:linear-gradient(145deg,var(--dream-violet),var(--dream-blue))}
+.dreamer-card-photo::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(49,51,74,.03),transparent 68%,rgba(49,51,74,.16));box-shadow:inset 0 -1px rgba(255,255,255,.7)}
+.dreamer-card-photo img{width:100%;height:100%;display:block;object-fit:cover;object-position:center 30%;filter:saturate(.92) contrast(.98);transition:transform .75s cubic-bezier(.22,1,.36,1),filter .55s ease}
+.dreamer-card:hover .dreamer-card-photo img{transform:scale(1.035);filter:saturate(1) contrast(1)}
+.dreamer-file-number{position:absolute;z-index:2;left:14px;top:14px;min-width:38px;height:30px;padding:0 10px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.88);border-radius:9px;background:rgba(248,247,251,.78);box-shadow:0 6px 18px rgba(49,51,74,.1);backdrop-filter:blur(10px);font-family:var(--font-geist-mono),monospace;font-size:10px;line-height:1;font-weight:750;letter-spacing:.1em}
+.dreamer-duty{position:absolute;z-index:2;right:14px;top:14px;max-width:58%;min-height:36px;padding:6px 10px;display:flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.88);border-radius:10px;background:rgba(248,247,251,.8);box-shadow:0 6px 18px rgba(49,51,74,.1);backdrop-filter:blur(10px)}
+.dreamer-duty>i{flex:0 0 7px;width:7px;height:7px;border-radius:50%;background:#a8a6af}.dreamer-duty.is-online>i{background:#43c993;box-shadow:0 0 0 3px rgba(67,201,147,.16)}
+.dreamer-duty>span{min-width:0;display:grid;gap:2px}.dreamer-duty small{font-family:var(--font-geist-mono),monospace;font-size:7px;line-height:1;font-weight:750;letter-spacing:.14em;opacity:.56}.dreamer-duty b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;line-height:1.1}
+.dreamer-card-body{min-width:0;min-height:218px;padding:21px 22px 18px;display:flex;flex-direction:column}
+.dreamer-card-heading{min-width:0;display:block}.dreamer-card-heading>small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--hair-shadow);font-family:var(--font-geist-mono),monospace;font-size:9px;line-height:1.3;font-weight:750;letter-spacing:.11em}.dreamer-card-heading>strong{display:block;margin-top:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:clamp(21px,1.55vw,25px);font-weight:620;line-height:1.15;letter-spacing:-.018em}.dreamer-card-heading>em{display:block;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:rgba(49,51,74,.56);font:italic 12px/1.3 Georgia,serif}
+.dreamer-card-bio{margin-top:12px;color:rgba(49,51,74,.68);font-size:13px;line-height:1.65;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.dreamer-services{margin-top:14px;display:flex;align-items:center;gap:6px;min-height:27px;overflow:hidden}.dreamer-services>b,.dreamer-services>i{flex:0 1 auto;min-width:0;padding:6px 9px;border:1px solid rgba(255,255,255,.88);border-radius:8px;background:rgba(255,255,255,.52);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-style:normal;font-weight:650}.dreamer-services>i{flex:0 0 auto;background:rgba(169,199,234,.36)}
+.dreamer-card-link{margin-top:auto;padding-top:13px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid rgba(49,51,74,.16)}
+.dreamer-card-link>small{white-space:nowrap;font-family:var(--font-geist-mono),monospace!important;font-size:8px!important;line-height:1!important;font-weight:700!important;letter-spacing:.1em;opacity:.46}
+.dreamer-card-link>b{white-space:nowrap;font-family:var(--font-geist-mono),monospace!important;font-size:9px!important;line-height:1!important;font-weight:720!important;letter-spacing:.1em}
+.dreamer-card-link i{margin-left:6px;font-family:Arial,sans-serif!important;font-size:13px!important;font-style:normal;font-weight:400;line-height:1}
+.dreamer-card:focus-visible{outline:2px solid var(--hair-blue);outline-offset:4px}
+
+/* Retire the former arch motif from the staff profile as well. */
+.main-polaroid{border-radius:18px;transform:none}
+.main-polaroid:hover{transform:translateY(-3px)}
+.photo-caption{border-radius:13px}
+@media(max-width:1040px){.dreamer-card{grid-column:span 6}}
+@media(max-width:620px){
+  .staff-gallery{gap:18px;padding-inline:16px}
+  .dreamer-card{grid-column:span 12;grid-template-columns:minmax(132px,42%) minmax(0,58%);grid-template-rows:1fr;min-height:246px;border-radius:14px;contain-intrinsic-size:246px}
+  .dreamer-card:hover{transform:none}
+  .dreamer-card-photo{height:100%;aspect-ratio:auto}
+  .dreamer-file-number{left:10px;top:10px;min-width:34px;height:27px;padding-inline:8px;border-radius:8px;font-size:9px}
+  .dreamer-duty{left:10px;right:auto;top:45px;max-width:calc(100% - 20px);min-height:31px;padding:5px 8px;border-radius:8px}.dreamer-duty small{display:none}.dreamer-duty b{font-size:10px}
+  .dreamer-card-body{min-height:0;padding:16px 14px 14px}
+  .dreamer-card-heading>small{font-size:7px}.dreamer-card-heading>strong{margin-top:6px;font-size:19px}.dreamer-card-heading>em{font-size:10px}
+  .dreamer-card-bio{margin-top:9px;font-size:11px;line-height:1.55;-webkit-line-clamp:3}
+  .dreamer-services{margin-top:10px;align-items:flex-start;flex-wrap:wrap;gap:5px}.dreamer-services>b,.dreamer-services>i{padding:5px 7px;font-size:8px}
+  .dreamer-card-link{margin-top:auto;padding-top:11px;align-items:flex-end}.dreamer-card-link>small{font-size:7px}.dreamer-card-link>b{font-size:0}.dreamer-card-link i{margin:0;font-size:18px}
+  .main-polaroid{border-radius:14px}
+  .photo-caption{border-radius:11px}
 }

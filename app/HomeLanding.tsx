@@ -12,7 +12,7 @@ export default function HomeLanding({home}:{home:HomeData}){
 
   useEffect(()=>{
     if(reduceMotion||images.length<2)return;
-    const seconds=Math.min(60,Math.max(4,current?.displaySeconds||10));
+    const seconds=Math.min(5,Math.max(3.5,current?.displaySeconds||5));
     const timer=window.setTimeout(()=>setSlide(value=>(value+1)%images.length),seconds*1000);
     return()=>window.clearTimeout(timer);
   },[current?.displaySeconds,images.length,reduceMotion,slide]);
@@ -29,8 +29,12 @@ export default function HomeLanding({home}:{home:HomeData}){
         <span className="home-dream-caustics" aria-hidden="true"/>
         <span className="home-dream-mist" aria-hidden="true"/>
         <span className="home-hero-grid"/>
-        <span className="home-hero-index">{String(slide+1).padStart(2,"0")} / {String(images.length).padStart(2,"0")}</span>
-        <div className="home-slide-dots">{images.map((image,index)=><button key={image.id} onClick={()=>setSlide(index)} className={index===slide?"active":""} aria-label={`切換至第 ${index+1} 張店景`}/>)}</div>
+        <span className="home-hero-index" aria-live="polite">{String(slide+1).padStart(2,"0")} / {String(images.length).padStart(2,"0")}</span>
+        {images.length>1&&<div className="home-slide-controls" aria-label="店景輪播控制">
+          <button className="home-slide-arrow" onClick={()=>setSlide(value=>(value-1+images.length)%images.length)} aria-label="上一張店景">←</button>
+          <div className="home-slide-dots">{images.map((image,index)=><button key={image.id} onClick={()=>setSlide(index)} className={index===slide?"active":""} aria-label={`切換至第 ${index+1} 張店景`}/>)}</div>
+          <button className="home-slide-arrow" onClick={()=>setSlide(value=>(value+1)%images.length)} aria-label="下一張店景">→</button>
+        </div>}
       </div>
       <motion.div className="home-hero-copy" initial={reduceMotion?false:{opacity:0,y:28,filter:"blur(8px)"}} animate={{opacity:1,y:0,filter:"blur(0px)"}} transition={{delay:reduceMotion ? 0 : .72,duration:reduceMotion ? .2 : 1.15,ease:[.22,1,.36,1]}}>
         <span>WELCOME TO THE WAKING DREAM</span>

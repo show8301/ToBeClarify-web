@@ -80,6 +80,10 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
 
   return (
     <div className={`archive-shell${embedded?" archive-embedded":""}`}>
+      <div className="roster-coral-field" aria-hidden="true">
+        <span className="roster-coral coral-one"><i/><i/><i/><i/></span>
+        <span className="roster-coral coral-two"><i/><i/><i/><i/></span>
+      </div>
       {!embedded&&<header className="archive-header">
         <a className="archive-brand" href="#roster">清醒夢 <i>LUCID DREAM</i></a>
         <span className="archive-edition">WAKING DREAM · STAFF ARCHIVE</span>

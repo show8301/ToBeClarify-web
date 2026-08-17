@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import type { NavigationItem, ShopInfo } from "./site-types";
@@ -14,6 +14,9 @@ export default function SiteChrome({navigation,shopInfo,children}:{navigation:Na
   const pathname = usePathname();
   const router = useRouter();
   const reduceMotion = useReducedMotion();
+  const {scrollYProgress} = useScroll();
+  const bubbleDrift = useTransform(scrollYProgress,[0,1],["0vh","22vh"]);
+  const mistDrift = useTransform(scrollYProgress,[0,1],["0vh","-12vh"]);
   const items = useMemo(()=>navigation.flatMap((item)=>item.children?.length?item.children:item).filter((item)=>item.routePath!=="/home"),[navigation]);
 
   useEffect(()=>{setOpen(false);setLeaving(null)},[pathname]);
@@ -29,6 +32,8 @@ export default function SiteChrome({navigation,shopInfo,children}:{navigation:Na
   };
 
   return <div className="site-frame">
+    <motion.div className="site-parallax-bubbles" style={reduceMotion?undefined:{y:bubbleDrift}} aria-hidden="true"><i/><i/><i/><i/><i/><i/></motion.div>
+    <motion.div className="site-parallax-mist" style={reduceMotion?undefined:{y:mistDrift}} aria-hidden="true"/>
     <header className="site-header">
       <a className="site-brand" href="/" onClick={(event)=>navigate(event,"/")}><strong>{shopInfo.name||"清醒夢"}</strong><span>LUCID DREAM</span></a>
       <span className="site-header-note">WAKING DREAM · EORZEA SALON</span>

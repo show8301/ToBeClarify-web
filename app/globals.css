@@ -1532,3 +1532,15 @@ body{background-image:radial-gradient(ellipse 75% 55% at 4% 4%,rgba(232,199,218,
 .site-footer>a i{
   width:22px;height:22px;margin-left:18px;display:grid;place-items:center;line-height:1
 }
+
+/* Gallery modal: avoid a post-paint stacking jump and expensive moving blur layers. */
+.site-content:has(.weekly-modal){z-index:61}
+body.modal-open{animation-play-state:paused}
+body.modal-open .site-frame::before,
+body.modal-open .site-frame::after,
+body.modal-open .site-parallax-bubbles i{animation-play-state:paused}
+.weekly-modal{backdrop-filter:blur(8px) saturate(1.02)}
+.weekly-modal-sheet>header{backdrop-filter:blur(10px)}
+.weekly-modal-intro{backdrop-filter:none}
+.weekly-collage button{content-visibility:auto;contain-intrinsic-size:320px 240px}
+@media(max-width:560px){.weekly-modal{backdrop-filter:blur(7px)}}

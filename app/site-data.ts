@@ -1,5 +1,5 @@
 import snapshotJson from "./data/site-snapshot.json";
-import type { GalleryAlbum, GalleryAlbumSummary, HomeData, MenuData, RankingItem, SiteSnapshot } from "./site-types";
+import type { GalleryAlbum, GalleryAlbumSummary, GuestbookPage, HomeData, MenuData, RankingItem, SiteSnapshot } from "./site-types";
 
 const API="https://api.marchgroup.net/api/client";
 const CACHE_TTL=10*60*1000;
@@ -12,6 +12,7 @@ const menuCache:CacheEntry<MenuData>={value:snapshot.menu,expiresAt:0,refresh:nu
 const albumsCache:CacheEntry<GalleryAlbumSummary[]>={value:snapshot.albums,expiresAt:0,refresh:null};
 const staffRankingCache:CacheEntry<RankingItem[]>={value:snapshot.staffRanking,expiresAt:0,refresh:null};
 const monetaryRankingCache:CacheEntry<RankingItem[]>={value:snapshot.monetaryRanking,expiresAt:0,refresh:null};
+const guestbookCache:CacheEntry<GuestbookPage>={value:snapshot.guestbook,expiresAt:0,refresh:null};
 const albumCaches=new Map(Object.entries(snapshot.albumDetails).map(([id,value])=>[id,{value,expiresAt:0,refresh:null} satisfies CacheEntry<GalleryAlbum>]));
 
 async function request<T>(path:string):Promise<T>{
@@ -51,4 +52,5 @@ export function getRankings(type:"staffRanking"|"monetaryRanking"):RankingItem[]
   const entry=type==="staffRanking"?staffRankingCache:monetaryRankingCache;
   return useCache(entry,()=>request<RankingItem[]>(`/rankings?type=${type}`));
 }
+export function getGuestbookComments():GuestbookPage{return useCache(guestbookCache,()=>request<GuestbookPage>("/guestbook/comments"))}
 export const siteSnapshotGeneratedAt=snapshot.generatedAt;

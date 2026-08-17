@@ -12,12 +12,13 @@ async function get(path) {
   return payload.data;
 }
 
-const [rawHome, menu, albums, staffRanking, monetaryRanking] = await Promise.all([
+const [rawHome, menu, albums, staffRanking, monetaryRanking, guestbook] = await Promise.all([
   get("/home"),
   get("/menu"),
   get("/gallery-albums"),
   get("/rankings?type=staffRanking"),
   get("/rankings?type=monetaryRanking"),
+  get("/guestbook/comments"),
 ]);
 
 const settings = Object.fromEntries(rawHome.siteSettings.map((item) => [item.settingKey, item.settingValue]));
@@ -37,6 +38,7 @@ const snapshot = {
   albumDetails:Object.fromEntries(albumEntries),
   staffRanking,
   monetaryRanking,
+  guestbook,
 };
 
 await writeFile(output, `${JSON.stringify(snapshot, null, 2)}\n`);

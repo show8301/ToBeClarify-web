@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-17T02:41:16.104Z",
+  "generatedAt": "2026-08-17T03:15:23.014Z",
   "home": {
     "shopInfo": {
       "name": "清醒夢",
@@ -843,5 +843,207 @@
       "scoreLabel": "680,000 Gil",
       "periodLabel": "2026-07"
     }
-  ]
+  ],
+  "guestbook": {
+    "page": 1,
+    "pageSize": 20,
+    "totalCount": 21,
+    "items": [
+      {
+        "id": "07386012-1859-57fe-bedb-3bfed967f13a",
+        "displayName": "暮光櫃台",
+        "content": "歡迎留下不含現實個資的 RP 感想。正式版會接審核流程，第一版僅作畫面展示。",
+        "isPinned": true,
+        "createdAt": "2026-07-01T20:40:00+08:00",
+        "replies": [
+          {
+            "id": "f4127237-e173-50b4-b2b0-ce2fc1774140",
+            "displayName": "水晶櫃檯",
+            "content": "正式版會再加入審核與隱藏流程，demo 先保留公開展示。",
+            "createdAt": "2026-07-01T20:48:00+08:00"
+          }
+        ]
+      },
+      {
+        "id": "7cc6384f-d971-54d1-b9e0-fab054ccb31b",
+        "displayName": "店內公告",
+        "content": "留言請保持角色內禮儀，避免攻擊性文字、過度越界內容或破壞他人沉浸體驗。",
+        "isPinned": true,
+        "createdAt": "2026-07-01T20:30:00+08:00",
+        "replies": []
+      },
+      {
+        "id": "b1b382da-8e53-452e-9446-adbdcfe8646f",
+        "displayName": "dev",
+        "content": "DB留言測試",
+        "isPinned": false,
+        "createdAt": "2026-07-15T21:35:28+08:00",
+        "replies": []
+      },
+      {
+        "id": "67934862-ee2d-56dd-b291-608c5014625f",
+        "displayName": "匿名旅人",
+        "content": "第一次來也不會緊張，店員把流程說得很清楚，整晚節奏很舒服。",
+        "isPinned": false,
+        "createdAt": "2026-06-30T23:00:00+08:00",
+        "replies": [
+          {
+            "id": "9c5904a2-18af-5904-9c5c-336f21e7088c",
+            "displayName": "櫃檯回覆",
+            "content": "謝謝你的留言，期待下次再一起補完角色故事。",
+            "createdAt": "2026-06-30T23:08:00+08:00"
+          }
+        ]
+      },
+      {
+        "id": "14c016df-02d3-57fd-bb6f-b83f4f5c6760",
+        "displayName": "白銀鄉常客",
+        "content": "喜歡這裡的低光佈置，適合把角色故事慢慢講完。",
+        "isPinned": false,
+        "createdAt": "2026-06-29T22:07:00+08:00",
+        "replies": []
+      },
+      {
+        "id": "50343e6b-e524-55c4-8f72-c109065c6582",
+        "displayName": "月下來客",
+        "content": "月下祝杯的氣氛很漂亮，短籤詩讓角色有了新的靈感。",
+        "isPinned": false,
+        "createdAt": "2026-06-28T21:14:00+08:00",
+        "replies": []
+      },
+      {
+        "id": "a18a638f-3845-5cda-b748-829d09388ab4",
+        "displayName": "初訪冒險者",
+        "content": "包廂陪談節奏剛好，適合想安靜聊天的晚上。",
+        "isPinned": false,
+        "createdAt": "2026-06-27T20:21:00+08:00",
+        "replies": []
+      },
+      {
+        "id": "36f9e318-4d0b-5c86-b3b7-8cf1b1fb0984",
+        "displayName": "匿名旅人",
+        "content": "第一次來也不會緊張，店員把流程說得很清楚，整晚節奏很舒服。",
+        "isPinned": false,
+        "createdAt": "2026-06-26T19:28:00+08:00",
+        "replies": []
+      },
+      {
+        "id": "8695a773-efc6-5dae-9f67-73e1f87cc775",
+        "displayName": "白銀鄉常客",
+        "content": "喜歡這裡的低光佈置，適合把角色故事慢慢講完。",
+        "isPinned": false,
+        "createdAt": "2026-06-25T23:35:00+08:00",
+        "replies": [
+          {
+            "id": "2e7cddfa-526c-5196-acdb-a7ec35cbc160",
+            "displayName": "櫃檯回覆",
+            "content": "謝謝你的留言，期待下次再一起補完角色故事。",
+            "createdAt": "2026-06-25T23:43:00+08:00"
+          }
+        ]
+      },
+      {
+        "id": "7e190b09-3b2c-5479-9e7c-a5e4f27416ec",
+        "displayName": "月下來客",
+        "content": "月下祝杯的氣氛很漂亮，短籤詩讓角色有了新的靈感。",
+        "isPinned": false,
+        "createdAt": "2026-06-24T22:42:00+08:00",
+        "replies": []
+      },
+      {
+        "id": "1ccef544-4b0c-5b77-ae8f-072b12d0ebf1",
+        "displayName": "初訪冒險者",
+        "content": "包廂陪談節奏剛好，適合想安靜聊天的晚上。",
+        "isPinned": false,
+        "createdAt": "2026-06-23T21:49:00+08:00",
+        "replies": []
+      },
+      {
+        "id": "dbd1cc53-3e2d-5e6f-bd03-161d03ace5a1",
+        "displayName": "匿名旅人",
+        "content": "第一次來也不會緊張，店員把流程說得很清楚，整晚節奏很舒服。",
+        "isPinned": false,
+        "createdAt": "2026-06-30T20:56:00+08:00",
+        "replies": []
+      },
+      {
+        "id": "1eeec1c6-cdbd-518c-a03a-17e59174db64",
+        "displayName": "白銀鄉常客",
+        "content": "喜歡這裡的低光佈置，適合把角色故事慢慢講完。",
+        "isPinned": false,
+        "createdAt": "2026-06-29T19:03:00+08:00",
+        "replies": []
+      },
+      {
+        "id": "40917371-7c91-5c8c-b60e-575598e86be6",
+        "displayName": "月下來客",
+        "content": "月下祝杯的氣氛很漂亮，短籤詩讓角色有了新的靈感。",
+        "isPinned": false,
+        "createdAt": "2026-06-28T23:10:00+08:00",
+        "replies": [
+          {
+            "id": "68f3a0e0-dc58-53a2-8898-779a38aeeb2d",
+            "displayName": "櫃檯回覆",
+            "content": "謝謝你的留言，期待下次再一起補完角色故事。",
+            "createdAt": "2026-06-28T23:18:00+08:00"
+          }
+        ]
+      },
+      {
+        "id": "12fa5bde-41a9-57ed-bb80-0274e79d9728",
+        "displayName": "初訪冒險者",
+        "content": "包廂陪談節奏剛好，適合想安靜聊天的晚上。",
+        "isPinned": false,
+        "createdAt": "2026-06-27T22:17:00+08:00",
+        "replies": []
+      },
+      {
+        "id": "8acd7f8f-5b05-55d6-8cdc-212b976b722b",
+        "displayName": "匿名旅人",
+        "content": "第一次來也不會緊張，店員把流程說得很清楚，整晚節奏很舒服。",
+        "isPinned": false,
+        "createdAt": "2026-06-26T21:24:00+08:00",
+        "replies": []
+      },
+      {
+        "id": "6290fa4b-ffcf-5571-878f-8c6b8d7886ac",
+        "displayName": "白銀鄉常客",
+        "content": "喜歡這裡的低光佈置，適合把角色故事慢慢講完。",
+        "isPinned": false,
+        "createdAt": "2026-06-25T20:31:00+08:00",
+        "replies": []
+      },
+      {
+        "id": "0a081eec-30fd-524a-a00f-8ee8f97702be",
+        "displayName": "月下來客",
+        "content": "月下祝杯的氣氛很漂亮，短籤詩讓角色有了新的靈感。",
+        "isPinned": false,
+        "createdAt": "2026-06-24T19:38:00+08:00",
+        "replies": []
+      },
+      {
+        "id": "6cccdfd8-8092-5b1a-b1c1-409330debc4e",
+        "displayName": "初訪冒險者",
+        "content": "包廂陪談節奏剛好，適合想安靜聊天的晚上。",
+        "isPinned": false,
+        "createdAt": "2026-06-23T23:45:00+08:00",
+        "replies": [
+          {
+            "id": "c12b9f2b-fbb3-538c-9cd9-62b15b9599be",
+            "displayName": "櫃檯回覆",
+            "content": "謝謝你的留言，期待下次再一起補完角色故事。",
+            "createdAt": "2026-06-23T23:53:00+08:00"
+          }
+        ]
+      },
+      {
+        "id": "62c8d9c1-6e5d-53fc-9435-cc2eccc37bb5",
+        "displayName": "匿名旅人",
+        "content": "第一次來也不會緊張，店員把流程說得很清楚，整晚節奏很舒服。",
+        "isPinned": false,
+        "createdAt": "2026-06-30T22:52:00+08:00",
+        "replies": []
+      }
+    ]
+  }
 }

@@ -76,6 +76,16 @@ export type StaffReservation = {
   id:string; staffId:string; serviceLabel:string; startsAt:string; endsAt:string; status:string;
 };
 
+export type GuestbookReply = {
+  id:string; displayName:string; content:string; createdAt:string;
+};
+export type GuestbookComment = {
+  id:string; displayName:string; content:string; isPinned:boolean; createdAt:string; replies:GuestbookReply[];
+};
+export type GuestbookPage = {
+  items:GuestbookComment[]; page:number; pageSize:number; totalCount:number;
+};
+
 export type SiteSnapshot = {
   generatedAt:string;
   home:HomeData;
@@ -84,4 +94,5 @@ export type SiteSnapshot = {
   albumDetails:Record<string,GalleryAlbum>;
   staffRanking:RankingItem[];
   monetaryRanking:RankingItem[];
+  guestbook:GuestbookPage;
 };

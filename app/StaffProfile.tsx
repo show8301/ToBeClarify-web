@@ -70,7 +70,7 @@ export default function StaffProfile({ staff, index, navigation }:{ staff:StaffD
     const navigate = () => {
       history.scrollRestoration = "manual";
       document.documentElement.classList.add("route-returning");
-      replaceWithFallback("/#roster",()=>window.location.pathname==="/"&&window.location.hash==="#roster");
+      replaceWithFallback("/staff#roster",()=>window.location.pathname==="/staff"&&window.location.hash==="#roster");
     };
     if (reduceMotion) return navigate();
     setLeaving(true);

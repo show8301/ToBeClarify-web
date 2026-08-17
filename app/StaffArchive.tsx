@@ -7,7 +7,7 @@ import type { StaffSummary } from "./staff-types";
 
 const fallbackPortrait = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='1000'%3E%3Crect width='100%25' height='100%25' fill='%23d9d2c5'/%3E%3Ccircle cx='400' cy='390' r='150' fill='%23eee9df'/%3E%3Cpath d='M150 950c30-240 150-350 250-350s220 110 250 350' fill='%23eee9df'/%3E%3C/svg%3E";
 
-export default function StaffArchive({ initialStaff }:{ initialStaff:StaffSummary[] }) {
+export default function StaffArchive({ initialStaff, embedded=false }:{ initialStaff:StaffSummary[];embedded?:boolean }) {
   const [query, setQuery] = useState("");
   const [leaving, setLeaving] = useState(false);
   const [featuredIndex, setFeaturedIndex] = useState(0);
@@ -79,12 +79,12 @@ export default function StaffArchive({ initialStaff }:{ initialStaff:StaffSummar
   };
 
   return (
-    <main className="archive-shell">
-      <header className="archive-header">
+    <div className={`archive-shell${embedded?" archive-embedded":""}`}>
+      {!embedded&&<header className="archive-header">
         <a className="archive-brand" href="#roster">清醒夢 <i>LUCID DREAM</i></a>
         <span className="archive-edition">WAKING DREAM · STAFF ARCHIVE</span>
         <div className="header-count"><b>{String(initialStaff.length).padStart(2,"0")}</b><span>MEMBERS<br/>ON FILE</span></div>
-      </header>
+      </header>}
 
       <section className="roster-intro" id="roster">
         <div><span className="section-kicker">THE PEOPLE BEHIND THE DREAM</span><h1>MEET THE<br/><i>DREAMERS</i></h1></div>
@@ -126,6 +126,6 @@ export default function StaffArchive({ initialStaff }:{ initialStaff:StaffSummar
       <AnimatePresence>{leaving&&<motion.div className="route-transition" initial={{opacity:0,clipPath:"inset(100% 0 0 0)"}} animate={{opacity:1,clipPath:"inset(0% 0 0 0)"}} exit={{opacity:0}} transition={{duration:.28,ease:[.76,0,.24,1]}} aria-hidden="true"><motion.span initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} transition={{delay:.1,duration:.18}}>OPENING PERSONNEL FILE <i>✦</i></motion.span></motion.div>}</AnimatePresence>
 
       <footer className="archive-footer"><span>清醒夢 · LUCID DREAM STAFF ARCHIVE</span><b>KEEP DREAMING ✦</b></footer>
-    </main>
+    </div>
   );
 }

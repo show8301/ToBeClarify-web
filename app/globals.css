@@ -577,6 +577,7 @@ button,input,textarea{color:inherit}
 .site-frame:before{inset:-22%;opacity:.2;background:radial-gradient(ellipse at 18% 26%,rgba(52,181,188,.2),transparent 25%),radial-gradient(ellipse at 76% 62%,rgba(181,138,77,.12),transparent 22%);mix-blend-mode:screen;filter:blur(34px);animation:dream-orbit 26s ease-in-out infinite alternate}
 .site-frame:after{inset:25% -30% -35%;opacity:.11;background:radial-gradient(ellipse at center,rgba(200,192,178,.2),transparent 62%);filter:blur(50px);animation:dream-breathe 17s ease-in-out infinite}
 .site-content,.site-footer{position:relative;z-index:1}
+body.modal-open .site-content{z-index:61}
 
 .home-hero-visual:after{z-index:1}
 .home-hero-visual>img{z-index:0;will-change:opacity,transform,filter}

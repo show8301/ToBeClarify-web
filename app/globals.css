@@ -399,3 +399,38 @@ html.route-returning::after{content:"RESTORING STAFF POSITION  ←";position:fix
 @media(max-width:820px){.home-about{grid-template-columns:1fr;gap:44px}.home-about-copy{grid-column:1}.home-about-title h2{font-size:clamp(42px,10vw,58px)}}
 @media(max-width:360px){.home-about-title h2{font-size:36px}}
 @media(min-width:1101px){.home-about{grid-template-columns:minmax(300px,.9fr) minmax(380px,1.05fr) minmax(300px,.9fr)}.home-about-title h2{font-size:clamp(44px,3.5vw,68px)}}
+
+/* Site-wide typography system */
+:root{--type-caption:11px;--type-label:12px;--type-small:14px;--type-body:17px;--type-reading:18px;--type-leading:1.75}
+body{font-size:var(--type-body);line-height:1.65;text-rendering:optimizeLegibility}
+
+/* Shared chrome */
+.site-brand span,.site-header-note,.site-menu-toggle b{font-size:var(--type-caption)}.site-header nav a i{font-size:10px}.site-header nav a span{font-size:17px}.site-footer>div:first-child>span,.site-footer>div:nth-child(2)>b,.site-footer>a{font-size:var(--type-caption)}.site-footer p{font-size:16px;line-height:1.8}.site-footer>div:nth-child(2){font-size:15px;line-height:1.6}
+
+/* Shared editorial labels and comfortable Chinese headings */
+.home-hero-copy>span,.home-about-title>span,.home-pricing header span,.home-events header span,.home-rules header>span,.home-final-cta>span,.weekly-hero>span,.menu-hero>div:first-child>span,.menu-sets header span,.menu-catalog header>div>span,.live-hero>div:first-child>span,.live-status header span,.live-timeline header span,.honor-hero>span,.staff-honor header>span,.guest-podium header>span,.guestbook-hero>span{font-size:var(--type-label);line-height:1.25}
+.home-pricing h2,.home-events h2,.home-final-cta h2,.menu-sets h2,.menu-catalog h2,.live-status h2,.live-timeline h2,.staff-honor h2,.guest-podium h2{font-size:clamp(44px,4.8vw,72px);line-height:1.05;letter-spacing:-.045em}
+
+/* Home */
+.home-hero-index{font-size:var(--type-caption)}.home-hero-copy>div b,.home-hero-copy>div span{font-size:15px}.home-hero-copy>a{font-size:var(--type-caption)}.home-hero-ticket span,.home-hero-ticket em{font-size:var(--type-caption)}.home-hero-ticket b{font-size:15px}.home-about-photo span{font-size:var(--type-caption)}.home-pricing>header>p{font-size:18px;line-height:1.85}.home-pricing article>span{font-size:var(--type-label)}.home-pricing article>i{font-size:var(--type-caption)}.home-event-card small,.home-event-card b{font-size:var(--type-caption)}.home-event-card p{font-size:16px;line-height:1.75}.home-rules li>span{font-size:var(--type-caption)}.home-rules li p{font-size:17px;line-height:1.8}.home-rules li small{font-size:14px;line-height:1.7}
+
+/* Staff archive and profile */
+.intro-feature::before,.intro-feature-photo i,.intro-feature-copy small,.intro-feature-copy>span,.card-stamp,.staff-card::after{font-size:var(--type-caption)}.intro-feature-copy em{font-size:14px}.intro-feature-copy b{font-size:14px}.staff-card-top>i em{font-size:var(--type-caption)}.staff-card-copy small{font-size:13px}.staff-card-copy p{font-size:16px;line-height:1.6}.card-action{font-size:var(--type-caption)}.service-grid article>span,.filmstrip span{font-size:var(--type-caption)}.service-grid p{font-size:14px}.service-grid article>b{font-size:13px}.dossier-foot{font-size:var(--type-caption)}.lightbox-top span,.lightbox figcaption{font-size:var(--type-caption)}
+
+/* Weekly gallery and modal */
+.weekly-hero>div p{font-size:15px;line-height:1.7}.weekly-hero>p{font-size:18px;line-height:1.85}.weekly-card-photo i,.weekly-card-copy b{font-size:var(--type-caption)}.weekly-card-copy small,.weekly-card-copy em{font-size:var(--type-label)}.weekly-card-copy p{font-size:16px;line-height:1.8}.weekly-modal-sheet>header span,.weekly-modal-sheet>header button,.weekly-photo-stage>header button,.weekly-modal-intro>span,.weekly-modal-intro>b,.weekly-photo-stage figcaption,.weekly-collage span{font-size:var(--type-caption)}.weekly-modal-sheet>header b,.weekly-photo-stage>header>span{font-size:13px}.weekly-modal-intro h2{font-size:clamp(42px,4.8vw,72px);line-height:1.05;letter-spacing:-.045em}.weekly-modal-intro p{font-size:17px;line-height:1.85}.weekly-sheet-grabber span{font-size:10px}
+
+/* Menu */
+.menu-cover-card>span,.menu-cover-card>i,.menu-pricing-rules article>span,.menu-pricing-rules small,.menu-set-photo>small,.menu-sets li span,.menu-catalog nav i,.menu-category-intro>span,.menu-category li>span{font-size:var(--type-caption)}.menu-cover-card>p,.menu-sets>header>p,.menu-category-intro p{font-size:17px;line-height:1.85}.menu-pricing-rules p{font-size:16px;line-height:1.75;color:rgba(255,255,255,.8)}.menu-sets article p,.menu-category li p{font-size:16px;line-height:1.75}.menu-sets li b{font-size:15px}.menu-sets article strong,.menu-category li>b{font-size:16px}.menu-category-intro h3{font-size:clamp(42px,4.3vw,62px);line-height:1.05;letter-spacing:-.045em}.menu-catalog nav button{font-size:16px}
+
+/* Live status */
+.live-clock>span,.live-clock>button,.live-status>header>b,.timeline-times>span,.timeline-times>b,.timeline-line>span small{font-size:var(--type-caption)}.live-hero>p,.live-timeline>header>p{font-size:17px;line-height:1.85}.live-status a>span{font-size:13px}.live-status a>small{font-size:14px}.timeline-row>div:first-child span{font-size:15px}.timeline-line>span b{font-size:13px}
+
+/* Rankings */
+.honor-hero>div i,.staff-honor-photo>b,.staff-honor-copy>small,.staff-honor-copy>i,.guest-podium article>small,.guest-podium article>i,.guest-ranking-list>header,.guest-ranking-list li>em{font-size:var(--type-caption)}.honor-hero>p{font-size:16px;line-height:1.85}.staff-honor-copy>p{font-size:17px;line-height:1.85}.guest-ranking-list li small{font-size:13px}
+
+/* Guestbook */
+.guestbook-hero>div p{font-size:14px;line-height:1.65}.guestbook-hero>p{font-size:16px;line-height:1.85}.guest-composer>span,.guestbook-feed section>header,.guest-composer form>button,.guest-inline-reply>button,.guest-load-more,.guest-note>header,.guest-reply-toggle,.guest-replies time{font-size:var(--type-caption)}.guest-composer label span,.guest-inline-reply label span{font-size:12px}.guest-composer input,.guest-composer textarea,.guest-inline-reply textarea{font-size:16px;line-height:1.65}.guest-composer>p{font-size:13px;line-height:1.75}.guest-note>p{font-size:17px;line-height:1.9}.guest-replies span{font-size:12px}.guest-replies p{font-size:15px;line-height:1.75}
+
+@media(max-width:560px){:root{--type-body:17px;--type-reading:18px}.site-header nav a span{font-size:17px}.home-pricing h2,.home-events h2,.home-final-cta h2,.menu-sets h2,.menu-catalog h2,.live-status h2,.live-timeline h2,.staff-honor h2,.guest-podium h2{font-size:40px;line-height:1.1}.weekly-card-copy p,.menu-sets article p,.menu-category li p{font-size:17px}.weekly-modal-intro p,.guest-note>p{font-size:17px}.archive-footer{font-size:var(--type-caption)}}
+@media(max-width:560px){.service-grid h3{font-size:18px}.service-grid p{font-size:15px}.service-grid article>b{font-size:14px}}

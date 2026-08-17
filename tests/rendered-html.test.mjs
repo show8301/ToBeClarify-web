@@ -45,7 +45,8 @@ test("renders route-addressable gallery content over the archive", async () => {
   assert.match(html, /weekly-page/);
   assert.match(html, /weekly-modal/);
   assert.match(html, new RegExp(album.albumTitle));
-  assert.match(html, /DRAG DOWN TO CLOSE/);
+  assert.match(html, /向下拖曳關閉相簿/);
+  assert.match(html, /關閉相簿/);
 });
 
 test("keeps a current API snapshot for resilient first paint", async () => {

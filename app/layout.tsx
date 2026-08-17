@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export async function generateMetadata():Promise<Metadata> {
-  const title = "清醒夢 Lucid Dream｜店員名鑑";
-  const description = "走進清醒夢境，認識 Lucid Dream 的每一位店員。";
+  const title = "清醒夢 Lucid Dream｜艾歐澤亞深夜沙龍";
+  const description = "為旅人留燈的清醒夢境。認識店員、查看活動、菜單與今夜店舖動態。";
   return {
     title,
     description,

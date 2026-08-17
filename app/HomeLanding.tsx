@@ -18,14 +18,21 @@ export default function HomeLanding({home}:{home:HomeData}){
   },[current?.displaySeconds,images.length,reduceMotion,slide]);
 
   return <div className="home-page">
+    {!reduceMotion&&<motion.div className="home-dream-entry" aria-hidden="true" initial={{opacity:1}} animate={{opacity:0,visibility:"hidden"}} transition={{opacity:{delay:1.15,duration:.85,ease:[.76,0,.24,1]},visibility:{delay:2}}}>
+      <motion.span initial={{opacity:0,letterSpacing:".48em"}} animate={{opacity:1,letterSpacing:".28em"}} transition={{delay:.18,duration:.8}}>BETWEEN WAKING AND DREAM</motion.span>
+      <motion.i initial={{scaleX:0,opacity:0}} animate={{scaleX:1,opacity:1}} transition={{delay:.1,duration:1.05,ease:[.22,1,.36,1]}}/>
+      <b>清醒夢</b>
+    </motion.div>}
     <section className="home-hero">
       <div className="home-hero-visual">
-        <AnimatePresence mode="sync" initial={false}>{current&&<motion.img key={current.id} src={current.imageUrl} alt="清醒夢店內景象" initial={reduceMotion?false:{opacity:0,scale:1.04}} animate={{opacity:1,scale:1}} exit={{opacity:0}} transition={{duration:.8,ease:[.22,1,.36,1]}}/>}</AnimatePresence>
+        <AnimatePresence mode="sync" initial={!reduceMotion}>{current&&<motion.img key={current.id} src={current.imageUrl} alt="清醒夢店內景象" initial={reduceMotion?false:{opacity:0,scale:1.075,filter:"blur(10px)"}} animate={{opacity:1,scale:1,filter:"blur(0px)"}} exit={reduceMotion?{opacity:0}:{opacity:0,scale:1.025,filter:"blur(6px)"}} transition={{duration:reduceMotion ? .2 : 1.65,ease:[.22,1,.36,1]}}/>}</AnimatePresence>
+        <span className="home-dream-caustics" aria-hidden="true"/>
+        <span className="home-dream-mist" aria-hidden="true"/>
         <span className="home-hero-grid"/>
         <span className="home-hero-index">{String(slide+1).padStart(2,"0")} / {String(images.length).padStart(2,"0")}</span>
         <div className="home-slide-dots">{images.map((image,index)=><button key={image.id} onClick={()=>setSlide(index)} className={index===slide?"active":""} aria-label={`切換至第 ${index+1} 張店景`}/>)}</div>
       </div>
-      <motion.div className="home-hero-copy" initial={reduceMotion?false:{opacity:0,x:-36}} animate={{opacity:1,x:0}} transition={{duration:.65,ease:[.22,1,.36,1]}}>
+      <motion.div className="home-hero-copy" initial={reduceMotion?false:{opacity:0,y:28,filter:"blur(8px)"}} animate={{opacity:1,y:0,filter:"blur(0px)"}} transition={{delay:reduceMotion ? 0 : .72,duration:reduceMotion ? .2 : 1.15,ease:[.22,1,.36,1]}}>
         <span>WELCOME TO THE WAKING DREAM</span>
         <h1><i>LUCID</i><br/>DREAM</h1>
         <p>{home.shopInfo.subtitle}</p>

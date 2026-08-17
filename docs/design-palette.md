@@ -35,3 +35,6 @@ The live theme is defined by semantic tokens at the end of `app/globals.css`:
 
 Recommended balance: 60% midnight/deep ocean, 20% teal/lagoon, 10% warm stone, 7% smoked gold, and no more than 3% mulberry or luminous accents.
 
+## Motion language — lucid drift
+
+Dreamlike motion is deliberately slow and peripheral: overlapping image dissolves, moving water-light, low fog, almost-imperceptible title echoes, and a brief submerged route transition. Content surfaces remain stable. Every ambient animation is disabled when `prefers-reduced-motion` is enabled.

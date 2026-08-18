@@ -1554,6 +1554,7 @@ body{background-image:radial-gradient(ellipse 75% 55% at 4% 4%,rgba(232,199,218,
 
 /* Gallery modal: avoid a post-paint stacking jump and expensive moving blur layers. */
 .site-content:has(.weekly-modal){z-index:61}
+.site-frame:has(.weekly-modal) .site-floating-menu{opacity:0;visibility:hidden;pointer-events:none}
 body.modal-open{animation-play-state:paused}
 body.modal-open .site-frame::before,
 body.modal-open .site-frame::after,

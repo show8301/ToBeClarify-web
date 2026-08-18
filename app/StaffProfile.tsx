@@ -64,6 +64,17 @@ export default function StaffProfile({ staff, index, navigation }:{ staff:StaffD
     else window.requestAnimationFrame(navigate);
   }, [reduceMotion, router]);
 
+  const clearNavigationState = useCallback(() => {
+    if (navigationTimer.current) window.clearTimeout(navigationTimer.current);
+    if (navigationWatchdog.current) window.clearTimeout(navigationWatchdog.current);
+    navigationTimer.current = null;
+    navigationWatchdog.current = null;
+    navigationLock.current = false;
+    setSwitching(null);
+    setLeaving(false);
+    document.documentElement.classList.remove("route-returning");
+  }, []);
+
   const returnToRoster = useCallback(() => {
     if (navigationLock.current || leaving) return;
     navigationLock.current = true;
@@ -75,12 +86,8 @@ export default function StaffProfile({ staff, index, navigation }:{ staff:StaffD
     if (reduceMotion) return navigate();
     setLeaving(true);
     navigate();
-    navigationWatchdog.current = window.setTimeout(() => {
-      navigationLock.current = false;
-      setLeaving(false);
-      document.documentElement.classList.remove("route-returning");
-    }, 6000);
-  }, [leaving, reduceMotion, replaceWithFallback]);
+    navigationWatchdog.current = window.setTimeout(clearNavigationState, 3500);
+  }, [clearNavigationState, leaving, reduceMotion, replaceWithFallback]);
 
   const switchStaff = useCallback(async (target:StaffSummary|null, direction:"previous"|"next") => {
     if (!target || navigationLock.current || switching || leaving) return;
@@ -116,18 +123,24 @@ export default function StaffProfile({ staff, index, navigation }:{ staff:StaffD
   }, [next, previous, switchStaff]);
 
   useLayoutEffect(() => {
-    if (navigationTimer.current) window.clearTimeout(navigationTimer.current);
-    if (navigationWatchdog.current) window.clearTimeout(navigationWatchdog.current);
-    navigationLock.current = false;
-    setSwitching(null);
-    setLeaving(false);
+    clearNavigationState();
     const root = document.documentElement;
-    root.classList.remove("route-returning");
     const previousBehavior = root.style.scrollBehavior;
     root.style.scrollBehavior = "auto";
     window.scrollTo(0, 0);
     requestAnimationFrame(() => { root.style.scrollBehavior = previousBehavior; });
-  }, [currentStaff.id]);
+  }, [clearNavigationState, currentStaff.id]);
+
+  useEffect(() => {
+    const restore = () => clearNavigationState();
+    window.addEventListener("pageshow", restore);
+    window.addEventListener("popstate", restore);
+    return () => {
+      window.removeEventListener("pageshow", restore);
+      window.removeEventListener("popstate", restore);
+      clearNavigationState();
+    };
+  }, [clearNavigationState]);
 
   useLayoutEffect(() => {
     if (window.location.pathname===`/staff/${staff.id}`&&currentStaff.id!==staff.id) setCurrentStaff(staff);

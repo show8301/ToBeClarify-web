@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { NavigationItem, ShopInfo } from "./site-types";
 
 const pathAliases:Record<string,string> = { "/home":"/", "/event":"/gallery" };
@@ -11,6 +11,9 @@ const resolvePath = (path:string) => pathAliases[path] ?? path;
 export default function SiteChrome({navigation,shopInfo,children}:{navigation:NavigationItem[];shopInfo:ShopInfo;children:React.ReactNode}) {
   const [open,setOpen] = useState(false);
   const [leaving,setLeaving] = useState<string|null>(null);
+  const [showFloatingMenu,setShowFloatingMenu] = useState(false);
+  const navigationTimer = useRef<ReturnType<typeof window.setTimeout>|null>(null);
+  const navigationWatchdog = useRef<ReturnType<typeof window.setTimeout>|null>(null);
   const pathname = usePathname();
   const router = useRouter();
   const reduceMotion = useReducedMotion();
@@ -20,7 +23,44 @@ export default function SiteChrome({navigation,shopInfo,children}:{navigation:Na
   const mistDrift = useTransform(scrollYProgress,[0,1],["0vh","-8vh"]);
   const items = useMemo(()=>navigation.flatMap((item)=>item.children?.length?item.children:item).filter((item)=>item.routePath!=="/home"),[navigation]);
 
-  useEffect(()=>{setOpen(false);setLeaving(null)},[pathname]);
+  const clearNavigation = useCallback(() => {
+    if (navigationTimer.current) window.clearTimeout(navigationTimer.current);
+    if (navigationWatchdog.current) window.clearTimeout(navigationWatchdog.current);
+    navigationTimer.current = null;
+    navigationWatchdog.current = null;
+    setOpen(false);
+    setLeaving(null);
+  }, []);
+
+  useEffect(()=>{clearNavigation()},[clearNavigation,pathname]);
+  useEffect(() => {
+    const restore = () => clearNavigation();
+    window.addEventListener("pageshow", restore);
+    window.addEventListener("popstate", restore);
+    return () => {
+      window.removeEventListener("pageshow", restore);
+      window.removeEventListener("popstate", restore);
+      clearNavigation();
+    };
+  }, [clearNavigation]);
+  useEffect(() => {
+    const updateFloatingMenu = () => setShowFloatingMenu(window.scrollY > Math.min(260, window.innerHeight * .34));
+    updateFloatingMenu();
+    window.addEventListener("scroll", updateFloatingMenu, {passive:true});
+    window.addEventListener("resize", updateFloatingMenu);
+    return () => {
+      window.removeEventListener("scroll", updateFloatingMenu);
+      window.removeEventListener("resize", updateFloatingMenu);
+    };
+  }, []);
+  useEffect(() => {
+    if (!open) return;
+    const closeOnEscape = (event:KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [open]);
 
   const navigate = (event:React.MouseEvent<HTMLAnchorElement>,path:string) => {
     const href=resolvePath(path);
@@ -29,7 +69,17 @@ export default function SiteChrome({navigation,shopInfo,children}:{navigation:Na
     setOpen(false);
     if(reduceMotion)return router.push(href);
     setLeaving(href);
-    window.setTimeout(()=>router.push(href),560);
+    navigationTimer.current = window.setTimeout(() => {
+      try { router.push(href); }
+      catch { window.location.assign(href); }
+    },560);
+    navigationWatchdog.current = window.setTimeout(() => {
+      const target = new URL(href, window.location.href);
+      const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+      const expected = `${target.pathname}${target.search}${target.hash}`;
+      if (current !== expected) window.location.assign(href);
+      clearNavigation();
+    },3200);
   };
 
   return <div className="site-frame">
@@ -40,11 +90,18 @@ export default function SiteChrome({navigation,shopInfo,children}:{navigation:Na
       <a className="site-brand" href="/" onClick={(event)=>navigate(event,"/")}><strong>{shopInfo.name||"清醒夢"}</strong><span>LUCID DREAM</span></a>
       <span className="site-header-note">WAKING DREAM · EORZEA SALON</span>
       <button className={`site-menu-toggle${open?" is-open":""}`} onClick={()=>setOpen(value=>!value)} aria-expanded={open} aria-controls="site-navigation"><span/><span/><b>{open?"CLOSE":"MENU"}</b></button>
-      <nav id="site-navigation" className={open?"is-open":""} aria-label="主要導覽">
-        <a className={pathname==="/"?"active":""} href="/" onClick={(event)=>navigate(event,"/")}><i>00</i><span>首頁</span></a>
-        {items.map((item,index)=>{const href=resolvePath(item.routePath);return <a className={pathname===href?"active":""} href={href} onClick={(event)=>navigate(event,href)} key={item.id}><i>{String(index+1).padStart(2,"0")}</i><span>{item.label}</span></a>})}
-      </nav>
     </header>
+    <nav id="site-navigation" className={`site-navigation${open?" is-open":""}${showFloatingMenu?" is-detached":""}`} aria-label="主要導覽">
+      <a className={pathname==="/"?"active":""} href="/" onClick={(event)=>navigate(event,"/")}><i>00</i><span>首頁</span></a>
+      {items.map((item,index)=>{const href=resolvePath(item.routePath);return <a className={pathname===href?"active":""} href={href} onClick={(event)=>navigate(event,href)} key={item.id}><i>{String(index+1).padStart(2,"0")}</i><span>{item.label}</span></a>})}
+    </nav>
+    <button
+      className={`site-floating-menu${showFloatingMenu?" is-visible":""}${open?" is-open":""}`}
+      onClick={()=>setOpen(value=>!value)}
+      aria-expanded={open}
+      aria-controls="site-navigation"
+      aria-label={open?"關閉主選單":"開啟主選單"}
+    ><span/><span/><b>{open?"CLOSE":"MENU"}</b></button>
     <main className="site-content">{children}</main>
     <footer className="site-footer">
       <div><span>LUCID DREAM · EORZEA</span><strong>{shopInfo.name||"清醒夢"}</strong><p>{shopInfo.footerText}</p></div>

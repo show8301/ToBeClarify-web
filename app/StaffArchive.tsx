@@ -1,8 +1,9 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { ArrowUpRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { StaffSummary } from "./staff-types";
 
 const fallbackPortrait = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='1000'%3E%3Crect width='100%25' height='100%25' fill='%23d9d2c5'/%3E%3Ccircle cx='400' cy='390' r='150' fill='%23eee9df'/%3E%3Cpath d='M150 950c30-240 150-350 250-350s220 110 250 350' fill='%23eee9df'/%3E%3C/svg%3E";
@@ -12,6 +13,8 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
   const [leaving, setLeaving] = useState(false);
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const [featuredPaused, setFeaturedPaused] = useState(false);
+  const navigationTimer = useRef<ReturnType<typeof window.setTimeout>|null>(null);
+  const navigationWatchdog = useRef<ReturnType<typeof window.setTimeout>|null>(null);
   const router = useRouter();
   const reduceMotion = useReducedMotion();
   const filtered = useMemo(() => initialStaff.filter((person) =>
@@ -62,20 +65,45 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
     };
   }, []);
 
+  const clearNavigation = useCallback(() => {
+    if (navigationTimer.current) window.clearTimeout(navigationTimer.current);
+    if (navigationWatchdog.current) window.clearTimeout(navigationWatchdog.current);
+    navigationTimer.current = null;
+    navigationWatchdog.current = null;
+    setLeaving(false);
+  }, []);
+
+  useEffect(() => {
+    const restore = () => clearNavigation();
+    window.addEventListener("pageshow", restore);
+    window.addEventListener("popstate", restore);
+    return () => {
+      window.removeEventListener("pageshow", restore);
+      window.removeEventListener("popstate", restore);
+      clearNavigation();
+    };
+  }, [clearNavigation]);
+
   const openProfile = (event:React.MouseEvent<HTMLAnchorElement>, href:string) => {
     event.preventDefault();
     if (leaving) return;
     sessionStorage.setItem("lucid-roster-scroll", String(window.scrollY));
     if (reduceMotion) return router.push(href);
     setLeaving(true);
-    window.setTimeout(() => {
+    navigationTimer.current = window.setTimeout(() => {
       const root = document.documentElement;
       const previousBehavior = root.style.scrollBehavior;
       root.style.scrollBehavior = "auto";
       window.scrollTo(0, 0);
-      router.push(href);
+      try { router.push(href); }
+      catch { window.location.assign(href); }
       requestAnimationFrame(() => { root.style.scrollBehavior = previousBehavior; });
     }, 280);
+    navigationWatchdog.current = window.setTimeout(() => {
+      const target = new URL(href, window.location.href);
+      if (window.location.pathname !== target.pathname) window.location.assign(href);
+      clearNavigation();
+    }, 2800);
   };
 
   return (
@@ -90,7 +118,7 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
         <div><span className="section-kicker">THE PEOPLE BEHIND THE DREAM</span><h1>MEET THE<br/><i>DREAMERS</i></h1></div>
         {featured&&<motion.a key={featured.id} className={`intro-feature${featuredPaused?" is-paused":""}`} href={`/staff/${featured.id}`} onClick={(event)=>openProfile(event,`/staff/${featured.id}`)} onMouseEnter={()=>setFeaturedPaused(true)} onMouseLeave={()=>setFeaturedPaused(false)} onFocus={()=>setFeaturedPaused(true)} onBlur={()=>setFeaturedPaused(false)} initial={{opacity:0,y:14,rotate:1}} animate={{opacity:1,y:0,rotate:-1}} transition={{duration:.45,ease:[.22,1,.36,1]}} aria-label={`本次夢境推薦：${featured.displayName}`}>
           <span className="intro-feature-photo"><img src={featured.avatarUrl||fallbackPortrait} alt={`${featured.displayName} 的推薦照片`}/><i>{featured.isWorkingToday?"ON DUTY":"DREAM STAFF"}</i></span>
-          <span className="intro-feature-copy"><small>RANDOM DREAMER · 本次推薦</small><strong>{featured.displayName}</strong><em>{featured.roleTitle||"DREAM STAFF"}</em>{featuredServices[0]&&<b>{featuredServices[0].serviceName}</b>}<span>VIEW FILE ↗</span></span>
+          <span className="intro-feature-copy"><small>RANDOM DREAMER · 本次推薦</small><strong>{featured.displayName}</strong><em>{featured.roleTitle||"DREAM STAFF"}</em>{featuredServices[0]&&<b>{featuredServices[0].serviceName}</b>}<span>VIEW FILE <ArrowUpRight aria-hidden="true"/></span></span>
           <i className="intro-feature-progress" aria-hidden="true"/>
         </motion.a>}
         <span className="intro-index">LUCID DREAM / 2026</span>
@@ -98,7 +126,7 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
 
       <section className="gallery-controls" aria-label="名單搜尋">
         <div><span>ALL STAFF</span><b>{String(filtered.length).padStart(2,"0")}</b></div>
-        <label><span className="sr-only">搜尋店員</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜尋名字、職稱或特色…"/><b>SEARCH ↗</b></label>
+        <label><span className="sr-only">搜尋店員</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜尋名字、職稱或特色…"/><b>SEARCH <ArrowUpRight aria-hidden="true"/></b></label>
       </section>
 
       <section className="staff-gallery" aria-label="店員視覺名單">
@@ -132,7 +160,7 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
                     {services.slice(0,2).map((service,serviceIndex)=><b key={service.id}><img src={`/assets/staff-card-chip-icon-${serviceIndex===0?"a":"b"}.png`} alt="" aria-hidden="true"/>{service.serviceName}</b>)}
                     {services.length > 2 && <i><img src="/assets/staff-card-chip-icon-c.png" alt="" aria-hidden="true"/>+{services.length-2}</i>}
                   </span>}
-                  <span className="dreamer-card-link"><small>FILE · {fileNumber}</small><b>VIEW PROFILE <i>↗</i></b></span>
+                  <span className="dreamer-card-link"><small>FILE · {fileNumber}</small><b>VIEW PROFILE <ArrowUpRight aria-hidden="true"/></b></span>
                 </span>
               </motion.a>
             );

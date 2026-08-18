@@ -80,10 +80,6 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
 
   return (
     <div className={`archive-shell${embedded?" archive-embedded":""}`}>
-      <div className="roster-coral-field" aria-hidden="true">
-        <span className="roster-coral coral-one"><i/><i/><i/><i/></span>
-        <span className="roster-coral coral-two"><i/><i/><i/><i/></span>
-      </div>
       {!embedded&&<header className="archive-header">
         <a className="archive-brand" href="#roster">清醒夢 <i>LUCID DREAM</i></a>
         <span className="archive-edition">WAKING DREAM · STAFF ARCHIVE</span>
@@ -109,6 +105,8 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
         <AnimatePresence mode="popLayout">
           {filtered.map((person, index) => {
             const services = [...(person.commonServices ?? []), ...(person.specialServices ?? [])];
+            // Temporary availability override until the staff API exposes a nomination flag.
+            const canBeNominated = true;
             const fileNumber = String(index + 1).padStart(2,"0");
             return (
               <motion.a layout href={`/staff/${person.id}`} onClick={(event) => openProfile(event, `/staff/${person.id}`)} key={person.id} className="dreamer-card"
@@ -119,9 +117,12 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
                   <span className="dreamer-role-ribbon" title={person.roleTitle || "DREAM STAFF"}>
                     <i>✦</i><b>{person.roleTitle || "DREAM STAFF"}</b><i>✦</i>
                   </span>
-                  <span className="dreamer-file-number">{fileNumber}</span>
-                  <span className={`dreamer-duty${person.isWorkingToday ? " is-online" : ""}`}>
-                    <i aria-hidden="true"/><span><small>{person.isWorkingToday ? "ON DUTY" : "OFF DUTY"}</small><b>{person.statusText || "未排班"}</b></span>
+                  <span className="dreamer-photo-statuses">
+                    <span className={`dreamer-duty${person.isWorkingToday ? " is-online" : ""}`}>
+                      <i aria-hidden="true"/><span><small>{person.isWorkingToday ? "ON DUTY" : "OFF DUTY"}</small><b>{person.statusText || "未排班"}</b></span>
+                    </span>
+                    {canBeNominated && <span className="dreamer-nomination" aria-label="此店員可以指名"><i aria-hidden="true">✦</i><b>可以指名</b></span>}
+                    <span className="dreamer-file-number">{fileNumber}</span>
                   </span>
                 </span>
                 <span className="dreamer-card-body">

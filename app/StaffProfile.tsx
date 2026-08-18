@@ -149,7 +149,6 @@ export default function StaffProfile({ staff, index, navigation }:{ staff:StaffD
   return <main className="profile-page">
     <div className="profile-dream-atmosphere" aria-hidden="true">
       <span className="profile-pearl pearl-one"/><span className="profile-pearl pearl-two"/><span className="profile-pearl pearl-three"/>
-      <span className="profile-coral"><i/><i/><i/><i/></span>
     </div>
     <motion.article key={currentStaff.id} className="profile-spread" initial={reduceMotion?{opacity:0}:{opacity:0,y:24}} animate={{opacity:1,y:0}} transition={{duration:.5,ease:[.22,1,.36,1]}}>
       <header className="profile-modal-head"><div><span>清醒夢 · PERSONNEL FILE</span><b>{currentStaff.displayName}</b></div><nav className="profile-switcher" aria-label="切換店員"><button onClick={()=>switchStaff(previous,"previous")} disabled={!previous} aria-label={`上一位${previous?`：${previous.displayName}`:""}`}><i>←</i><span>PREV</span><b>{previous?.displayName}</b></button><em>{String(currentIndex+1).padStart(2,"0")} / {String(navigation.total).padStart(2,"0")}</em><button onClick={()=>switchStaff(next,"next")} disabled={!next} aria-label={`下一位${next?`：${next.displayName}`:""}`}><span>NEXT</span><b>{next?.displayName}</b><i>→</i></button></nav><button className="back-to-staff" onClick={returnToRoster} aria-label="返回店員列表"><span className="back-label-wide">BACK TO STAFF</span><span className="back-label-short">LIST</span><i>←</i></button></header>

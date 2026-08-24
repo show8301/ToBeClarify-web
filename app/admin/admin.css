@@ -1124,3 +1124,31 @@
   .adminPreviewDossierScroll { overflow: visible; }
   .adminPreviewDutyStamp { right: 0; }
 }
+
+/* Avatar upload, compression, and 4:5 crop workspace. */
+.adminAvatarPicker { grid-column: 1 / -1; }
+.adminAvatarPreview { width: min(280px,100%); min-height: 0; aspect-ratio: 4 / 5; border-style: solid; }
+.adminAvatarPreview img { width: 100%; height: 100%; object-fit: cover; }
+.adminAvatarActions { flex-wrap: wrap; }
+.adminAvatarActions .adminButton { flex: 0 1 auto; }
+.adminButton.isDisabled { pointer-events: none; opacity: .55; }
+.adminAvatarStatus { color: #477077; }
+.adminAvatarError { color: #884c63; font-size: 11px; line-height: 1.55; }
+.adminAvatarCropDialog { width: min(760px,calc(100vw - 28px)); }
+.adminAvatarCropWorkspace { display: grid; gap: 16px; }
+.adminAvatarCropStage { position: relative; width: 100%; height: min(56vh,540px); min-height: 360px; overflow: hidden; border: 1px solid rgba(255,255,255,.9); border-radius: 18px; background: #31334a; box-shadow: inset 0 0 0 1px rgba(49,51,74,.18); }
+.adminAvatarZoomControl { display: grid; grid-template-columns: auto minmax(0,1fr) 54px; align-items: center; gap: 13px; color: #4f5575; font-size: 12px; font-weight: 700; }
+.adminAvatarZoomControl input { width: 100%; accent-color: #8ba7ca; }
+.adminAvatarZoomControl output { font: 700 11px/1 var(--font-mono); text-align: right; }
+.adminAvatarCropWorkspace > p { margin: 0; color: rgba(49,51,74,.62); font-size: 12px; line-height: 1.6; }
+.adminServiceToggleFields { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 12px 24px; padding: 8px 12px; border: 1px solid rgba(255,255,255,.82); border-radius: 13px; background: rgba(255,255,255,.3); }
+.adminPreviewServiceGrid article div > em { display: inline-flex; margin-top: 7px; padding: 4px 7px; border: 1px solid rgba(139,167,202,.35); border-radius: 999px; color: #65789f; font: normal 700 7px/1 var(--font-mono); letter-spacing: .08em; }
+
+@media (max-width: 720px) {
+  .adminAvatarPreview { width: 100%; max-width: 320px; }
+  .adminAvatarActions { display: grid; grid-template-columns: 1fr 1fr; }
+  .adminAvatarActions .adminButton { width: 100%; }
+  .adminAvatarActions .adminButton-danger { grid-column: 1 / -1; }
+  .adminAvatarCropDialog { width: calc(100vw - 18px); }
+  .adminAvatarCropStage { height: min(52vh,460px); min-height: 300px; }
+}

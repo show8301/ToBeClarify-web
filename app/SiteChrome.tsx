@@ -11,7 +11,7 @@ const resolvePath = (path:string) => pathAliases[path] ?? path;
 export default function SiteChrome({navigation,shopInfo,children}:{navigation:NavigationItem[];shopInfo:ShopInfo;children:React.ReactNode}) {
   const [open,setOpen] = useState(false);
   const [leaving,setLeaving] = useState<string|null>(null);
-  const [showFloatingMenu,setShowFloatingMenu] = useState(false);
+  const [showFloatingTop,setShowFloatingTop] = useState(false);
   const navigationTimer = useRef<ReturnType<typeof window.setTimeout>|null>(null);
   const navigationWatchdog = useRef<ReturnType<typeof window.setTimeout>|null>(null);
   const pathname = usePathname();
@@ -44,13 +44,13 @@ export default function SiteChrome({navigation,shopInfo,children}:{navigation:Na
     };
   }, [clearNavigation]);
   useEffect(() => {
-    const updateFloatingMenu = () => setShowFloatingMenu(window.scrollY > Math.min(260, window.innerHeight * .34));
-    updateFloatingMenu();
-    window.addEventListener("scroll", updateFloatingMenu, {passive:true});
-    window.addEventListener("resize", updateFloatingMenu);
+    const updateFloatingTop = () => setShowFloatingTop(window.scrollY > Math.min(260, window.innerHeight * .34));
+    updateFloatingTop();
+    window.addEventListener("scroll", updateFloatingTop, {passive:true});
+    window.addEventListener("resize", updateFloatingTop);
     return () => {
-      window.removeEventListener("scroll", updateFloatingMenu);
-      window.removeEventListener("resize", updateFloatingMenu);
+      window.removeEventListener("scroll", updateFloatingTop);
+      window.removeEventListener("resize", updateFloatingTop);
     };
   }, []);
   useEffect(() => {
@@ -91,17 +91,15 @@ export default function SiteChrome({navigation,shopInfo,children}:{navigation:Na
       <span className="site-header-note">WAKING DREAM · EORZEA SALON</span>
       <button className={`site-menu-toggle${open?" is-open":""}`} onClick={()=>setOpen(value=>!value)} aria-expanded={open} aria-controls="site-navigation"><span/><span/><b>{open?"CLOSE":"MENU"}</b></button>
     </header>
-    <nav id="site-navigation" className={`site-navigation${open?" is-open":""}${showFloatingMenu?" is-detached":""}`} aria-label="主要導覽">
+    <nav id="site-navigation" className={`site-navigation${open?" is-open":""}`} aria-label="主要導覽">
       <a className={pathname==="/"?"active":""} href="/" onClick={(event)=>navigate(event,"/")}><i>00</i><span>首頁</span></a>
       {items.map((item,index)=>{const href=resolvePath(item.routePath);return <a className={pathname===href?"active":""} href={href} onClick={(event)=>navigate(event,href)} key={item.id}><i>{String(index+1).padStart(2,"0")}</i><span>{item.label}</span></a>})}
     </nav>
     <button
-      className={`site-floating-menu${showFloatingMenu?" is-visible":""}${open?" is-open":""}`}
-      onClick={()=>setOpen(value=>!value)}
-      aria-expanded={open}
-      aria-controls="site-navigation"
-      aria-label={open?"關閉主選單":"開啟主選單"}
-    ><span/><span/><b>{open?"CLOSE":"MENU"}</b></button>
+      className={`site-floating-top${showFloatingTop?" is-visible":""}`}
+      onClick={()=>window.scrollTo({top:0,behavior:reduceMotion?"auto":"smooth"})}
+      aria-label="回到頁面頂端"
+    ><span aria-hidden="true">↑</span><b>TOP</b></button>
     <main className="site-content">{children}</main>
     <footer className="site-footer">
       <div><span>LUCID DREAM · EORZEA</span><strong>{shopInfo.name||"清醒夢"}</strong><p>{shopInfo.footerText}</p></div>

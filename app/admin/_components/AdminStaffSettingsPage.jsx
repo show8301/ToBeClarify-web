@@ -14,13 +14,57 @@ const emptyStaff = {
   sortOrder: 0, isActive: true, services: [], gallery: [],
 };
 
+function optionalNumber(value) {
+  if (value === '' || value === null || value === undefined) return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function priceFromText(value) {
+  const match = String(value || '').match(/([\d,]+)\s*(?:gil|g)(?:\b|$)/i);
+  return match ? Number(match[1].replaceAll(',', '')) : '';
+}
+
+function durationFromText(value) {
+  const match = String(value || '').match(/(\d+)\s*(?:min|分鐘)/i);
+  return match ? Number(match[1]) : '';
+}
+
+function toServiceEditor(item) {
+  return {
+    ...item,
+    price: item.price ?? priceFromText(item.priceText),
+    durationMinutes: item.durationMinutes ?? item.duration ?? durationFromText(item.priceText),
+    isNominatable: item.isNominatable ?? item.canNominate ?? true,
+  };
+}
+
+function servicePriceText(item) {
+  const price = optionalNumber(item.price);
+  const duration = optionalNumber(item.durationMinutes);
+  if (price !== null) return `${price.toLocaleString('en-US')} Gil${duration !== null ? ` / ${duration} min` : ''}`;
+  if (duration !== null) return `${duration} min`;
+  return item.priceText || '';
+}
+
+function serviceMeta(item) {
+  const price = optionalNumber(item.price);
+  const duration = optionalNumber(item.durationMinutes);
+  return [
+    item.serviceType === 'common' ? '一般服務' : '特殊服務',
+    price !== null ? `${price.toLocaleString('en-US')} Gil` : (item.priceText || '未設定價格'),
+    duration !== null ? `${duration} 分鐘` : '未設定時間',
+    item.isNominatable === false ? '不可指名' : '可指名',
+  ].join(' · ');
+}
+
 function toEditor(value) {
   return {
     ...emptyStaff,
     ...value,
     avatarFile: null,
     avatarPreviewUrl: '',
-    services: (value.services || []).map((item) => ({ ...item })),
+    services: (value.services || []).map(toServiceEditor),
     gallery: (value.gallery || []).map((item) => ({ ...item, _file: null, _previewUrl: '' })),
   };
 }
@@ -203,9 +247,11 @@ export function AdminStaffSettingsPage() {
       !['common', 'special'].includes(item.serviceType)
       || !item.serviceName?.trim()
       || !item.serviceDescription?.trim()
+      || (optionalNumber(item.price) !== null && optionalNumber(item.price) < 0)
+      || (optionalNumber(item.durationMinutes) !== null && optionalNumber(item.durationMinutes) < 0)
     ));
     if (invalidService) {
-      setMessage('請先完成服務的類型、名稱與說明，或移除尚未完成的服務。');
+      setMessage('請先完成服務的類型、名稱與說明，並確認價格與時間不可小於 0。');
       return;
     }
     setSaving(true);
@@ -246,12 +292,24 @@ export function AdminStaffSettingsPage() {
         isActive: form.isActive,
         services: form.services.map((item) => ({
           id: item.id?.startsWith('local-') ? null : item.id, serviceType: item.serviceType,
-          serviceName: item.serviceName, serviceDescription: item.serviceDescription, priceText: item.priceText || null,
+          serviceName: item.serviceName, serviceDescription: item.serviceDescription,
+          priceText: servicePriceText(item) || null,
+          price: optionalNumber(item.price), durationMinutes: optionalNumber(item.durationMinutes),
+          isNominatable: item.isNominatable !== false,
           sortOrder: Number(item.sortOrder) || 0, isEnabled: item.isEnabled,
         })),
         gallery,
       });
-      setForm(toEditor(saved));
+      const savedWithFrontendServiceFields = {
+        ...saved,
+        services: (saved.services || []).map((item, index) => ({
+          ...item,
+          price: item.price ?? form.services[index]?.price ?? '',
+          durationMinutes: item.durationMinutes ?? form.services[index]?.durationMinutes ?? '',
+          isNominatable: item.isNominatable ?? form.services[index]?.isNominatable ?? true,
+        })),
+      };
+      setForm(toEditor(savedWithFrontendServiceFields));
       setStaffList((current) => current.map((item) => item.id === saved.id ? saved : item));
       setMessage('店員資料已儲存。');
     } catch (error) {
@@ -280,8 +338,10 @@ export function AdminStaffSettingsPage() {
     if (!editingService || !canEditSelected) return;
     if (!['common', 'special'].includes(editingService.serviceType)
       || !editingService.serviceName?.trim()
-      || !editingService.serviceDescription?.trim()) {
-      setMessage('請填寫服務的類型、服務名稱與說明。');
+      || !editingService.serviceDescription?.trim()
+      || (optionalNumber(editingService.price) !== null && optionalNumber(editingService.price) < 0)
+      || (optionalNumber(editingService.durationMinutes) !== null && optionalNumber(editingService.durationMinutes) < 0)) {
+      setMessage('請填寫服務的類型、服務名稱與說明；價格與時間不可小於 0。');
       return;
     }
     setForm((current) => ({ ...current, services: current.services.map((item) => item.id === editingService.id ? editingService : item) }));
@@ -376,12 +436,12 @@ export function AdminStaffSettingsPage() {
                 <AdminField label="角色標籤"><input disabled={isReadOnly} value={form.roleTitle || ''} onChange={(event) => update('roleTitle', event.target.value)} /></AdminField>
                 <AdminField label="卡片簡介" className="span-2" required><textarea required disabled={isReadOnly} rows="3" value={form.shortBio || ''} onChange={(event) => update('shortBio', event.target.value)} /></AdminField>
                 <AdminField label="詳細介紹" className="span-2"><textarea disabled={isReadOnly} rows="7" value={form.profileBio || ''} onChange={(event) => update('profileBio', event.target.value)} /></AdminField>
-                <AdminAvatarPicker label="頭像" value={form.avatarUrl} pendingFile={form.avatarFile} hint="選取圖片後會立即顯示於右側預覽，儲存時才上傳。" disabled={isReadOnly} onChange={updateAvatarFile} onClear={() => { update('avatarFile', null); update('avatarPreviewUrl', ''); update('avatarUrl', ''); update('avatarMediaId', null); }} />
+                <AdminAvatarPicker label="頭像" value={form.avatarUrl} pendingFile={form.avatarFile} hint="上傳時會先壓縮；調整圖片可裁切新上傳或資料庫中的原始頭像。儲存店員資料後才會正式上傳。" disabled={isReadOnly} onChange={updateAvatarFile} onClear={() => { update('avatarFile', null); update('avatarPreviewUrl', ''); update('avatarUrl', ''); update('avatarMediaId', null); }} />
               </div>
             </AdminPanel>
 
-            <AdminPanel title="服務內容" description={canManageAll ? '拖曳卡片調整服務順序；右側開關會加入或移除公開顯示。' : '可查看服務內容；只有自己的資料可以修改。'} actions={canEditSelected ? <AdminButton variant="secondary" onClick={() => { const item = { id: newId(), serviceType: 'special', serviceName: '', serviceDescription: '', priceText: '', sortOrder: form.services.length, isEnabled: true }; update('services', [...form.services, item]); setEditingService(item); }}>新增服務</AdminButton> : null}>
-              <AdminDragList items={form.services} canDrag={canManageAll} onReorder={(items) => canEditSelected && update('services', items)} onItemClick={(item) => setEditingService({ ...item })} renderItem={(item) => <><div><strong>{item.serviceName || '未命名服務'}</strong><small>{item.serviceType === 'common' ? '一般服務' : '特殊服務'} · {item.priceText || '未設定價格'}</small></div><div className="adminDragCardMeta" onClick={(event) => event.stopPropagation()}><AdminToggle checked={item.isEnabled} disabled={!canEditSelected} onChange={(value) => update('services', form.services.map((service) => service.id === item.id ? { ...service, isEnabled: value } : service))} label="" ariaLabel={`切換${item.serviceName || '此服務'}啟用狀態`} />{canEditSelected ? <AdminButton variant="danger" onClick={() => update('services', form.services.filter((service) => service.id !== item.id))}>刪除</AdminButton> : null}</div></>} emptyText="尚無服務內容。" />
+            <AdminPanel title="服務內容" description={canManageAll ? '拖曳卡片調整服務順序；右側開關會加入或移除公開顯示。' : '可查看服務內容；只有自己的資料可以修改。'} actions={canEditSelected ? <AdminButton variant="secondary" onClick={() => { const item = { id: newId(), serviceType: 'special', serviceName: '', serviceDescription: '', priceText: '', price: '', durationMinutes: '', isNominatable: true, sortOrder: form.services.length, isEnabled: true }; update('services', [...form.services, item]); setEditingService(item); }}>新增服務</AdminButton> : null}>
+              <AdminDragList items={form.services} canDrag={canManageAll} onReorder={(items) => canEditSelected && update('services', items)} onItemClick={(item) => setEditingService({ ...item })} renderItem={(item) => <><div><strong>{item.serviceName || '未命名服務'}</strong><small>{serviceMeta(item)}</small></div><div className="adminDragCardMeta" onClick={(event) => event.stopPropagation()}><AdminToggle checked={item.isEnabled} disabled={!canEditSelected} onChange={(value) => update('services', form.services.map((service) => service.id === item.id ? { ...service, isEnabled: value } : service))} label="" ariaLabel={`切換${item.serviceName || '此服務'}啟用狀態`} />{canEditSelected ? <AdminButton variant="danger" onClick={() => update('services', form.services.filter((service) => service.id !== item.id))}>刪除</AdminButton> : null}</div></>} emptyText="尚無服務內容。" />
             </AdminPanel>
 
             <AdminPanel title="店員相簿" description={canManageAll ? '拖曳卡片調整相簿順序；圖片預覽已放大。' : '可查看相簿內容；只有自己的資料可以修改。'} actions={canEditSelected ? <AdminButton variant="secondary" onClick={() => { const item = { id: newId(), mediaId: null, imageUrl: '', sortOrder: form.gallery.length, isPublished: true, _file: null }; update('gallery', [...form.gallery, item]); setEditingGallery(item); }}>新增圖片</AdminButton> : null}>
@@ -398,7 +458,17 @@ export function AdminStaffSettingsPage() {
       </AdminDialog>
 
       <AdminDialog open={Boolean(editingService)} title={editingService?.serviceName || '查看服務'} description={canEditSelected ? '服務啟用狀態也可以直接在服務列表右側切換。' : '目前為唯讀模式。'} onClose={() => setEditingService(null)} actions={<><AdminButton variant="ghost" onClick={() => setEditingService(null)}>關閉</AdminButton>{canEditSelected ? <AdminButton onClick={saveServiceEditor}>完成編輯</AdminButton> : null}</>}>
-        {editingService ? <><div className="adminNotice adminDialogNotice" role="alert">{message || '標示 * 的欄位為必填。'}</div><div className="adminFormGrid"><AdminField label="類型" required><select required disabled={!canEditSelected} value={editingService.serviceType} onChange={(event) => setEditingService((current) => ({ ...current, serviceType: event.target.value }))}><option value="common">一般</option><option value="special">特殊</option></select></AdminField><AdminField label="服務名稱" required><input required disabled={!canEditSelected} value={editingService.serviceName} onChange={(event) => setEditingService((current) => ({ ...current, serviceName: event.target.value }))} autoFocus /></AdminField><AdminField label="價格文字"><input disabled={!canEditSelected} value={editingService.priceText || ''} onChange={(event) => setEditingService((current) => ({ ...current, priceText: event.target.value }))} /></AdminField><AdminField label="說明" className="span-2" required><textarea required disabled={!canEditSelected} rows="5" value={editingService.serviceDescription} onChange={(event) => setEditingService((current) => ({ ...current, serviceDescription: event.target.value }))} /></AdminField><div className="adminFormWide"><AdminToggle checked={editingService.isEnabled} disabled={!canEditSelected} onChange={(value) => setEditingService((current) => ({ ...current, isEnabled: value }))} /></div></div></> : null}
+        {editingService ? <>
+          <div className="adminNotice adminDialogNotice" role="alert">{message || '標示 * 的欄位為必填。價格、時間與可指名目前先作為前端欄位。'}</div>
+          <div className="adminFormGrid">
+            <AdminField label="類型" required><select required disabled={!canEditSelected} value={editingService.serviceType} onChange={(event) => setEditingService((current) => ({ ...current, serviceType: event.target.value }))}><option value="common">一般</option><option value="special">特殊</option></select></AdminField>
+            <AdminField label="服務名稱" required><input required disabled={!canEditSelected} value={editingService.serviceName} onChange={(event) => setEditingService((current) => ({ ...current, serviceName: event.target.value }))} autoFocus /></AdminField>
+            <AdminField label="價格"><input type="number" min="0" step="1" inputMode="numeric" disabled={!canEditSelected} value={editingService.price ?? ''} onChange={(event) => setEditingService((current) => ({ ...current, price: event.target.value === '' ? '' : Number(event.target.value) }))} /><small>單位：Gil</small></AdminField>
+            <AdminField label="時間"><input type="number" min="0" step="5" inputMode="numeric" disabled={!canEditSelected} value={editingService.durationMinutes ?? ''} onChange={(event) => setEditingService((current) => ({ ...current, durationMinutes: event.target.value === '' ? '' : Number(event.target.value) }))} /><small>單位：分鐘</small></AdminField>
+            <AdminField label="說明" className="span-2" required><textarea required disabled={!canEditSelected} rows="5" value={editingService.serviceDescription} onChange={(event) => setEditingService((current) => ({ ...current, serviceDescription: event.target.value }))} /></AdminField>
+            <div className="adminServiceToggleFields"><AdminToggle checked={editingService.isNominatable !== false} disabled={!canEditSelected} onChange={(value) => setEditingService((current) => ({ ...current, isNominatable: value }))} label="可指名" /><AdminToggle checked={editingService.isEnabled} disabled={!canEditSelected} onChange={(value) => setEditingService((current) => ({ ...current, isEnabled: value }))} label="公開顯示" /></div>
+          </div>
+        </> : null}
       </AdminDialog>
 
       <AdminDialog open={Boolean(editingGallery)} title="編輯店員相簿圖片" description={canEditSelected ? '選擇圖片後會先套用到編輯草稿；按下店員資料儲存後才會上傳。' : '目前為唯讀模式。'} onClose={canEditSelected ? saveGalleryEditor : cancelGalleryEditor} actions={<><AdminButton variant="ghost" onClick={cancelGalleryEditor}>取消</AdminButton>{canEditSelected ? <AdminButton onClick={saveGalleryEditor}>套用圖片</AdminButton> : null}</>}>
@@ -431,6 +501,7 @@ function StaffPublicCard({ form, navigation }) {
   const role = form.roleTitle || 'DREAM STAFF';
   const avatarUrl = form.avatarPreviewUrl || form.avatarUrl;
   const services = form.services.filter((item) => item.isEnabled);
+  const isNominatable = services.some((item) => item.isNominatable !== false);
   return <article className={`adminRosterCardPreview ${form.isActive ? '' : 'isHidden'}`.trim()}>
     <div className="adminRosterCardPhoto">
       {avatarUrl ? <img src={avatarUrl} alt="" /> : <div className="adminPreviewImageFallback">尚無頭像</div>}
@@ -438,7 +509,7 @@ function StaffPublicCard({ form, navigation }) {
     </div>
     <div className="adminRosterStatusBar">
       <span className={`adminRosterDuty ${form.isWorkingToday ? 'isOnline' : ''}`}><i /><small>{form.isWorkingToday ? 'ON DUTY' : 'OFF DUTY'}<b>{form.statusText || (form.isWorkingToday ? '待命中' : '未排班')}</b></small></span>
-      <span className="adminRosterNomination">✦ 可以指名</span>
+      <span className="adminRosterNomination">✦ {isNominatable ? '可以指名' : '暫不開放指名'}</span>
       <strong>{navigation.number}</strong>
     </div>
     <div className="adminRosterCardBody">
@@ -491,7 +562,11 @@ function StaffDetailPreview({ form, navigation, imageIndex = 0, onImageChange, o
         </section>
         <section>
           <header><b>服務項目</b><span>{services.length} SERVICES</span></header>
-          <div className="adminPreviewServiceGrid">{services.map((item, index) => <article key={item.id}><span>{String(index + 1).padStart(2, '0')}</span><div><h3>{item.serviceName}</h3><p>{item.serviceDescription}</p></div>{item.priceText ? <b>{item.priceText}</b> : null}</article>)}</div>
+          <div className="adminPreviewServiceGrid">{services.map((item, index) => <article key={item.id}>
+            <span>{String(index + 1).padStart(2, '0')}</span>
+            <div><h3>{item.serviceName}</h3><p>{item.serviceDescription}</p><em>{item.isNominatable === false ? '不可指名' : '可指名'}</em></div>
+            {servicePriceText(item) ? <b>{servicePriceText(item)}</b> : null}
+          </article>)}</div>
         </section>
       </div>
       <footer><span>RECORD ID　·　{String(form.id || '').slice(0, 13)}</span><b>LUCID DREAM　✦</b></footer>

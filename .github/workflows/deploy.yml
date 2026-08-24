@@ -46,3 +46,27 @@ jobs:
           path: dist
           if-no-files-found: error
           retention-days: 7
+
+  deploy:
+    name: Deploy to IIS
+    if: github.event_name == 'workflow_dispatch'
+    needs: build
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout deployment script
+        uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: tobeclarify-web-dist
+          path: ${{ runner.temp }}\tobeclarify-web-dist
+
+      - name: Deploy Web files
+        shell: powershell
+        env:
+          ARTIFACT_PATH: ${{ runner.temp }}\tobeclarify-web-dist
+          DEPLOY_PATH: ${{ vars.WEB_DEPLOY_PATH }}
+        run: .\scripts\deploy-iis.ps1 -ArtifactPath $env:ARTIFACT_PATH -DeployPath $env:DEPLOY_PATH

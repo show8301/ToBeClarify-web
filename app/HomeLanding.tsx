@@ -55,7 +55,7 @@ export default function HomeLanding({home}:{home:HomeData}){
     </section>
 
     <section className="home-pricing">
-      <header><div><span>FIRST VISIT GUIDE</span><h2>入夢方式</h2></div><p>{home.shopInfo.entryNote}</p></header>
+      <header><div><span>FIRST VISIT GUIDE</span><h2>入夢指南</h2></div><p>{home.shopInfo.entryNote}</p></header>
       <div>{home.shopInfo.pricing.map((item,index)=><motion.article key={item.name} initial={reduceMotion?false:{opacity:0,y:24}} whileInView={{opacity:1,y:0}} viewport={{once:true,amount:.25}} transition={{delay:index*.08}}><span>{String(index+1).padStart(2,"0")}</span><h3>{item.name}</h3><b>{item.price}</b><i>{index===0?"ENTRY":index===1?"COMPANY":"PRIVATE"}</i></motion.article>)}</div>
     </section>
 
@@ -65,7 +65,7 @@ export default function HomeLanding({home}:{home:HomeData}){
     </section>}
 
     <section className="home-rules">
-      <header><span>HOUSE ETIQUETTE</span><h2>讓每一場夢<br/>都值得珍藏</h2><p>入場前請先理解彼此的界線。角色互動建立於尊重、同意與舒適節奏之上。</p></header>
+      <header><span>HOUSE ETIQUETTE</span><h2>每一場夢<br/>都值得珍藏</h2><p>入場前請先理解彼此的界線。角色互動建立於尊重、同意與舒適節奏之上。</p></header>
       <ol>{home.shopRules.map((rule,index)=><li key={rule.id}><span>{String(index+1).padStart(2,"0")}</span><div><p>{rule.ruleText}</p>{rule.ruleNote&&<small>{rule.ruleNote}</small>}</div></li>)}</ol>
     </section>
 

@@ -35,6 +35,17 @@ test("server-renders the Lucid Dream public routes", async () => {
   }
 });
 
+test("server-renders every addressable admin route", async () => {
+  for (const path of ["/admin", "/admin/login", "/admin/home", "/admin/staff", "/admin/events", "/admin/menu"]) {
+    const response = await render(path);
+    assert.equal(response.status, 200, `${path} should render`);
+    assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
+    const html = await response.text();
+    assert.match(html, /正在確認後台通行資格/);
+    assert.doesNotMatch(html, /codex-preview|_sites-preview/i);
+  }
+});
+
 test("renders route-addressable gallery content over the archive", async () => {
   const snapshot = JSON.parse(await readFile(new URL("../app/data/site-snapshot.json", import.meta.url), "utf8"));
   const album = snapshot.albums[0];

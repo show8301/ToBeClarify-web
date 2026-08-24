@@ -3,7 +3,10 @@ param(
     [string]$ArtifactPath,
 
     [Parameter(Mandatory = $true)]
-    [string]$DeployPath
+    [string]$DeployPath,
+
+    [Parameter(Mandatory = $true)]
+    [string]$HealthCheckUrl
 )
 
 Set-StrictMode -Version Latest
@@ -54,7 +57,20 @@ try {
         throw 'Deployment verification failed because index.html is missing.'
     }
 
-    Write-Host "Web deployment completed: $deployRoot"
+    if ([string]::IsNullOrWhiteSpace($HealthCheckUrl)) {
+        throw 'WEB_HEALTHCHECK_URL is not configured.'
+    }
+
+    $separator = if ($HealthCheckUrl.Contains('?')) { '&' } else { '?' }
+    $cacheBuster = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+    $checkUrl = "$HealthCheckUrl${separator}deploymentCheck=$cacheBuster"
+    $response = Invoke-WebRequest -Uri $checkUrl -UseBasicParsing -TimeoutSec 30
+
+    if ($response.StatusCode -lt 200 -or $response.StatusCode -ge 400) {
+        throw "Web health check failed with HTTP $($response.StatusCode): $HealthCheckUrl"
+    }
+
+    Write-Host "Web deployment and health check completed: $deployRoot"
 }
 catch {
     Write-Warning 'Web deployment failed. Restoring the previous files.'

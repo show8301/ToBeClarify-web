@@ -1,19 +1,20 @@
-name: Deploy GitHub Pages
+name: Web CI/CD
 
 on:
   push:
+    branches:
+      - main
+  pull_request:
     branches:
       - main
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
-  cancel-in-progress: false
+  group: web-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -33,22 +34,15 @@ jobs:
         run: npm ci
 
       - name: Build
+        env:
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          VITE_ADMIN_API_BASE_URL: ${{ vars.VITE_ADMIN_API_BASE_URL }}
         run: npm run build
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
         with:
+          name: tobeclarify-web-dist
           path: dist
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          if-no-files-found: error
+          retention-days: 7

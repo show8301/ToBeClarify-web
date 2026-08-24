@@ -4,6 +4,7 @@ import {
   AdminButton, AdminDialog, AdminDragList, AdminField, AdminImagePicker, AdminPage, AdminPanel, AdminState, AdminToggle,
   newId,
 } from './AdminShared.jsx';
+import { cleanupAdminMedia } from './adminMedia.js';
 
 const tabs = [['pricing', '消費規則'], ['categories', '分類'], ['items', '餐點品項'], ['sets', '套餐']];
 const emptyPricing = { id: '', title: '', description: '', priceText: '', sortOrder: 0, isEnabled: true };
@@ -55,6 +56,7 @@ export function AdminMenuPage() {
     if (!editing) return;
     setSaving(true);
     setMessage('');
+    const uploadedMediaIds = [];
     try {
       const { type, form } = editing;
       let saved;
@@ -71,6 +73,7 @@ export function AdminMenuPage() {
         let imageUrl = form.imageUrl || null;
         if (form.imageFile) {
           const uploaded = await adminApi.uploadMedia(form.imageFile, 'menu');
+          uploadedMediaIds.push(uploaded.id);
           mediaId = uploaded.id;
           imageUrl = uploaded.url;
         }
@@ -86,6 +89,7 @@ export function AdminMenuPage() {
         let imageUrl = form.imageUrl || null;
         if (form.imageFile) {
           const uploaded = await adminApi.uploadMedia(form.imageFile, 'menu');
+          uploadedMediaIds.push(uploaded.id);
           mediaId = uploaded.id;
           imageUrl = uploaded.url;
         }
@@ -95,6 +99,7 @@ export function AdminMenuPage() {
       setEditing(null);
       setMessage('菜單資料已儲存。');
     } catch (error) {
+      await cleanupAdminMedia(uploadedMediaIds);
       setMessage(error.message);
     } finally {
       setSaving(false);
@@ -148,7 +153,7 @@ export function AdminMenuPage() {
 
   const currentLabel = tabs.find(([id]) => id === tab)?.[1] || '';
   return (
-    <AdminPage eyebrow="Salon Menu" title="菜單設定" description="管理消費規則、菜單分類、餐點品項與套餐組合。所有排序統一使用拖曳卡片，點擊卡片開啟編輯。" actions={<><AdminButton variant="secondary" onClick={create}>新增{currentLabel}</AdminButton><AdminButton onClick={saveOrder} disabled={!orderDirty || saving}>{saving ? '儲存中…' : '儲存排序'}</AdminButton></>}>
+    <AdminPage eyebrow="Dream Menu" title="菜單設定" description="管理消費規則、菜單分類、餐點品項與套餐組合。所有排序統一使用拖曳卡片，點擊卡片開啟編輯。" actions={<><AdminButton variant="secondary" onClick={create}>新增{currentLabel}</AdminButton><AdminButton onClick={saveOrder} disabled={!orderDirty || saving}>{saving ? '儲存中…' : '儲存排序'}</AdminButton></>}>
       {message ? <div className="adminNotice">{message}</div> : null}
       <div className="adminTabs">{tabs.map(([id, label]) => <button type="button" key={id} className={tab === id ? 'isActive' : ''} onClick={() => setTab(id)}>{label}</button>)}</div>
       <AdminState loading={state.loading} error={state.error} onRetry={load} />

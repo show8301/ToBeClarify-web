@@ -22,7 +22,7 @@ export function adaptNavigation(items = []) {
 export function adaptStaff(staff, detail = false) {
   return {
     id: staff.id,
-    nickname: staff.nickname || staff.displayName,
+    nickname: staff.nickname || '',
     displayName: staff.displayName,
     role: staff.roleTitle || '',
     isWorkingToday: staff.isWorkingToday !== false,

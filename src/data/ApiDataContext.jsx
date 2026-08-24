@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { adaptGalleryAlbum, adaptNavigation, adaptStaff } from '../api/adapters.js';
+import { adaptNavigation } from '../api/adapters.js';
 import { clientApi } from '../api/client.js';
 
 const ApiDataContext = createContext(null);
@@ -10,12 +10,8 @@ export function ApiDataProvider({ children }) {
   const load = useCallback(async (signal) => {
     setState((current) => ({ ...current, loading: true, error: null }));
     try {
-      const [home, albums] = await Promise.all([
-        clientApi.getHome(signal),
-        clientApi.getGalleryAlbums(signal),
-      ]);
-      const reports = await Promise.all(albums.map((album) => clientApi.getGalleryAlbum(album.id, signal)));
-      setState({ loading: false, error: null, data: { home, reports } });
+      const home = await clientApi.getHome(signal);
+      setState({ loading: false, error: null, data: { home } });
     } catch (error) {
       if (error.name !== 'AbortError') setState({ loading: false, error, data: null });
     }
@@ -31,25 +27,18 @@ export function ApiDataProvider({ children }) {
 
   const value = useMemo(() => {
     if (!state.data) return { ...state, reload };
-    const { home, reports } = state.data;
-      const settings = Object.fromEntries((home.siteSettings || []).map((item) => [item.settingKey, item.settingValue]));
-    const adaptedReports = reports.map(adaptGalleryAlbum);
-    const reportById = new Map(adaptedReports.map((report) => [report.id, report]));
+    const { home } = state.data;
+    const settings = Object.fromEntries((home.siteSettings || []).map((item) => [item.settingKey, item.settingValue]));
     const carouselReports = (home.carousels || [])
-      .map((carousel) => {
-        const report = reportById.get(carousel.albumId);
-        if (report) {
-          return {
-            ...report,
-            title: carousel.title || report.title,
-            summary: carousel.summary || report.description,
-            imageUrl: carousel.imageUrl || report.imageUrl,
-            period: carousel.eventTime || report.period,
-          };
-        }
-        return null;
-      })
-      .filter(Boolean);
+      .filter((carousel) => carousel.albumExists !== false)
+      .map((carousel) => ({
+        id: carousel.id,
+        albumId: carousel.albumId,
+        title: carousel.title,
+        summary: carousel.summary || '',
+        imageUrl: carousel.imageUrl,
+        period: carousel.eventTime || '',
+      }));
 
     return {
       loading: state.loading,
@@ -60,8 +49,6 @@ export function ApiDataProvider({ children }) {
       liveUpdateConfig: settings.liveUpdateConfig || {},
       navigationItems: adaptNavigation(home.navigation),
       shopRules: (home.shopRules || []).map((rule) => rule.ruleText),
-      staffMembers: (home.staff || []).map((staff) => adaptStaff(staff)),
-      reports: adaptedReports,
       carouselReports,
     };
   }, [reload, state]);

@@ -71,7 +71,11 @@ function clampVisibleRange(start, end, minTime, maxTime) {
 }
 
 export function LiveUpdatePage() {
-  const { liveUpdateConfig, staffMembers } = useApiData();
+  const { liveUpdateConfig } = useApiData();
+  const staffResource = useApiResource(async (signal) => (
+    await clientApi.getStaffMembers(signal)
+  ).map((staff) => adaptStaff(staff)), []);
+  const staffMembers = staffResource.data || [];
   const [selectedStaff, setSelectedStaff] = useState(null);
   const [detailError, setDetailError] = useState(null);
   const baseDate = useMemo(() => new Date(liveUpdateConfig.lastUpdatedAt || Date.now()), [liveUpdateConfig.lastUpdatedAt]);
@@ -127,7 +131,7 @@ export function LiveUpdatePage() {
     () =>
       workingStaffRows.map(({ staff, label, status }) => ({
         id: staff.id,
-        title: staff.nickname,
+        title: staff.displayName || staff.nickname,
         label,
         status,
         avatarUrl: staff.avatarUrl,
@@ -195,12 +199,13 @@ export function LiveUpdatePage() {
       title="店舖動態"
       intro="即時展示今日店員預約時間軸與上班狀態。此頁僅供瀏覽，不提供操作。"
     >
-      <section className="liveHeader">
-        <p>最後更新時間</p>
-        <strong>{formatLiveTime(liveUpdateConfig.lastUpdatedAt || Date.now())}</strong>
-      </section>
+      <ApiState loading={staffResource.loading} error={staffResource.error} onRetry={staffResource.reload}>
+        <section className="liveHeader">
+          <p>最後更新時間</p>
+          <strong>{formatLiveTime(liveUpdateConfig.lastUpdatedAt || Date.now())}</strong>
+        </section>
 
-      <section className="staffStatusSection">
+        <section className="staffStatusSection">
         <div className="sectionTitle">
           <p className="eyebrow">Staff Status</p>
           <h2>店員狀態</h2>
@@ -213,15 +218,15 @@ export function LiveUpdatePage() {
               key={staff.id}
               onClick={() => selectStaff(staff)}
             >
-              <ImageWithLoading src={staff.avatarUrl} alt={`${staff.nickname} 頭貼`} />
-              <span>{staff.nickname}</span>
+              <ImageWithLoading src={staff.avatarUrl} alt={`${staff.displayName || staff.nickname} 頭貼`} />
+              <span>{staff.displayName || staff.nickname}</span>
               <StatusBadge tone={statusTone(status)}>{label}</StatusBadge>
             </button>
           ))}
         </div>
-      </section>
+        </section>
 
-      <ApiState loading={reservationResource.loading} error={reservationResource.error} onRetry={reservationResource.reload}>
+        <ApiState loading={reservationResource.loading} error={reservationResource.error} onRetry={reservationResource.reload}>
         <section className="bookingTimelineSection">
         <div className="sectionTitle">
           <p className="eyebrow">Reservation Timeline</p>
@@ -278,7 +283,7 @@ export function LiveUpdatePage() {
           {compactScheduleRows.map(({ staff, dotStatus, reservations, statusLabel }) => (
             <article className="compactScheduleRow" key={staff.id}>
               <div className="compactScheduleStaff">
-                <strong>{staff.nickname}</strong>
+                <strong>{staff.displayName || staff.nickname}</strong>
                 <span className={`scheduleStatusDot ${dotStatus}`} aria-label={statusLabel} />
               </div>
               <div className="compactScheduleTimes">
@@ -296,6 +301,7 @@ export function LiveUpdatePage() {
           ))}
         </div>
         </section>
+        </ApiState>
       </ApiState>
 
       {detailError ? <p className="inlineApiError" role="alert">{detailError.message}</p> : null}

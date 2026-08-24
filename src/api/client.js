@@ -61,6 +61,7 @@ function queryString(params) {
 
 export const clientApi = {
   getHome: (signal) => request('/home', { signal }),
+  getStaffMembers: (signal) => request('/staff-members', { signal }),
   getStaffDetail: (id, signal) => request(`/staff-members/${encodeURIComponent(id)}`, { signal }),
   getGalleryAlbums: (signal) => request('/gallery-albums', { signal }),
   getGalleryAlbum: (id, signal) => request(`/gallery-albums/${encodeURIComponent(id)}`, { signal }),
@@ -106,6 +107,9 @@ export const adminApi = {
     if (category) body.append('category', category);
     return request('/media/upload', { method: 'POST', body, signal }, ADMIN_API_BASE_URL);
   },
+  cleanupMedia: (mediaIds = [], signal) => request('/media/cleanup', {
+    method: 'POST', body: JSON.stringify({ mediaIds }), signal,
+  }, ADMIN_API_BASE_URL),
   getSiteSettings: (signal) => request('/site-settings', { signal }, ADMIN_API_BASE_URL),
   saveSiteSetting: (key, body, signal) => request(`/site-settings/${encodeURIComponent(key)}`, {
     method: 'PUT', body: JSON.stringify(body), signal,
@@ -133,6 +137,9 @@ export const adminApi = {
   getStaffMembers: (signal) => request('/staff-members', { signal }, ADMIN_API_BASE_URL),
   getStaffMember: (id, signal) => request(`/staff-members/${encodeURIComponent(id)}`, { signal }, ADMIN_API_BASE_URL),
   saveStaffMember: (id, body, signal) => request(`/staff-members/${encodeURIComponent(id)}`, {
+    method: 'PUT', body: JSON.stringify(body), signal,
+  }, ADMIN_API_BASE_URL),
+  updateStaffMemberStatus: (id, body, signal) => request(`/staff-members/${encodeURIComponent(id)}/status`, {
     method: 'PUT', body: JSON.stringify(body), signal,
   }, ADMIN_API_BASE_URL),
   reorderStaffMembers: (items, signal) => request('/staff-members/order', {

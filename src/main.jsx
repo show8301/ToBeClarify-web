@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { AppLoader } from './components/AppLoader.jsx';
@@ -21,6 +21,8 @@ import './styles.css';
 const routeAliases = {
   '/': '/home',
 };
+
+const hiddenPublicNavigationLabels = new Set(['留聲機', '店舖動態', '榮譽殿堂']);
 
 const appBase = import.meta.env.BASE_URL.replace(/\/$/, '');
 
@@ -76,15 +78,46 @@ function App() {
 function PublicApp({ route, navigate }) {
   const apiData = useApiData();
   const [isIntroLoading, setIsIntroLoading] = useState(true);
+  const [isLoaderExitReady, setIsLoaderExitReady] = useState(false);
+  const loaderHoldTimerRef = useRef(null);
   const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
       setIsIntroLoading(false);
-    }, shouldReduceMotion ? 450 : 1600);
+    }, shouldReduceMotion ? 450 : 2400);
 
     return () => window.clearTimeout(timer);
   }, [shouldReduceMotion]);
+
+  const isLoading = apiData.loading || isIntroLoading;
+
+  useEffect(() => {
+    setIsLoaderExitReady(false);
+    if (loaderHoldTimerRef.current !== null) {
+      window.clearTimeout(loaderHoldTimerRef.current);
+      loaderHoldTimerRef.current = null;
+    }
+    if (isLoading) return undefined;
+    if (shouldReduceMotion) setIsLoaderExitReady(true);
+    return undefined;
+  }, [isLoading, shouldReduceMotion]);
+
+  const handleLoaderRevealComplete = () => {
+    if (shouldReduceMotion) {
+      setIsLoaderExitReady(true);
+      return;
+    }
+
+    if (loaderHoldTimerRef.current !== null) {
+      window.clearTimeout(loaderHoldTimerRef.current);
+    }
+
+    loaderHoldTimerRef.current = window.setTimeout(() => {
+      loaderHoldTimerRef.current = null;
+      setIsLoaderExitReady(true);
+    }, 220);
+  };
 
   const page = useMemo(() => {
     if (route === '/home') return <HomePage navigate={navigate} />;
@@ -103,18 +136,29 @@ function PublicApp({ route, navigate }) {
     return <ApiState loading={false} error={apiData.error} onRetry={apiData.reload} />;
   }
 
-  if (apiData.loading || isIntroLoading) return <AppLoader />;
-
+  const shouldShowLoader = isLoading || !isLoaderExitReady;
   return (
-    <>
-      <PublicLayout route={route} navigate={navigate} apiData={apiData}>
-        {page}
-      </PublicLayout>
-    </>
+    <AnimatePresence mode="wait" initial={false}>
+      {shouldShowLoader ? (
+        <AppLoader
+          key="app-loader"
+          isDataLoading={shouldShowLoader ? isLoading && apiData.loading : false}
+          isIntroLoading={shouldShowLoader ? isLoading && isIntroLoading : false}
+          onRevealComplete={handleLoaderRevealComplete}
+        />
+      ) : (
+        <PublicLayout key="public-layout" route={route} navigate={navigate} apiData={apiData}>
+          {page}
+        </PublicLayout>
+      )}
+    </AnimatePresence>
   );
 }
 
 function PublicLayout({ children, route, navigate, apiData }) {
+  const visibleNavigationItems = apiData.navigationItems.filter(
+    (item) => !hiddenPublicNavigationLabels.has(item.label),
+  );
   const shouldReduceMotion = useReducedMotion();
   const pageMotion = shouldReduceMotion
     ? {
@@ -133,7 +177,7 @@ function PublicLayout({ children, route, navigate, apiData }) {
   return (
     <div className="appShell">
       <BackgroundBubbles />
-      <Navbar route={route} navigate={navigate} navigationItems={apiData.navigationItems} shopInfo={apiData.shopInfo} />
+      <Navbar route={route} navigate={navigate} navigationItems={visibleNavigationItems} shopInfo={apiData.shopInfo} />
       <main className="pageTransitionShell">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div key={route} className="pageTransition" {...pageMotion}>
@@ -141,7 +185,7 @@ function PublicLayout({ children, route, navigate, apiData }) {
           </motion.div>
         </AnimatePresence>
       </main>
-      <Footer navigate={navigate} navigationItems={apiData.navigationItems} shopInfo={apiData.shopInfo} />
+      <Footer navigate={navigate} navigationItems={visibleNavigationItems} shopInfo={apiData.shopInfo} />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 
-export function Modal({ title, children, onClose }) {
+export function Modal({ title, children, onClose, panelClassName = '' }) {
   useEffect(() => {
     const onKeyDown = (event) => {
       if (event.key === 'Escape') onClose();
@@ -17,7 +17,7 @@ export function Modal({ title, children, onClose }) {
   return createPortal(
     <div className="modalBackdrop" role="presentation" onMouseDown={onClose}>
       <section
-        className="modalPanel"
+        className={`modalPanel ${panelClassName}`.trim()}
         role="dialog"
         aria-modal="true"
         aria-label={title}

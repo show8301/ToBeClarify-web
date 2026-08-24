@@ -33,30 +33,30 @@ export function AdminPanel({ title, description, actions, children, className = 
   );
 }
 
-export function AdminField({ label, children, hint, className = '' }) {
+export function AdminField({ label, children, hint, className = '', required = false }) {
   return (
     <label className={`adminField ${className}`.trim()}>
-      <span>{label}</span>
+      <span>{label}{required ? <b className="adminRequiredMark" aria-hidden="true">*</b> : null}</span>
       {children}
       {hint ? <small>{hint}</small> : null}
     </label>
   );
 }
 
-export function AdminButton({ children, variant = 'primary', ...props }) {
-  return <button className={`adminButton adminButton-${variant}`} type="button" {...props}>{children}</button>;
+export function AdminButton({ children, variant = 'primary', className = '', ...props }) {
+  return <button className={`adminButton adminButton-${variant} ${className}`.trim()} type="button" {...props}>{children}</button>;
 }
 
-export function AdminToggle({ checked, onChange, label = '啟用' }) {
+export function AdminToggle({ checked, onChange, label = '啟用', ariaLabel, disabled = false, className = '' }) {
   return (
-    <label className="adminToggle">
-      <input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} />
-      <span>{label}</span>
+    <label className={`adminToggle ${className}`.trim()}>
+      <input type="checkbox" checked={checked} disabled={disabled} aria-label={ariaLabel || label || undefined} onChange={(event) => onChange(event.target.checked)} />
+      {label ? <span>{label}</span> : null}
     </label>
   );
 }
 
-export function AdminImagePicker({ label = '圖片', value, pendingFile, onChange, onClear, hint }) {
+export function AdminImagePicker({ label = '圖片', value, pendingFile, onChange, onClear, hint, className = '', disabled = false, required = false }) {
   const [preview, setPreview] = useState(value || '');
 
   useEffect(() => {
@@ -70,20 +70,20 @@ export function AdminImagePicker({ label = '圖片', value, pendingFile, onChang
   }, [pendingFile, value]);
 
   return (
-    <div className="adminImagePicker">
+    <div className={`adminImagePicker ${className}`.trim()}>
       <div className="adminImagePickerHeader">
-        <span>{label}</span>
+        <span>{label}{required ? <b className="adminRequiredMark" aria-hidden="true">*</b> : null}</span>
         {pendingFile ? <small>尚未上傳，儲存時才會送出</small> : null}
       </div>
       <div className="adminImagePreview">
         {preview ? <img src={preview} alt="預覽" /> : <span>尚無圖片</span>}
       </div>
       <div className="adminImagePickerActions">
-        <label className="adminButton adminButton-secondary">
+        {!disabled ? <label className="adminButton adminButton-secondary">
           選擇圖片
-          <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={(event) => onChange(event.target.files?.[0] || null)} />
-        </label>
-        {preview ? <AdminButton variant="ghost" onClick={onClear}>清除</AdminButton> : null}
+          <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={(event) => { onChange(event.target.files?.[0] || null); event.target.value = ''; }} />
+        </label> : null}
+        {preview && !disabled ? <AdminButton variant="ghost" onClick={onClear}>清除</AdminButton> : null}
       </div>
       {hint ? <small className="adminFieldHint">{hint}</small> : null}
     </div>
@@ -96,11 +96,11 @@ export function AdminState({ loading, error, onRetry }) {
   return null;
 }
 
-export function AdminDialog({ open, title, description, children, onClose, actions }) {
+export function AdminDialog({ open, title, description, children, onClose, actions, className = '' }) {
   if (!open) return null;
   return (
     <div className="adminDialogBackdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose?.(); }}>
-      <section className="adminDialog" role="dialog" aria-modal="true" aria-label={title} onMouseDown={(event) => event.stopPropagation()}>
+      <section className={`adminDialog ${className}`.trim()} role="dialog" aria-modal="true" aria-label={title} onMouseDown={(event) => event.stopPropagation()}>
         <header className="adminDialogHeader">
           <div>
             <h2>{title}</h2>
@@ -148,14 +148,33 @@ export function AdminDragList({ items, onReorder, onItemClick, renderItem, empty
           <article
             className={`adminDragCard ${draggingId === id ? 'isDragging' : ''} ${dragOverId === id ? 'isDragOver' : ''}`.trim()}
             key={id}
-            draggable={canDrag}
-            onDragStart={canDrag ? (event) => { setDraggingId(id); event.dataTransfer.effectAllowed = 'move'; } : undefined}
-            onDragEnd={canDrag ? () => { setDraggingId(null); setDragOverId(null); } : undefined}
-            onDragOver={canDrag ? (event) => { event.preventDefault(); setDragOverId(id); } : undefined}
+            onDragOver={canDrag ? (event) => {
+              if (!draggingId) return;
+              event.preventDefault();
+              event.dataTransfer.dropEffect = 'move';
+              setDragOverId(id);
+            } : undefined}
             onDrop={canDrag ? (event) => { event.preventDefault(); drop(id); } : undefined}
             onClick={() => { if (!draggedRef.current) onItemClick?.(item); }}
           >
-            <span className={`adminDragHandle ${canDrag ? '' : 'isDisabled'}`.trim()} aria-hidden="true">{canDrag ? '⋮⋮' : '•'}</span>
+            <span
+              className={`adminDragHandle ${canDrag ? '' : 'isDisabled'}`.trim()}
+              draggable={canDrag}
+              aria-hidden="true"
+              onDragStart={canDrag ? (event) => {
+                draggedRef.current = true;
+                setDraggingId(id);
+                event.dataTransfer.effectAllowed = 'move';
+                event.dataTransfer.setData('text/plain', id);
+              } : undefined}
+              onDragEnd={canDrag ? () => {
+                setDraggingId(null);
+                setDragOverId(null);
+                window.setTimeout(() => { draggedRef.current = false; }, 0);
+              } : undefined}
+            >
+              {canDrag ? '⋮⋮' : '•'}
+            </span>
             <div className="adminDragCardContent">{renderItem(item)}</div>
           </article>
         );

@@ -6,7 +6,7 @@ export function Footer({ navigate, navigationItems, shopInfo }) {
   return (
     <footer className="footer">
       <div>
-        <p className="eyebrow">Eorzea Private Salon</p>
+        <p className="eyebrow">Lucid Dream</p>
         <h2>{shopInfo.name}</h2>
         <p>{shopInfo.footerText}</p>
       </div>

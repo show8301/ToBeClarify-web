@@ -43,29 +43,33 @@ export function GalleryPage() {
   );
 }
 
-export function GalleryModal({ item, onClose }) {
+export function GalleryModal({ item, loading = false, error = null, onClose }) {
   if (!item) return null;
 
   return (
     <Modal title={item.title} onClose={onClose}>
       <div className="galleryDialog">
-        <div className="galleryDialogHeader">
-          <p className="eyebrow">Photo Collage</p>
-          <h2>{item.title}</h2>
-          <span>{item.period}</span>
-          {item.details.map((paragraph) => (
-            <p key={paragraph}>{paragraph}</p>
-          ))}
-        </div>
-        <div className="photoCollage">
-          {item.photos.slice(0, 20).map((photo, index) => (
-            <ImageWithLoading
-              src={photo.thumbnailUrl}
-              alt={`${item.title} 活動照片 ${index + 1}`}
-              key={`${photo.imageUrl}-${index}`}
-            />
-          ))}
-        </div>
+        {loading ? <div className="apiState" role="status">活動詳細資料載入中…</div> : null}
+        {error ? <div className="apiState apiStateError" role="alert"><strong>活動詳細資料暫時無法載入</strong><p>{error.message}</p></div> : null}
+        {!loading && !error ? <>
+          <div className="galleryDialogHeader">
+            <p className="eyebrow">Photo Collage</p>
+            <h2>{item.title}</h2>
+            <span>{item.period}</span>
+            {(item.details || []).map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
+          </div>
+          <div className="photoCollage">
+            {(item.photos || []).slice(0, 20).map((photo, index) => (
+              <ImageWithLoading
+                src={photo.thumbnailUrl}
+                alt={`${item.title} 活動照片 ${index + 1}`}
+                key={`${photo.imageUrl}-${index}`}
+              />
+            ))}
+          </div>
+        </> : null}
       </div>
     </Modal>
   );

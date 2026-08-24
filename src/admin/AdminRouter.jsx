@@ -46,7 +46,7 @@ function AdminRouteView({ route, navigate }) {
 function AdminLoading() {
   return (
     <main className="adminState" role="status">
-      <div className="adminStateMark">35</div>
+      <div className="adminStateMark">⚙️</div>
       <p>正在確認後台通行資格…</p>
     </main>
   );

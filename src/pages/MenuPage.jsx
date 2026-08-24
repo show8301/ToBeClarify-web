@@ -14,7 +14,7 @@ export function MenuPage() {
   const pricing = resource.data?.pricing || [];
 
   return (
-    <PageFrame eyebrow="Salon Menu" title="佳餚名錄" intro="先確認消費規則，再瀏覽本週提供的餐點與套餐。">
+    <PageFrame eyebrow="Dream Menu" title="佳餚名錄" intro="先確認消費規則，再瀏覽本週提供的餐點與套餐。">
       <ApiState loading={resource.loading} error={resource.error} onRetry={resource.reload}>
         <section className="menuPanel">
         <motion.div

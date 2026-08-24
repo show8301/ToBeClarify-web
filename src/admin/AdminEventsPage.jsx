@@ -4,6 +4,7 @@ import {
   AdminButton, AdminDialog, AdminDragList, AdminField, AdminImagePicker, AdminPage, AdminPanel, AdminState,
   AdminToggle, newId, splitParagraphs, toDateTimeLocal,
 } from './AdminShared.jsx';
+import { cleanupAdminMedia } from './adminMedia.js';
 
 const emptyReport = {
   id: '', albumTitle: '', albumDescription: '', coverMediaId: null, coverImageUrl: '', coverFile: null,
@@ -84,11 +85,13 @@ export function AdminEventsPage() {
     if (!editingReport) return;
     setSaving(true);
     setMessage('');
+    const uploadedMediaIds = [];
     try {
       let coverMediaId = editingReport.coverMediaId || null;
       let coverImageUrl = editingReport.coverImageUrl || null;
       if (editingReport.coverFile) {
         const uploaded = await adminApi.uploadMedia(editingReport.coverFile, 'gallery');
+        uploadedMediaIds.push(uploaded.id);
         coverMediaId = uploaded.id;
         coverImageUrl = uploaded.url;
       }
@@ -98,6 +101,7 @@ export function AdminEventsPage() {
         let imageUrl = item.imageUrl || null;
         if (item._file) {
           const uploaded = await adminApi.uploadMedia(item._file, 'gallery');
+          uploadedMediaIds.push(uploaded.id);
           mediaId = uploaded.id;
           imageUrl = uploaded.url;
         }
@@ -114,6 +118,7 @@ export function AdminEventsPage() {
       setEditingItem(null);
       setMessage('週報已儲存。');
     } catch (error) {
+      await cleanupAdminMedia(uploadedMediaIds);
       setMessage(error.message);
     } finally {
       setSaving(false);

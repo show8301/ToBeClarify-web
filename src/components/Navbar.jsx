@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import brandMark from '../assets/brand-mark.svg';
+import logoIcon from '../assets/LogoSmallTransparent.png';
 
 export function Navbar({ route, navigate, navigationItems, shopInfo }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -47,7 +47,7 @@ export function Navbar({ route, navigate, navigationItems, shopInfo }) {
     <header className="navbar">
       <button className="brandButton" type="button" onClick={() => handleNavigate('/home')}>
         <span className="brandMark">
-          <img src={brandMark} alt="" />
+          <img src={logoIcon} alt="" />
         </span>
         <span>
           <strong>{shopInfo.name}</strong>

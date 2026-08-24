@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import brandMark from '../assets/brand-mark.svg';
+import logoIcon from '../assets/LogoSmallTransparent.png';
 import { adminApi, ApiError } from '../api/client.js';
 import { useAdminAuth } from './AdminAuthContext.jsx';
 import { AdminButton, AdminDialog } from './AdminShared.jsx';
@@ -73,10 +73,12 @@ export function AdminLoginPage({ navigate }) {
     <main className="adminLoginShell">
       <section className="adminLoginCard" aria-labelledby="admin-login-title">
         <div className="adminLoginBrand">
-          <span className="adminLoginMark"><img src={brandMark} alt="" /></span>
+          <span className="adminLoginMark">
+            <img src={logoIcon} alt="" />
+          </span>
           <span>
-            <strong>35女王古殿</strong>
-            <small>ADMIN LOUNGE</small>
+            <strong>清醒夢</strong>
+            <small>Somnia Management</small>
           </span>
         </div>
 

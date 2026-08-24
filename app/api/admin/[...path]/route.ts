@@ -7,10 +7,27 @@ function adminApiBaseUrl() {
   return (process.env.ADMIN_API_BASE_URL?.trim() || DEFAULT_ADMIN_API_BASE_URL).replace(/\/$/, "");
 }
 
-function isSameOriginRequest(request: Request) {
+export function isSameOriginRequest(request: Request) {
   if (!MUTATING_METHODS.has(request.method.toUpperCase())) return true;
   const origin = request.headers.get("origin");
-  return !origin || origin === new URL(request.url).origin;
+  if (!origin) return true;
+
+  let originHost: string;
+  try {
+    originHost = new URL(origin).host.toLowerCase();
+  } catch {
+    return false;
+  }
+
+  const allowedHosts = [
+    new URL(request.url).host,
+    request.headers.get("host"),
+    request.headers.get("x-forwarded-host")?.split(",", 1)[0],
+  ]
+    .filter((host): host is string => Boolean(host))
+    .map((host) => host.trim().toLowerCase());
+
+  return allowedHosts.includes(originHost);
 }
 
 function rewriteAdminCookie(value: string, request: Request) {

@@ -27,3 +27,30 @@ test('staff status changes use the dedicated immediate-save endpoint', async () 
     globalThis.fetch = originalFetch;
   }
 });
+
+test('admin proxy accepts same-origin mutations behind a trusted reverse proxy', async () => {
+  const moduleUrl = new URL('../app/api/admin/[...path]/route.ts', import.meta.url);
+  moduleUrl.searchParams.set('test', `${process.pid}-${Date.now()}`);
+  const { isSameOriginRequest } = await import(moduleUrl.href);
+
+  const proxiedRequest = new Request('http://internal-service:3000/api/admin/auth/login', {
+    method: 'POST',
+    headers: {
+      origin: 'https://lucid.zeabur.app',
+      host: 'internal-service:3000',
+      'x-forwarded-host': 'lucid.zeabur.app',
+      'x-forwarded-proto': 'https',
+    },
+  });
+  const crossSiteRequest = new Request('http://internal-service:3000/api/admin/auth/login', {
+    method: 'POST',
+    headers: {
+      origin: 'https://attacker.example',
+      host: 'internal-service:3000',
+      'x-forwarded-host': 'lucid.zeabur.app',
+    },
+  });
+
+  assert.equal(isSameOriginRequest(proxiedRequest), true);
+  assert.equal(isSameOriginRequest(crossSiteRequest), false);
+});

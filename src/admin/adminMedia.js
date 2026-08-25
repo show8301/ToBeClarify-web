@@ -1,11 +1,11 @@
-import { adminApi } from '../api/client.js';
+import { adminApi } from './admin-api.js';
 
 export async function cleanupAdminMedia(mediaIds) {
   const ids = [...new Set((mediaIds || []).filter(Boolean))];
-  if (ids.length === 0) return;
+  if (!ids.length) return;
   try {
     await adminApi.cleanupMedia(ids);
   } catch {
-    // The scheduled API cleanup is the fallback when the compensating request cannot complete.
+    // The API's scheduled cleanup is the fallback if compensating cleanup fails.
   }
 }

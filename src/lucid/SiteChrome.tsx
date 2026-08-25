@@ -1,0 +1,111 @@
+"use client";
+
+import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { usePathname, useRouter } from "./router";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { NavigationItem, ShopInfo } from "./site-types";
+
+const pathAliases:Record<string,string> = { "/home":"/", "/event":"/gallery" };
+const resolvePath = (path:string) => pathAliases[path] ?? path;
+
+export default function SiteChrome({navigation,shopInfo,children}:{navigation:NavigationItem[];shopInfo:ShopInfo;children:React.ReactNode}) {
+  const [open,setOpen] = useState(false);
+  const [leaving,setLeaving] = useState<string|null>(null);
+  const [showFloatingTop,setShowFloatingTop] = useState(false);
+  const navigationTimer = useRef<ReturnType<typeof window.setTimeout>|null>(null);
+  const navigationWatchdog = useRef<ReturnType<typeof window.setTimeout>|null>(null);
+  const pathname = usePathname();
+  const router = useRouter();
+  const reduceMotion = useReducedMotion();
+  const {scrollYProgress} = useScroll();
+  const nearBubbleDrift = useTransform(scrollYProgress,[0,1],["0vh","28vh"]);
+  const farBubbleDrift = useTransform(scrollYProgress,[0,1],["0vh","9vh"]);
+  const mistDrift = useTransform(scrollYProgress,[0,1],["0vh","-8vh"]);
+  const items = useMemo(()=>navigation.flatMap((item)=>item.children?.length?item.children:item).filter((item)=>item.routePath!=="/home"),[navigation]);
+
+  const clearNavigation = useCallback(() => {
+    if (navigationTimer.current) window.clearTimeout(navigationTimer.current);
+    if (navigationWatchdog.current) window.clearTimeout(navigationWatchdog.current);
+    navigationTimer.current = null;
+    navigationWatchdog.current = null;
+    setOpen(false);
+    setLeaving(null);
+  }, []);
+
+  useEffect(()=>{clearNavigation()},[clearNavigation,pathname]);
+  useEffect(() => {
+    const restore = () => clearNavigation();
+    window.addEventListener("pageshow", restore);
+    window.addEventListener("popstate", restore);
+    return () => {
+      window.removeEventListener("pageshow", restore);
+      window.removeEventListener("popstate", restore);
+      clearNavigation();
+    };
+  }, [clearNavigation]);
+  useEffect(() => {
+    const updateFloatingTop = () => setShowFloatingTop(window.scrollY > Math.min(260, window.innerHeight * .34));
+    updateFloatingTop();
+    window.addEventListener("scroll", updateFloatingTop, {passive:true});
+    window.addEventListener("resize", updateFloatingTop);
+    return () => {
+      window.removeEventListener("scroll", updateFloatingTop);
+      window.removeEventListener("resize", updateFloatingTop);
+    };
+  }, []);
+  useEffect(() => {
+    if (!open) return;
+    const closeOnEscape = (event:KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [open]);
+
+  const navigate = (event:React.MouseEvent<HTMLAnchorElement>,path:string) => {
+    const href=resolvePath(path);
+    if(href===pathname)return;
+    event.preventDefault();
+    setOpen(false);
+    if(reduceMotion)return router.push(href);
+    setLeaving(href);
+    navigationTimer.current = window.setTimeout(() => {
+      try { router.push(href); }
+      catch { window.location.assign(href); }
+    },560);
+    navigationWatchdog.current = window.setTimeout(() => {
+      const target = new URL(href, window.location.href);
+      const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+      const expected = `${target.pathname}${target.search}${target.hash}`;
+      if (current !== expected) window.location.assign(href);
+      clearNavigation();
+    },3200);
+  };
+
+  return <div className="site-frame">
+    <motion.div className="site-parallax-bubbles site-bubbles-far" style={reduceMotion?undefined:{y:farBubbleDrift}} aria-hidden="true"><i/><i/><i/><i/></motion.div>
+    <motion.div className="site-parallax-bubbles site-bubbles-near" style={reduceMotion?undefined:{y:nearBubbleDrift}} aria-hidden="true"><i/><i/></motion.div>
+    <motion.div className="site-parallax-mist" style={reduceMotion?undefined:{y:mistDrift}} aria-hidden="true"/>
+    <header className="site-header">
+      <a className="site-brand" href="/" onClick={(event)=>navigate(event,"/")}><strong>{shopInfo.name||"清醒夢"}</strong><span>LUCID DREAM</span></a>
+      <span className="site-header-note">WAKING DREAM · EORZEA SALON</span>
+      <button className={`site-menu-toggle${open?" is-open":""}`} onClick={()=>setOpen(value=>!value)} aria-expanded={open} aria-controls="site-navigation"><span/><span/><b>{open?"CLOSE":"MENU"}</b></button>
+    </header>
+    <nav id="site-navigation" className={`site-navigation${open?" is-open":""}`} aria-label="主要導覽">
+      <a className={pathname==="/"?"active":""} href="/" onClick={(event)=>navigate(event,"/")}><i>00</i><span>首頁</span></a>
+      {items.map((item,index)=>{const href=resolvePath(item.routePath);return <a className={pathname===href?"active":""} href={href} onClick={(event)=>navigate(event,href)} key={item.id}><i>{String(index+1).padStart(2,"0")}</i><span>{item.label}</span></a>})}
+    </nav>
+    <button
+      className={`site-floating-top${showFloatingTop?" is-visible":""}`}
+      onClick={()=>window.scrollTo({top:0,behavior:reduceMotion?"auto":"smooth"})}
+      aria-label="回到頁面頂端"
+    ><span aria-hidden="true">↑</span><b>TOP</b></button>
+    <main className="site-content">{children}</main>
+    <footer className="site-footer">
+      <div><span>LUCID DREAM · EORZEA</span><strong>{shopInfo.name||"清醒夢"}</strong><p>{shopInfo.footerText}</p></div>
+      <div><b>OPEN</b><span>{shopInfo.openHours}</span><b>LOCATION</b><span>{shopInfo.server} · {shopInfo.address}</span></div>
+      <a href="/staff" onClick={(event)=>navigate(event,"/staff")}>MEET THE DREAMERS <i>↗</i></a>
+    </footer>
+    <AnimatePresence>{leaving&&<motion.div className="site-route-transition" initial={{clipPath:"inset(100% 0 0 0)",filter:"blur(5px)"}} animate={{clipPath:"inset(0% 0 0 0)",filter:"blur(0px)"}} exit={{opacity:0}} transition={{duration:.58,ease:[.76,0,.24,1]}} aria-hidden="true"><motion.span initial={{opacity:0,y:18,letterSpacing:".42em"}} animate={{opacity:1,y:0,letterSpacing:".23em"}} transition={{delay:.25,duration:.55,ease:[.22,1,.36,1]}}>ENTERING ANOTHER DREAM <i>✦</i></motion.span></motion.div>}</AnimatePresence>
+  </div>;
+}

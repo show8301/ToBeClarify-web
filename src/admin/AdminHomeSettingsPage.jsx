@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { adminApi } from '../api/client.js';
+import { adminApi } from './admin-api.js';
 import {
   AdminButton, AdminDialog, AdminDragList, AdminField, AdminImagePicker, AdminPanel, AdminState,
   AdminToggle, AdminPage, newId, splitParagraphs,
@@ -22,9 +22,6 @@ export function AdminHomeSettingsPage() {
   const [editingCarousel, setEditingCarousel] = useState(null);
   const [editingSlide, setEditingSlide] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [savingRuleIds, setSavingRuleIds] = useState(() => new Set());
-  const [savingCarouselIds, setSavingCarouselIds] = useState(() => new Set());
-  const [savingSlideIds, setSavingSlideIds] = useState(() => new Set());
   const [message, setMessage] = useState('');
   const [removedSlideIds, setRemovedSlideIds] = useState([]);
 
@@ -38,7 +35,7 @@ export function AdminHomeSettingsPage() {
       setSite({ ...emptySite, ...shopInfo, aboutText: (shopInfo.about || []).join('\n\n') });
       setRules(nextRules.map((item) => ({ ...item })));
       setCarousels(nextCarousels.map((item) => ({ ...item, _file: null })));
-      setSlides(nextSlides.map((item) => ({ ...item, displaySeconds: Number(item.displaySeconds) || 10, _file: null })));
+      setSlides(nextSlides.map((item) => ({ ...item, _file: null })));
       setReports(nextReports);
       setRemovedSlideIds([]);
       setState({ loading: false, error: null });
@@ -72,87 +69,6 @@ export function AdminHomeSettingsPage() {
     }
     setSlides((current) => current.map((item) => item.id === editingSlide.id ? editingSlide : item));
     setEditingSlide(null);
-  };
-
-  const toggleSlide = async (item, isEnabled) => {
-    const previous = item.isEnabled;
-    setSlides((current) => current.map((value) => value.id === item.id ? { ...value, isEnabled } : value));
-    if (item.id.startsWith('local-')) return;
-    setSavingSlideIds((current) => new Set(current).add(item.id));
-    try {
-      await adminApi.saveHomeSlide(item.id, {
-        mediaId: item.mediaId || null,
-        imageUrl: item.imageUrl || null,
-        sortOrder: Number(item.sortOrder) || 0,
-        isEnabled,
-        displaySeconds: Number(item.displaySeconds) || 10,
-      });
-      setMessage('首頁圖片啟用狀態已更新。');
-    } catch (error) {
-      setSlides((current) => current.map((value) => value.id === item.id ? { ...value, isEnabled: previous } : value));
-      setMessage(error.message);
-    } finally {
-      setSavingSlideIds((current) => {
-        const next = new Set(current);
-        next.delete(item.id);
-        return next;
-      });
-    }
-  };
-
-  const toggleRule = async (item, isEnabled) => {
-    const previous = item.isEnabled;
-    setRules((current) => current.map((value) => value.id === item.id ? { ...value, isEnabled } : value));
-    if (item.id.startsWith('local-')) return;
-    setSavingRuleIds((current) => new Set(current).add(item.id));
-    try {
-      await adminApi.saveShopRule(item.id, {
-        ruleText: item.ruleText,
-        ruleNote: item.ruleNote || null,
-        sortOrder: Number(item.sortOrder) || 0,
-        isEnabled,
-      });
-      setMessage('店內規則啟用狀態已更新。');
-    } catch (error) {
-      setRules((current) => current.map((value) => value.id === item.id ? { ...value, isEnabled: previous } : value));
-      setMessage(error.message);
-    } finally {
-      setSavingRuleIds((current) => {
-        const next = new Set(current);
-        next.delete(item.id);
-        return next;
-      });
-    }
-  };
-
-  const toggleCarousel = async (item, isEnabled) => {
-    const previous = item.isEnabled;
-    setCarousels((current) => current.map((value) => value.id === item.id ? { ...value, isEnabled } : value));
-    if (item.id.startsWith('local-')) return;
-    setSavingCarouselIds((current) => new Set(current).add(item.id));
-    try {
-      await adminApi.saveHomeCarousel(item.id, {
-        albumId: item.albumId || null,
-        overrideTitle: item.overrideTitle,
-        overrideSummary: item.overrideSummary,
-        overrideMediaId: item.overrideMediaId || null,
-        overrideImageUrl: item.overrideImageUrl || null,
-        eventTimeSnapshot: item.eventTimeSnapshot || null,
-        ctaLabel: item.ctaLabel || '查看完整活動',
-        sortOrder: Number(item.sortOrder) || 0,
-        isEnabled,
-      });
-      setMessage('週報輪播啟用狀態已更新。');
-    } catch (error) {
-      setCarousels((current) => current.map((value) => value.id === item.id ? { ...value, isEnabled: previous } : value));
-      setMessage(error.message);
-    } finally {
-      setSavingCarouselIds((current) => {
-        const next = new Set(current);
-        next.delete(item.id);
-        return next;
-      });
-    }
   };
 
   const saveAll = async () => {
@@ -206,7 +122,7 @@ export function AdminHomeSettingsPage() {
         }
         await adminApi.saveHomeSlide(slide.id.startsWith('local-') ? null : slide.id, {
           mediaId, imageUrl, sortOrder: Number(slide.sortOrder) || 0, isEnabled: slide.isEnabled,
-          displaySeconds: Number(slide.displaySeconds) || 10,
+          displaySeconds: Math.min(60, Math.max(1, Number(slide.displaySeconds) || 10)),
         });
       }
       setMessage('首頁設定已儲存。');
@@ -288,7 +204,7 @@ export function AdminHomeSettingsPage() {
             items={slides}
             onReorder={setSlides}
             onItemClick={(item) => setEditingSlide({ ...item })}
-            renderItem={(item) => <><div className="adminDragCardWithImage">{item.imageUrl ? <img src={item.imageUrl} alt="" /> : null}<div><strong>{item.imageUrl ? '首頁背景圖片' : (item._file?.name || '尚未選擇圖片')}</strong><small>第 {Number(item.sortOrder) + 1} 張 · 顯示 {Number(item.displaySeconds) || 10} 秒</small></div></div><div className="adminDragCardMeta"><AdminToggle checked={item.isEnabled} disabled={savingSlideIds.has(item.id)} onChange={(value) => toggleSlide(item, value)} label="" ariaLabel={`切換第 ${Number(item.sortOrder) + 1} 張首頁圖片`} /><AdminButton variant="danger" onClick={(event) => { event.stopPropagation(); removeSlide(item); }}>刪除</AdminButton></div></>}
+            renderItem={(item) => <><div className="adminDragCardWithImage">{item.imageUrl ? <img src={item.imageUrl} alt="" /> : null}<div><strong>{item.imageUrl ? '首頁背景圖片' : (item._file?.name || '尚未選擇圖片')}</strong><small>第 {Number(item.sortOrder) + 1} 張 · 播放 {Number(item.displaySeconds) || 10} 秒</small></div></div><div className="adminDragCardMeta"><AdminButton variant="danger" onClick={(event) => { event.stopPropagation(); removeSlide(item); }}>刪除</AdminButton></div></>}
             emptyText="尚無首頁幻燈片，請新增第一張圖片。"
           />
         </AdminPanel>
@@ -298,7 +214,7 @@ export function AdminHomeSettingsPage() {
             items={rules}
             onReorder={setRules}
             onItemClick={(item) => setEditingRule({ ...item })}
-            renderItem={(item) => <><div><strong>{item.ruleText || '未命名規則'}</strong><small>{item.ruleNote || '沒有補充說明'}</small></div><div className="adminDragCardMeta" onClick={(event) => event.stopPropagation()}><AdminToggle checked={item.isEnabled} disabled={savingRuleIds.has(item.id)} onChange={(value) => toggleRule(item, value)} label="" ariaLabel={`切換規則「${item.ruleText || '未命名規則'}」啟用狀態`} /><AdminButton variant="danger" onClick={() => removeRule(item)}>刪除</AdminButton></div></>}
+            renderItem={(item) => <><div><strong>{item.ruleText || '未命名規則'}</strong><small>{item.ruleNote || '沒有補充說明'}</small></div><div className="adminDragCardMeta"><em>{item.isEnabled ? '啟用' : '停用'}</em><AdminButton variant="danger" onClick={(event) => { event.stopPropagation(); removeRule(item); }}>刪除</AdminButton></div></>}
             emptyText="尚無店內規則，請新增第一筆。"
           />
         </AdminPanel>
@@ -308,7 +224,7 @@ export function AdminHomeSettingsPage() {
             items={carousels}
             onReorder={setCarousels}
             onItemClick={(item) => setEditingCarousel({ ...item })}
-            renderItem={(item) => <><div className="adminDragCardWithImage">{item.overrideImageUrl ? <img src={item.overrideImageUrl} alt="" /> : null}<div><strong>{item.overrideTitle || '未命名輪播'}</strong><small>{item.overrideSummary || '沒有摘要'}</small></div></div><div className="adminDragCardMeta" onClick={(event) => event.stopPropagation()}><AdminToggle checked={item.isEnabled} disabled={savingCarouselIds.has(item.id)} onChange={(value) => toggleCarousel(item, value)} label="" ariaLabel={`切換週報輪播「${item.overrideTitle || '未命名輪播'}」啟用狀態`} /><AdminButton variant="danger" onClick={() => removeCarousel(item)}>刪除</AdminButton></div></>}
+            renderItem={(item) => <><div className="adminDragCardWithImage">{item.overrideImageUrl ? <img src={item.overrideImageUrl} alt="" /> : null}<div><strong>{item.overrideTitle || '未命名輪播'}</strong><small>{item.overrideSummary || '沒有摘要'}</small></div></div><div className="adminDragCardMeta"><em>{item.isEnabled ? '啟用' : '停用'}</em><AdminButton variant="danger" onClick={(event) => { event.stopPropagation(); removeCarousel(item); }}>刪除</AdminButton></div></>}
             emptyText="尚無首頁輪播，請新增第一筆。"
           />
         </AdminPanel>
@@ -322,8 +238,8 @@ export function AdminHomeSettingsPage() {
         {editingCarousel ? <div className="adminFormGrid"><AdminField label="對應週報" className="span-2"><select value={editingCarousel.albumId || ''} onChange={(event) => selectCarouselReport(event.target.value)}>{reports.map((report) => <option key={report.id} value={report.id}>{report.albumTitle}</option>)}</select></AdminField><AdminField label="首頁標題"><input value={editingCarousel.overrideTitle} onChange={(event) => updateCarouselEditor('overrideTitle', event.target.value)} /></AdminField><AdminField label="時間文字"><input value={editingCarousel.eventTimeSnapshot || ''} onChange={(event) => updateCarouselEditor('eventTimeSnapshot', event.target.value)} /></AdminField><AdminField label="首頁摘要" className="span-2"><textarea rows="4" value={editingCarousel.overrideSummary} onChange={(event) => updateCarouselEditor('overrideSummary', event.target.value)} /></AdminField><AdminField label="按鈕文字"><input value={editingCarousel.ctaLabel || ''} onChange={(event) => updateCarouselEditor('ctaLabel', event.target.value)} /></AdminField><AdminImagePicker label="首頁輪播圖片覆寫" value={editingCarousel.overrideImageUrl} pendingFile={editingCarousel._file} onChange={(file) => updateCarouselEditor('_file', file)} onClear={() => { updateCarouselEditor('_file', null); updateCarouselEditor('overrideImageUrl', ''); updateCarouselEditor('overrideMediaId', null); }} /><div className="adminFormWide"><AdminToggle checked={editingCarousel.isEnabled} onChange={(value) => updateCarouselEditor('isEnabled', value)} /></div></div> : null}
       </AdminDialog>
 
-      <AdminDialog className="adminSlideDialog" open={Boolean(editingSlide)} title={editingSlide?.id?.startsWith('local-') ? '新增首頁幻燈片' : '編輯首頁幻燈片'} description="圖片會先在本機預覽，按下首頁的儲存按鈕後才會上傳。排序請回到卡片清單拖曳調整。" onClose={() => setEditingSlide(null)} actions={<><AdminButton variant="ghost" onClick={() => setEditingSlide(null)}>取消</AdminButton><AdminButton onClick={saveSlideEditor}>完成編輯</AdminButton></>}>
-        {editingSlide ? <div className="adminFormGrid"><AdminImagePicker className="adminSlideImagePicker" label="背景圖片" value={editingSlide.imageUrl} pendingFile={editingSlide._file} onChange={(file) => updateSlideEditor('_file', file)} onClear={() => { updateSlideEditor('_file', null); updateSlideEditor('imageUrl', ''); updateSlideEditor('mediaId', null); }} /><AdminField label="顯示秒數" hint="每張圖片可個別設定 1～60 秒"><input type="number" min="1" max="60" value={editingSlide.displaySeconds || 10} onChange={(event) => updateSlideEditor('displaySeconds', event.target.value)} /></AdminField><div><AdminToggle checked={editingSlide.isEnabled} onChange={(value) => updateSlideEditor('isEnabled', value)} label="公開播放" /></div></div> : null}
+      <AdminDialog open={Boolean(editingSlide)} title={editingSlide?.id?.startsWith('local-') ? '新增首頁幻燈片' : '編輯首頁幻燈片'} description="圖片會先在本機預覽，按下首頁的儲存按鈕後才會上傳。排序請回到卡片清單拖曳調整。" onClose={() => setEditingSlide(null)} actions={<><AdminButton variant="ghost" onClick={() => setEditingSlide(null)}>取消</AdminButton><AdminButton onClick={saveSlideEditor}>完成編輯</AdminButton></>}>
+        {editingSlide ? <div className="adminFormGrid"><AdminImagePicker label="背景圖片" value={editingSlide.imageUrl} pendingFile={editingSlide._file} onChange={(file) => updateSlideEditor('_file', file)} onClear={() => { updateSlideEditor('_file', null); updateSlideEditor('imageUrl', ''); updateSlideEditor('mediaId', null); }} /><AdminField label="播放秒數"><input type="number" min="1" max="60" value={editingSlide.displaySeconds || 10} onChange={(event) => updateSlideEditor('displaySeconds', event.target.value)} /></AdminField><div><AdminToggle checked={editingSlide.isEnabled} onChange={(value) => updateSlideEditor('isEnabled', value)} label="公開播放" /></div></div> : null}
       </AdminDialog>
     </AdminPage>
   );

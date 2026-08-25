@@ -1108,7 +1108,9 @@
 .adminPreviewServiceGrid article > span { color: #65789f; font: 700 8px/1 var(--font-mono); }
 .adminPreviewServiceGrid h3 { margin: 0; color: #31334a; font-size: 13px; }
 .adminPreviewServiceGrid p { margin: 5px 0 0; color: rgba(49,51,74,.65); font-size: 11px; line-height: 1.55; }
-.adminPreviewServiceGrid article > b { color: #65789f; font: 700 10px/1.3 var(--font-mono); text-align: right; }
+.adminPreviewServicePrice { min-width: 112px; display: grid; justify-items: end; gap: 4px; color: #65789f; text-align: right; }
+.adminPreviewServicePrice b { font: 700 10px/1.3 var(--font-mono); }
+.adminPreviewServicePrice small { font: 650 8px/1.35 var(--font-mono); opacity: .76; }
 .adminPreviewDossier > footer { display: flex; justify-content: space-between; gap: 12px; padding: 11px 28px; border-top: 1px solid rgba(49,51,74,.18); font: 700 7px/1 var(--font-mono); letter-spacing: .12em; }
 .adminPreviewDossier > footer b { color: #65789f; }
 
@@ -1147,7 +1149,6 @@
 .adminAvatarZoomControl output { font: 700 11px/1 var(--font-mono); text-align: right; }
 .adminAvatarCropWorkspace > p { margin: 0; color: rgba(49,51,74,.62); font-size: 12px; line-height: 1.6; }
 .adminServiceToggleFields { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 12px 24px; padding: 8px 12px; border: 1px solid rgba(255,255,255,.82); border-radius: 13px; background: rgba(255,255,255,.3); }
-.adminPreviewServiceGrid article div > em { display: inline-flex; margin-top: 7px; padding: 4px 7px; border: 1px solid rgba(139,167,202,.35); border-radius: 999px; color: #65789f; font: normal 700 7px/1 var(--font-mono); letter-spacing: .08em; }
 
 @media (max-width: 720px) {
   .adminAvatarPreview { width: 100%; max-width: 320px; }

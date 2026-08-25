@@ -14,6 +14,16 @@ const clientStaffCache = new Map<string,ClientCacheEntry>();
 const clientStaffRequests = new Map<string,Promise<StaffDetail>>();
 const CLIENT_CACHE_TTL = 10*60*1000;
 
+function gil(value:number) {
+  return `${value.toLocaleString("en-US")} Gil`;
+}
+
+function serviceDisplayPrice(service:StaffDetail["commonServices"][number]) {
+  const override = service.priceText?.trim();
+  if (override) return override;
+  return service.price === null || service.price === undefined ? null : gil(service.price);
+}
+
 async function loadStaffDetail(id:string) {
   const cached=clientStaffCache.get(id);
   if(cached&&cached.expiresAt>Date.now())return cached.data;
@@ -176,7 +186,12 @@ export default function StaffProfile({ staff, index, navigation }:{ staff:StaffD
         <motion.div className="dossier-scroll" initial="hidden" animate="visible" variants={{hidden:{},visible:{transition:{delayChildren:.68,staggerChildren:.1}}}}>
           <motion.section className="gallery-block" variants={{hidden:reduceMotion?{opacity:1}:{opacity:0,y:20},visible:{opacity:1,y:0}}} transition={{duration:.36,ease:[.22,1,.36,1]}}><header><b>影像紀錄</b><button onClick={()=>images.length&&setLightboxIndex(0)} disabled={!images.length}>OPEN LIGHTBOX ↗</button></header><div className="filmstrip">{images.slice(0,6).map((image,i)=><button key={image.id} onClick={()=>setLightboxIndex(i)} aria-label={`查看第 ${i+1} 張照片`}><img src={image.imageUrl} alt=""/><span>{String(i+1).padStart(2,"0")}</span></button>)}</div></motion.section>
           <motion.section className="bio-block" variants={{hidden:reduceMotion?{opacity:1}:{opacity:0,y:20},visible:{opacity:1,y:0}}} transition={{duration:.36,ease:[.22,1,.36,1]}}><header><b>人物誌</b><span>PROFILE NOTE</span></header><p>{currentStaff.profileBio||currentStaff.shortBio||"這位夢境成員正在準備自己的介紹。"}</p></motion.section>
-          {!!services.length&&<motion.section className="service-block" variants={{hidden:reduceMotion?{opacity:1}:{opacity:0,y:20},visible:{opacity:1,y:0}}} transition={{duration:.36,ease:[.22,1,.36,1]}}><header><b>服務項目</b><span>{services.length} SERVICES</span></header><div className="service-grid">{services.map((service,i)=><article key={service.id}><span>{String(i+1).padStart(2,"0")}</span><div><h3>{service.serviceName}</h3><p>{service.serviceDescription}</p></div>{service.priceText&&<b>{service.priceText}</b>}</article>)}</div></motion.section>}
+          {!!services.length&&<motion.section className="service-block" variants={{hidden:reduceMotion?{opacity:1}:{opacity:0,y:20},visible:{opacity:1,y:0}}} transition={{duration:.36,ease:[.22,1,.36,1]}}><header><b>服務項目</b><span>{services.length} SERVICES</span></header><div className="service-grid">{services.map((service,i)=>{
+            const displayPrice=serviceDisplayPrice(service);
+            const duration=service.durationMinutes === null || service.durationMinutes === undefined ? null : `${service.durationMinutes} 分鐘`;
+            const additionalPrice=service.additionalPersonPrice === null || service.additionalPersonPrice === undefined ? null : `每位額外 +${gil(service.additionalPersonPrice)}`;
+            return <article key={service.id}><span>{String(i+1).padStart(2,"0")}</span><div><h3>{service.serviceName}</h3><p>{service.serviceDescription}</p></div>{displayPrice||duration||additionalPrice?<div className="service-price-meta">{displayPrice&&<b>{displayPrice}</b>}{duration&&<small>{duration}</small>}{additionalPrice&&<small>{additionalPrice}</small>}</div>:null}</article>;
+          })}</div></motion.section>}
         </motion.div>
         <motion.div className="dossier-foot" initial={reduceMotion?false:{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{delay:1,duration:.28}}><span>RECORD ID · {currentStaff.id.slice(0,13)}</span><b>LUCID DREAM ✦</b></motion.div>
       </motion.div>

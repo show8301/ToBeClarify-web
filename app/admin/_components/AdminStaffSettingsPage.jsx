@@ -42,21 +42,30 @@ function toServiceEditor(item) {
 }
 
 function servicePriceText(item) {
+  const override = String(item.priceText || '').trim();
+  if (override) return override;
   const price = optionalNumber(item.price);
+  return price !== null ? `${price.toLocaleString('en-US')} Gil` : '';
+}
+
+function serviceDurationText(item) {
   const duration = optionalNumber(item.durationMinutes);
-  if (price !== null) return `${price.toLocaleString('en-US')} Gil${duration !== null ? ` / ${duration} min` : ''}`;
-  if (duration !== null) return `${duration} min`;
-  return item.priceText || '';
+  return duration !== null ? `${duration} 分鐘` : '';
+}
+
+function serviceAdditionalPriceText(item) {
+  const price = optionalNumber(item.additionalPersonPrice);
+  return price !== null ? `每位額外 +${price.toLocaleString('en-US')} Gil` : '';
 }
 
 function serviceMeta(item) {
   const price = optionalNumber(item.price);
   const duration = optionalNumber(item.durationMinutes);
+  const override = String(item.priceText || '').trim();
   return [
     item.serviceType === 'common' ? '一般服務' : '特殊服務',
-    price !== null ? `${price.toLocaleString('en-US')} Gil` : (item.priceText || '未設定價格'),
+    override || (price !== null ? `${price.toLocaleString('en-US')} Gil` : '未設定價格'),
     duration !== null ? `${duration} 分鐘` : '未設定時間',
-    item.isNominatable === false ? '不可指名' : '可指名',
     optionalNumber(item.additionalPersonPrice) !== null ? `每位額外 ${Number(item.additionalPersonPrice).toLocaleString('en-US')} Gil` : '未設定額外人數價格',
   ].join(' · ');
 }
@@ -302,7 +311,7 @@ export function AdminStaffSettingsPage() {
         services: form.services.map((item) => ({
           id: item.id?.startsWith('local-') ? null : item.id, serviceType: item.serviceType,
           serviceName: item.serviceName, serviceDescription: item.serviceDescription,
-          priceText: servicePriceText(item) || null,
+          priceText: String(item.priceText || '').trim() || null,
           price: optionalNumber(item.price), durationMinutes: optionalNumber(item.durationMinutes),
           isNominatable: item.isNominatable !== false,
           additionalPersonPrice: optionalNumber(item.additionalPersonPrice),
@@ -454,7 +463,7 @@ export function AdminStaffSettingsPage() {
               </div>
             </AdminPanel>
 
-            <AdminPanel title="服務內容" description={canManageAll ? '拖曳卡片調整服務順序；右側開關會加入或移除公開顯示。' : '可查看服務內容；只有自己的資料可以修改。'} actions={canEditSelected ? <AdminButton variant="secondary" onClick={() => { const item = { id: newId(), serviceType: 'special', serviceName: '', serviceDescription: '', priceText: '', price: '', durationMinutes: '', isNominatable: true, additionalPersonPrice: '', sortOrder: form.services.length, isEnabled: true }; update('services', [...form.services, item]); setEditingService(item); }}>新增服務</AdminButton> : null}>
+            <AdminPanel title="服務內容" description={canManageAll ? '拖曳卡片調整服務順序；指名資格統一由基本資料的「開放指名」控制。' : '可查看服務內容；指名資格統一由基本資料控制。'} actions={canEditSelected ? <AdminButton variant="secondary" onClick={() => { const item = { id: newId(), serviceType: 'special', serviceName: '', serviceDescription: '', priceText: '', price: '', durationMinutes: '', isNominatable: true, additionalPersonPrice: '', sortOrder: form.services.length, isEnabled: true }; update('services', [...form.services, item]); setEditingService(item); }}>新增服務</AdminButton> : null}>
               <AdminDragList items={form.services} canDrag={canManageAll} onReorder={(items) => canEditSelected && update('services', items)} onItemClick={(item) => setEditingService({ ...item })} renderItem={(item) => <><div><strong>{item.serviceName || '未命名服務'}</strong><small>{serviceMeta(item)}</small></div><div className="adminDragCardMeta" onClick={(event) => event.stopPropagation()}><AdminToggle checked={item.isEnabled} disabled={!canEditSelected} onChange={(value) => update('services', form.services.map((service) => service.id === item.id ? { ...service, isEnabled: value } : service))} label="" ariaLabel={`切換${item.serviceName || '此服務'}啟用狀態`} />{canEditSelected ? <AdminButton variant="danger" onClick={() => update('services', form.services.filter((service) => service.id !== item.id))}>刪除</AdminButton> : null}</div></>} emptyText="尚無服務內容。" />
             </AdminPanel>
 
@@ -478,10 +487,11 @@ export function AdminStaffSettingsPage() {
             <AdminField label="類型" required><select required disabled={!canEditSelected} value={editingService.serviceType} onChange={(event) => setEditingService((current) => ({ ...current, serviceType: event.target.value }))}><option value="common">一般</option><option value="special">特殊</option></select></AdminField>
             <AdminField label="服務名稱" required><input required disabled={!canEditSelected} value={editingService.serviceName} onChange={(event) => setEditingService((current) => ({ ...current, serviceName: event.target.value }))} autoFocus /></AdminField>
             <AdminField label="價格"><input type="number" min="0" step="1" inputMode="numeric" disabled={!canEditSelected} value={editingService.price ?? ''} onChange={(event) => setEditingService((current) => ({ ...current, price: event.target.value === '' ? '' : Number(event.target.value) }))} /><small>單位：Gil</small></AdminField>
+            <AdminField label="價格文字（選填）"><input maxLength="80" disabled={!canEditSelected} value={editingService.priceText || ''} onChange={(event) => setEditingService((current) => ({ ...current, priceText: event.target.value }))} /><small>填寫時會優先取代數值價格顯示，例如「期間限定優惠」。</small></AdminField>
             <AdminField label="時間"><input type="number" min="0" step="5" inputMode="numeric" disabled={!canEditSelected} value={editingService.durationMinutes ?? ''} onChange={(event) => setEditingService((current) => ({ ...current, durationMinutes: event.target.value === '' ? '' : Number(event.target.value) }))} /><small>單位：分鐘</small></AdminField>
             <AdminField label="每位額外人數價格"><input type="number" min="0" step="1" inputMode="numeric" disabled={!canEditSelected} value={editingService.additionalPersonPrice ?? ''} onChange={(event) => setEditingService((current) => ({ ...current, additionalPersonPrice: event.target.value === '' ? '' : Number(event.target.value) }))} /><small>單位：Gil／每位額外人數</small></AdminField>
             <AdminField label="說明" className="span-2" required><textarea required disabled={!canEditSelected} rows="5" value={editingService.serviceDescription} onChange={(event) => setEditingService((current) => ({ ...current, serviceDescription: event.target.value }))} /></AdminField>
-            <div className="adminServiceToggleFields"><AdminToggle checked={editingService.isNominatable !== false} disabled={!canEditSelected} onChange={(value) => setEditingService((current) => ({ ...current, isNominatable: value }))} label="可指名" /><AdminToggle checked={editingService.isEnabled} disabled={!canEditSelected} onChange={(value) => setEditingService((current) => ({ ...current, isEnabled: value }))} label="公開顯示" /></div>
+            <div className="adminServiceToggleFields"><AdminToggle checked={editingService.isEnabled} disabled={!canEditSelected} onChange={(value) => setEditingService((current) => ({ ...current, isEnabled: value }))} label="公開顯示" /></div>
           </div>
         </> : null}
       </AdminDialog>
@@ -579,8 +589,8 @@ function StaffDetailPreview({ form, navigation, imageIndex = 0, onImageChange, o
           <header><b>服務項目</b><span>{services.length} SERVICES</span></header>
           <div className="adminPreviewServiceGrid">{services.map((item, index) => <article key={item.id}>
             <span>{String(index + 1).padStart(2, '0')}</span>
-            <div><h3>{item.serviceName}</h3><p>{item.serviceDescription}</p><em>{item.isNominatable === false ? '不可指名' : '可指名'}</em></div>
-            {servicePriceText(item) ? <b>{servicePriceText(item)}</b> : null}
+            <div><h3>{item.serviceName}</h3><p>{item.serviceDescription}</p></div>
+            {servicePriceText(item) || serviceDurationText(item) || serviceAdditionalPriceText(item) ? <div className="adminPreviewServicePrice">{servicePriceText(item) ? <b>{servicePriceText(item)}</b> : null}{serviceDurationText(item) ? <small>{serviceDurationText(item)}</small> : null}{serviceAdditionalPriceText(item) ? <small>{serviceAdditionalPriceText(item)}</small> : null}</div> : null}
           </article>)}</div>
         </section>
       </div>

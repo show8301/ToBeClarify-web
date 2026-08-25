@@ -8,11 +8,20 @@ const REQUEST_TIMEOUT = 3500;
 type Snapshot = { generatedAt:string; list:StaffSummary[]; details:Record<string,StaffDetail> };
 type CacheEntry<T> = { value:T; expiresAt:number };
 
+class StaffApiError extends Error {
+  status:number;
+
+  constructor(status:number) {
+    super(`Staff API returned ${status}`);
+    this.name = "StaffApiError";
+    this.status = status;
+  }
+}
+
 const snapshot = snapshotJson as unknown as Snapshot;
 let listCache:CacheEntry<StaffSummary[]> = { value:snapshot.list, expiresAt:0 };
 let listRefresh:Promise<void>|null = null;
 const detailCache = new Map<string,CacheEntry<StaffDetail>>();
-const detailRefresh = new Map<string,Promise<void>>();
 
 async function request<T>(url:string):Promise<T> {
   const response = await fetch(url, {
@@ -20,7 +29,7 @@ async function request<T>(url:string):Promise<T> {
     headers:{ Accept:"application/json" },
     signal:AbortSignal.timeout(REQUEST_TIMEOUT),
   });
-  if (!response.ok) throw new Error(`Staff API returned ${response.status}`);
+  if (!response.ok) throw new StaffApiError(response.status);
   return response.json() as Promise<T>;
 }
 
@@ -32,33 +41,32 @@ function refreshList() {
     .finally(() => { listRefresh = null; });
 }
 
-function refreshDetail(id:string) {
-  if (detailRefresh.has(id)) return;
-  const refresh = request<{data:StaffDetail}>(`${API}/${id}`)
-    .then(({data}) => { if (data) detailCache.set(id,{ value:data, expiresAt:Date.now()+CACHE_TTL }); })
-    .catch(() => {
-      const fallback = detailCache.get(id);
-      if (fallback) detailCache.set(id,{ ...fallback, expiresAt:Date.now()+CACHE_TTL });
-    })
-    .finally(() => { detailRefresh.delete(id); });
-  detailRefresh.set(id,refresh);
-}
-
 export function getStaffList():StaffSummary[] {
   if (Date.now() >= listCache.expiresAt) refreshList();
   return listCache.value;
 }
 
-export function getStaffDetail(id:string):StaffDetail|null {
-  let cached = detailCache.get(id);
-  if (!cached) {
-    const fallback = snapshot.details[id];
-    if (!fallback) return null;
-    cached = { value:fallback, expiresAt:0 };
-    detailCache.set(id,cached);
+export async function getStaffDetail(id:string):Promise<StaffDetail|null> {
+  const cached = detailCache.get(id);
+  if (cached && Date.now() < cached.expiresAt) return cached.value;
+
+  const fallback = cached?.value ?? snapshot.details[id] ?? null;
+  try {
+    const { data } = await request<{data:StaffDetail|null}>(`${API}/${encodeURIComponent(id)}`);
+    if (!data) return fallback;
+    detailCache.set(id,{ value:data, expiresAt:Date.now()+CACHE_TTL });
+    return data;
+  } catch (error) {
+    if (error instanceof StaffApiError && error.status === 404) {
+      detailCache.delete(id);
+      return null;
+    }
+    if (fallback) {
+      detailCache.set(id,{ value:fallback, expiresAt:Date.now()+CACHE_TTL });
+      return fallback;
+    }
+    throw error;
   }
-  if (Date.now() >= cached.expiresAt) refreshDetail(id);
-  return cached.value;
 }
 
 export const staffSnapshotGeneratedAt = snapshot.generatedAt;

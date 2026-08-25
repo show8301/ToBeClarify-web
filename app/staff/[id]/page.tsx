@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import StaffProfile from "../../StaffProfile";
 import { getStaffDetail, getStaffList } from "../../staff-data";
 
 export async function generateMetadata({params}:{params:Promise<{id:string}>}):Promise<Metadata>{
   const {id}=await params;
-  const staff=getStaffDetail(id);
+  const staff=await getStaffDetail(id);
   if(!staff)return{title:"找不到店員｜清醒夢 Lucid Dream"};
   const title=`${staff.displayName}｜清醒夢 Lucid Dream`;
   const description=staff.shortBio||`認識清醒夢店員 ${staff.displayName}`;
@@ -14,8 +15,8 @@ export async function generateMetadata({params}:{params:Promise<{id:string}>}):P
 
 export default async function StaffPage({params}:{params:Promise<{id:string}>}){
   const {id}=await params;
-  const staff=getStaffDetail(id);
-  if(!staff)throw new Error("找不到店員資料");
+  const staff=await getStaffDetail(id);
+  if(!staff)notFound();
   const list=getStaffList();
   const index=list.findIndex(person=>person.id===staff.id);
   const safeIndex=Math.max(index,0);

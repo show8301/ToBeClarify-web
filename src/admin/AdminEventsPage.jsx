@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { adminApi } from '../api/client.js';
+import { adminApi } from './admin-api.js';
 import {
   AdminButton, AdminDialog, AdminDragList, AdminField, AdminImagePicker, AdminPage, AdminPanel, AdminState,
   AdminToggle, newId, splitParagraphs, toDateTimeLocal,
@@ -40,7 +40,9 @@ function reportRequest(report, coverMediaId = report.coverMediaId, coverImageUrl
     coverImageUrl: coverImageUrl || null,
     periodText: report.periodText || null,
     endsAt: report.endsAt || null,
-    detailContent: JSON.stringify(splitParagraphs(report.detailText)),
+    detailContent: JSON.stringify(splitParagraphs(
+      report.detailText ?? readDetails(report.detailContent),
+    )),
     items: (items || []).map((item, index) => ({
       id: item.id?.startsWith('local-') ? null : item.id,
       mediaId: item.mediaId || null,

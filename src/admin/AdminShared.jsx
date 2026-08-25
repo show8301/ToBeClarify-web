@@ -49,10 +49,18 @@ export function AdminButton({ children, variant = 'primary', className = '', ...
 
 export function AdminToggle({ checked, onChange, label = '啟用', ariaLabel, disabled = false, className = '' }) {
   return (
-    <label className={`adminToggle ${className}`.trim()}>
-      <input type="checkbox" checked={checked} disabled={disabled} aria-label={ariaLabel || label || undefined} onChange={(event) => onChange(event.target.checked)} />
+    <span className={`adminToggle ${className}`.trim()}>
+      <button
+        className="adminToggleSwitch"
+        type="button"
+        role="switch"
+        aria-checked={Boolean(checked)}
+        aria-label={ariaLabel || label || undefined}
+        disabled={disabled}
+        onClick={() => onChange(!Boolean(checked))}
+      />
       {label ? <span>{label}</span> : null}
-    </label>
+    </span>
   );
 }
 
@@ -96,18 +104,18 @@ export function AdminState({ loading, error, onRetry }) {
   return null;
 }
 
-export function AdminDialog({ open, title, description, children, onClose, actions, className = '' }) {
+export function AdminDialog({ open, title, description, children, onClose, actions, className = '', showHeader = true }) {
   if (!open) return null;
   return (
     <div className="adminDialogBackdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose?.(); }}>
       <section className={`adminDialog ${className}`.trim()} role="dialog" aria-modal="true" aria-label={title} onMouseDown={(event) => event.stopPropagation()}>
-        <header className="adminDialogHeader">
+        {showHeader ? <header className="adminDialogHeader">
           <div>
             <h2>{title}</h2>
             {description ? <p>{description}</p> : null}
           </div>
           <AdminButton variant="ghost" onClick={onClose} aria-label="關閉編輯視窗">關閉</AdminButton>
-        </header>
+        </header> : null}
         <div className="adminDialogBody">{children}</div>
         {actions ? <footer className="adminDialogFooter">{actions}</footer> : null}
       </section>
@@ -148,12 +156,7 @@ export function AdminDragList({ items, onReorder, onItemClick, renderItem, empty
           <article
             className={`adminDragCard ${draggingId === id ? 'isDragging' : ''} ${dragOverId === id ? 'isDragOver' : ''}`.trim()}
             key={id}
-            onDragOver={canDrag ? (event) => {
-              if (!draggingId) return;
-              event.preventDefault();
-              event.dataTransfer.dropEffect = 'move';
-              setDragOverId(id);
-            } : undefined}
+            onDragOver={canDrag ? (event) => { if (!draggingId) return; event.preventDefault(); event.dataTransfer.dropEffect = 'move'; setDragOverId(id); } : undefined}
             onDrop={canDrag ? (event) => { event.preventDefault(); drop(id); } : undefined}
             onClick={() => { if (!draggedRef.current) onItemClick?.(item); }}
           >

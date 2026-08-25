@@ -1,14 +1,13 @@
 import { useMemo, useState } from 'react';
-import logoIcon from '../assets/LogoSmallTransparent.png';
-import { adminApi } from '../api/client.js';
+import { adminApi } from './admin-api.js';
 import { useAdminAuth } from './AdminAuthContext.jsx';
 import { AdminButton } from './AdminShared.jsx';
 
 const allItems = [
-  { route: '/admin/home', label: '首頁設定', roles: ['developer', 'manager'] },
-  { route: '/admin/staff', label: '店員設定', roles: ['developer', 'manager', 'clerk'] },
-  { route: '/admin/events', label: '活動設定', roles: ['developer', 'manager'] },
-  { route: '/admin/menu', label: '菜單設定', roles: ['developer', 'manager'] },
+  { route: '/admin/home', label: '首頁設定', index: '01', roles: ['developer', 'manager'] },
+  { route: '/admin/staff', label: '店員設定', index: '02', roles: ['developer', 'manager', 'clerk'] },
+  { route: '/admin/events', label: '活動設定', index: '03', roles: ['developer', 'manager'] },
+  { route: '/admin/menu', label: '菜單設定', index: '04', roles: ['developer', 'manager'] },
 ];
 
 export function AdminLayout({ route, navigate, children }) {
@@ -47,8 +46,8 @@ export function AdminLayout({ route, navigate, children }) {
     <main className="adminShell">
       <header className="adminTopbar">
         <div className="adminTopbarBrand">
-          <span className="adminTopbarMark"><img src={logoIcon} alt="" /></span>
-          <span><strong>清醒夢</strong><small>ADMIN LOUNGE</small></span>
+          <span className="adminTopbarMark"><img src="/favicon.svg" alt="" /></span>
+          <span><strong>清醒夢</strong><small>LUCID DREAM / ADMIN</small></span>
         </div>
         <button
           className="adminMenuButton"
@@ -63,7 +62,9 @@ export function AdminLayout({ route, navigate, children }) {
         </button>
         <nav className={`adminNav ${isMenuOpen ? 'isOpen' : ''}`} aria-label="後台功能選單">
           {items.map((item) => (
-            <button key={item.route} className={route === item.route ? 'isActive' : ''} type="button" onClick={() => handleNavigate(item.route)}>{item.label}</button>
+            <button key={item.route} className={route === item.route ? 'isActive' : ''} type="button" onClick={() => handleNavigate(item.route)}>
+              <span>{item.index}</span>{item.label}
+            </button>
           ))}
         </nav>
         <div className="adminTopbarUtilities">

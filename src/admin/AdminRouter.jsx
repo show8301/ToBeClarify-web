@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import './admin.css';
 import { AdminAuthProvider, useAdminAuth } from './AdminAuthContext.jsx';
 import { AdminHomePage } from './AdminHomePage.jsx';
 import { AdminLoginPage } from './AdminLoginPage.jsx';
@@ -46,12 +47,11 @@ function AdminRouteView({ route, navigate }) {
 function AdminLoading() {
   return (
     <main className="adminState" role="status">
-      <div className="adminStateMark">⚙️</div>
+      <div className="adminStateMark">LD</div>
       <p>正在確認後台通行資格…</p>
     </main>
   );
 }
-
 function AdminError({ error }) {
   return (
     <main className="adminState adminStateError" role="alert">

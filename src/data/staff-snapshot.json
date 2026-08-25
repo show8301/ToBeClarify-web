@@ -1,0 +1,2963 @@
+{
+  "generatedAt": "2026-08-16T02:21:28.090Z",
+  "list": [
+    {
+      "id": "dcd49fb5-cacf-4447-9471-8a75950a4a8c",
+      "displayName": "塔克西跩佛",
+      "nickname": "塔克西",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/3b15f04a-5c5f-4704-9263-7e7698abf44d?variant=card",
+      "roleTitle": "夢境主理人",
+      "shortBio": "請拋下所有煩惱，讓我帶領您進入脫離現實的夢境裡\n\n在踏入這扇門後，現實就暫時留在門外",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [],
+      "specialServices": []
+    },
+    {
+      "id": "6ab4f2d2-44b1-4c9c-bb83-5c8cf45ca3a4",
+      "displayName": "琳感菇",
+      "nickname": "菇",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/637de5aa-82a4-4952-8ccd-e77d7ee698b7?variant=card",
+      "roleTitle": "服務生/社恐",
+      "shortBio": "我肚子餓",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [],
+      "specialServices": [
+        {
+          "id": "87679cc0-cfb4-44cf-91c4-2aa19b2668ea",
+          "serviceType": "special",
+          "serviceName": "店外攝影",
+          "serviceDescription": "需預約\n客人先決定好服裝、景跟風格，然後由我來拍攝",
+          "priceText": "500000"
+        },
+        {
+          "id": "8eac53af-dfab-4e00-8540-7874ef057a19",
+          "serviceType": "special",
+          "serviceName": "店內攝影",
+          "serviceDescription": "在店內幫你拍一張美美ㄉ照",
+          "priceText": "50000"
+        },
+        {
+          "id": "f6872b3c-d4d1-4b39-a0ce-44a364aa0385",
+          "serviceType": "special",
+          "serviceName": "拍立得簽繪",
+          "serviceDescription": "就是簽繪",
+          "priceText": "300000"
+        },
+        {
+          "id": "5e0d244b-3971-4cce-820d-7d3e397de0b9",
+          "serviceType": "special",
+          "serviceName": "什麼？我接指名？",
+          "serviceDescription": "與你尬聊30分鐘\n看誰先受不了",
+          "priceText": "150000"
+        }
+      ]
+    },
+    {
+      "id": "eced5fc8-faea-4e0c-8e24-92f68085037a",
+      "displayName": "破道之九十",
+      "nickname": "90",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/a467b1df-b493-465e-9610-23969cea650c?variant=card",
+      "roleTitle": "服務生 / 水產品 ",
+      "shortBio": "受某靈壓強烈影響的敖龍族女性。\n夢中的稀有魚。\n可以飼養在1級以上的水族箱。\n咕嚕...↪️咕嚕咕嚕↩️？\n\n商店販售：無\n不可出售 不可在市場出售",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [],
+      "specialServices": []
+    },
+    {
+      "id": "f5f3b15a-9768-4e37-87e5-abcbc4e9cf0d",
+      "displayName": "緹依·夜羽",
+      "nickname": null,
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/bca1df95-a0d4-476b-a3cc-c605ec189d2c?variant=card",
+      "roleTitle": "服務生",
+      "shortBio": "在海邊經營著一間小小的咖啡館，最近卻開始四處打工。至於原因……大概得問問那位不太有金錢概念的哥哥。",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [],
+      "specialServices": []
+    },
+    {
+      "id": "ff0b974f-3d1b-4745-bb55-84b75f17e336",
+      "displayName": "珉",
+      "nickname": "珉",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/1b07a32f-0be6-46e4-a6ae-99ff5f7d90ec?variant=card",
+      "roleTitle": "服務生/冷漠",
+      "shortBio": "來自格里達尼亞靜謐巷弄間的一間小花店的折耳兔娘。",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [
+        {
+          "id": "4ac9c415-06ec-4578-aa31-9de9a4df7969",
+          "serviceType": "common",
+          "serviceName": "服務生",
+          "serviceDescription": "就只是個服務生",
+          "priceText": null
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "41e53dcb-0e74-4cb4-b353-6939f6928bbc",
+          "serviceType": "special",
+          "serviceName": "已讀亂回",
+          "serviceDescription": "你講你的，我講我的。",
+          "priceText": "77888"
+        }
+      ]
+    },
+    {
+      "id": "f64ed72b-eb0d-4f69-8154-b9797493f2eb",
+      "displayName": "煙蘿",
+      "nickname": null,
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/5c0a23ac-ee6e-4501-bb0a-5f743bd5ce15?variant=card",
+      "roleTitle": "服務生",
+      "shortBio": "「祝您有個好夢。」",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [],
+      "specialServices": []
+    },
+    {
+      "id": "9af66586-7123-460b-8951-53e23ba3bce8",
+      "displayName": "Wen泉蛋",
+      "nickname": "溫泉蛋?",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/109b0894-0b42-48ee-b906-2ee45763357f?variant=card",
+      "roleTitle": "窩ㄅ是一顆蛋",
+      "shortBio": "窩是可愛ㄉ拉拉肥",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [],
+      "specialServices": []
+    },
+    {
+      "id": "066a1087-ba58-4300-8baf-7e5bb492f45d",
+      "displayName": "黑輪",
+      "nickname": "黑輪",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/b428d204-30cb-4f38-bad7-c4282308e371?variant=card",
+      "roleTitle": "本店唯一女精/【翠影酒亭】老闆娘",
+      "shortBio": "「歡迎來到如夢似幻的清醒夢，請和我一起，踏入一個愜意的夜晚，如何？」",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [
+        {
+          "id": "b533c7a4-b143-4f62-9a7f-76d054a1acf7",
+          "serviceType": "common",
+          "serviceName": "不專業攝影",
+          "serviceDescription": "個人獨照 (幫你拍) (或是你想要我的自拍照，怎麼可能會有人想要....)\n雙人合照 (跟我合照)",
+          "priceText": "單人100000GIL 雙人150000GIL"
+        },
+        {
+          "id": "5909d325-83e9-4f08-bace-f1b3ec80ec49",
+          "serviceType": "common",
+          "serviceName": "超破簽繪",
+          "serviceDescription": "(小學生等級，無法和店內其他同事比，但如果你真的很好奇且不怕醜的話......可以試試)",
+          "priceText": "150000GIL/1張"
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "a75ac4fe-f9a0-49e2-8fc2-11743712658c",
+          "serviceType": "special",
+          "serviceName": "一起玩任何東西",
+          "serviceDescription": "可以陪玩大部分的遊戲 (想點此服務之前可以先向我詢問你想一起玩的遊戲，我應該都有，除了APEX，媽的EA亂鎖\n) ",
+          "priceText": "內議，一局200000-400000GIL(看遊戲時長)"
+        }
+      ]
+    },
+    {
+      "id": "06a11a6b-ae0f-48d0-b7a4-50609a5cd23a",
+      "displayName": "三月五日",
+      "nickname": "35",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/dfad2628-96b2-4003-a1b5-5f7a60598187?variant=card",
+      "roleTitle": "YA",
+      "shortBio": "白藍色短髮折耳兔娘，光之攝影師。\n注意：我有帽子!!!\n感謝你的注意 : )",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [
+        {
+          "id": "ecd3a9e9-c2b3-4d09-b9bb-b8a3acf2ff5a",
+          "serviceType": "common",
+          "serviceName": "拍立得(純拍)",
+          "serviceDescription": "純拍",
+          "priceText": "$80,000Gil/張"
+        },
+        {
+          "id": "8b0a5adb-5002-416d-9242-a9ab52f24efb",
+          "serviceType": "common",
+          "serviceName": "拍立得(純簽名)",
+          "serviceDescription": "純簽名",
+          "priceText": "$150,000Gil/張"
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "fc34cd82-65c0-4278-abff-8cb5163ba679",
+          "serviceType": "special",
+          "serviceName": "拍立得(簽繪)",
+          "serviceDescription": "簽繪",
+          "priceText": "$300,000Gil/張"
+        }
+      ]
+    },
+    {
+      "id": "9e55b56c-19b5-437a-816d-4e3252cecc4e",
+      "displayName": "佩佩嘎鳳",
+      "nickname": null,
+      "avatarUrl": null,
+      "roleTitle": null,
+      "shortBio": "臭臉貓萬歲",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [],
+      "specialServices": []
+    },
+    {
+      "id": "1a498ab8-16e6-4070-804c-86ad77e6a210",
+      "displayName": "嗚哇哇嗚哇",
+      "nickname": "嗚哇",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/1e245710-6788-4ff9-ae55-b0f4ebc09f2d?variant=card",
+      "roleTitle": "歐米茄絕境驗證戰",
+      "shortBio": "歐米茄絕境驗證戰",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [],
+      "specialServices": []
+    },
+    {
+      "id": "165a4649-4ab1-4227-b33b-82026903957c",
+      "displayName": "投石機",
+      "nickname": null,
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/b354f3b3-fa16-4053-9c89-7ee7f46ba877?variant=card",
+      "roleTitle": "魅魔／攻城用具",
+      "shortBio": "人畜無害的妖異……大概吧",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [
+        {
+          "id": "013f0e20-0430-4516-aab3-0f5e99195461",
+          "serviceType": "common",
+          "serviceName": "一般指名",
+          "serviceDescription": "欸？只要聊天就好嗎？",
+          "priceText": "20min/15w"
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "bc3faa1c-56e4-447e-968a-8b2a41154ad4",
+          "serviceType": "special",
+          "serviceName": "虛無占卜",
+          "serviceDescription": "透過虛無界的力量窺探你的過去、現在和未來！\n（三張塔羅牌，純粹我流牌陣和解法>_O）",
+          "priceText": "20min/20w"
+        },
+        {
+          "id": "1742c99e-7581-4032-912d-a83af92a2c26",
+          "serviceType": "special",
+          "serviceName": "專屬夢境",
+          "serviceDescription": "無論如何都想再見到的人？再也聽不到的一句話？在魅魔替你編織的夢裡都能實現喔！\n（輕─重ＲＰ；１０分鐘事前討論，３０分鐘實際ＲＰ）",
+          "priceText": "40min/50w"
+        }
+      ]
+    },
+    {
+      "id": "04985e69-27ba-44e7-b25a-d2fa7ccd791c",
+      "displayName": "莉賽露丶天羽",
+      "nickname": "天羽",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/3285d4a7-7278-42c8-ba2a-aa782d0a525c?variant=card",
+      "roleTitle": "幽靈",
+      "shortBio": "從你眼中所照映出的那個寧靜的世界，又在那之中看見了什麼呢？",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [
+        {
+          "id": "725474a4-fca8-42a1-8b8b-d92b5a485ca8",
+          "serviceType": "common",
+          "serviceName": "共通服務？",
+          "serviceDescription": "這是什麼？好玩嗎？",
+          "priceText": "窩不知道"
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "bd37dee0-ed27-499c-9c16-34d0b95b67ad",
+          "serviceType": "special",
+          "serviceName": "天羽占卜",
+          "serviceDescription": "天羽占卜（不負責任版）\n提問，然後......\n接受命運的安排！",
+          "priceText": "一個緣分"
+        },
+        {
+          "id": "1bff4faa-01a5-4e37-8dc1-b7fc7412b616",
+          "serviceType": "special",
+          "serviceName": "簽繪",
+          "serviceDescription": "其他店員搓得更好別找我，我只是多放幾個東西不然好空（Ｘ",
+          "priceText": "一份心願"
+        }
+      ]
+    },
+    {
+      "id": "fd88f8ca-4d90-4450-9e27-5c40c1dfb312",
+      "displayName": "西野茜",
+      "nickname": "小茜",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/f380590a-64c1-48a4-bddf-dcbba52596f4?variant=card",
+      "roleTitle": "西野茜",
+      "shortBio": "您好，小茜裝潢代工，遊蕩在世界各地替每位客人把心愛的家裝潢得漂漂亮亮的裝潢師\n至今房屋裝潢將近十年年時間，國際服加上繁中服經手裝潢件數上百件\n謝謝客人支持我的裝潢，也希望接更多不同種類風格來挑戰自己",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [
+        {
+          "id": "1c48795d-aa48-4173-b1bb-444b65efb403",
+          "serviceType": "common",
+          "serviceName": "純聊天陪聊",
+          "serviceDescription": "陪伴客人聊天，不管是遊戲內、抱怨上司、日常生活瑣事皆可陪聊",
+          "priceText": "100,000 Gil"
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "b8549d32-285a-4f02-a513-7bf5feabad2c",
+          "serviceType": "special",
+          "serviceName": "日隨/副本/討伐/24人/大型 支援",
+          "serviceDescription": "日常副本日隨隊友支援，缺隊友嗎? 主MT、ST",
+          "priceText": "100,000 Gil"
+        },
+        {
+          "id": "fae22ded-8157-41b8-be31-3533ec9f470a",
+          "serviceType": "special",
+          "serviceName": "裝潢技術 諮詢/詢問",
+          "serviceDescription": "運用多年裝潢技術，協助客人裝潢技術上諮詢輔導",
+          "priceText": "100,000 Gil"
+        },
+        {
+          "id": "b7ed7357-4ad6-41d4-ae84-b0232c7a2c62",
+          "serviceType": "special",
+          "serviceName": "裝潢技術 協助/施工",
+          "serviceDescription": "協助客人裝潢上遇到困難的技術支援以及指導，到府上協助裝潢施工",
+          "priceText": "500,000 Gil"
+        },
+        {
+          "id": "845d96c0-7bee-4a79-b7af-8739256daf3f",
+          "serviceType": "special",
+          "serviceName": "裝潢接案 承接各式裝潢風格",
+          "serviceDescription": "【收費明細】各類房型收費如下：\n                  個人房700萬\n(含家具以及染色350、裝潢費350)\n                  公寓700萬\n(含家具以及染色350、裝潢費350)\n                 S房1000萬\n(含家具以及染色500、裝潢費500)\n                 M房2500萬\n(含家具以及染色1250、裝潢費1250)\n                  L房3500萬\n(含家具以及染色1750、裝潢費1750)",
+          "priceText": "7,000,000 ~ 35,000,000 Gil"
+        },
+        {
+          "id": "606385af-5410-403d-8de3-35eaab3f137d",
+          "serviceType": "special",
+          "serviceName": "挖寶藏寶庫隊友支援",
+          "serviceDescription": "想單人挖寶缺隊友嗎?  出魔紋獎勵都歸客人所有",
+          "priceText": "100,000 Gil"
+        }
+      ]
+    },
+    {
+      "id": "d72b532e-ca08-4263-8425-c970583e02ac",
+      "displayName": "紅色赤月",
+      "nickname": null,
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/25bd6f99-4828-45f8-a039-6b3499df2c81?variant=card",
+      "roleTitle": "男模店老闆",
+      "shortBio": "在艾奧傑亞開設一間男模店的老闆\n平時開店時由於過度繁忙，沒有機會與各位好好暢聊\n想在這裡與各位好好的聊天，談心，玩樂\nRP定位:無RP",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [
+        {
+          "id": "37342914-1ed7-4e33-92e6-4302409f0eb8",
+          "serviceType": "common",
+          "serviceName": "一般指名",
+          "serviceDescription": "一般聊天服務",
+          "priceText": "20min/15w"
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "955c8ed2-20bc-432e-b5e1-1011aacf5cec",
+          "serviceType": "special",
+          "serviceName": "日隨",
+          "serviceDescription": "指名期間免費",
+          "priceText": "免費"
+        },
+        {
+          "id": "4e0658d6-7095-455b-ac7d-64a9d3733074",
+          "serviceType": "special",
+          "serviceName": "一般拍照(非拍立得)",
+          "serviceDescription": "無簽繪",
+          "priceText": "5w"
+        },
+        {
+          "id": "45245bac-d190-44c2-b55c-15fb2cd57c15",
+          "serviceType": "special",
+          "serviceName": "神秘房間服務",
+          "serviceDescription": "秘密，等你來發掘探索",
+          "priceText": "30min/50w"
+        }
+      ]
+    },
+    {
+      "id": "54fec66c-4b81-4b30-b129-2acddc406d9c",
+      "displayName": "下限無底",
+      "nickname": "下.限.無.底(C4取2)",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/343564cf-8e46-46c0-bf7e-bf3b64859baf?variant=card",
+      "roleTitle": "窩不是叔叔 /【終焉後的餐桌】店長",
+      "shortBio": "喜歡到處找人湊熱鬧，也很習慣往熟人身邊貼，一不小心就會靠得有點太近。\n至於有沒有特別偏心誰……嗯，她自己也不太確定。\n其他店員表示──這人完全法克...",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [
+        {
+          "id": "0ba9592a-4493-41cd-ae08-8c381b2b8d06",
+          "serviceType": "common",
+          "serviceName": "單人拍立得(有簽繪)",
+          "serviceDescription": "單人拍立得 有簽繪喔(*´∀`)~♥",
+          "priceText": "100,000 Gil "
+        },
+        {
+          "id": "9fc93187-fada-4d4d-9133-55f15396f66c",
+          "serviceType": "common",
+          "serviceName": "合照拍立得(無簽繪)",
+          "serviceDescription": "合照拍立得 沒有簽繪喔(*´∀`)~♥",
+          "priceText": "50,000 Gil "
+        },
+        {
+          "id": "8ef906d9-4312-4074-a8f5-e9d10623ce9c",
+          "serviceType": "common",
+          "serviceName": "合照拍立得(有簽繪)",
+          "serviceDescription": "合照拍立得 有簽繪喔(*´∀`)~♥",
+          "priceText": "150,000 Gil"
+        },
+        {
+          "id": "c1c2870d-878e-4532-940b-fc0c86cf510f",
+          "serviceType": "common",
+          "serviceName": "貼貼照",
+          "serviceDescription": "貼貼照(*´▽`*)",
+          "priceText": null
+        },
+        {
+          "id": "326c3fd1-4d7f-4673-92fe-c802067eb14a",
+          "serviceType": "common",
+          "serviceName": "外拍",
+          "serviceDescription": "外拍",
+          "priceText": null
+        },
+        {
+          "id": "d087b00f-4539-4c0b-9516-84cb5f8a4804",
+          "serviceType": "common",
+          "serviceName": "日隨/打本",
+          "serviceDescription": "日隨/打本",
+          "priceText": null
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "14978c2e-e425-4d4c-b1e3-edadb45557b4",
+          "serviceType": "special",
+          "serviceName": "P8S 陪練/通關 ST ",
+          "serviceDescription": "P8S 陪練/通關 ST ",
+          "priceText": "1飯/通關 150,000 Gil "
+        },
+        {
+          "id": "c6af3f26-3899-4dd8-b9e1-bc49fe4b8313",
+          "serviceType": "special",
+          "serviceName": "絕神兵陪練/通關 ST",
+          "serviceDescription": "絕神兵陪練/通關 ST",
+          "priceText": "1飯/通關 150,000 Gil "
+        },
+        {
+          "id": "772072cb-96f9-4f28-9de9-804dc3a3cddb",
+          "serviceType": "special",
+          "serviceName": "絕亞陪練/通關ST ",
+          "serviceDescription": "絕亞陪練/通關ST ",
+          "priceText": "1飯/通關 150,000 Gil"
+        },
+        {
+          "id": "b712c244-6c9d-4033-94fa-4cda56d590ac",
+          "serviceType": "special",
+          "serviceName": "絕巴哈陪練/通關 ST ",
+          "serviceDescription": "絕巴哈陪練/通關 ST ",
+          "priceText": "1飯/通關 200,000 Gil "
+        }
+      ]
+    },
+    {
+      "id": "bde161b1-44b9-401a-8a80-a6690d025e11",
+      "displayName": "林檎子",
+      "nickname": "林檎子",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/2e407ab1-4495-4a8c-b93c-12f3e605a090?variant=card",
+      "roleTitle": "媽咪 / 【海都沒有派對】擁有者",
+      "shortBio": "是大家的媽咪林檎子 ♡",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [
+        {
+          "id": "fc98043d-8a01-48d0-811d-b7e7dc5f7c2c",
+          "serviceType": "common",
+          "serviceName": "與媽咪合影(簽拍)",
+          "serviceDescription": "與媽咪相處的時光也許很短，\n但我們可以將片刻化為永恆，\n讓媽咪拿起相機記錄我們的模樣，\n把夢裡的回憶好好凝結吧(๑ơ ₃ ơ)♥",
+          "priceText": "300,000 Gil / 張"
+        },
+        {
+          "id": "87fc8b77-33c7-41f4-ab26-8b1f1afa2dfc",
+          "serviceType": "common",
+          "serviceName": "媽咪的蛋包飯",
+          "serviceDescription": "媽咪把《海都沒有派對》的招牌餐點帶來啦！\n孩子今天的蛋包飯上想要畫上什麼圖案或文字呢？",
+          "priceText": "150,000 Gil /份"
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "4d4da6e7-6a97-4616-82ff-76ac41c1136f",
+          "serviceType": "special",
+          "serviceName": "峽谷大亂鬥！",
+          "serviceDescription": "是該拿出...媽咪的...尊爵不凡...Faker簽名...阿璃造型了...!",
+          "priceText": "300,000 Gil /場"
+        }
+      ]
+    },
+    {
+      "id": "5effcab9-1619-4956-9219-34053c95205a",
+      "displayName": "芙烈達‧卡蘿",
+      "nickname": "芙烈達",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/79976326-e9cf-4daf-b90c-5b4be53b7449?variant=card",
+      "roleTitle": "畫家/薩維奈/男孩子",
+      "shortBio": "喜歡交流喜歡畫圖也喜歡你，\n請約稿的同時也跟我約會吧！✨❤️",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [
+        {
+          "id": "49f564f8-6229-4761-84b9-14538e080b13",
+          "serviceType": "common",
+          "serviceName": "一般指名",
+          "serviceDescription": "任何情況下都可以指名芙烈達!\n※一節20分鐘",
+          "priceText": "150000"
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "83dc5afb-7b0b-419c-a331-ea23bf8060e5",
+          "serviceType": "special",
+          "serviceName": "🥥 把我帶出場！",
+          "serviceDescription": "將芙烈達帶出場外！\n一節以２０分鐘為一節\n首節：⁠100,000⁠ Gil\n續節：⁠50,000⁠ Gil / 節",
+          "priceText": "⁠100,000⁠ Gil~⁠50,000⁠"
+        },
+        {
+          "id": "214b54aa-a2f3-4d0e-9fc5-fa40ac7243d8",
+          "serviceType": "special",
+          "serviceName": " 🎨 預約人像畫圖 ",
+          "serviceDescription": "跟芙烈達預約拍照、畫圖，並在營業時間交付\n\n內容：個人繪圖 PNG 檔案雲端連結 1 張\n附贈：指名時間 1 節 (額滿可選非營業時間打包或折抵單節費用)",
+          "priceText": "⁠1,000,000⁠ Gil～10,000,000⁠ Gil "
+        },
+        {
+          "id": "76b8c687-4cf6-41bb-b3a2-a03cd9ab3452",
+          "serviceType": "special",
+          "serviceName": " ✈️ 整合包：帶我去任何地方 ",
+          "serviceDescription": "帶著芙烈達一起出去玩，並且在下周營業時間交付雙人合圖一張！\n內容：外帶 2 節 + 專屬雙人合圖 1 張\n備註：限 6.0 前地圖，圖稿 1 週內交付",
+          "priceText": "⁠5,000,000⁠ Gil"
+        },
+        {
+          "id": "70ec8dc4-5633-46a6-a898-833a56e728c7",
+          "serviceType": "special",
+          "serviceName": " 🔮 祕密的夢境契約：什麼都可以的服務",
+          "serviceDescription": " 化形的妖怪將滿足你在夢境裡的所有願望……\n",
+          "priceText": " 代價：⁠???,???⁠ Gil"
+        }
+      ]
+    },
+    {
+      "id": "2e638353-a36a-4158-874d-e63554cf5a3e",
+      "displayName": "薩姆琦烏卡",
+      "nickname": "烏卡",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/1546d03a-a7ae-4acd-8158-b82747d37e3c?variant=card",
+      "roleTitle": "偶像",
+      "shortBio": "呱呱!",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [],
+      "specialServices": [
+        {
+          "id": "a4b35262-5977-4c2d-a9b3-9d117d2a8fe0",
+          "serviceType": "special",
+          "serviceName": "Freestyle Dancing!!",
+          "serviceDescription": "給粉絲自己挑歌，偶像跳給你看!",
+          "priceText": "300'000 GIL/20MIN"
+        }
+      ]
+    },
+    {
+      "id": "b8a134c7-2514-4c27-bcc4-04e32c5752be",
+      "displayName": "春和咲",
+      "nickname": "小春",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/42551dd7-61c8-4e33-8ca9-3995bb060acb?variant=card",
+      "roleTitle": "溫和、吃貨",
+      "shortBio": "心情不好可以找我，心情很好可以找我，無聊可以找我，有聊可以找我。",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [
+        {
+          "id": "0499fbe0-c0ae-4627-9c39-bc3bb356dac8",
+          "serviceType": "common",
+          "serviceName": "陪聊",
+          "serviceDescription": "就陪你聊天，把我當垃圾桶，想說就說",
+          "priceText": "100000gil"
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "3111ad44-0aba-459b-b576-4d49cd4d9e5f",
+          "serviceType": "special",
+          "serviceName": "帕麻邱",
+          "serviceDescription": "陪你打日麻(多瑪方城戰、雀魂?)\n非專業雀士，你想和大牌?當然可以",
+          "priceText": "100000gil"
+        },
+        {
+          "id": "bfb6ad25-b9ea-4656-b827-35f87f713609",
+          "serviceType": "special",
+          "serviceName": "COS女僕",
+          "serviceDescription": "穿著女僕裝跟你聊天，什麼?你說你看過我在女僕店上班?都是假象~",
+          "priceText": "150000gil"
+        },
+        {
+          "id": "6213860a-2651-4dd6-a45b-71340e46f807",
+          "serviceType": "special",
+          "serviceName": "外拍(店外)",
+          "serviceDescription": "你有想法的話，我就是你的擺拍人偶~\n此服務可以到店外的地點做拍攝，拍攝時間至少30分鐘以上",
+          "priceText": "150000gil"
+        },
+        {
+          "id": "607f87f6-4d5a-4d82-8381-548318de94aa",
+          "serviceType": "special",
+          "serviceName": "畫作推薦(店外)",
+          "serviceDescription": "外派到你家幫你推薦一幅適合擺在你家的畫，目前2~7版風景畫以及伊修加爾德都有\n時間還夠的話就在你家聊",
+          "priceText": "100000gil"
+        },
+        {
+          "id": "1f57bb30-1f24-417c-b060-bd8e58be7e54",
+          "serviceType": "special",
+          "serviceName": "優雷卡陪練(店外)",
+          "serviceDescription": "視需求跟時間訂價，可幫忙戳NM帶練等，打BA等等",
+          "priceText": "300000gil"
+        }
+      ]
+    },
+    {
+      "id": "3a39d845-e99c-426b-b2f6-e1fce899508b",
+      "displayName": "鹿鳴月芽",
+      "nickname": "鹿鹿",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/ebb056c3-399e-459a-bd98-9457e723d410?variant=card",
+      "roleTitle": "撫媚系鹿鹿、可甜可鹹系❤",
+      "shortBio": "艾歐澤亞這麼大...你、下次有空的時候，還願意再來找我嗎？",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [
+        {
+          "id": "768191ea-f6fa-4c8b-84f1-21c5bca089e0",
+          "serviceType": "common",
+          "serviceName": "戀愛感聊天",
+          "serviceDescription": "在聊天時施放一些戀愛魔法，讓二人世界甜甜蜜蜜了起來",
+          "priceText": "200,000 Gil "
+        },
+        {
+          "id": "a746f72c-9e9d-4a0c-9c38-d04e0997130e",
+          "serviceType": "common",
+          "serviceName": "拍立得 (單人)",
+          "serviceDescription": "鹿鹿現場拍的照片及含簽繪版本，相簿含範例\n也會有隨機掉落風格唷～❤",
+          "priceText": "150,000 Gil"
+        },
+        {
+          "id": "b0ff03eb-5502-48b3-901a-89c28e8c1c53",
+          "serviceType": "common",
+          "serviceName": "拍立得 (雙人)",
+          "serviceDescription": "與可愛帥氣的您一起合照，服務已含簽繪\n\n可於相簿參考範例",
+          "priceText": "250,000 Gil"
+        },
+        {
+          "id": "f72066cd-e3d3-4703-b4b0-10b85c46a2fa",
+          "serviceType": "common",
+          "serviceName": "外拍",
+          "serviceDescription": "由您決定服裝、景觀及風格 ，可帶著鹿鹿出外拍照\n\n攝影由鹿鹿負責，您負責可愛就好",
+          "priceText": "100,000 Gil"
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "8f375115-8f08-4675-8176-012e8207b0e5",
+          "serviceType": "special",
+          "serviceName": "專屬包廂服務",
+          "serviceDescription": "想窺探鹿鹿藏起來的另一面嗎？那就來陪鹿聊聊天💕\n至於能發現多少，就看你自己❤️",
+          "priceText": null
+        },
+        {
+          "id": "60d408d8-0864-4e05-80a2-df208e13485f",
+          "serviceType": "special",
+          "serviceName": "1日CP券",
+          "serviceDescription": "只限於艾奧澤亞內使用，於進店開始計時 \n若有進入RP店和其他之消費行為，需由您買單。\n會有滿滿的戀愛感，或是想指定鹿成為哪種風格的可愛CP也可以！",
+          "priceText": "1,000,000 Gil"
+        }
+      ]
+    },
+    {
+      "id": "5ea035f4-dc41-4ccc-95d5-34a8c3f13dc8",
+      "displayName": "霧淵",
+      "nickname": null,
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/2c53e3fa-000f-480f-85d0-21e88304412e?variant=card",
+      "roleTitle": "高冷黑兔",
+      "shortBio": "霧淵高冷的不行",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [],
+      "specialServices": [
+        {
+          "id": "cf0b4a12-dda2-4595-a18b-6d6e83344150",
+          "serviceType": "special",
+          "serviceName": "陪伴日常",
+          "serviceDescription": "所有日隨可以排到的本，只要有開的全部可以陪排\n\n「免費的陪伴，一直不是廉價呦」",
+          "priceText": "0"
+        },
+        {
+          "id": "57d64968-c792-4a3c-9382-382329b91545",
+          "serviceType": "special",
+          "serviceName": "黑魔副本教學",
+          "serviceDescription": "黑魔基礎教學以及個別副本研究\n\n\n「我們可以打不出來，但不能不做準備」",
+          "priceText": "0"
+        },
+        {
+          "id": "8eb48640-d190-469d-9a3a-07cb2b508d78",
+          "serviceType": "special",
+          "serviceName": "拍照",
+          "serviceDescription": "我負責被拍，地點隨意\n\n「這是自身化為木樁的時刻」",
+          "priceText": "0"
+        },
+        {
+          "id": "f2a723e0-5920-4cb0-8e01-6197e936327c",
+          "serviceType": "special",
+          "serviceName": "挖寶",
+          "serviceDescription": "陪妳去挖寶，單人寶圖可以去幫妳加油，多人寶圖可以一起下底\n\n「挖不挖得到是另一回事」",
+          "priceText": "0"
+        },
+        {
+          "id": "47dc4e48-9d4e-4d55-9ed9-1e79dc174cc5",
+          "serviceType": "special",
+          "serviceName": "青魔學技能",
+          "serviceDescription": "陪妳去學青摩技能\n\n「一起去學技能吧」",
+          "priceText": "0"
+        },
+        {
+          "id": "06026794-6987-47b9-b28d-e670bab18e72",
+          "serviceType": "special",
+          "serviceName": "黑風海練副職",
+          "serviceDescription": "可以開學者套盾，也可以幫打怪\n\n「怪要滅絕啦」",
+          "priceText": "0"
+        },
+        {
+          "id": "4889a031-7db1-47c3-a6dc-f28526702c8b",
+          "serviceType": "special",
+          "serviceName": "月球組隊陪肝",
+          "serviceDescription": "利維坦限定\n\n「一起肝吧」",
+          "priceText": "0"
+        },
+        {
+          "id": "592176f1-30fc-48e1-a917-75d465952524",
+          "serviceType": "special",
+          "serviceName": "絕伊甸陪練",
+          "serviceDescription": "一飯50萬，打的是D2黑魔，過本需額外付150萬渡劫費用，如果團隊是從 0 開始，可以一飯 20 萬打 d4 畫家，打的是日野自標安基藍自標\n\n「回游末邦監獄摟」",
+          "priceText": "500000"
+        },
+        {
+          "id": "a457eb02-2df8-4623-aa1c-b362de089675",
+          "serviceType": "special",
+          "serviceName": "絕亞力山大陪練",
+          "serviceDescription": "一飯30萬，打的是D2黑魔，正攻1211魚子醬全套，如果要練34固定斷絕我需要先預習\n\n從0開始D4畫家/召喚一飯10萬\n\n「打不過就合體不好吧」",
+          "priceText": "300000"
+        },
+        {
+          "id": "7cf331b6-5902-49a8-a842-80b69ea1d822",
+          "serviceType": "special",
+          "serviceName": "女王古殿仙藥團",
+          "serviceDescription": "5萬是帶仙藥跟技能的費用\n\n「這種老舊的建築是危樓吧」",
+          "priceText": "50000"
+        },
+        {
+          "id": "58e33861-e480-43ad-8b6a-a4575afab4aa",
+          "serviceType": "special",
+          "serviceName": "全肯定哄妳",
+          "serviceDescription": "全肯定哄妳，跟妳一起罵討厭的人\n\n「這段時間妳就是對的」",
+          "priceText": "100000"
+        },
+        {
+          "id": "2672e2e4-1e64-49de-a309-406f73ccf63b",
+          "serviceType": "special",
+          "serviceName": "外帶做其他沒寫的服務",
+          "serviceDescription": "有什麼要求都可以問問",
+          "priceText": "?"
+        }
+      ]
+    },
+    {
+      "id": "7f9f3806-12ab-4d8e-a169-a610572a7b22",
+      "displayName": "龍塵/龍炎/龍霆/龍颯",
+      "nickname": "龍哥",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/1e8992bd-ab61-4f35-b37f-86f8a640159c?variant=card",
+      "roleTitle": "龍涎閣",
+      "shortBio": "「於世界探尋，並持之以恆，那是渴望歸屬、戲謔俗世、杜絕塵囂、颯爽勇武之人的故事。」",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [],
+      "specialServices": []
+    },
+    {
+      "id": "a7832951-39a0-4792-ba22-ec33addcc444",
+      "displayName": "夏爾",
+      "nickname": null,
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/b1e9c469-23a7-4cb7-bee9-410d8da38f24?variant=card",
+      "roleTitle": null,
+      "shortBio": "夢之所以有意義，是因為醒來之後，我們有可能把在夢中看見的希望帶回現實。",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [],
+      "specialServices": [
+        {
+          "id": "1085e2ab-d134-4072-af62-3740c53e4d87",
+          "serviceType": "special",
+          "serviceName": "合照拍立得",
+          "serviceDescription": "無簽繪",
+          "priceText": "50,000 Gil"
+        },
+        {
+          "id": "6c7e98da-2579-4903-950c-917d0cb8e50b",
+          "serviceType": "special",
+          "serviceName": "陪玩網頁小遊戲",
+          "serviceDescription": "陪玩各種網頁小遊戲！10分鐘\n五子棋..公關災難..等等\n※有好玩的可以介紹給我哦",
+          "priceText": "30,000 Gil"
+        },
+        {
+          "id": "818ef7c6-9119-4a28-ba1e-b22400020440",
+          "serviceType": "special",
+          "serviceName": "金碟陪玩",
+          "serviceDescription": "15分鐘金碟隨意玩~~\n看是要我投籃投到手抽筋，還是一起跳松果都可以 (՞•̀ω•́՞)⸝ި ʕᦏ",
+          "priceText": "50,000 Gil"
+        }
+      ]
+    },
+    {
+      "id": "5018ec61-7e3b-4a4e-b7b0-a11d66291711",
+      "displayName": "神仙玉米粉",
+      "nickname": "玉米",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/6247196b-2eac-494b-aed5-3b1a911db738?variant=card",
+      "roleTitle": "畫家/維艾拉",
+      "shortBio": "「...能為你畫張圖嗎?」\n無名的畫家，總是身著旗袍\n揹著畫筆到處旅行----",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [],
+      "specialServices": [
+        {
+          "id": "8df2c8e9-6bb5-44f8-9344-8dc1b386c20a",
+          "serviceType": "special",
+          "serviceName": "繪圖委託",
+          "serviceDescription": "電繪/手繪",
+          "priceText": "50萬~85萬"
+        },
+        {
+          "id": "934ff4cd-2f2b-4d9f-a181-8d306afae4ac",
+          "serviceType": "special",
+          "serviceName": "頭像(電繪)",
+          "serviceDescription": "黑白+任意指定色彩",
+          "priceText": "500,000 Gil"
+        },
+        {
+          "id": "8cf0d300-b9bc-4f81-a7c7-2205b681094b",
+          "serviceType": "special",
+          "serviceName": "半身(電繪)",
+          "serviceDescription": "黑白+任意指定色彩",
+          "priceText": "700,000 Gil"
+        },
+        {
+          "id": "e4509da3-801e-437e-a7b7-71a727c58278",
+          "serviceType": "special",
+          "serviceName": "頭像(手繪)",
+          "serviceDescription": "黑白",
+          "priceText": "650,000 Gil"
+        },
+        {
+          "id": "425981fe-70ea-404a-b5ca-8ddc568c6211",
+          "serviceType": "special",
+          "serviceName": "半身(手繪)",
+          "serviceDescription": "黑白",
+          "priceText": " 850,000 Gil"
+        }
+      ]
+    },
+    {
+      "id": "7507c82f-f0c8-4ef8-83e6-1de52a5bd6ba",
+      "displayName": "普琳希絲",
+      "nickname": "Ｅ",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/b6985887-67d9-4e6f-8054-81a502dcf6db?variant=card",
+      "roleTitle": "傭兵｜情報商",
+      "shortBio": "「讓我們一起描繪一場令人沉醉的夢境吧？」",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [],
+      "specialServices": [
+        {
+          "id": "5b8c3b3e-5a07-45e1-a08b-f0917e9e7d73",
+          "serviceType": "special",
+          "serviceName": "店內攝影｜簡單個人照",
+          "serviceDescription": "換上您喜歡的衣服，擺出您自信的動作，由我按下快門‧",
+          "priceText": "50,000"
+        },
+        {
+          "id": "2e8f560f-a16a-49c1-be6e-2856dae4ad0f",
+          "serviceType": "special",
+          "serviceName": "店內攝影｜個人拍立得（無簽）",
+          "serviceDescription": "如需要簽繪，則需要加價3萬Gil。",
+          "priceText": "50,000"
+        },
+        {
+          "id": "fc41305a-1159-4455-b09e-267381a69997",
+          "serviceType": "special",
+          "serviceName": "店內攝影｜雙人拍立得（無簽）",
+          "serviceDescription": "如需簽繪，則需要加價5萬Gil。",
+          "priceText": "100,000"
+        },
+        {
+          "id": "1cadce69-c32b-4d95-af0c-a8c7217232fb",
+          "serviceType": "special",
+          "serviceName": "店外攝影｜個人照",
+          "serviceDescription": "限定攝影棚拍，需要客人自行搭配服裝與尋找心儀攝影棚｜\n因溝通與確認姿勢需要時間，請先確保有空閒時間｜\n保底五張照片，會統一上傳雲端給客人。（試營運中可能漲幅）",
+          "priceText": "500,000/1hr"
+        },
+        {
+          "id": "dc564326-b7f3-4b35-8e73-44a8e81af97f",
+          "serviceType": "special",
+          "serviceName": "繪圖｜QQ麻糬",
+          "serviceDescription": "此項目為不定期開放，如開放會提前告知，基本上會限制名額。\n是模版。需提供角色大頭及服裝，複雜服飾會極簡化，介意者請繞道。工期：3-7天",
+          "priceText": "300,000"
+        },
+        {
+          "id": "8ef08c0c-072b-45bd-a26b-4c52771f85ca",
+          "serviceType": "special",
+          "serviceName": "繪圖｜正比塗鴉",
+          "serviceDescription": "此項目為不定期開放，如開放會提前告知，基本上會限制名額。\n繪製胸上左右。蹭線、溢色、服裝簡化注意，介意者請繞道。工期：7-14天",
+          "priceText": "1,000,000"
+        },
+        {
+          "id": "33606713-93ba-483e-83aa-9f511c64a15b",
+          "serviceType": "special",
+          "serviceName": "談心｜戀愛體驗",
+          "serviceDescription": "「需要我的話，我一直都在。」",
+          "priceText": "300,000/20min"
+        },
+        {
+          "id": "b7284e81-27d7-47b4-bb36-af80096797cc",
+          "serviceType": "special",
+          "serviceName": "外帶｜日隨",
+          "serviceDescription": "日隨打TH居多。打PVP不額外收費，不保證會贏。",
+          "priceText": "150,000/20min"
+        }
+      ]
+    },
+    {
+      "id": "6d9bcaba-4840-4abf-a3dd-65dcff7706f7",
+      "displayName": "米婭",
+      "nickname": "Mia",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/916c01c0-6c60-466d-b464-749f961a27d7?variant=card",
+      "roleTitle": "光暗未來絕境戰",
+      "shortBio": "光暗未來絕境戰",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [],
+      "specialServices": [
+        {
+          "id": "6fb90039-dc0b-451f-9081-492e13bfeb33",
+          "serviceType": "special",
+          "serviceName": "鏡中奇遇",
+          "serviceDescription": "讀條鏡中奇遇之後，場外出現一面白鏡與兩面紅鏡。白鏡會與BOSS同時發動攻擊，紅鏡會延遲發動。\n兩面紅鏡必定相隔90°。\n\nBOSS與白鏡會先發動月環及最近四人的誘導扇形。MT需要把BOSS拉到白鏡對面，由近戰誘導BOSS、遠程誘導白鏡。",
+          "priceText": "999,999,999"
+        },
+        {
+          "id": "d8703634-2653-4a53-a128-1c694d814e61",
+          "serviceType": "special",
+          "serviceName": "時間壓縮．絕",
+          "serviceDescription": "地獄審判後暗之巫女回場中讀條時間壓縮．絕。讀條職業若是站位不當的話可能會斷讀條。\n傷害約18.5萬的全體AOE後，賦予玩家一堆debuff開始時間壓縮一串機制。\n",
+          "priceText": "999,999,999"
+        },
+        {
+          "id": "47993c68-ad03-48b6-9772-4d89d74c26b8",
+          "serviceType": "special",
+          "serviceName": "光與暗的龍詩",
+          "serviceDescription": "兩人共同讀條技能，但實際傷害來自米特隆。全體AOE傷害約17萬需要注意。",
+          "priceText": "999,999,999"
+        },
+        {
+          "id": "d7227af8-8a59-4b5e-beb7-b0b2ca9b0ccb",
+          "serviceType": "special",
+          "serviceName": "時間結晶",
+          "serviceDescription": "兩人回中共同讀條，實際傷害來自暗之巫女。全體AOE傷害約16萬。\n讀條完賦予玩家debuff後上天無法選中。\n\n場上出現與P3時間壓縮同款的非常Happy的沙漏與連線，連線必定只有圖下兩種情況。\n加速的黃線只會連中間，而緩速的紫線則會隨機連線。\n接著這三組沙漏會依加減速依序釋放大範圍鋼鐵，AC必定會先發生。\n鋼鐵範圍可認地板的線。",
+          "priceText": "999,999,999"
+        },
+        {
+          "id": "f5907102-9e41-4710-975e-dea900535016",
+          "serviceType": "special",
+          "serviceName": "光塵之劍",
+          "serviceDescription": "讀條造成約18.5萬的物理全體AOE，並且場中出現地火。\n地火的位置與發動順序隨機，但形狀為固定。",
+          "priceText": "999,999,999"
+        },
+        {
+          "id": "4849b66f-19b4-4412-9067-bff2ab77a31e",
+          "serviceType": "special",
+          "serviceName": "失樂園",
+          "serviceDescription": "潘朵拉之盒後，會依照「光塵之劍→復樂園→星靈之劍→光塵之劍」的順序重複機制。\n在第三次光塵之劍後米特隆會讀條時間切。此時琳和蓋亞會送你1.5條LB，讓你最後有LB3可以打。",
+          "priceText": "999,999,999"
+        }
+      ]
+    },
+    {
+      "id": "6c1a2ce7-7e76-407a-9a52-74864a028984",
+      "displayName": "羲墨",
+      "nickname": null,
+      "avatarUrl": null,
+      "roleTitle": null,
+      "shortBio": "「在這清醒的夢境，汝可讓吾感到有趣嗎?」",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [
+        {
+          "id": "a59f095a-491c-4026-943f-37513f469f1c",
+          "serviceType": "common",
+          "serviceName": "敘闊",
+          "serviceDescription": "一般陪聊",
+          "priceText": null
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "5f21b802-336e-4ae6-9b3c-9208ff82e488",
+          "serviceType": "special",
+          "serviceName": "遊憩",
+          "serviceDescription": "小遊戲",
+          "priceText": "30000"
+        },
+        {
+          "id": "baaf4c1f-78f8-4d10-b33d-c200f7b00812",
+          "serviceType": "special",
+          "serviceName": "卜卦",
+          "serviceDescription": "測一卦..不一定準\n曉天命，盡人事",
+          "priceText": "100000"
+        },
+        {
+          "id": "d2b8bf3a-5563-49da-8cb0-e52c8e3c233e",
+          "serviceType": "special",
+          "serviceName": "月出",
+          "serviceDescription": "月出皎兮，佼人僚兮；舒窈糾兮，勞心悄兮..\n(戀愛體驗)",
+          "priceText": "300000"
+        }
+      ]
+    },
+    {
+      "id": "957b071c-f800-4889-960e-db2d588b1c3e",
+      "displayName": "許魁",
+      "nickname": "小粉貓",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/119d28f2-f86b-49e6-a09f-0ac5c713a52e?variant=card",
+      "roleTitle": "小粉貓",
+      "shortBio": "我還沒想好",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [],
+      "specialServices": []
+    },
+    {
+      "id": "1ee068c4-3cb1-4b55-b44b-49e95b51d07a",
+      "displayName": "貓貓",
+      "nickname": "芙貓貓",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/21f9ec0e-6cc3-4088-83c0-462dcf416a46?variant=card",
+      "roleTitle": "指名人員/拉拉菲爾族",
+      "shortBio": "我有黑鼻子但我不是公肥",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [],
+      "specialServices": []
+    },
+    {
+      "id": "7077cfe0-a073-4564-88f7-61c083a0fce7",
+      "displayName": "帕蕊",
+      "nickname": "帕蕊",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/397c9796-dbbc-4c07-ad6c-a3ee4eac022a?variant=card",
+      "roleTitle": ":3",
+      "shortBio": "測試",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [
+        {
+          "id": "fc318920-8f2f-405b-9898-2f9375694235",
+          "serviceType": "common",
+          "serviceName": "給我錢",
+          "serviceDescription": "請收留我",
+          "priceText": "一棟L"
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "c4be059f-ea11-4ba4-87c2-b24e58784d64",
+          "serviceType": "special",
+          "serviceName": "測試",
+          "serviceDescription": "請我吃飯謝謝",
+          "priceText": "無價"
+        }
+      ]
+    },
+    {
+      "id": "2cbb90df-84ee-5bd1-a8d8-f73de4f7df76",
+      "displayName": "菲萊",
+      "nickname": "菲萊",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/7d1f9b1b-ad9d-43ca-b37f-ece0ad44cb46?variant=card",
+      "roleTitle": "系統架構者 / 創造物管理局職員",
+      "shortBio": "通靈需求，理念審核，阻止創造無用之物，尋找解決方案之人。",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [
+        {
+          "id": "6456f970-47e6-589b-a2bb-73c2006fde75",
+          "serviceType": "common",
+          "serviceName": "咬耳朵",
+          "serviceDescription": "坐好耳朵給你咬\n(若做出攻擊性咬咬，後果自負)",
+          "priceText": "200,000 Gil"
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "b30105f1-4942-561b-ad39-60419d0aaa25",
+          "serviceType": "special",
+          "serviceName": "讓我看看",
+          "serviceDescription": "跟客人聊個天並依照客人喜好推薦合適的店員。",
+          "priceText": "10,000 Gil"
+        },
+        {
+          "id": "d3512cdc-9424-583f-a35b-812a43f2b8bb",
+          "serviceType": "special",
+          "serviceName": "主線稽查",
+          "serviceDescription": "依照已經到達的主線進度，聊聊一路走來的歷程。\n『……你背負著眾多的寄託，\n心中充滿各種記憶。』",
+          "priceText": "30,000 Gil"
+        }
+      ]
+    },
+    {
+      "id": "13b88276-56cb-4882-87b1-01716fb827c2",
+      "displayName": "愛梅克賽特克",
+      "nickname": "愛梅(測試店員)",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/d0be3478-5a02-4206-adc8-c33e7a129f56?variant=card",
+      "roleTitle": "Tester / 最古魔導士",
+      "shortBio": "區區廢物不許對我們的夙願說三道四!",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "commonServices": [
+        {
+          "id": "3345025a-f0b9-412e-bfa5-2fa17a254ffb",
+          "serviceType": "common",
+          "serviceName": "陪聊",
+          "serviceDescription": "就陪你浪費一下生命吧。\n沒辦法，對弱小又稍縱即逝的生物來說，這種狹隘的短視是無法避免的吧?",
+          "priceText": "1,000,000"
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "0cbde3fd-b837-4be1-9c23-3511feca4236",
+          "serviceType": "special",
+          "serviceName": "臭臉說怪話",
+          "serviceDescription": "我這是在誇你們，欣然接受就好了",
+          "priceText": "你的可悲生命"
+        }
+      ]
+    }
+  ],
+  "details": {
+    "dcd49fb5-cacf-4447-9471-8a75950a4a8c": {
+      "id": "dcd49fb5-cacf-4447-9471-8a75950a4a8c",
+      "displayName": "塔克西跩佛",
+      "nickname": "塔克西",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/3b15f04a-5c5f-4704-9263-7e7698abf44d?variant=card",
+      "roleTitle": "夢境主理人",
+      "shortBio": "請拋下所有煩惱，讓我帶領您進入脫離現實的夢境裡\n\n在踏入這扇門後，現實就暫時留在門外",
+      "profileBio": "有人說，夢是現實不敢去的地方\n\n因為在夢裡，不管多麼天馬行空的想象，都可以存在\n\n所以，我們打造了「清醒夢」——一個讓夢境與現實交錯的地方\n\n在這裡，你可以暫時放下現實的規則，遇見不同的人、體驗不同的故事，讓每一次相遇都成為夢境的一部分\n\n今晚，就讓我們陪你一起打造出屬於自己的夢境\n",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [],
+      "commonServices": [],
+      "specialServices": []
+    },
+    "6ab4f2d2-44b1-4c9c-bb83-5c8cf45ca3a4": {
+      "id": "6ab4f2d2-44b1-4c9c-bb83-5c8cf45ca3a4",
+      "displayName": "琳感菇",
+      "nickname": "菇",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/637de5aa-82a4-4952-8ccd-e77d7ee698b7?variant=card",
+      "roleTitle": "服務生/社恐",
+      "shortBio": "我肚子餓",
+      "profileBio": "肚子餓想吃麥當勞薯條\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [
+        {
+          "id": "64c3a2db-5f8b-4df3-a35f-47583779f52e",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/52db1ecd-66cd-4d2c-b652-fa89f18fa822?variant=full"
+        },
+        {
+          "id": "9c2aa787-a55b-474b-b08c-e3f04a699449",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/3ca69b91-7872-4c46-b2a0-c49a64984fda?variant=full"
+        },
+        {
+          "id": "13c8a955-ef1a-42f2-9a71-6cd4aff50617",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/388c99b5-3c11-4a1a-a5c6-c8cc623ca341?variant=full"
+        },
+        {
+          "id": "faeb936e-3ae4-4971-a4be-f0ed9cade05b",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/350eb4f3-de86-44d4-98cc-3e96538ed043?variant=full"
+        },
+        {
+          "id": "df909966-0b2e-4c86-956f-d88bb58759e7",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/96b896b0-e469-4307-862a-d4f45617624f?variant=full"
+        },
+        {
+          "id": "27a48f56-e639-4476-b653-269cb8506ec8",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/5df67a1c-2cb8-4d13-972d-466ac39b3a04?variant=full"
+        }
+      ],
+      "commonServices": [],
+      "specialServices": [
+        {
+          "id": "87679cc0-cfb4-44cf-91c4-2aa19b2668ea",
+          "serviceType": "special",
+          "serviceName": "店外攝影",
+          "serviceDescription": "需預約\n客人先決定好服裝、景跟風格，然後由我來拍攝",
+          "priceText": "500000"
+        },
+        {
+          "id": "8eac53af-dfab-4e00-8540-7874ef057a19",
+          "serviceType": "special",
+          "serviceName": "店內攝影",
+          "serviceDescription": "在店內幫你拍一張美美ㄉ照",
+          "priceText": "50000"
+        },
+        {
+          "id": "f6872b3c-d4d1-4b39-a0ce-44a364aa0385",
+          "serviceType": "special",
+          "serviceName": "拍立得簽繪",
+          "serviceDescription": "就是簽繪",
+          "priceText": "300000"
+        },
+        {
+          "id": "5e0d244b-3971-4cce-820d-7d3e397de0b9",
+          "serviceType": "special",
+          "serviceName": "什麼？我接指名？",
+          "serviceDescription": "與你尬聊30分鐘\n看誰先受不了",
+          "priceText": "150000"
+        }
+      ]
+    },
+    "eced5fc8-faea-4e0c-8e24-92f68085037a": {
+      "id": "eced5fc8-faea-4e0c-8e24-92f68085037a",
+      "displayName": "破道之九十",
+      "nickname": "90",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/a467b1df-b493-465e-9610-23969cea650c?variant=card",
+      "roleTitle": "服務生 / 水產品 ",
+      "shortBio": "受某靈壓強烈影響的敖龍族女性。\n夢中的稀有魚。\n可以飼養在1級以上的水族箱。\n咕嚕...↪️咕嚕咕嚕↩️？\n\n商店販售：無\n不可出售 不可在市場出售",
+      "profileBio": "水產品 \n\n受某靈壓強烈影響的敖龍族女性。\n夢中的稀有魚。\n可以飼養在1級以上的水族箱。\n咕嚕...↪️咕嚕咕嚕↩️？\n\n商店販售：無\n\n不可出售 不可在市場出售\n\n出沒地點：\n《清醒夢》的酒醉鯊魚上\n《棺》的櫃檯裡\n《三月咖啡&酒吧》的魚缸裡\n與某些RP店內的角落\n\n《棺》不定時運營中",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [
+        {
+          "id": "02a73309-ec38-4764-a1f6-ad140ee2cb7b",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/1041386e-5fee-45f4-a4fd-bedbe91a01d7?variant=full"
+        },
+        {
+          "id": "f71575d8-d4df-47a7-b7d0-9d8a082b552a",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/72968c58-c822-4b0f-9dbe-39ff03ad337a?variant=full"
+        },
+        {
+          "id": "a79595a7-257f-4525-8c0b-c624f7aa9c00",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/1f70e5d1-f0da-42f9-97f9-15b830b2042a?variant=full"
+        },
+        {
+          "id": "5e3009d2-ccf4-445e-b175-98eb7a65f662",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/0f15752d-7e0b-4436-bda8-6c08ca99337c?variant=full"
+        },
+        {
+          "id": "82a06e77-ce49-414e-aa24-c6faba009684",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/468d1808-7cc3-4700-9f18-489dc1047251?variant=full"
+        },
+        {
+          "id": "68daa214-d904-4e15-ad24-f0d91a128c68",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/442c6d6c-7369-46de-b071-64054142ed0b?variant=full"
+        },
+        {
+          "id": "51953f1c-a91b-479f-9ad1-134feeb39f98",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/7512d647-f806-4993-87ec-c92958b0fbdd?variant=full"
+        }
+      ],
+      "commonServices": [],
+      "specialServices": []
+    },
+    "f5f3b15a-9768-4e37-87e5-abcbc4e9cf0d": {
+      "id": "f5f3b15a-9768-4e37-87e5-abcbc4e9cf0d",
+      "displayName": "緹依·夜羽",
+      "nickname": null,
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/bca1df95-a0d4-476b-a3cc-c605ec189d2c?variant=card",
+      "roleTitle": "服務生",
+      "shortBio": "在海邊經營著一間小小的咖啡館，最近卻開始四處打工。至於原因……大概得問問那位不太有金錢概念的哥哥。",
+      "profileBio": "平時在海邊經營著一間小小的咖啡館。\n\n最近，哥哥又把旅費花在一些「很有研究價值」的東西上。\n\n「價格不重要，重要的是它們的價值。」\n\n……不，價格很重要。\n\n為了避免旅費再次見底，在朋友的介紹下，來到店裡幫忙。\n\n如果看到一位和我長得很像、正準備掏錢買些奇怪東西的人──\n\n請先叫我。\n\n「哥哥的研究，我不反對。」\n\n「但至少，先讓我們有錢吃飯。」",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [
+        {
+          "id": "948516f1-2eaf-4e9b-80d9-d5e635b9da99",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/5f875054-42a4-43b9-b3ea-0eb5dbe65440?variant=full"
+        },
+        {
+          "id": "37885865-e904-4e85-a183-7b7680adc949",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/737586ad-202e-463b-bc2e-8bcd54e35511?variant=full"
+        },
+        {
+          "id": "b52268bf-63ab-4883-bef2-cc79b711c48a",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/c5e0df0b-66c7-4aad-ae0e-2ec4a9a0f6fd?variant=full"
+        },
+        {
+          "id": "d8b24620-7a73-42b2-b19b-a83f3798c92e",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/b492b695-ca41-47fa-9b51-f5b5619cea3c?variant=full"
+        },
+        {
+          "id": "8b3c48fc-bb39-49f3-9c5d-e446edb3665b",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/b7f74398-27df-41da-85f9-d6653860731a?variant=full"
+        }
+      ],
+      "commonServices": [],
+      "specialServices": []
+    },
+    "ff0b974f-3d1b-4745-bb55-84b75f17e336": {
+      "id": "ff0b974f-3d1b-4745-bb55-84b75f17e336",
+      "displayName": "珉",
+      "nickname": "珉",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/1b07a32f-0be6-46e4-a6ae-99ff5f7d90ec?variant=card",
+      "roleTitle": "服務生/冷漠",
+      "shortBio": "來自格里達尼亞靜謐巷弄間的一間小花店的折耳兔娘。",
+      "profileBio": "外表總是一副漫不經心的冷淡模樣，其實只是慢熟，混熟後就會露出愛捉弄人的童心。\n是一個極致的「美好事物收集者」——熱愛優美的風景、鍾情精緻的物件，若是遇見了美麗的人，她更是不吝於給予直率的讚美。對她來說，生命就是由這些閃閃發光的小事組成的。",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [
+        {
+          "id": "57fe8f3a-e838-42dd-bbbd-80087a64fe97",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/2ef91c38-23d6-4262-b8ac-a1980e0a9405?variant=full"
+        }
+      ],
+      "commonServices": [
+        {
+          "id": "4ac9c415-06ec-4578-aa31-9de9a4df7969",
+          "serviceType": "common",
+          "serviceName": "服務生",
+          "serviceDescription": "就只是個服務生",
+          "priceText": null
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "41e53dcb-0e74-4cb4-b353-6939f6928bbc",
+          "serviceType": "special",
+          "serviceName": "已讀亂回",
+          "serviceDescription": "你講你的，我講我的。",
+          "priceText": "77888"
+        }
+      ]
+    },
+    "f64ed72b-eb0d-4f69-8154-b9797493f2eb": {
+      "id": "f64ed72b-eb0d-4f69-8154-b9797493f2eb",
+      "displayName": "煙蘿",
+      "nickname": null,
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/5c0a23ac-ee6e-4501-bb0a-5f743bd5ce15?variant=card",
+      "roleTitle": "服務生",
+      "shortBio": "「祝您有個好夢。」",
+      "profileBio": "在伊修加爾德的貴族宅邸中，煙蘿度過了一段漫長且壓抑的歲月。在那裡，僕人是沒有名字的影子，多餘的表情會被視為不敬，發問則會招來責罰。久而久之，她習慣了將靈魂藏在面無表情的軀殼深處，把「沉默」當作保護色。當貴族家道中落，煙蘿終於獲得了自由，開始尋找下一份工作。 ",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [
+        {
+          "id": "2da81a55-fb23-45b5-a13a-72015e91885a",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/d912507f-7ce5-4fc1-9c0b-25cff9040d24?variant=full"
+        },
+        {
+          "id": "bb90cbbd-7e82-44f9-86fa-358046f7aa17",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/438f74ce-25c5-41ff-b545-e2b891917c99?variant=full"
+        }
+      ],
+      "commonServices": [],
+      "specialServices": []
+    },
+    "9af66586-7123-460b-8951-53e23ba3bce8": {
+      "id": "9af66586-7123-460b-8951-53e23ba3bce8",
+      "displayName": "Wen泉蛋",
+      "nickname": "溫泉蛋?",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/109b0894-0b42-48ee-b906-2ee45763357f?variant=card",
+      "roleTitle": "窩ㄅ是一顆蛋",
+      "shortBio": "窩是可愛ㄉ拉拉肥",
+      "profileBio": null,
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [],
+      "commonServices": [],
+      "specialServices": []
+    },
+    "066a1087-ba58-4300-8baf-7e5bb492f45d": {
+      "id": "066a1087-ba58-4300-8baf-7e5bb492f45d",
+      "displayName": "黑輪",
+      "nickname": "黑輪",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/b428d204-30cb-4f38-bad7-c4282308e371?variant=card",
+      "roleTitle": "本店唯一女精/【翠影酒亭】老闆娘",
+      "shortBio": "「歡迎來到如夢似幻的清醒夢，請和我一起，踏入一個愜意的夜晚，如何？」",
+      "profileBio": "出身於利姆薩．羅敏薩的精靈十分少見，但這位被稱為『黑輪』的女性精靈就是其中一位，她不願透露本名，但原因只是因為原本的名子稱呼起來太長了，加上她特別喜歡這款來自東方的食材，便因此讓周圍的朋友都如此稱呼自己。\n\n高挑的身材與俐落的眼神，加上精靈那天生優雅的氣質，初次見到她的時候，也許大多數人會覺得她是一個很冷酷嚴肅的人，但與外表相反，她其實是一個熱情助人，特別喜歡與人交際的一個人。\n\n髮型與服裝都會不定時更換，今天也許是西裝筆挺的正經人樣子，隔天或許就會變成鄰家姊姊的日常風了。\n\n另外，她似乎自己也有經營著一間酒館，來到這層現實與夢的交織之處，一來是來交更多朋友的，二來是偷偷來宣傳自己店鋪的，希望不會被老闆罵.......",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [
+        {
+          "id": "cee16c71-24b9-43f4-a15c-f236c7a1df47",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/87b975f0-d8b4-4bec-87a6-d7116114d555?variant=full"
+        },
+        {
+          "id": "fce4fc8f-bff7-4dab-98a6-c8d7aca7d616",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/095e3c43-5f11-42ac-a750-8517b7b5eb5d?variant=full"
+        },
+        {
+          "id": "0d5b849e-618f-4e88-839a-d70e657d0ccb",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/9d5b7e25-cdcd-417b-98ae-ddc3874fcaa6?variant=full"
+        },
+        {
+          "id": "c0d97aec-123b-436c-bf67-1f5aee0405d1",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/00422c10-84b9-44c6-b90e-384e2aa37c90?variant=full"
+        },
+        {
+          "id": "ef4e5fdb-efde-44ab-8cbe-5fd15b86906f",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/0921162c-783c-4cba-b984-7c900e3d3655?variant=full"
+        },
+        {
+          "id": "13dfdad6-d3ab-4faa-82b3-d98e6120086f",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/4f0be6bb-e395-4745-a85e-90954f9b6226?variant=full"
+        },
+        {
+          "id": "f309366c-838f-4158-9879-278e8407ef8b",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/e5d6624a-3eb6-458d-a61f-60893066a241?variant=full"
+        },
+        {
+          "id": "0cb773d1-eec9-4978-931e-05340c160b66",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/c3de9d0b-0fc6-41fa-9615-77d38b6f08fa?variant=full"
+        }
+      ],
+      "commonServices": [
+        {
+          "id": "b533c7a4-b143-4f62-9a7f-76d054a1acf7",
+          "serviceType": "common",
+          "serviceName": "不專業攝影",
+          "serviceDescription": "個人獨照 (幫你拍) (或是你想要我的自拍照，怎麼可能會有人想要....)\n雙人合照 (跟我合照)",
+          "priceText": "單人100000GIL 雙人150000GIL"
+        },
+        {
+          "id": "5909d325-83e9-4f08-bace-f1b3ec80ec49",
+          "serviceType": "common",
+          "serviceName": "超破簽繪",
+          "serviceDescription": "(小學生等級，無法和店內其他同事比，但如果你真的很好奇且不怕醜的話......可以試試)",
+          "priceText": "150000GIL/1張"
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "a75ac4fe-f9a0-49e2-8fc2-11743712658c",
+          "serviceType": "special",
+          "serviceName": "一起玩任何東西",
+          "serviceDescription": "可以陪玩大部分的遊戲 (想點此服務之前可以先向我詢問你想一起玩的遊戲，我應該都有，除了APEX，媽的EA亂鎖\n) ",
+          "priceText": "內議，一局200000-400000GIL(看遊戲時長)"
+        }
+      ]
+    },
+    "06a11a6b-ae0f-48d0-b7a4-50609a5cd23a": {
+      "id": "06a11a6b-ae0f-48d0-b7a4-50609a5cd23a",
+      "displayName": "三月五日",
+      "nickname": "35",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/dfad2628-96b2-4003-a1b5-5f7a60598187?variant=card",
+      "roleTitle": "YA",
+      "shortBio": "白藍色短髮折耳兔娘，光之攝影師。\n注意：我有帽子!!!\n感謝你的注意 : )",
+      "profileBio": "鋼鐵兔兔",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [
+        {
+          "id": "dd9114f2-7520-4ca6-99be-2698255eefeb",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/665d0240-e96f-4489-8d56-9ca6831157db?variant=full"
+        },
+        {
+          "id": "feccb6d0-af58-42ad-8567-d17426872b3b",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/d3d1bcf7-1e76-4356-a519-c7de4e0fbdb3?variant=full"
+        },
+        {
+          "id": "8e0e5388-999c-4cbc-bb56-3c6e73314804",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/576709b3-1ae9-459f-bfe7-c155995fd894?variant=full"
+        },
+        {
+          "id": "da18d2cd-ebb1-4944-bae9-bc35891e8bd9",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/a3d2e6a5-2859-423d-8733-df78d87c268e?variant=full"
+        },
+        {
+          "id": "6735045a-90f5-43c5-baaa-c96f50916c5d",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/a6f37cdd-a9a3-4185-97d5-68d54404e296?variant=full"
+        },
+        {
+          "id": "ac8fe7fd-e95f-4b3a-8f9b-523fd2a5cc74",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/b267c886-78ba-4b63-b1f9-cee38de6f055?variant=full"
+        },
+        {
+          "id": "7107d5d1-6487-4161-8a25-bcd263e6d736",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/30066f6f-1bfd-44de-8869-2c86442584cd?variant=full"
+        },
+        {
+          "id": "e90c22a5-2891-4a0a-86b2-53e212ac9ddd",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/b21dfc2a-ba7e-4cf8-acb2-a6862b47a0bb?variant=full"
+        },
+        {
+          "id": "df4baca5-cf3b-4446-8407-3f7919447216",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/03d7abc3-3a95-4d04-985f-dbb0502cad1d?variant=full"
+        }
+      ],
+      "commonServices": [
+        {
+          "id": "ecd3a9e9-c2b3-4d09-b9bb-b8a3acf2ff5a",
+          "serviceType": "common",
+          "serviceName": "拍立得(純拍)",
+          "serviceDescription": "純拍",
+          "priceText": "$80,000Gil/張"
+        },
+        {
+          "id": "8b0a5adb-5002-416d-9242-a9ab52f24efb",
+          "serviceType": "common",
+          "serviceName": "拍立得(純簽名)",
+          "serviceDescription": "純簽名",
+          "priceText": "$150,000Gil/張"
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "fc34cd82-65c0-4278-abff-8cb5163ba679",
+          "serviceType": "special",
+          "serviceName": "拍立得(簽繪)",
+          "serviceDescription": "簽繪",
+          "priceText": "$300,000Gil/張"
+        }
+      ]
+    },
+    "9e55b56c-19b5-437a-816d-4e3252cecc4e": {
+      "id": "9e55b56c-19b5-437a-816d-4e3252cecc4e",
+      "displayName": "佩佩嘎鳳",
+      "nickname": null,
+      "avatarUrl": null,
+      "roleTitle": null,
+      "shortBio": "臭臉貓萬歲",
+      "profileBio": "「咦？我原本沒有這麼矮呀……？」 \n\n原本是來自黑衣森林的維艾拉族。\n\n某天被同伴帶到一個神祕的地方，一覺醒來後，不只耳朵變了，連身高都一起縮水，莫名其妙變成了一隻小小的貓魅族！\n\n雖然到現在還是不知道發生了什麼，也還沒找到變回去的方法，不過既然旅程還在繼續，就先一邊旅行、一邊慢慢尋找答案吧♪\n\n輾轉來到這裡後，被店裡溫暖又放鬆的氛圍深深吸引，不知不覺就決定留下來了。\n\n如果你剛好也想找個地方放鬆、聊聊天，或只是想暫時逃離冒險的疲憊，都歡迎來找我坐坐！\n\n希望每位來到這裡的人，都能帶著笑容離開，並在這裡做一場屬於自己的美夢。₍^. .^₎⟆\n",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [],
+      "commonServices": [],
+      "specialServices": []
+    },
+    "1a498ab8-16e6-4070-804c-86ad77e6a210": {
+      "id": "1a498ab8-16e6-4070-804c-86ad77e6a210",
+      "displayName": "嗚哇哇嗚哇",
+      "nickname": "嗚哇",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/1e245710-6788-4ff9-ae55-b0f4ebc09f2d?variant=card",
+      "roleTitle": "歐米茄絕境驗證戰",
+      "shortBio": "歐米茄絕境驗證戰",
+      "profileBio": "異國詩人提出了疑問。 如果歐米茄繼續作為武器獲得力量並持續戰鬥，它真的能找到渴望的答案嗎？\n既然如此，何不在腦中描繪一幅畫面，再驗證一次呢？ 尋找可能存在的可能性以及隨之而來的替代結果。 畢竟，我們擁有未知的力量，能讓這一切成為可能。",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [
+        {
+          "id": "69539089-695e-420e-a969-0d5822d86948",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/579b1ad7-4acd-4bb3-b8f4-cccb7b0f5a15?variant=full"
+        },
+        {
+          "id": "d62fb377-db47-41a1-bf11-4bfd2078506d",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/5d672359-bc64-4c63-a1bf-53b0316535d1?variant=full"
+        },
+        {
+          "id": "4060a150-d49d-45ea-91ca-6e5495370139",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/2968444a-fe27-4b4f-81e5-7414bcdcff28?variant=full"
+        },
+        {
+          "id": "35b8c96d-00dc-4f97-9246-60e7d9b498f3",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/6fb1b612-e3e7-493d-92eb-d3ca672f95cb?variant=full"
+        }
+      ],
+      "commonServices": [],
+      "specialServices": []
+    },
+    "165a4649-4ab1-4227-b33b-82026903957c": {
+      "id": "165a4649-4ab1-4227-b33b-82026903957c",
+      "displayName": "投石機",
+      "nickname": null,
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/b354f3b3-fa16-4053-9c89-7ee7f46ba877?variant=card",
+      "roleTitle": "魅魔／攻城用具",
+      "shortBio": "人畜無害的妖異……大概吧",
+      "profileBio": "不知怎地混進原初世界的妖異，但好像沒有危害人的意思。\n\n明明是魅魔，技能點卻全點在力量，比起魅惑人心更擅長拿石頭丟人，被其他妖異們戲稱為投石機。\n\n只能在夢境中發揮魅魔的能力，因此找到清醒夢這個好地方之後就賴著不走了。\n\n開朗直爽，講話很大聲，葷素不忌，和她對話比起靈魂更可能失去聽力。\n\n「謝謝我聾了。」──匿名客人",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [
+        {
+          "id": "dae46b12-a60d-436f-a78d-badfb1d5f996",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/7194ad8f-e31b-4c37-8613-5b3b271985b9?variant=full"
+        }
+      ],
+      "commonServices": [
+        {
+          "id": "013f0e20-0430-4516-aab3-0f5e99195461",
+          "serviceType": "common",
+          "serviceName": "一般指名",
+          "serviceDescription": "欸？只要聊天就好嗎？",
+          "priceText": "20min/15w"
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "bc3faa1c-56e4-447e-968a-8b2a41154ad4",
+          "serviceType": "special",
+          "serviceName": "虛無占卜",
+          "serviceDescription": "透過虛無界的力量窺探你的過去、現在和未來！\n（三張塔羅牌，純粹我流牌陣和解法>_O）",
+          "priceText": "20min/20w"
+        },
+        {
+          "id": "1742c99e-7581-4032-912d-a83af92a2c26",
+          "serviceType": "special",
+          "serviceName": "專屬夢境",
+          "serviceDescription": "無論如何都想再見到的人？再也聽不到的一句話？在魅魔替你編織的夢裡都能實現喔！\n（輕─重ＲＰ；１０分鐘事前討論，３０分鐘實際ＲＰ）",
+          "priceText": "40min/50w"
+        }
+      ]
+    },
+    "04985e69-27ba-44e7-b25a-d2fa7ccd791c": {
+      "id": "04985e69-27ba-44e7-b25a-d2fa7ccd791c",
+      "displayName": "莉賽露丶天羽",
+      "nickname": "天羽",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/3285d4a7-7278-42c8-ba2a-aa782d0a525c?variant=card",
+      "roleTitle": "幽靈",
+      "shortBio": "從你眼中所照映出的那個寧靜的世界，又在那之中看見了什麼呢？",
+      "profileBio": "只會在夢中出現的存在，沒有人知道他從何而來，沒有人知道他什麼時候出現的，或許一開始就在了？也許他從來都不存在過？默默無聞，只剩下一抹微笑，幾乎沒有話語，沉默似乎是他的日常。還是你有辦法讓他開口呢？\n莫名其妙的喜歡竹筍，甚至會在電線杆旁邊看著月亮發呆。\n\n也許會忽然間看見？\n抑或是幻覺？",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [],
+      "commonServices": [
+        {
+          "id": "725474a4-fca8-42a1-8b8b-d92b5a485ca8",
+          "serviceType": "common",
+          "serviceName": "共通服務？",
+          "serviceDescription": "這是什麼？好玩嗎？",
+          "priceText": "窩不知道"
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "bd37dee0-ed27-499c-9c16-34d0b95b67ad",
+          "serviceType": "special",
+          "serviceName": "天羽占卜",
+          "serviceDescription": "天羽占卜（不負責任版）\n提問，然後......\n接受命運的安排！",
+          "priceText": "一個緣分"
+        },
+        {
+          "id": "1bff4faa-01a5-4e37-8dc1-b7fc7412b616",
+          "serviceType": "special",
+          "serviceName": "簽繪",
+          "serviceDescription": "其他店員搓得更好別找我，我只是多放幾個東西不然好空（Ｘ",
+          "priceText": "一份心願"
+        }
+      ]
+    },
+    "fd88f8ca-4d90-4450-9e27-5c40c1dfb312": {
+      "id": "fd88f8ca-4d90-4450-9e27-5c40c1dfb312",
+      "displayName": "西野茜",
+      "nickname": "小茜",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/f380590a-64c1-48a4-bddf-dcbba52596f4?variant=card",
+      "roleTitle": "西野茜",
+      "shortBio": "您好，小茜裝潢代工，遊蕩在世界各地替每位客人把心愛的家裝潢得漂漂亮亮的裝潢師\n至今房屋裝潢將近十年年時間，國際服加上繁中服經手裝潢件數上百件\n謝謝客人支持我的裝潢，也希望接更多不同種類風格來挑戰自己",
+      "profileBio": "【擅長風格】\n．現代風．摩登風．森林系．日系．咖啡廳．RP店．酒吧、酒館系．庭院電梯\n．異空間．庭院庭俱浮空．可愛拼接牆．夜星空．可愛童話溫馨\n【裝潢技術】各式家具種類浮空\n．堆疊\n．漂浮技巧\n．夾層技術\n．穿模與錯位組合\n．物理碰撞以及防穿透\n．影片風格重現，無論是B站或是任何喜歡的裝修風格皆可重現",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [],
+      "commonServices": [
+        {
+          "id": "1c48795d-aa48-4173-b1bb-444b65efb403",
+          "serviceType": "common",
+          "serviceName": "純聊天陪聊",
+          "serviceDescription": "陪伴客人聊天，不管是遊戲內、抱怨上司、日常生活瑣事皆可陪聊",
+          "priceText": "100,000 Gil"
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "b8549d32-285a-4f02-a513-7bf5feabad2c",
+          "serviceType": "special",
+          "serviceName": "日隨/副本/討伐/24人/大型 支援",
+          "serviceDescription": "日常副本日隨隊友支援，缺隊友嗎? 主MT、ST",
+          "priceText": "100,000 Gil"
+        },
+        {
+          "id": "fae22ded-8157-41b8-be31-3533ec9f470a",
+          "serviceType": "special",
+          "serviceName": "裝潢技術 諮詢/詢問",
+          "serviceDescription": "運用多年裝潢技術，協助客人裝潢技術上諮詢輔導",
+          "priceText": "100,000 Gil"
+        },
+        {
+          "id": "b7ed7357-4ad6-41d4-ae84-b0232c7a2c62",
+          "serviceType": "special",
+          "serviceName": "裝潢技術 協助/施工",
+          "serviceDescription": "協助客人裝潢上遇到困難的技術支援以及指導，到府上協助裝潢施工",
+          "priceText": "500,000 Gil"
+        },
+        {
+          "id": "845d96c0-7bee-4a79-b7af-8739256daf3f",
+          "serviceType": "special",
+          "serviceName": "裝潢接案 承接各式裝潢風格",
+          "serviceDescription": "【收費明細】各類房型收費如下：\n                  個人房700萬\n(含家具以及染色350、裝潢費350)\n                  公寓700萬\n(含家具以及染色350、裝潢費350)\n                 S房1000萬\n(含家具以及染色500、裝潢費500)\n                 M房2500萬\n(含家具以及染色1250、裝潢費1250)\n                  L房3500萬\n(含家具以及染色1750、裝潢費1750)",
+          "priceText": "7,000,000 ~ 35,000,000 Gil"
+        },
+        {
+          "id": "606385af-5410-403d-8de3-35eaab3f137d",
+          "serviceType": "special",
+          "serviceName": "挖寶藏寶庫隊友支援",
+          "serviceDescription": "想單人挖寶缺隊友嗎?  出魔紋獎勵都歸客人所有",
+          "priceText": "100,000 Gil"
+        }
+      ]
+    },
+    "d72b532e-ca08-4263-8425-c970583e02ac": {
+      "id": "d72b532e-ca08-4263-8425-c970583e02ac",
+      "displayName": "紅色赤月",
+      "nickname": null,
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/25bd6f99-4828-45f8-a039-6b3499df2c81?variant=card",
+      "roleTitle": "男模店老闆",
+      "shortBio": "在艾奧傑亞開設一間男模店的老闆\n平時開店時由於過度繁忙，沒有機會與各位好好暢聊\n想在這裡與各位好好的聊天，談心，玩樂\nRP定位:無RP",
+      "profileBio": null,
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [],
+      "commonServices": [
+        {
+          "id": "37342914-1ed7-4e33-92e6-4302409f0eb8",
+          "serviceType": "common",
+          "serviceName": "一般指名",
+          "serviceDescription": "一般聊天服務",
+          "priceText": "20min/15w"
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "955c8ed2-20bc-432e-b5e1-1011aacf5cec",
+          "serviceType": "special",
+          "serviceName": "日隨",
+          "serviceDescription": "指名期間免費",
+          "priceText": "免費"
+        },
+        {
+          "id": "4e0658d6-7095-455b-ac7d-64a9d3733074",
+          "serviceType": "special",
+          "serviceName": "一般拍照(非拍立得)",
+          "serviceDescription": "無簽繪",
+          "priceText": "5w"
+        },
+        {
+          "id": "45245bac-d190-44c2-b55c-15fb2cd57c15",
+          "serviceType": "special",
+          "serviceName": "神秘房間服務",
+          "serviceDescription": "秘密，等你來發掘探索",
+          "priceText": "30min/50w"
+        }
+      ]
+    },
+    "54fec66c-4b81-4b30-b129-2acddc406d9c": {
+      "id": "54fec66c-4b81-4b30-b129-2acddc406d9c",
+      "displayName": "下限無底",
+      "nickname": "下.限.無.底(C4取2)",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/343564cf-8e46-46c0-bf7e-bf3b64859baf?variant=card",
+      "roleTitle": "窩不是叔叔 /【終焉後的餐桌】店長",
+      "shortBio": "喜歡到處找人湊熱鬧，也很習慣往熟人身邊貼，一不小心就會靠得有點太近。\n至於有沒有特別偏心誰……嗯，她自己也不太確定。\n其他店員表示──這人完全法克...",
+      "profileBio": "來自遠東一座曾供旅人落腳的安全屋。\n\n原本在那裡待了很長一段時間，只是熟悉的人逐漸不在了，便乾脆收拾行李離開。她不太喜歡提起原因，通常只會說：「待太久了，想換個地方而已。」\n\n一路晃到這裡後，覺得似乎挺適合落腳，便順勢留了下來。平常個性隨性，對沒興趣的事情懶得多管，但一旦碰上自己感興趣的事，就會莫名其妙地執著到底。\n\n比起一個人待著，她更喜歡到處找人湊熱鬧，也很習慣往熟人身邊貼。對誰都能自然地親近幾分，偶爾也因此讓人有些誤會。\n\n至今仍保留著把奇怪東西撿回家的習慣，偶爾也會順手塞幾樣給身邊的人。",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [
+        {
+          "id": "06d27215-a2c2-45f1-8c34-324d534cd35f",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/d4067406-b39b-4e31-adbf-ad51f95e8291?variant=full"
+        },
+        {
+          "id": "156a43ca-1ed6-4bf3-817c-39f753537b01",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/e5ceda2f-1521-45aa-a191-3473d68c0d77?variant=full"
+        },
+        {
+          "id": "87b8f981-c387-4575-af84-da39ffdfd7b3",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/a7032efa-25f9-417a-b26b-85903fdc1475?variant=full"
+        },
+        {
+          "id": "fa8552e6-40dd-4c13-a291-9752c1ebb1a2",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/969cd5d3-0341-4f6b-91ba-c289d226a504?variant=full"
+        },
+        {
+          "id": "8dc74101-20eb-4264-abbd-daae76d9ee51",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/e4a344ce-e74b-46af-878c-0859158c6b65?variant=full"
+        },
+        {
+          "id": "f729ba2a-797a-4459-a44b-9dc9b0431d5a",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/8a50c672-577b-41dc-8058-b04d3e560a96?variant=full"
+        },
+        {
+          "id": "4033a9a9-69b5-408b-b8ce-f36ef4768d94",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/b6ac3f3b-f20d-441a-9e23-0723a4737b8e?variant=full"
+        }
+      ],
+      "commonServices": [
+        {
+          "id": "0ba9592a-4493-41cd-ae08-8c381b2b8d06",
+          "serviceType": "common",
+          "serviceName": "單人拍立得(有簽繪)",
+          "serviceDescription": "單人拍立得 有簽繪喔(*´∀`)~♥",
+          "priceText": "100,000 Gil "
+        },
+        {
+          "id": "9fc93187-fada-4d4d-9133-55f15396f66c",
+          "serviceType": "common",
+          "serviceName": "合照拍立得(無簽繪)",
+          "serviceDescription": "合照拍立得 沒有簽繪喔(*´∀`)~♥",
+          "priceText": "50,000 Gil "
+        },
+        {
+          "id": "8ef906d9-4312-4074-a8f5-e9d10623ce9c",
+          "serviceType": "common",
+          "serviceName": "合照拍立得(有簽繪)",
+          "serviceDescription": "合照拍立得 有簽繪喔(*´∀`)~♥",
+          "priceText": "150,000 Gil"
+        },
+        {
+          "id": "c1c2870d-878e-4532-940b-fc0c86cf510f",
+          "serviceType": "common",
+          "serviceName": "貼貼照",
+          "serviceDescription": "貼貼照(*´▽`*)",
+          "priceText": null
+        },
+        {
+          "id": "326c3fd1-4d7f-4673-92fe-c802067eb14a",
+          "serviceType": "common",
+          "serviceName": "外拍",
+          "serviceDescription": "外拍",
+          "priceText": null
+        },
+        {
+          "id": "d087b00f-4539-4c0b-9516-84cb5f8a4804",
+          "serviceType": "common",
+          "serviceName": "日隨/打本",
+          "serviceDescription": "日隨/打本",
+          "priceText": null
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "14978c2e-e425-4d4c-b1e3-edadb45557b4",
+          "serviceType": "special",
+          "serviceName": "P8S 陪練/通關 ST ",
+          "serviceDescription": "P8S 陪練/通關 ST ",
+          "priceText": "1飯/通關 150,000 Gil "
+        },
+        {
+          "id": "c6af3f26-3899-4dd8-b9e1-bc49fe4b8313",
+          "serviceType": "special",
+          "serviceName": "絕神兵陪練/通關 ST",
+          "serviceDescription": "絕神兵陪練/通關 ST",
+          "priceText": "1飯/通關 150,000 Gil "
+        },
+        {
+          "id": "772072cb-96f9-4f28-9de9-804dc3a3cddb",
+          "serviceType": "special",
+          "serviceName": "絕亞陪練/通關ST ",
+          "serviceDescription": "絕亞陪練/通關ST ",
+          "priceText": "1飯/通關 150,000 Gil"
+        },
+        {
+          "id": "b712c244-6c9d-4033-94fa-4cda56d590ac",
+          "serviceType": "special",
+          "serviceName": "絕巴哈陪練/通關 ST ",
+          "serviceDescription": "絕巴哈陪練/通關 ST ",
+          "priceText": "1飯/通關 200,000 Gil "
+        }
+      ]
+    },
+    "bde161b1-44b9-401a-8a80-a6690d025e11": {
+      "id": "bde161b1-44b9-401a-8a80-a6690d025e11",
+      "displayName": "林檎子",
+      "nickname": "林檎子",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/2e407ab1-4495-4a8c-b93c-12f3e605a090?variant=card",
+      "roleTitle": "媽咪 / 【海都沒有派對】擁有者",
+      "shortBio": "是大家的媽咪林檎子 ♡",
+      "profileBio": "在艾奧傑亞的角落經營著一間小巧但溫馨的育幼之家，\n閒暇之餘來清醒夢這邊打工補貼組織內的營運資金，\n想要成為一座燈塔，為所有在夢境裡迷航的人引路。\n\n也許大眾普遍認為她溫柔又充滿慈愛，\n但她深邃的眼眸背後藏著的究竟是什麼，從來也沒有人看穿。",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [
+        {
+          "id": "898f4c2e-ee87-4bd4-8274-07899c5a709e",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/ff3cb141-592e-4af1-8ea1-607de3dbdcd5?variant=full"
+        },
+        {
+          "id": "f6a77601-8451-4c19-9153-6de4ecda2291",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/3dfc2812-eb00-4f78-ac03-44be3e13047a?variant=full"
+        },
+        {
+          "id": "6d15ca2a-8c64-4a2b-81a4-811853ba55f5",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/04ad6a29-7d9a-42d1-935e-cbc226e28012?variant=full"
+        },
+        {
+          "id": "f105daeb-523f-4d5d-93d3-9046960d14ab",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/2d2520e2-c8d1-420f-bcc7-c5a4b7fd26d5?variant=full"
+        }
+      ],
+      "commonServices": [
+        {
+          "id": "fc98043d-8a01-48d0-811d-b7e7dc5f7c2c",
+          "serviceType": "common",
+          "serviceName": "與媽咪合影(簽拍)",
+          "serviceDescription": "與媽咪相處的時光也許很短，\n但我們可以將片刻化為永恆，\n讓媽咪拿起相機記錄我們的模樣，\n把夢裡的回憶好好凝結吧(๑ơ ₃ ơ)♥",
+          "priceText": "300,000 Gil / 張"
+        },
+        {
+          "id": "87fc8b77-33c7-41f4-ab26-8b1f1afa2dfc",
+          "serviceType": "common",
+          "serviceName": "媽咪的蛋包飯",
+          "serviceDescription": "媽咪把《海都沒有派對》的招牌餐點帶來啦！\n孩子今天的蛋包飯上想要畫上什麼圖案或文字呢？",
+          "priceText": "150,000 Gil /份"
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "4d4da6e7-6a97-4616-82ff-76ac41c1136f",
+          "serviceType": "special",
+          "serviceName": "峽谷大亂鬥！",
+          "serviceDescription": "是該拿出...媽咪的...尊爵不凡...Faker簽名...阿璃造型了...!",
+          "priceText": "300,000 Gil /場"
+        }
+      ]
+    },
+    "5effcab9-1619-4956-9219-34053c95205a": {
+      "id": "5effcab9-1619-4956-9219-34053c95205a",
+      "displayName": "芙烈達‧卡蘿",
+      "nickname": "芙烈達",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/79976326-e9cf-4daf-b90c-5b4be53b7449?variant=card",
+      "roleTitle": "畫家/薩維奈/男孩子",
+      "shortBio": "喜歡交流喜歡畫圖也喜歡你，\n請約稿的同時也跟我約會吧！✨❤️",
+      "profileBio": "🌴可接受RP程度-無～重 🍹\n\n「很久很久以前，薩維奈島上有一隻會變形、專門吃人的可怕怪物。\n\n有一天，怪物遇到了一個人。這個人好神奇，竟然一點都不怕怪物。\n怪物覺得很奇怪，不自覺間就深深愛上了這個人，再也捨不得吃掉他。\n\n但是，人類的壽命太短了，這個人很快就生病死掉了。\n怪物傷心欲絕，哭得太厲害，把所有的記憶都哭掉了，連自己原本的樣子都想不起來。\n後來傳說中，怪物變成了那個人的樣子，混進了人類的世界裡。\n現在，牠可能就躲在街上的人群中，悄悄地生活著……」\n\n節錄自薩雷安民間傳說書庫：\n《薩維奈島的古老妖怪》XX_章節—化形的妖怪。\n\n※繪圖範例請看相簿最後※",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [
+        {
+          "id": "f2ee86cd-2472-4257-a41a-8f233ebf32ae",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/c110d5e8-cbea-4144-a32c-a84a8edad895?variant=full"
+        },
+        {
+          "id": "9fae72b5-2a8c-41a6-839f-91635dc22851",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/5f74d57d-9d88-4083-b7e9-921fe6f82fa7?variant=full"
+        },
+        {
+          "id": "9e118e72-55e2-4e81-86fb-99ff665cabe6",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/4289b4d3-6df3-4d84-a2d8-40158da37c8f?variant=full"
+        },
+        {
+          "id": "d07a5cbf-1016-490a-801e-e7c1e0f95a20",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/013bee35-0c39-4d19-857a-3f38c3c56d78?variant=full"
+        },
+        {
+          "id": "d8562a3a-6e17-4f12-a854-4d74c623b61a",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/8864fc87-a108-44e1-a1f0-e8b5aa957582?variant=full"
+        }
+      ],
+      "commonServices": [
+        {
+          "id": "49f564f8-6229-4761-84b9-14538e080b13",
+          "serviceType": "common",
+          "serviceName": "一般指名",
+          "serviceDescription": "任何情況下都可以指名芙烈達!\n※一節20分鐘",
+          "priceText": "150000"
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "83dc5afb-7b0b-419c-a331-ea23bf8060e5",
+          "serviceType": "special",
+          "serviceName": "🥥 把我帶出場！",
+          "serviceDescription": "將芙烈達帶出場外！\n一節以２０分鐘為一節\n首節：⁠100,000⁠ Gil\n續節：⁠50,000⁠ Gil / 節",
+          "priceText": "⁠100,000⁠ Gil~⁠50,000⁠"
+        },
+        {
+          "id": "214b54aa-a2f3-4d0e-9fc5-fa40ac7243d8",
+          "serviceType": "special",
+          "serviceName": " 🎨 預約人像畫圖 ",
+          "serviceDescription": "跟芙烈達預約拍照、畫圖，並在營業時間交付\n\n內容：個人繪圖 PNG 檔案雲端連結 1 張\n附贈：指名時間 1 節 (額滿可選非營業時間打包或折抵單節費用)",
+          "priceText": "⁠1,000,000⁠ Gil～10,000,000⁠ Gil "
+        },
+        {
+          "id": "76b8c687-4cf6-41bb-b3a2-a03cd9ab3452",
+          "serviceType": "special",
+          "serviceName": " ✈️ 整合包：帶我去任何地方 ",
+          "serviceDescription": "帶著芙烈達一起出去玩，並且在下周營業時間交付雙人合圖一張！\n內容：外帶 2 節 + 專屬雙人合圖 1 張\n備註：限 6.0 前地圖，圖稿 1 週內交付",
+          "priceText": "⁠5,000,000⁠ Gil"
+        },
+        {
+          "id": "70ec8dc4-5633-46a6-a898-833a56e728c7",
+          "serviceType": "special",
+          "serviceName": " 🔮 祕密的夢境契約：什麼都可以的服務",
+          "serviceDescription": " 化形的妖怪將滿足你在夢境裡的所有願望……\n",
+          "priceText": " 代價：⁠???,???⁠ Gil"
+        }
+      ]
+    },
+    "2e638353-a36a-4158-874d-e63554cf5a3e": {
+      "id": "2e638353-a36a-4158-874d-e63554cf5a3e",
+      "displayName": "薩姆琦烏卡",
+      "nickname": "烏卡",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/1546d03a-a7ae-4acd-8158-b82747d37e3c?variant=card",
+      "roleTitle": "偶像",
+      "shortBio": "呱呱!",
+      "profileBio": "某日在利姆薩羅敏薩海邊醒來的維艾拉族，對於自己的過往腦海裡是完全沒有記憶，腦海裡只有「薩姆琦烏卡」這個詞，就被她當作自己的名字了。\n\n為了嘗試去找回過去的記憶，於是展開了周遊各國的旅行，希望能找到認識「過去的她」之人。旅行途中也是認識到形形色色的人，結交到各式各樣的朋友，發覺自己喜歡交朋友跟被記住的感覺，於是到處出沒表演來讓自己的身影能留在大家的腦海中，為了方便而決定使用「偶像」的名義來活動。\n身為偶像的她樂觀開朗、熱情奔放，喜歡當大家的小太陽，努力發光發熱，也會到處努力學習舞蹈來透過表演傳達正能量!\n對大家都是一視同仁的好，最重視友情!但要是遇到有人對她的朋友不禮貌，她就會整個人炸開來，盡全力討回公道。\n\n即便如此正向，有時烏卡還是會無法控制地低潮而陷入沉睡，同時體內的某個存在將會甦醒......\n\n「只要烏卡存在大家的心中，我就永遠不會消失!」",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [
+        {
+          "id": "cec2a2ea-330d-4ad9-a706-cca07afc01f0",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/aa394df7-b551-4a4c-95a3-cd252b41edb9?variant=full"
+        }
+      ],
+      "commonServices": [],
+      "specialServices": [
+        {
+          "id": "a4b35262-5977-4c2d-a9b3-9d117d2a8fe0",
+          "serviceType": "special",
+          "serviceName": "Freestyle Dancing!!",
+          "serviceDescription": "給粉絲自己挑歌，偶像跳給你看!",
+          "priceText": "300'000 GIL/20MIN"
+        }
+      ]
+    },
+    "b8a134c7-2514-4c27-bcc4-04e32c5752be": {
+      "id": "b8a134c7-2514-4c27-bcc4-04e32c5752be",
+      "displayName": "春和咲",
+      "nickname": "小春",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/42551dd7-61c8-4e33-8ca9-3995bb060acb?variant=card",
+      "roleTitle": "溫和、吃貨",
+      "shortBio": "心情不好可以找我，心情很好可以找我，無聊可以找我，有聊可以找我。",
+      "profileBio": "原身是來自利姆薩羅敏薩的一隻打工貓，好不容易賺了大錢在伊修加爾德蓋了一間畫廊。\n\n靠著賣畫，從此過起退休生活......並沒有，由於畫畫只是興趣，並不能拿來養貓餬口，所以來到了清醒夢，一邊引領旅人進入自己造出的夢境之中，一邊思索著未來的方向......\n\n習慣溫柔的對待每位旅人，傾聽他們生活中發生的事，比方說走出門踩到香蕉皮跌倒啊，打本不順之類的，或著聽聽他們在大陸上旅行的種種趣事。\n是聊著聊著容易忘記時間的類型。\n是聊著聊著容易忘記時間的類型。\n\n「咲很樂意聽你說，但聊著聊著，心可別被我聊走囉。」",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [
+        {
+          "id": "e586dba3-7e13-4168-870e-b2eb05ec9a04",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/2c515a6f-3a0a-4d8c-b3c4-e63c439ae66f?variant=full"
+        },
+        {
+          "id": "4ab45edd-936a-4929-8d8d-acd7520b08e6",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/ef814060-3af7-43b2-9b46-3ecfe460bdb1?variant=full"
+        },
+        {
+          "id": "889a9b4e-19bd-4295-9635-932f66dac32d",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/ca42f6cd-709d-4172-a20b-658b97b16f7a?variant=full"
+        }
+      ],
+      "commonServices": [
+        {
+          "id": "0499fbe0-c0ae-4627-9c39-bc3bb356dac8",
+          "serviceType": "common",
+          "serviceName": "陪聊",
+          "serviceDescription": "就陪你聊天，把我當垃圾桶，想說就說",
+          "priceText": "100000gil"
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "3111ad44-0aba-459b-b576-4d49cd4d9e5f",
+          "serviceType": "special",
+          "serviceName": "帕麻邱",
+          "serviceDescription": "陪你打日麻(多瑪方城戰、雀魂?)\n非專業雀士，你想和大牌?當然可以",
+          "priceText": "100000gil"
+        },
+        {
+          "id": "bfb6ad25-b9ea-4656-b827-35f87f713609",
+          "serviceType": "special",
+          "serviceName": "COS女僕",
+          "serviceDescription": "穿著女僕裝跟你聊天，什麼?你說你看過我在女僕店上班?都是假象~",
+          "priceText": "150000gil"
+        },
+        {
+          "id": "6213860a-2651-4dd6-a45b-71340e46f807",
+          "serviceType": "special",
+          "serviceName": "外拍(店外)",
+          "serviceDescription": "你有想法的話，我就是你的擺拍人偶~\n此服務可以到店外的地點做拍攝，拍攝時間至少30分鐘以上",
+          "priceText": "150000gil"
+        },
+        {
+          "id": "607f87f6-4d5a-4d82-8381-548318de94aa",
+          "serviceType": "special",
+          "serviceName": "畫作推薦(店外)",
+          "serviceDescription": "外派到你家幫你推薦一幅適合擺在你家的畫，目前2~7版風景畫以及伊修加爾德都有\n時間還夠的話就在你家聊",
+          "priceText": "100000gil"
+        },
+        {
+          "id": "1f57bb30-1f24-417c-b060-bd8e58be7e54",
+          "serviceType": "special",
+          "serviceName": "優雷卡陪練(店外)",
+          "serviceDescription": "視需求跟時間訂價，可幫忙戳NM帶練等，打BA等等",
+          "priceText": "300000gil"
+        }
+      ]
+    },
+    "3a39d845-e99c-426b-b2f6-e1fce899508b": {
+      "id": "3a39d845-e99c-426b-b2f6-e1fce899508b",
+      "displayName": "鹿鳴月芽",
+      "nickname": "鹿鹿",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/ebb056c3-399e-459a-bd98-9457e723d410?variant=card",
+      "roleTitle": "撫媚系鹿鹿、可甜可鹹系❤",
+      "shortBio": "艾歐澤亞這麼大...你、下次有空的時候，還願意再來找我嗎？",
+      "profileBio": "出生於太陽神草原、在延夏上長大的晨曦之民，某一天，心血來潮與家人告別，獨自來到拉諾西亞。\n\n對於許多新奇的事物、打扮和冒險故事都很感興趣\n\n帶著安靜柔和的氣質，喜歡寧靜的夜晚和能讓人放鬆、安心停留的地方。\n\n喜歡與人聊天，也喜歡靜靜地傾聽每個人的故事及經歷\n\n如果願意坐下來陪我聊聊天，我會很開心的。\n\n「你...看起來很有趣呢～！」 \n\n總是帶著微笑，眼中藏不住對於新奇事物的期待\n\n「初次見面，我叫鹿鳴，你也可以叫我鹿鹿」",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [
+        {
+          "id": "d1456f43-fd44-4c9f-a261-48698b127543",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/646cf170-36df-4716-bb70-cbbc50b13bc2?variant=full"
+        },
+        {
+          "id": "8a8a89cd-64b9-4913-a30b-2f39499faf0d",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/a2be1726-a119-4018-bbe2-a777ab5f1589?variant=full"
+        },
+        {
+          "id": "2c8a4b47-bcc7-4898-9187-95e2700d9372",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/f7ec0819-6303-4a5c-abec-2a70a21072fc?variant=full"
+        },
+        {
+          "id": "2462ed24-cd54-47dd-8af0-2b6e68f16845",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/7d055158-85ad-49ff-b3a1-6165282013cc?variant=full"
+        }
+      ],
+      "commonServices": [
+        {
+          "id": "768191ea-f6fa-4c8b-84f1-21c5bca089e0",
+          "serviceType": "common",
+          "serviceName": "戀愛感聊天",
+          "serviceDescription": "在聊天時施放一些戀愛魔法，讓二人世界甜甜蜜蜜了起來",
+          "priceText": "200,000 Gil "
+        },
+        {
+          "id": "a746f72c-9e9d-4a0c-9c38-d04e0997130e",
+          "serviceType": "common",
+          "serviceName": "拍立得 (單人)",
+          "serviceDescription": "鹿鹿現場拍的照片及含簽繪版本，相簿含範例\n也會有隨機掉落風格唷～❤",
+          "priceText": "150,000 Gil"
+        },
+        {
+          "id": "b0ff03eb-5502-48b3-901a-89c28e8c1c53",
+          "serviceType": "common",
+          "serviceName": "拍立得 (雙人)",
+          "serviceDescription": "與可愛帥氣的您一起合照，服務已含簽繪\n\n可於相簿參考範例",
+          "priceText": "250,000 Gil"
+        },
+        {
+          "id": "f72066cd-e3d3-4703-b4b0-10b85c46a2fa",
+          "serviceType": "common",
+          "serviceName": "外拍",
+          "serviceDescription": "由您決定服裝、景觀及風格 ，可帶著鹿鹿出外拍照\n\n攝影由鹿鹿負責，您負責可愛就好",
+          "priceText": "100,000 Gil"
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "8f375115-8f08-4675-8176-012e8207b0e5",
+          "serviceType": "special",
+          "serviceName": "專屬包廂服務",
+          "serviceDescription": "想窺探鹿鹿藏起來的另一面嗎？那就來陪鹿聊聊天💕\n至於能發現多少，就看你自己❤️",
+          "priceText": null
+        },
+        {
+          "id": "60d408d8-0864-4e05-80a2-df208e13485f",
+          "serviceType": "special",
+          "serviceName": "1日CP券",
+          "serviceDescription": "只限於艾奧澤亞內使用，於進店開始計時 \n若有進入RP店和其他之消費行為，需由您買單。\n會有滿滿的戀愛感，或是想指定鹿成為哪種風格的可愛CP也可以！",
+          "priceText": "1,000,000 Gil"
+        }
+      ]
+    },
+    "5ea035f4-dc41-4ccc-95d5-34a8c3f13dc8": {
+      "id": "5ea035f4-dc41-4ccc-95d5-34a8c3f13dc8",
+      "displayName": "霧淵",
+      "nickname": null,
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/2c53e3fa-000f-480f-85d0-21e88304412e?variant=card",
+      "roleTitle": "高冷黑兔",
+      "shortBio": "霧淵高冷的不行",
+      "profileBio": "薩雷安魔法大學的畢業生\n在校期間成績不算特別亮眼，但基本功相當紮實，尤其擅長把課堂上那些繁瑣的魔法理論，轉化成實際討伐時能派上用場的技巧。畢業後沒有加入大型公會或研究機構，而是以自由討伐者的身分接取委託，主要處理魔物驅除、遺跡探索、護衛以及各種「報酬不錯但沒什麼人想接」的麻煩工作。\n\n選擇自由業並不是因為嚮往冒險，單純只是欠了不少學貸\n工作的收入看似不錯，但裝備維修、藥水食物與交通都要錢，因此只要沒有委託時，幾乎什麼零工都做。裁縫師、鍛造師、烹調師、魔法作業代寫、森都當保鑣、挑戰鬥技場領獎金、聊天執事，甚至還會幫會魔法的貓解決疑難雜症。久而久之，在城裡不同地方遇見他穿著完全不同的制服，似乎也成了一件很正常的事。\n表面給人一種懶散、隨遇而安的感覺，對很多事情都是「差不多就好」但實際上責任感意外地強。嘴上經常抱怨：「這次的委託太麻煩了吧……」，但是一旦接下了委託，依然會用盡全力完成，答應代班就不會臨時消失，借的錢會記得還，就算嘴上抱怨得再厲害，也很少真的把麻煩丟給別人。不太擅長拒絕別人的請求，因此偶爾會莫名其妙接下一堆事情，事後才坐在角落開始反省自己。\n",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [],
+      "commonServices": [],
+      "specialServices": [
+        {
+          "id": "cf0b4a12-dda2-4595-a18b-6d6e83344150",
+          "serviceType": "special",
+          "serviceName": "陪伴日常",
+          "serviceDescription": "所有日隨可以排到的本，只要有開的全部可以陪排\n\n「免費的陪伴，一直不是廉價呦」",
+          "priceText": "0"
+        },
+        {
+          "id": "57d64968-c792-4a3c-9382-382329b91545",
+          "serviceType": "special",
+          "serviceName": "黑魔副本教學",
+          "serviceDescription": "黑魔基礎教學以及個別副本研究\n\n\n「我們可以打不出來，但不能不做準備」",
+          "priceText": "0"
+        },
+        {
+          "id": "8eb48640-d190-469d-9a3a-07cb2b508d78",
+          "serviceType": "special",
+          "serviceName": "拍照",
+          "serviceDescription": "我負責被拍，地點隨意\n\n「這是自身化為木樁的時刻」",
+          "priceText": "0"
+        },
+        {
+          "id": "f2a723e0-5920-4cb0-8e01-6197e936327c",
+          "serviceType": "special",
+          "serviceName": "挖寶",
+          "serviceDescription": "陪妳去挖寶，單人寶圖可以去幫妳加油，多人寶圖可以一起下底\n\n「挖不挖得到是另一回事」",
+          "priceText": "0"
+        },
+        {
+          "id": "47dc4e48-9d4e-4d55-9ed9-1e79dc174cc5",
+          "serviceType": "special",
+          "serviceName": "青魔學技能",
+          "serviceDescription": "陪妳去學青摩技能\n\n「一起去學技能吧」",
+          "priceText": "0"
+        },
+        {
+          "id": "06026794-6987-47b9-b28d-e670bab18e72",
+          "serviceType": "special",
+          "serviceName": "黑風海練副職",
+          "serviceDescription": "可以開學者套盾，也可以幫打怪\n\n「怪要滅絕啦」",
+          "priceText": "0"
+        },
+        {
+          "id": "4889a031-7db1-47c3-a6dc-f28526702c8b",
+          "serviceType": "special",
+          "serviceName": "月球組隊陪肝",
+          "serviceDescription": "利維坦限定\n\n「一起肝吧」",
+          "priceText": "0"
+        },
+        {
+          "id": "592176f1-30fc-48e1-a917-75d465952524",
+          "serviceType": "special",
+          "serviceName": "絕伊甸陪練",
+          "serviceDescription": "一飯50萬，打的是D2黑魔，過本需額外付150萬渡劫費用，如果團隊是從 0 開始，可以一飯 20 萬打 d4 畫家，打的是日野自標安基藍自標\n\n「回游末邦監獄摟」",
+          "priceText": "500000"
+        },
+        {
+          "id": "a457eb02-2df8-4623-aa1c-b362de089675",
+          "serviceType": "special",
+          "serviceName": "絕亞力山大陪練",
+          "serviceDescription": "一飯30萬，打的是D2黑魔，正攻1211魚子醬全套，如果要練34固定斷絕我需要先預習\n\n從0開始D4畫家/召喚一飯10萬\n\n「打不過就合體不好吧」",
+          "priceText": "300000"
+        },
+        {
+          "id": "7cf331b6-5902-49a8-a842-80b69ea1d822",
+          "serviceType": "special",
+          "serviceName": "女王古殿仙藥團",
+          "serviceDescription": "5萬是帶仙藥跟技能的費用\n\n「這種老舊的建築是危樓吧」",
+          "priceText": "50000"
+        },
+        {
+          "id": "58e33861-e480-43ad-8b6a-a4575afab4aa",
+          "serviceType": "special",
+          "serviceName": "全肯定哄妳",
+          "serviceDescription": "全肯定哄妳，跟妳一起罵討厭的人\n\n「這段時間妳就是對的」",
+          "priceText": "100000"
+        },
+        {
+          "id": "2672e2e4-1e64-49de-a309-406f73ccf63b",
+          "serviceType": "special",
+          "serviceName": "外帶做其他沒寫的服務",
+          "serviceDescription": "有什麼要求都可以問問",
+          "priceText": "?"
+        }
+      ]
+    },
+    "7f9f3806-12ab-4d8e-a169-a610572a7b22": {
+      "id": "7f9f3806-12ab-4d8e-a169-a610572a7b22",
+      "displayName": "龍塵/龍炎/龍霆/龍颯",
+      "nickname": "龍哥",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/1e8992bd-ab61-4f35-b37f-86f8a640159c?variant=card",
+      "roleTitle": "龍涎閣",
+      "shortBio": "「於世界探尋，並持之以恆，那是渴望歸屬、戲謔俗世、杜絕塵囂、颯爽勇武之人的故事。」",
+      "profileBio": "來自遠東之國，名為龍涎閣的場所，四位性格各異的成員一同齊聚在這。\n一行人前往這名為清醒夢的場所將會碰見甚麼？\n四人各自懷揣著異樣的心思，有誰能夠瞥見那一角的真實。\n\n龍塵（男精）\nhttps://lit.link/en/dustdragon\n龍炎（龍男）\nhttps://lit.link/en/FlameDragon\n龍霆（貓男）\nhttps://lit.link/en/thunderdragon\n龍颯（人男）\nhttps://lit.link/en/soughdragon\n\nex.可接受RP程度:無~重",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [
+        {
+          "id": "37b2e2fe-a011-40fd-8d68-5102bb10de7e",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/988b9866-eb86-43ba-a3bc-4ed9e364d6ce?variant=full"
+        },
+        {
+          "id": "b3d4048c-6305-4d01-a1a1-413b34e729e1",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/cb378a76-0460-436f-b864-47ade671b470?variant=full"
+        }
+      ],
+      "commonServices": [],
+      "specialServices": []
+    },
+    "a7832951-39a0-4792-ba22-ec33addcc444": {
+      "id": "a7832951-39a0-4792-ba22-ec33addcc444",
+      "displayName": "夏爾",
+      "nickname": null,
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/b1e9c469-23a7-4cb7-bee9-410d8da38f24?variant=card",
+      "roleTitle": null,
+      "shortBio": "夢之所以有意義，是因為醒來之後，我們有可能把在夢中看見的希望帶回現實。",
+      "profileBio": "我叫「夏爾」。\n有人說，這個名字讓人想起《魔戒》，也有人會聯想到《轉生史萊姆》；不過對我而言，我更喜歡被解讀為——某個來自美夢之地、將意志與希望交給後來旅人的「鐘錶匠」。\n\n在這裡，我不會替各位決定應該做一場怎樣的夢。\n而是希望每一位來到此處的旅人，都能在這找到自己真正期望的事物。\n願各位既不迷失於夢，也不被現實驚醒，就請在這裡，做一場既清醒，又足夠美好的夢吧。\n\n歡迎來到我們的夢境",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [
+        {
+          "id": "44fa3fe5-bda7-4339-ab2e-b8f0e6e573d5",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/438c2632-429f-418f-a82f-58de4284b5e8?variant=full"
+        },
+        {
+          "id": "3c400b23-6618-4456-b0f8-8693005c6eba",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/4dd19e9a-2242-49a3-bf58-bfa457f5a255?variant=full"
+        },
+        {
+          "id": "9c094f24-1d3a-4c74-8bc3-a33b386ba8e1",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/c23d975f-8a8b-44e7-bb5f-ae35ea85f9f5?variant=full"
+        }
+      ],
+      "commonServices": [],
+      "specialServices": [
+        {
+          "id": "1085e2ab-d134-4072-af62-3740c53e4d87",
+          "serviceType": "special",
+          "serviceName": "合照拍立得",
+          "serviceDescription": "無簽繪",
+          "priceText": "50,000 Gil"
+        },
+        {
+          "id": "6c7e98da-2579-4903-950c-917d0cb8e50b",
+          "serviceType": "special",
+          "serviceName": "陪玩網頁小遊戲",
+          "serviceDescription": "陪玩各種網頁小遊戲！10分鐘\n五子棋..公關災難..等等\n※有好玩的可以介紹給我哦",
+          "priceText": "30,000 Gil"
+        },
+        {
+          "id": "818ef7c6-9119-4a28-ba1e-b22400020440",
+          "serviceType": "special",
+          "serviceName": "金碟陪玩",
+          "serviceDescription": "15分鐘金碟隨意玩~~\n看是要我投籃投到手抽筋，還是一起跳松果都可以 (՞•̀ω•́՞)⸝ި ʕᦏ",
+          "priceText": "50,000 Gil"
+        }
+      ]
+    },
+    "5018ec61-7e3b-4a4e-b7b0-a11d66291711": {
+      "id": "5018ec61-7e3b-4a4e-b7b0-a11d66291711",
+      "displayName": "神仙玉米粉",
+      "nickname": "玉米",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/6247196b-2eac-494b-aed5-3b1a911db738?variant=card",
+      "roleTitle": "畫家/維艾拉",
+      "shortBio": "「...能為你畫張圖嗎?」\n無名的畫家，總是身著旗袍\n揹著畫筆到處旅行----",
+      "profileBio": "每停留一處就會與當地的旅行者打交道、聽取各式的冒險故事，最後他總會說出那句經典的台詞:\n\n「你好啊，旅行者」\n「我能為你畫張圖嗎?」\n\n沒人知曉他真正的名字，只知道他總以「玉米」自稱，據說是因為本人非常喜愛玉米的緣故---",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [
+        {
+          "id": "3ecdfdf5-f5dd-43f7-824e-670714a254d3",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/5891967b-f853-4098-97b4-ce60779b9675?variant=full"
+        },
+        {
+          "id": "ce1f13a0-a2cf-4630-8746-9ab4ebc2f868",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/d8a6c845-11e2-4f55-9e3f-7b950ec8f691?variant=full"
+        },
+        {
+          "id": "7ca8682c-6215-43dd-a211-bac164d50e59",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/7ab349c1-d72b-4ff3-bedb-47fde71ba34f?variant=full"
+        },
+        {
+          "id": "7c11bac5-8b1e-47f4-ad9d-b4e3dd34cbed",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/fe7e29c4-1af2-4d6f-b5ed-7e330d3006a4?variant=full"
+        },
+        {
+          "id": "91df7ed5-c253-4d7b-a772-f2f8204012ef",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/9b61ff03-7b2a-4c37-8d29-2cf8c046c6e6?variant=full"
+        }
+      ],
+      "commonServices": [],
+      "specialServices": [
+        {
+          "id": "8df2c8e9-6bb5-44f8-9344-8dc1b386c20a",
+          "serviceType": "special",
+          "serviceName": "繪圖委託",
+          "serviceDescription": "電繪/手繪",
+          "priceText": "50萬~85萬"
+        },
+        {
+          "id": "934ff4cd-2f2b-4d9f-a181-8d306afae4ac",
+          "serviceType": "special",
+          "serviceName": "頭像(電繪)",
+          "serviceDescription": "黑白+任意指定色彩",
+          "priceText": "500,000 Gil"
+        },
+        {
+          "id": "8cf0d300-b9bc-4f81-a7c7-2205b681094b",
+          "serviceType": "special",
+          "serviceName": "半身(電繪)",
+          "serviceDescription": "黑白+任意指定色彩",
+          "priceText": "700,000 Gil"
+        },
+        {
+          "id": "e4509da3-801e-437e-a7b7-71a727c58278",
+          "serviceType": "special",
+          "serviceName": "頭像(手繪)",
+          "serviceDescription": "黑白",
+          "priceText": "650,000 Gil"
+        },
+        {
+          "id": "425981fe-70ea-404a-b5ca-8ddc568c6211",
+          "serviceType": "special",
+          "serviceName": "半身(手繪)",
+          "serviceDescription": "黑白",
+          "priceText": " 850,000 Gil"
+        }
+      ]
+    },
+    "7507c82f-f0c8-4ef8-83e6-1de52a5bd6ba": {
+      "id": "7507c82f-f0c8-4ef8-83e6-1de52a5bd6ba",
+      "displayName": "普琳希絲",
+      "nickname": "Ｅ",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/b6985887-67d9-4e6f-8054-81a502dcf6db?variant=card",
+      "roleTitle": "傭兵｜情報商",
+      "shortBio": "「讓我們一起描繪一場令人沉醉的夢境吧？」",
+      "profileBio": "在傭兵與情報商的圈子裡，幾乎沒有人知道那名維艾拉族男子真正的名字。\n\n人們只記得他綁著細辮馬尾的粉髮、淡紫的瞳色、臉上特別的三角圖騰，以及總是揚起的嘴角。\n「Ｅ」、「兔子」、「小兔」——無論被怎麼稱呼，他都能知道你在喊他。\n\nＥ擅長所有戰鬥技巧，也擅長從酒館、賭桌與耳語之間獲得任何的情報。當傭兵不為其他，單純缺錢、單純能打發時間。\n他喜歡漂亮可愛的女孩子，從不掩飾這點、也清楚自己優勢的他從搭訕、調情到請客，都是他的日常。\n\n——沒有人能確定他會在誰的故事裡停留多久。\n\n\n\n×\n\n可接受RP程度：無～重",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [
+        {
+          "id": "0c53d856-f700-40bf-a90b-085b095bfd26",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/ac49803e-3184-4e3a-81cd-98ed01484354?variant=full"
+        },
+        {
+          "id": "bdc77b3d-747e-4ec2-a170-c349c94d676a",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/f2312e34-3ff0-4ca9-b093-56e0c7546164?variant=full"
+        },
+        {
+          "id": "1c83cdea-10b9-4eda-87b0-bf917eb9efb1",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/579a859a-119c-4a59-9a8b-97fdcfd76a95?variant=full"
+        },
+        {
+          "id": "e099b450-dedd-4a2f-8bbb-0af12ee2300b",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/71b84c68-bed7-420e-8260-aa56181ea6f2?variant=full"
+        },
+        {
+          "id": "6b9e777f-d5ab-4f91-a5a7-ed6c6aa9bb60",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/3375ab8c-7cf3-4454-b5e3-6a6a411a533c?variant=full"
+        },
+        {
+          "id": "80e6e585-585e-464c-99bc-50e303ac903e",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/d5776505-8994-4731-9421-dbb859945bee?variant=full"
+        }
+      ],
+      "commonServices": [],
+      "specialServices": [
+        {
+          "id": "5b8c3b3e-5a07-45e1-a08b-f0917e9e7d73",
+          "serviceType": "special",
+          "serviceName": "店內攝影｜簡單個人照",
+          "serviceDescription": "換上您喜歡的衣服，擺出您自信的動作，由我按下快門‧",
+          "priceText": "50,000"
+        },
+        {
+          "id": "2e8f560f-a16a-49c1-be6e-2856dae4ad0f",
+          "serviceType": "special",
+          "serviceName": "店內攝影｜個人拍立得（無簽）",
+          "serviceDescription": "如需要簽繪，則需要加價3萬Gil。",
+          "priceText": "50,000"
+        },
+        {
+          "id": "fc41305a-1159-4455-b09e-267381a69997",
+          "serviceType": "special",
+          "serviceName": "店內攝影｜雙人拍立得（無簽）",
+          "serviceDescription": "如需簽繪，則需要加價5萬Gil。",
+          "priceText": "100,000"
+        },
+        {
+          "id": "1cadce69-c32b-4d95-af0c-a8c7217232fb",
+          "serviceType": "special",
+          "serviceName": "店外攝影｜個人照",
+          "serviceDescription": "限定攝影棚拍，需要客人自行搭配服裝與尋找心儀攝影棚｜\n因溝通與確認姿勢需要時間，請先確保有空閒時間｜\n保底五張照片，會統一上傳雲端給客人。（試營運中可能漲幅）",
+          "priceText": "500,000/1hr"
+        },
+        {
+          "id": "dc564326-b7f3-4b35-8e73-44a8e81af97f",
+          "serviceType": "special",
+          "serviceName": "繪圖｜QQ麻糬",
+          "serviceDescription": "此項目為不定期開放，如開放會提前告知，基本上會限制名額。\n是模版。需提供角色大頭及服裝，複雜服飾會極簡化，介意者請繞道。工期：3-7天",
+          "priceText": "300,000"
+        },
+        {
+          "id": "8ef08c0c-072b-45bd-a26b-4c52771f85ca",
+          "serviceType": "special",
+          "serviceName": "繪圖｜正比塗鴉",
+          "serviceDescription": "此項目為不定期開放，如開放會提前告知，基本上會限制名額。\n繪製胸上左右。蹭線、溢色、服裝簡化注意，介意者請繞道。工期：7-14天",
+          "priceText": "1,000,000"
+        },
+        {
+          "id": "33606713-93ba-483e-83aa-9f511c64a15b",
+          "serviceType": "special",
+          "serviceName": "談心｜戀愛體驗",
+          "serviceDescription": "「需要我的話，我一直都在。」",
+          "priceText": "300,000/20min"
+        },
+        {
+          "id": "b7284e81-27d7-47b4-bb36-af80096797cc",
+          "serviceType": "special",
+          "serviceName": "外帶｜日隨",
+          "serviceDescription": "日隨打TH居多。打PVP不額外收費，不保證會贏。",
+          "priceText": "150,000/20min"
+        }
+      ]
+    },
+    "6d9bcaba-4840-4abf-a3dd-65dcff7706f7": {
+      "id": "6d9bcaba-4840-4abf-a3dd-65dcff7706f7",
+      "displayName": "米婭",
+      "nickname": "Mia",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/916c01c0-6c60-466d-b464-749f961a27d7?variant=card",
+      "roleTitle": "光暗未來絕境戰",
+      "shortBio": "光暗未來絕境戰",
+      "profileBio": "過去，名為「光之泛濫」的災難席卷了第一世界的大地。現在，異國的詩人圍繞著這段歷史編織了一段新的篇章。歷經千難萬險才遏制住的泛濫究竟出自何人之手，他的目的又將把世界引向何方……聆聽著被過度改編的希望之詩，暗之戰士開始親自體驗圍繞光之巫女琳的「另一個未來」。",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [
+        {
+          "id": "478e7d43-9671-474e-bcdb-1dd7feb444e5",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/2c018225-10b1-457b-9057-56112c92d9f0?variant=full"
+        },
+        {
+          "id": "85c99d1a-d0d2-4d99-9b74-975537e92f87",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/81387f9b-4f56-4bfd-9d0f-519eb94a0f6d?variant=full"
+        },
+        {
+          "id": "638d3f39-4d0a-4e01-9bf9-9e257c9acbb0",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/fa8d0f7b-2d5a-48e5-ada9-a19800cce69a?variant=full"
+        },
+        {
+          "id": "d4591757-67aa-4213-ad71-2eab8582161f",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/c4700c09-6c10-4573-a08a-b77b306c819f?variant=full"
+        },
+        {
+          "id": "07056226-d052-4b3f-abc0-91885a27ee32",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/0dc7daee-0e74-4d13-9cb5-fbadf51ee970?variant=full"
+        },
+        {
+          "id": "a4cc23b5-1061-43ea-bdb3-ec168611fc22",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/21cefd9e-2f4a-404d-b41f-a74ad3ef0b03?variant=full"
+        },
+        {
+          "id": "b9b28fac-1fa6-4e03-ae3a-737be2495f28",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/67cb4f7b-c9e3-4c9e-875a-c80614615e4f?variant=full"
+        }
+      ],
+      "commonServices": [],
+      "specialServices": [
+        {
+          "id": "6fb90039-dc0b-451f-9081-492e13bfeb33",
+          "serviceType": "special",
+          "serviceName": "鏡中奇遇",
+          "serviceDescription": "讀條鏡中奇遇之後，場外出現一面白鏡與兩面紅鏡。白鏡會與BOSS同時發動攻擊，紅鏡會延遲發動。\n兩面紅鏡必定相隔90°。\n\nBOSS與白鏡會先發動月環及最近四人的誘導扇形。MT需要把BOSS拉到白鏡對面，由近戰誘導BOSS、遠程誘導白鏡。",
+          "priceText": "999,999,999"
+        },
+        {
+          "id": "d8703634-2653-4a53-a128-1c694d814e61",
+          "serviceType": "special",
+          "serviceName": "時間壓縮．絕",
+          "serviceDescription": "地獄審判後暗之巫女回場中讀條時間壓縮．絕。讀條職業若是站位不當的話可能會斷讀條。\n傷害約18.5萬的全體AOE後，賦予玩家一堆debuff開始時間壓縮一串機制。\n",
+          "priceText": "999,999,999"
+        },
+        {
+          "id": "47993c68-ad03-48b6-9772-4d89d74c26b8",
+          "serviceType": "special",
+          "serviceName": "光與暗的龍詩",
+          "serviceDescription": "兩人共同讀條技能，但實際傷害來自米特隆。全體AOE傷害約17萬需要注意。",
+          "priceText": "999,999,999"
+        },
+        {
+          "id": "d7227af8-8a59-4b5e-beb7-b0b2ca9b0ccb",
+          "serviceType": "special",
+          "serviceName": "時間結晶",
+          "serviceDescription": "兩人回中共同讀條，實際傷害來自暗之巫女。全體AOE傷害約16萬。\n讀條完賦予玩家debuff後上天無法選中。\n\n場上出現與P3時間壓縮同款的非常Happy的沙漏與連線，連線必定只有圖下兩種情況。\n加速的黃線只會連中間，而緩速的紫線則會隨機連線。\n接著這三組沙漏會依加減速依序釋放大範圍鋼鐵，AC必定會先發生。\n鋼鐵範圍可認地板的線。",
+          "priceText": "999,999,999"
+        },
+        {
+          "id": "f5907102-9e41-4710-975e-dea900535016",
+          "serviceType": "special",
+          "serviceName": "光塵之劍",
+          "serviceDescription": "讀條造成約18.5萬的物理全體AOE，並且場中出現地火。\n地火的位置與發動順序隨機，但形狀為固定。",
+          "priceText": "999,999,999"
+        },
+        {
+          "id": "4849b66f-19b4-4412-9067-bff2ab77a31e",
+          "serviceType": "special",
+          "serviceName": "失樂園",
+          "serviceDescription": "潘朵拉之盒後，會依照「光塵之劍→復樂園→星靈之劍→光塵之劍」的順序重複機制。\n在第三次光塵之劍後米特隆會讀條時間切。此時琳和蓋亞會送你1.5條LB，讓你最後有LB3可以打。",
+          "priceText": "999,999,999"
+        }
+      ]
+    },
+    "6c1a2ce7-7e76-407a-9a52-74864a028984": {
+      "id": "6c1a2ce7-7e76-407a-9a52-74864a028984",
+      "displayName": "羲墨",
+      "nickname": null,
+      "avatarUrl": null,
+      "roleTitle": null,
+      "shortBio": "「在這清醒的夢境，汝可讓吾感到有趣嗎?」",
+      "profileBio": "作為敖龍族少數的長生種\n羲墨已經記不清活過了多少日夜 只依稀記得見證了一代又一代多瑪君主的交迭..但羲墨不關心 漫長的時間教會他的只有餘燼般的漠然。\n祖上擁有龍族血脈 或許是因為返祖血統的原因 生物體徵呈現近似龍族的狀態 壽命也比一般敖龍族漫長的多 擁有正式姓氏但是極少在公開場合使用 極度厭惡主從關係混亂\n為了找點有意思的事情而來到清醒夢..\n",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [],
+      "commonServices": [
+        {
+          "id": "a59f095a-491c-4026-943f-37513f469f1c",
+          "serviceType": "common",
+          "serviceName": "敘闊",
+          "serviceDescription": "一般陪聊",
+          "priceText": null
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "5f21b802-336e-4ae6-9b3c-9208ff82e488",
+          "serviceType": "special",
+          "serviceName": "遊憩",
+          "serviceDescription": "小遊戲",
+          "priceText": "30000"
+        },
+        {
+          "id": "baaf4c1f-78f8-4d10-b33d-c200f7b00812",
+          "serviceType": "special",
+          "serviceName": "卜卦",
+          "serviceDescription": "測一卦..不一定準\n曉天命，盡人事",
+          "priceText": "100000"
+        },
+        {
+          "id": "d2b8bf3a-5563-49da-8cb0-e52c8e3c233e",
+          "serviceType": "special",
+          "serviceName": "月出",
+          "serviceDescription": "月出皎兮，佼人僚兮；舒窈糾兮，勞心悄兮..\n(戀愛體驗)",
+          "priceText": "300000"
+        }
+      ]
+    },
+    "957b071c-f800-4889-960e-db2d588b1c3e": {
+      "id": "957b071c-f800-4889-960e-db2d588b1c3e",
+      "displayName": "許魁",
+      "nickname": "小粉貓",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/119d28f2-f86b-49e6-a09f-0ac5c713a52e?variant=card",
+      "roleTitle": "小粉貓",
+      "shortBio": "我還沒想好",
+      "profileBio": null,
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [
+        {
+          "id": "587ff264-3798-45de-8335-5cf69932cdd3",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/5fe11ad4-e835-40a5-a12a-cae76dac050a?variant=full"
+        },
+        {
+          "id": "0888affc-b817-479e-b1a3-9939372465eb",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/bd2ecded-c729-46ef-aadc-66728ecf7cb6?variant=full"
+        },
+        {
+          "id": "501b220e-c621-4428-a44e-b11a7b49b1e0",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/25403f87-68fb-4a86-9444-edec731b9da3?variant=full"
+        },
+        {
+          "id": "d24f1e91-d6ee-4acd-9f04-b94b53542314",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/9c54f840-2c07-4146-84dc-0bdfbf804872?variant=full"
+        },
+        {
+          "id": "a9d888f3-a3f5-4f28-8fea-c351823b755a",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/c06972c8-be62-4091-852e-2f8dd389e611?variant=full"
+        }
+      ],
+      "commonServices": [],
+      "specialServices": []
+    },
+    "1ee068c4-3cb1-4b55-b44b-49e95b51d07a": {
+      "id": "1ee068c4-3cb1-4b55-b44b-49e95b51d07a",
+      "displayName": "貓貓",
+      "nickname": "芙貓貓",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/21f9ec0e-6cc3-4088-83c0-462dcf416a46?variant=card",
+      "roleTitle": "指名人員/拉拉菲爾族",
+      "shortBio": "我有黑鼻子但我不是公肥",
+      "profileBio": "來自聖恩達利姆神學院的平民派優秀學生（自稱），由於“億”些原因沒辦法繼續就學，因此踏上打工努力生活的日子。\n\n雖然就學時沒有學到什麼有用的東西（咦？），因此踏入夢境裡逃避現實，其實是打本能手，所以……肥肥、一起、強大！\n\n要介紹自己？嗯……算是一隻個性很古怪的拉拉菲爾族，笑點很低也很詭異，說不上開朗卻也不難聊天。\n\n*視力不好，沒戴眼鏡的時候其實看不太清楚，可以的話請坐近一些。",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [],
+      "commonServices": [],
+      "specialServices": []
+    },
+    "7077cfe0-a073-4564-88f7-61c083a0fce7": {
+      "id": "7077cfe0-a073-4564-88f7-61c083a0fce7",
+      "displayName": "帕蕊",
+      "nickname": "帕蕊",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/397c9796-dbbc-4c07-ad6c-a3ee4eac022a?variant=card",
+      "roleTitle": ":3",
+      "shortBio": "測試",
+      "profileBio": "不可拍打不可餵食可以給我錢",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [
+        {
+          "id": "0848fcf6-df31-4b43-a145-baf6102cdded",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/4d14f757-9c48-4f98-9f8a-5009ade38035?variant=full"
+        }
+      ],
+      "commonServices": [
+        {
+          "id": "fc318920-8f2f-405b-9898-2f9375694235",
+          "serviceType": "common",
+          "serviceName": "給我錢",
+          "serviceDescription": "請收留我",
+          "priceText": "一棟L"
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "c4be059f-ea11-4ba4-87c2-b24e58784d64",
+          "serviceType": "special",
+          "serviceName": "測試",
+          "serviceDescription": "請我吃飯謝謝",
+          "priceText": "無價"
+        }
+      ]
+    },
+    "2cbb90df-84ee-5bd1-a8d8-f73de4f7df76": {
+      "id": "2cbb90df-84ee-5bd1-a8d8-f73de4f7df76",
+      "displayName": "菲萊",
+      "nickname": "菲萊",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/7d1f9b1b-ad9d-43ca-b37f-ece0ad44cb46?variant=card",
+      "roleTitle": "系統架構者 / 創造物管理局職員",
+      "shortBio": "通靈需求，理念審核，阻止創造無用之物，尋找解決方案之人。",
+      "profileBio": "創造管理局成員。\n與上司希斯拉德一樣比起操作乙太，更擅長觀測乙太的本質與靈魂的成色。\n對於奇怪的創造魔法理念會嘗試找出提交者想要達到的目的，以提供可能通過審核的改進意見。\n偶爾心血來潮也會在下班後修正那些沒有通過審核的意見或接一些創造魔法委託。\n\n『不能只問客戶需求而提供服務，等你做好了他們又想要新的東西了。』\n\n『努力實現他們的願望，就是我能為這顆美麗的星球做出的最大貢獻。\n當他們完成自己的使命，我的使命自然也完成了。』\n\n沒辦法提供指名服務但是你可以捐一點Gil給當小費 :3",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [
+        {
+          "id": "1c13cb56-0e1b-4dba-bee0-ca240743f19b",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/273efce6-4164-4711-afdc-aadd93e98b4d?variant=full"
+        },
+        {
+          "id": "1c450697-8897-4311-82d3-6e87ce63cafc",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/14f00cb0-9885-430d-b5d7-c1e195e97e64?variant=full"
+        },
+        {
+          "id": "40fe17fb-e35f-44e1-a938-49e3d2675dce",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/f3a90817-98a0-4c82-ba52-fcf4fd846405?variant=full"
+        }
+      ],
+      "commonServices": [
+        {
+          "id": "6456f970-47e6-589b-a2bb-73c2006fde75",
+          "serviceType": "common",
+          "serviceName": "咬耳朵",
+          "serviceDescription": "坐好耳朵給你咬\n(若做出攻擊性咬咬，後果自負)",
+          "priceText": "200,000 Gil"
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "b30105f1-4942-561b-ad39-60419d0aaa25",
+          "serviceType": "special",
+          "serviceName": "讓我看看",
+          "serviceDescription": "跟客人聊個天並依照客人喜好推薦合適的店員。",
+          "priceText": "10,000 Gil"
+        },
+        {
+          "id": "d3512cdc-9424-583f-a35b-812a43f2b8bb",
+          "serviceType": "special",
+          "serviceName": "主線稽查",
+          "serviceDescription": "依照已經到達的主線進度，聊聊一路走來的歷程。\n『……你背負著眾多的寄託，\n心中充滿各種記憶。』",
+          "priceText": "30,000 Gil"
+        }
+      ]
+    },
+    "13b88276-56cb-4882-87b1-01716fb827c2": {
+      "id": "13b88276-56cb-4882-87b1-01716fb827c2",
+      "displayName": "愛梅克賽特克",
+      "nickname": "愛梅(測試店員)",
+      "avatarUrl": "https://api.marchgroup.net/api/client/media/d0be3478-5a02-4206-adc8-c33e7a129f56?variant=card",
+      "roleTitle": "Tester / 最古魔導士",
+      "shortBio": "區區廢物不許對我們的夙願說三道四!",
+      "profileBio": "事到如今為何還要掙扎? 你已經無法戰鬥了......你沒有戰鬥的目的了...... 你的冒險即將在這裡結束。",
+      "isWorkingToday": true,
+      "currentStatus": "available",
+      "statusText": "待命中",
+      "todayShift": null,
+      "gallery": [
+        {
+          "id": "71bcdac8-62d0-4c87-a868-3312b5520f91",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/6302894b-d58d-48a7-8bc0-23e152fc50d6?variant=full"
+        },
+        {
+          "id": "d0ec7b65-53af-47e5-bfd3-797d7e5360d7",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/c263dc04-545c-4147-a2d2-9678f7fc9b7d?variant=full"
+        },
+        {
+          "id": "84319152-1519-4e4a-84e8-036500e78d6a",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/2146f429-1b77-4a77-b7d3-deed2ac1a692?variant=full"
+        }
+      ],
+      "commonServices": [
+        {
+          "id": "3345025a-f0b9-412e-bfa5-2fa17a254ffb",
+          "serviceType": "common",
+          "serviceName": "陪聊",
+          "serviceDescription": "就陪你浪費一下生命吧。\n沒辦法，對弱小又稍縱即逝的生物來說，這種狹隘的短視是無法避免的吧?",
+          "priceText": "1,000,000"
+        }
+      ],
+      "specialServices": [
+        {
+          "id": "0cbde3fd-b837-4be1-9c23-3511feca4236",
+          "serviceType": "special",
+          "serviceName": "臭臉說怪話",
+          "serviceDescription": "我這是在誇你們，欣然接受就好了",
+          "priceText": "你的可悲生命"
+        }
+      ]
+    }
+  }
+}

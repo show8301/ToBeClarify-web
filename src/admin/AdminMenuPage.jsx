@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { adminApi } from '../api/client.js';
+import { adminApi } from './admin-api.js';
 import {
   AdminButton, AdminDialog, AdminDragList, AdminField, AdminImagePicker, AdminPage, AdminPanel, AdminState, AdminToggle,
   newId,
@@ -153,7 +153,7 @@ export function AdminMenuPage() {
 
   const currentLabel = tabs.find(([id]) => id === tab)?.[1] || '';
   return (
-    <AdminPage eyebrow="Dream Menu" title="菜單設定" description="管理消費規則、菜單分類、餐點品項與套餐組合。所有排序統一使用拖曳卡片，點擊卡片開啟編輯。" actions={<><AdminButton variant="secondary" onClick={create}>新增{currentLabel}</AdminButton><AdminButton onClick={saveOrder} disabled={!orderDirty || saving}>{saving ? '儲存中…' : '儲存排序'}</AdminButton></>}>
+    <AdminPage eyebrow="Salon Menu" title="菜單設定" description="管理消費規則、菜單分類、餐點品項與套餐組合。所有排序統一使用拖曳卡片，點擊卡片開啟編輯。" actions={<><AdminButton variant="secondary" onClick={create}>新增{currentLabel}</AdminButton><AdminButton onClick={saveOrder} disabled={!orderDirty || saving}>{saving ? '儲存中…' : '儲存排序'}</AdminButton></>}>
       {message ? <div className="adminNotice">{message}</div> : null}
       <div className="adminTabs">{tabs.map(([id, label]) => <button type="button" key={id} className={tab === id ? 'isActive' : ''} onClick={() => setTab(id)}>{label}</button>)}</div>
       <AdminState loading={state.loading} error={state.error} onRetry={load} />

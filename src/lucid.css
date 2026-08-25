@@ -1645,3 +1645,4 @@ body.modal-open .site-parallax-bubbles i{animation-play-state:paused}
   .site-floating-top b{font-size:8px;letter-spacing:.06em}
 }
 @media(prefers-reduced-motion:reduce){.site-floating-top{transition-duration:.01ms}}
+.home-admin-trigger{color:inherit;text-decoration:none;font:inherit;letter-spacing:inherit;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}.home-admin-trigger:focus-visible{outline:1px solid currentColor;outline-offset:2px;border-radius:2px}

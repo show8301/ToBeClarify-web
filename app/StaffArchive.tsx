@@ -133,8 +133,7 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
         <AnimatePresence mode="popLayout">
           {filtered.map((person, index) => {
             const services = [...(person.commonServices ?? []), ...(person.specialServices ?? [])];
-            // Temporary availability override until the staff API exposes a nomination flag.
-            const canBeNominated = true;
+            const canBeNominated = person.isNominatable === true;
             const fileNumber = String(index + 1).padStart(2,"0");
             return (
               <motion.a layout href={`/staff/${person.id}`} onClick={(event) => openProfile(event, `/staff/${person.id}`)} key={person.id} className="dreamer-card"

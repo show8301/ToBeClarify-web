@@ -775,6 +775,11 @@
 .adminStaffWorkToggle small,
 .adminDragCardMeta > small { color: var(--color-fg-mute); font-size: 10px; white-space: nowrap; }
 .adminStaffListIdentity { flex: 1; }
+.adminStaffListIdentity > div { min-width: 0; }
+.adminStaffListIdentity .adminStaffBufferLine { min-height: 14px; color: var(--color-accent-2); }
+.adminStaffListIdentity .adminStaffBufferLine.isEmpty { visibility: hidden; }
+.adminStaffBasicToggle { display: grid; align-content: center; gap: 6px; min-width: 0; }
+.adminStaffBasicToggle > small { color: var(--color-fg-mute); font-size: 11px; line-height: 1.5; }
 .adminStaffGalleryCard > img { flex: 0 0 92px; width: 92px; height: 68px; border-radius: 9px; }
 
 @media (max-width: 980px) {

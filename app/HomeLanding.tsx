@@ -1,11 +1,12 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import type { HomeData } from "./site-types";
 
 export default function HomeLanding({home}:{home:HomeData}){
   const [slide,setSlide]=useState(0);
+  const adminTriggerClicks=useRef(0);
   const reduceMotion=useReducedMotion();
   const images=home.slides.length?home.slides:home.shopInfo.heroImage?[{id:"hero",imageUrl:home.shopInfo.heroImage,displaySeconds:10}]:[];
   const current=images[slide%Math.max(images.length,1)];
@@ -16,6 +17,14 @@ export default function HomeLanding({home}:{home:HomeData}){
     const timer=window.setTimeout(()=>setSlide(value=>(value+1)%images.length),seconds*1000);
     return()=>window.clearTimeout(timer);
   },[current?.displaySeconds,images.length,reduceMotion,slide]);
+
+  function openAdminAfterFiveClicks(event:MouseEvent<HTMLAnchorElement>){
+    event.preventDefault();
+    adminTriggerClicks.current+=1;
+    if(adminTriggerClicks.current<5)return;
+    adminTriggerClicks.current=0;
+    window.location.assign("/admin/login");
+  }
 
   return <div className="home-page">
     {!reduceMotion&&<motion.div className="home-dream-entry" aria-hidden="true" initial={{opacity:1}} animate={{opacity:0,visibility:"hidden"}} transition={{opacity:{delay:1.15,duration:.85,ease:[.76,0,.24,1]},visibility:{delay:2}}}>
@@ -43,7 +52,7 @@ export default function HomeLanding({home}:{home:HomeData}){
         <div className="home-business-status"><b><i aria-hidden="true"/><span><small>LIVE STATUS</small>{home.shopInfo.businessStatus}</span></b><span>{home.shopInfo.openHours}</span></div>
         <a href="/staff">MEET THE DREAMERS <i>↗</i></a>
       </motion.div>
-      <div className="home-hero-ticket"><span>SERVER</span><b>{home.shopInfo.server}</b><span>ADDRESS</span><b>{home.shopInfo.address}</b><em>LD · 2026</em></div>
+      <div className="home-hero-ticket"><span>SERVER</span><b>{home.shopInfo.server}</b><span>ADDRESS</span><b>{home.shopInfo.address}</b><em><a className="home-admin-trigger" href="/admin/login" onClick={openAdminAfterFiveClicks} aria-label="開啟後台登入頁">LD</a> · 2026</em></div>
     </section>
 
     <section className="home-marquee" aria-label="店舖特色"><span>ROLE PLAY SALON</span><i>✦</i><span>DEEP NIGHT STORIES</span><i>✦</i><span>PHOTO & COMPANY</span><i>✦</i><span>EORZEA WEEKEND</span></section>

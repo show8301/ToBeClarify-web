@@ -67,3 +67,14 @@ test('the detached public action returns to the top on desktop and mobile', asyn
   assert.match(styles, /\.site-floating-top span\{[^}]*display:inline-flex;align-items:center/);
   assert.doesNotMatch(styles, /\.site-floating-menu/);
 });
+
+test('the LD signature opens admin login only after five clicks', async () => {
+  const source = await readFile(new URL('../app/HomeLanding.tsx', import.meta.url), 'utf8');
+  const styles = await readFile(new URL('../app/globals.css', import.meta.url), 'utf8');
+
+  assert.match(source, /adminTriggerClicks\.current\+=1/);
+  assert.match(source, /adminTriggerClicks\.current<5/);
+  assert.match(source, /window\.location\.assign\("\/admin\/login"\)/);
+  assert.match(source, /className="home-admin-trigger"[^>]+>LD<\/a> · 2026/);
+  assert.match(styles, /\.home-admin-trigger\{[^}]*text-decoration:none/);
+});

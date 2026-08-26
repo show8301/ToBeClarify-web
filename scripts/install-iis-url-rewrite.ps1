@@ -47,6 +47,34 @@ function Start-WindowsInstallerService {
     Write-Host 'Windows Installer service is running.'
 }
 
+function Test-WindowsInstallerComRegistration {
+    try {
+        $installerCom = New-Object -ComObject WindowsInstaller.Installer
+        [void][Runtime.InteropServices.Marshal]::ReleaseComObject($installerCom)
+        Write-Host 'Windows Installer COM registration is accessible.'
+    }
+    catch {
+        $hresult = '0x{0:X8}' -f ($_.Exception.HResult -band 0xffffffffL)
+        Write-Warning "Windows Installer COM registration check failed ($hresult): $($_.Exception.Message)"
+    }
+}
+
+function Write-InstallerLogTail {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path
+    )
+
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        Write-Warning "Windows Installer did not create the expected verbose log: $Path"
+        return
+    }
+
+    Write-Host '::group::Windows Installer verbose log tail'
+    Get-Content -LiteralPath $Path -Tail 160 | ForEach-Object { Write-Host $_ }
+    Write-Host '::endgroup::'
+}
+
 if (Test-UrlRewriteModule) {
     Write-Host 'IIS URL Rewrite is already installed.'
     exit 0
@@ -89,6 +117,7 @@ try {
     Write-Host "Verified Microsoft signature and approved SHA256: $($hash.Hash)"
 
     Start-WindowsInstallerService
+    Test-WindowsInstallerComRegistration
 
     $msiexecPath = Join-Path $env:windir 'System32\msiexec.exe'
     $arguments = "/i `"$installerPath`" /qn /norestart /L*v `"$logPath`""
@@ -100,6 +129,7 @@ try {
         -PassThru
 
     if ($installerProcess.ExitCode -ne 0 -and $installerProcess.ExitCode -ne 3010) {
+        Write-InstallerLogTail -Path $logPath
         throw "URL Rewrite installation failed with MSI exit code $($installerProcess.ExitCode). Log: $logPath"
     }
 

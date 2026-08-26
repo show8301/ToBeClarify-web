@@ -308,7 +308,7 @@ try {
 
     Wait-VinextHealth -Url "http://127.0.0.1:$NodePort/" -Attempts 30 | Out-Null
     $publicResponse = Wait-VinextHealth -Url $HealthCheckUrl -Attempts 15
-    if ($publicResponse.Content -notmatch '<title>[^<]*清醒夢') {
+    if ($publicResponse.Content -notmatch '(/_vinext/|__VINEXT|__next_f)') {
         throw "The public DEV health check returned HTML that does not look like the Vinext site: $HealthCheckUrl"
     }
 

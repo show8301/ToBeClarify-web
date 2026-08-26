@@ -32,11 +32,14 @@ test('staff avatar editor keeps separate upload, crop, and delete actions', asyn
 test('homepage slides expose an editable playback duration', async () => {
   const source = await readFile(new URL('../app/admin/_components/AdminHomeSettingsPage.jsx', import.meta.url), 'utf8');
   const landing = await readFile(new URL('../app/HomeLanding.tsx', import.meta.url), 'utf8');
+  const proxy = await readFile(new URL('../app/api/client-home/route.ts', import.meta.url), 'utf8');
 
   assert.match(source, /label="播放秒數"><input type="number"/);
   assert.match(source, /displaySeconds: Math\.min\(60, Math\.max\(1/);
   assert.match(source, /播放 \{Number\(item\.displaySeconds\) \|\| 10\} 秒/);
   assert.match(landing, /const seconds=Math\.min\(60,Math\.max\(1,Number\(current\?\.displaySeconds\)\|\|10\)\)/);
+  assert.match(landing, /fetch\("\/api\/client-home"/);
+  assert.match(proxy, /Cache-Control/);
 });
 
 test('developer can control each public menu page from the admin home', async () => {

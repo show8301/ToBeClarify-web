@@ -18,7 +18,7 @@ export default function HomeLanding({home}:{home:HomeData}){
 
   useEffect(()=>{
     const controller=new AbortController();
-    fetch("https://api.marchgroup.net/api/client/home",{cache:"no-store",headers:{Accept:"application/json"},signal:controller.signal})
+    fetch("/api/client-home",{cache:"no-store",headers:{Accept:"application/json"},signal:controller.signal})
       .then((response)=>response.ok?response.json():null)
       .then((payload:unknown)=>{
         const data=payload as {success?:boolean;data?:{slides?:HomeData["slides"];pageVisibility?:Partial<HomeData["pageVisibility"]>}}|null;

@@ -2,7 +2,9 @@ param(
     [string]$InstallerUri = 'https://download.microsoft.com/download/1/2/8/128E2E22-C1B9-44A4-BE2A-5859ED1D4592/rewrite_amd64_en-US.msi',
 
     [ValidatePattern('^[0-9A-Fa-f]{64}$')]
-    [string]$ExpectedSha256 = '37342FF2F585F263F34F48E9DE59EB1051D61015A8E967DBDE4075716230A32A'
+    [string]$ExpectedSha256 = '37342FF2F585F263F34F48E9DE59EB1051D61015A8E967DBDE4075716230A32A',
+
+    [switch]$AllowLocalSystemInstall
 )
 
 Set-StrictMode -Version Latest
@@ -152,6 +154,10 @@ function Install-UrlRewriteAsLocalSystem {
 if (Test-UrlRewriteModule) {
     Write-Host 'IIS URL Rewrite is already installed.'
     exit 0
+}
+
+if (-not $AllowLocalSystemInstall) {
+    throw 'URL Rewrite is missing. The one-time LocalSystem install was not explicitly enabled for this workflow run.'
 }
 
 if (-not [Environment]::Is64BitOperatingSystem) {

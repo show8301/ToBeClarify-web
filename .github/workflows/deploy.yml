@@ -5,12 +5,18 @@ on:
     branches:
       - dev
   workflow_dispatch:
+    inputs:
+      allow_one_time_system_install:
+        description: Allow one LocalSystem task to install signed Microsoft URL Rewrite
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
 
 concurrency:
-  group: vinext-dev-${{ github.ref }}
+  group: vinext-dev-${{ github.ref }}-${{ github.event_name }}-${{ github.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -75,8 +81,9 @@ jobs:
           path: ${{ runner.temp }}\tobeclarify-vinext-dev
 
       - name: Ensure Microsoft IIS URL Rewrite is installed
+        if: github.event_name == 'workflow_dispatch' && inputs.allow_one_time_system_install
         shell: powershell
-        run: .\scripts\install-iis-url-rewrite.ps1
+        run: .\scripts\install-iis-url-rewrite.ps1 -AllowLocalSystemInstall
 
       - name: Deploy Node runtime and configure IIS reverse proxy
         shell: powershell

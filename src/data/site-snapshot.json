@@ -51,6 +51,17 @@
         "25:00"
       ]
     },
+    "pageVisibility": {
+      "home": true,
+      "staff": true,
+      "gallery": true,
+      "menu": true,
+      "guestbook": true,
+      "liveUpdate": true,
+      "staffRanking": true,
+      "monetaryRanking": true
+    },
+    "menuHidden": false,
     "navigation": [
       {
         "id": "8b70ffd3-a08a-59a2-9117-b637669c91f0",

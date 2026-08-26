@@ -36,6 +36,8 @@ jobs:
         run: npm ci
 
       - name: Build and test
+        env:
+          NODE_OPTIONS: --experimental-strip-types
         run: npm test
 
       - name: Upload Vinext application

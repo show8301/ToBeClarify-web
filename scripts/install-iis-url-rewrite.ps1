@@ -18,6 +18,35 @@ function Test-UrlRewriteModule {
     return ($LASTEXITCODE -eq 0 -and ($moduleOutput -match 'RewriteModule'))
 }
 
+function Start-WindowsInstallerService {
+    $serviceName = 'msiserver'
+    $serviceRegistryPath = "HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName"
+    $service = Get-Service -Name $serviceName -ErrorAction Stop
+    $serviceConfiguration = Get-ItemProperty -LiteralPath $serviceRegistryPath -Name Start -ErrorAction Stop
+
+    if ($serviceConfiguration.Start -eq 4) {
+        Write-Host 'Windows Installer service is disabled; changing it to Manual startup.'
+        Set-Service -Name $serviceName -StartupType Manual
+    }
+
+    $service.Refresh()
+    if ($service.Status -ne [System.ServiceProcess.ServiceControllerStatus]::Running) {
+        Write-Host 'Starting Windows Installer service.'
+        Start-Service -Name $serviceName
+        $service.WaitForStatus(
+            [System.ServiceProcess.ServiceControllerStatus]::Running,
+            [TimeSpan]::FromSeconds(30)
+        )
+    }
+
+    $service.Refresh()
+    if ($service.Status -ne [System.ServiceProcess.ServiceControllerStatus]::Running) {
+        throw "Windows Installer service did not reach the Running state. Current state: $($service.Status)"
+    }
+
+    Write-Host 'Windows Installer service is running.'
+}
+
 if (Test-UrlRewriteModule) {
     Write-Host 'IIS URL Rewrite is already installed.'
     exit 0
@@ -58,6 +87,8 @@ try {
         throw "The URL Rewrite installer SHA256 does not match the approved package. Actual: $($hash.Hash)"
     }
     Write-Host "Verified Microsoft signature and approved SHA256: $($hash.Hash)"
+
+    Start-WindowsInstallerService
 
     $msiexecPath = Join-Path $env:windir 'System32\msiexec.exe'
     $arguments = "/i `"$installerPath`" /qn /norestart /L*v `"$logPath`""

@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
+      - dev
   pull_request:
     branches:
       - main
+      - dev
   workflow_dispatch:
 
 permissions:
@@ -38,8 +40,8 @@ jobs:
 
       - name: Build
         env:
-          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
-          VITE_ADMIN_API_BASE_URL: ${{ vars.VITE_ADMIN_API_BASE_URL }}
+          VITE_API_BASE_URL: ${{ (github.ref == 'refs/heads/dev' || github.base_ref == 'dev') && vars.DEV_VITE_API_BASE_URL || vars.VITE_API_BASE_URL }}
+          VITE_ADMIN_API_BASE_URL: ${{ (github.ref == 'refs/heads/dev' || github.base_ref == 'dev') && vars.DEV_VITE_ADMIN_API_BASE_URL || vars.VITE_ADMIN_API_BASE_URL }}
         run: npm run build
 
       - name: Upload build artifact
@@ -52,7 +54,14 @@ jobs:
 
   deploy:
     name: Deploy to IIS
-    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
+    if: >-
+      ${{
+        (github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'push' &&
+            (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'))) &&
+        (github.ref != 'refs/heads/dev' ||
+          (vars.DEV_WEB_DEPLOY_PATH != '' && vars.DEV_WEB_HEALTHCHECK_URL != ''))
+      }}
     needs: build
     runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 10
@@ -71,6 +80,7 @@ jobs:
         shell: powershell
         env:
           ARTIFACT_PATH: ${{ runner.temp }}\tobeclarify-web-dist
-          DEPLOY_PATH: ${{ vars.WEB_DEPLOY_PATH }}
-          HEALTH_CHECK_URL: ${{ vars.WEB_HEALTHCHECK_URL }}
-        run: .\scripts\deploy-iis.ps1 -ArtifactPath $env:ARTIFACT_PATH -DeployPath $env:DEPLOY_PATH -HealthCheckUrl $env:HEALTH_CHECK_URL
+          DEPLOY_PATH: ${{ github.ref == 'refs/heads/dev' && vars.DEV_WEB_DEPLOY_PATH || vars.WEB_DEPLOY_PATH }}
+          HEALTH_CHECK_URL: ${{ github.ref == 'refs/heads/dev' && vars.DEV_WEB_HEALTHCHECK_URL || vars.WEB_HEALTHCHECK_URL }}
+          EXPECTED_DEPLOY_LEAF: ${{ github.ref == 'refs/heads/dev' && '_dev' || 'ToBeClarify_web' }}
+        run: .\scripts\deploy-iis.ps1 -ArtifactPath $env:ARTIFACT_PATH -DeployPath $env:DEPLOY_PATH -HealthCheckUrl $env:HEALTH_CHECK_URL -ExpectedDeployLeaf $env:EXPECTED_DEPLOY_LEAF

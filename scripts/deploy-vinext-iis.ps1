@@ -226,21 +226,8 @@ if (-not (Test-Path -LiteralPath $appcmdPath -PathType Leaf)) {
     throw "IIS appcmd.exe was not found: $appcmdPath"
 }
 
-$missingIisPrerequisites = New-Object System.Collections.Generic.List[string]
-
-$rewriteOutput = & $appcmdPath list module RewriteModule 2>&1
-if ($LASTEXITCODE -ne 0 -or -not ($rewriteOutput -match 'RewriteModule')) {
-    $missingIisPrerequisites.Add('Microsoft IIS URL Rewrite 2.1 (x64)')
-}
-
-$proxyOutput = & $appcmdPath list config /section:system.webServer/proxy 2>&1
-if ($LASTEXITCODE -ne 0) {
-    $missingIisPrerequisites.Add('Microsoft Application Request Routing (ARR) 3.0 with IIS proxy support')
-}
-
-if ($missingIisPrerequisites.Count -gt 0) {
-    throw "Missing IIS prerequisites: $($missingIisPrerequisites -join '; ')"
-}
+$prerequisiteScript = Join-Path $PSScriptRoot 'test-iis-reverse-proxy-prerequisites.ps1'
+& $prerequisiteScript -AppCmdPath $appcmdPath
 
 if ($null -eq (Get-Command Register-ScheduledTask -ErrorAction SilentlyContinue)) {
     throw 'The Windows ScheduledTasks module is not available on the DEV runner.'

@@ -11,6 +11,11 @@ on:
         required: true
         default: false
         type: boolean
+      preflight_only:
+        description: Check IIS prerequisites without deploying the site
+        required: true
+        default: true
+        type: boolean
 
 permissions:
   contents: read
@@ -85,7 +90,12 @@ jobs:
         shell: powershell
         run: .\scripts\install-iis-url-rewrite.ps1 -AllowLocalSystemInstall
 
+      - name: Check IIS reverse proxy prerequisites
+        shell: powershell
+        run: .\scripts\test-iis-reverse-proxy-prerequisites.ps1
+
       - name: Deploy Node runtime and configure IIS reverse proxy
+        if: github.event_name == 'workflow_dispatch' && !inputs.preflight_only
         shell: powershell
         env:
           ARTIFACT_PATH: ${{ runner.temp }}\tobeclarify-vinext-dev

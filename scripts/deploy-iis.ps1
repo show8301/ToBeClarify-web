@@ -6,7 +6,11 @@ param(
     [string]$DeployPath,
 
     [Parameter(Mandatory = $true)]
-    [string]$HealthCheckUrl
+    [string]$HealthCheckUrl,
+
+    [Parameter(Mandatory = $true)]
+    [ValidateSet('ToBeClarify_web', 'ToBeClarify_web_dev')]
+    [string]$ExpectedDeployLeaf
 )
 
 Set-StrictMode -Version Latest
@@ -18,7 +22,7 @@ $deployRoot = $deployRoot.TrimEnd(
     [System.IO.Path]::DirectorySeparatorChar,
     [System.IO.Path]::AltDirectorySeparatorChar)
 
-if ((Split-Path -Leaf $deployRoot) -ine 'ToBeClarify_web') {
+if ((Split-Path -Leaf $deployRoot) -ine $ExpectedDeployLeaf) {
     throw "Refusing to deploy to unexpected directory: $deployRoot"
 }
 

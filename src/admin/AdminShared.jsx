@@ -66,6 +66,8 @@ export function AdminToggle({ checked, onChange, label = '啟用', ariaLabel, di
 
 export function AdminImagePicker({ label = '圖片', value, pendingFile, onChange, onClear, hint, className = '', disabled = false, required = false }) {
   const [preview, setPreview] = useState(value || '');
+  const [processing, setProcessing] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!pendingFile) {
@@ -77,6 +79,32 @@ export function AdminImagePicker({ label = '圖片', value, pendingFile, onChang
     return () => URL.revokeObjectURL(url);
   }, [pendingFile, value]);
 
+  const handleFile = async (file) => {
+    if (!file) return;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setError('圖片僅支援 JPEG、PNG 或 WebP 格式。');
+      return;
+    }
+    setProcessing(true);
+    setError('');
+    try {
+      const { default: imageCompression } = await import('browser-image-compression');
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 1.8,
+        maxWidthOrHeight: 2400,
+        initialQuality: 0.9,
+        fileType: 'image/webp',
+        useWebWorker: true,
+      });
+      const baseName = (file.name.replace(/\.[^.]+$/, '') || 'image');
+      onChange(new File([compressed], `${baseName}.webp`, { type: 'image/webp', lastModified: Date.now() }));
+    } catch (processError) {
+      setError(processError?.message || '圖片壓縮失敗，請換一張圖片再試。');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   return (
     <div className={`adminImagePicker ${className}`.trim()}>
       <div className="adminImagePickerHeader">
@@ -87,12 +115,13 @@ export function AdminImagePicker({ label = '圖片', value, pendingFile, onChang
         {preview ? <img src={preview} alt="預覽" /> : <span>尚無圖片</span>}
       </div>
       <div className="adminImagePickerActions">
-        {!disabled ? <label className="adminButton adminButton-secondary">
-          選擇圖片
-          <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={(event) => { onChange(event.target.files?.[0] || null); event.target.value = ''; }} />
+        {!disabled ? <label className={`adminButton adminButton-secondary${processing ? ' isDisabled' : ''}`}>
+          {processing ? '壓縮中…' : '選擇圖片'}
+          <input type="file" disabled={processing} accept="image/jpeg,image/png,image/webp" onChange={(event) => { void handleFile(event.target.files?.[0] || null); event.target.value = ''; }} />
         </label> : null}
-        {preview && !disabled ? <AdminButton variant="ghost" onClick={onClear}>清除</AdminButton> : null}
+        {preview && !disabled ? <AdminButton variant="ghost" onClick={onClear} disabled={processing}>清除</AdminButton> : null}
       </div>
+      {error ? <small className="adminAvatarError" role="alert">{error}</small> : null}
       {hint ? <small className="adminFieldHint">{hint}</small> : null}
     </div>
   );

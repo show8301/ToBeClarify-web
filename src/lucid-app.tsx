@@ -77,7 +77,7 @@ function useRemoteValue<T>(initial: T, loader: (signal: AbortSignal) => Promise<
 }
 
 function SitePage({ home, children }: { home: HomeData; children: React.ReactNode }) {
-  return <SiteChrome navigation={home.navigation} shopInfo={home.shopInfo}>{children}</SiteChrome>;
+  return <SiteChrome navigation={home.navigation} shopInfo={home.shopInfo} pageVisibility={home.pageVisibility} menuHidden={home.menuHidden}>{children}</SiteChrome>;
 }
 
 function StaffPage({ home }: { home: HomeData }) {
@@ -162,7 +162,7 @@ export default function LucidApp() {
     if (path === "/gallery" || path === "/event") return <GalleryPage home={home} />;
     const galleryMatch = path.match(/^\/gallery\/([^/]+)$/);
     if (galleryMatch) return <GalleryPage key={galleryMatch[1]} home={home} initialAlbumId={decodeURIComponent(galleryMatch[1])} />;
-    if (path === "/menu") return <MenuPage home={home} />;
+    if (path === "/menu") return home.pageVisibility.menu ? <MenuPage home={home} /> : <RouteMessage title="這場夢境目前沒有開放" />;
     if (path === "/guestbook") return <GuestbookPage home={home} />;
     if (path === "/liveupdate") return <LivePage home={home} />;
     if (path === "/staffRanking") return <RankingPage key="staffRanking" home={home} type="staffRanking" />;

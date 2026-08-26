@@ -31,10 +31,23 @@ export type ShopRule = { id:string; ruleText:string; ruleNote:string|null };
 export type LiveUpdateConfig = {
   lastUpdatedAt:string; scheduleStart:string; scheduleEnd:string; timeSlots:string[];
 };
+export type HomePageVisibility = {
+  home:boolean;
+  staff:boolean;
+  gallery:boolean;
+  menu:boolean;
+  guestbook:boolean;
+  liveUpdate:boolean;
+  staffRanking:boolean;
+  monetaryRanking:boolean;
+};
 
 export type HomeData = {
   shopInfo:ShopInfo;
   liveUpdateConfig:LiveUpdateConfig;
+  pageVisibility:HomePageVisibility;
+  /** Backward-compatible alias while older API settings are still present. */
+  menuHidden?:boolean;
   navigation:NavigationItem[];
   shopRules:ShopRule[];
   slides:HomeSlide[];

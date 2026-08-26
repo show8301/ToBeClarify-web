@@ -5,6 +5,7 @@ import type {
   GalleryAlbumSummary,
   GuestbookPage,
   HomeData,
+  HomePageVisibility,
   MenuData,
   RankingItem,
   SiteSnapshot,
@@ -80,22 +81,59 @@ function decodeSetting(value: unknown): unknown {
 
 type HomeResponse = {
   siteSettings?: { settingKey: string; settingValue: unknown }[];
+  pageVisibility?: unknown;
   navigation?: HomeData["navigation"];
   shopRules?: HomeData["shopRules"];
   slides?: HomeData["slides"];
   carousels?: HomeData["carousels"];
 };
 
+const defaultPageVisibility: HomePageVisibility = {
+  home: true,
+  staff: true,
+  gallery: true,
+  menu: true,
+  guestbook: true,
+  liveUpdate: true,
+  staffRanking: true,
+  monetaryRanking: true,
+};
+
+function normalizePageVisibility(value: unknown, fallback = defaultPageVisibility): HomePageVisibility {
+  if (!value || typeof value !== "object") return { ...fallback };
+  const source = value as Record<string, unknown>;
+  const legacyMenuHidden = source.menuHidden === true;
+  return {
+    home: source.home !== false,
+    staff: source.staff !== false,
+    gallery: source.gallery !== false,
+    menu: typeof source.menu === "boolean" ? source.menu : !legacyMenuHidden,
+    guestbook: source.guestbook !== false,
+    liveUpdate: source.liveUpdate !== false,
+    staffRanking: source.staffRanking !== false,
+    monetaryRanking: source.monetaryRanking !== false,
+  };
+}
+
 /** Converts the public /home response to the component-facing shape. */
 export function normalizeHome(raw: HomeResponse, fallback: HomeData = siteSnapshot.home): HomeData {
   const settings = Object.fromEntries(
     (raw.siteSettings ?? []).map((item) => [item.settingKey, decodeSetting(item.settingValue)]),
+  );
+  const visibilitySetting = settings.siteVisibility && typeof settings.siteVisibility === "object"
+    ? settings.siteVisibility
+    : undefined;
+  const pageVisibility = normalizePageVisibility(
+    raw.pageVisibility ?? visibilitySetting,
+    fallback.pageVisibility ?? defaultPageVisibility,
   );
   return {
     shopInfo: (settings.shopInfo as HomeData["shopInfo"] | undefined) ?? fallback.shopInfo,
     liveUpdateConfig:
       (settings.liveUpdateConfig as HomeData["liveUpdateConfig"] | undefined) ??
       fallback.liveUpdateConfig,
+    pageVisibility,
+    menuHidden: pageVisibility.menu === false,
     navigation: raw.navigation ?? fallback.navigation,
     shopRules: raw.shopRules ?? fallback.shopRules,
     slides: raw.slides ?? fallback.slides,

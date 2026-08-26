@@ -4,17 +4,29 @@ import test from 'node:test';
 
 test('staff avatar editor keeps separate upload, crop, and delete actions', async () => {
   const source = await readFile(new URL('../app/admin/_components/AdminAvatarPicker.jsx', import.meta.url), 'utf8');
+  const processor = await readFile(new URL('../app/admin/_components/AdminImageProcessingProvider.jsx', import.meta.url), 'utf8');
+  const client = await readFile(new URL('../app/admin/AdminClient.tsx', import.meta.url), 'utf8');
+  const shared = await readFile(new URL('../app/admin/_components/AdminShared.jsx', import.meta.url), 'utf8');
+  const imageProcessing = await readFile(new URL('../app/admin/_components/adminImageProcessing.js', import.meta.url), 'utf8');
   const proxy = await readFile(new URL('../app/api/admin-media/[id]/route.ts', import.meta.url), 'utf8');
 
   assert.match(source, /上傳圖片/);
   assert.match(source, /調整圖片/);
   assert.match(source, />刪除</);
-  assert.match(source, /react-easy-crop/);
-  assert.match(source, /browser-image-compression/);
+  assert.match(processor, /react-easy-crop/);
+  assert.match(imageProcessing, /browser-image-compression/);
   assert.match(source, /\/api\/admin-media\//);
   assert.match(proxy, /variant=original/);
   assert.match(source, /const AVATAR_WIDTH = 1200/);
   assert.match(source, /const AVATAR_HEIGHT = 1500/);
+  assert.match(source, /cropOnUpload = true/);
+  assert.match(imageProcessing, /fileType: 'image\/webp'/);
+  assert.match(imageProcessing, /canvas\.width = options\.width/);
+  assert.match(imageProcessing, /canvas\.height = options\.height/);
+  assert.match(processor, /crop: shouldCrop = false/);
+  assert.match(client, /<AdminImageProcessingProvider>/);
+  assert.match(source, /useAdminImageProcessing/);
+  assert.match(shared, /processImage\(\{ file, crop: false \}\)/);
 });
 
 test('homepage slides expose an editable playback duration', async () => {
@@ -48,7 +60,7 @@ test('staff ordering settings expose buffer, staff nomination, and public servic
 
   assert.match(source, /label="中間休息時間"><input type="number"/);
   assert.match(source, /label="開放指名"/);
-  assert.match(source, /中間休息 \$\{item\.bufferMinutes\} 分鐘/);
+  assert.match(source, /中間休息 \{item\.bufferMinutes\} 分鐘/);
   assert.match(source, /label="價格"><input type="number"/);
   assert.match(source, /label="價格文字（選填）"/);
   assert.match(source, /優先取代數值價格顯示/);

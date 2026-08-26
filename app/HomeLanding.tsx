@@ -6,6 +6,9 @@ import type { HomeData } from "./site-types";
 
 export default function HomeLanding({home}:{home:HomeData}){
   const [slide,setSlide]=useState(0);
+  const [heroLoaded,setHeroLoaded]=useState(false);
+  const [aboutLoaded,setAboutLoaded]=useState(false);
+  const [loadedEvents,setLoadedEvents]=useState<Record<string,boolean>>({});
   const adminTriggerClicks=useRef(0);
   const reduceMotion=useReducedMotion();
   const images=home.slides.length?home.slides:home.shopInfo.heroImage?[{id:"hero",imageUrl:home.shopInfo.heroImage,displaySeconds:10}]:[];
@@ -26,6 +29,10 @@ export default function HomeLanding({home}:{home:HomeData}){
     window.location.assign("/admin/login");
   }
 
+  function markEventLoaded(id:string){
+    setLoadedEvents(value=>value[id]?value:{...value,[id]:true});
+  }
+
   return <div className="home-page">
     {!reduceMotion&&<motion.div className="home-dream-entry" aria-hidden="true" initial={{opacity:1}} animate={{opacity:0,visibility:"hidden"}} transition={{opacity:{delay:1.15,duration:.85,ease:[.76,0,.24,1]},visibility:{delay:2}}}>
       <motion.span initial={{opacity:0,letterSpacing:".48em"}} animate={{opacity:1,letterSpacing:".28em"}} transition={{delay:.18,duration:.8}}>BETWEEN WAKING AND DREAM</motion.span>
@@ -33,8 +40,8 @@ export default function HomeLanding({home}:{home:HomeData}){
       <b>清醒夢</b>
     </motion.div>}
     <section className="home-hero">
-      <div className="home-hero-visual">
-        <AnimatePresence mode="sync" initial={!reduceMotion}>{current&&<motion.img key={current.id} src={current.imageUrl} alt="清醒夢店內景象" initial={reduceMotion?false:{opacity:0,scale:1.075,filter:"blur(10px)"}} animate={{opacity:1,scale:1,filter:"blur(0px)"}} exit={reduceMotion?{opacity:0}:{opacity:0,scale:1.025,filter:"blur(6px)"}} transition={{duration:reduceMotion ? .2 : 1.65,ease:[.22,1,.36,1]}}/>}</AnimatePresence>
+      <div className={`home-hero-visual${heroLoaded?" is-image-loaded":""}`}>
+        <AnimatePresence mode="sync" initial={!reduceMotion}>{current&&<motion.img key={current.id} src={current.imageUrl} alt="清醒夢店內景象" loading="eager" decoding="async" onLoad={()=>setHeroLoaded(true)} onError={()=>setHeroLoaded(true)} initial={reduceMotion?false:{opacity:0,scale:1.075,filter:"blur(8px)"}} animate={{opacity:1,scale:1,filter:"blur(0px)"}} exit={reduceMotion?{opacity:0}:{opacity:0,scale:1.025,filter:"blur(4px)"}} transition={{duration:reduceMotion ? .2 : 1.1,ease:[.22,1,.36,1]}}/>}</AnimatePresence>
         <span className="home-dream-caustics" aria-hidden="true"/>
         <span className="home-dream-mist" aria-hidden="true"/>
         <span className="home-hero-grid"/>
@@ -59,7 +66,7 @@ export default function HomeLanding({home}:{home:HomeData}){
 
     <section className="home-about">
       <div className="home-about-title"><span>ABOUT THE DREAM</span><h2>在清醒與夢境<br/>交界的深夜沙龍</h2></div>
-      <div className="home-about-photo"><img src={home.shopInfo.heroImage||current?.imageUrl} alt="清醒夢空間"/><span>PLACE / 001</span></div>
+      <div className={`home-about-photo${aboutLoaded?" is-image-loaded":""}`}><img src={home.shopInfo.heroImage||current?.imageUrl} alt="清醒夢空間" loading="lazy" decoding="async" onLoad={()=>setAboutLoaded(true)} onError={()=>setAboutLoaded(true)}/><span>PLACE / 001</span></div>
       <div className="home-about-copy">{home.shopInfo.about.map((paragraph,index)=><p key={index}>{paragraph}</p>)}<div><b>OPEN</b><span>{home.shopInfo.openHours}</span><b>WHERE</b><span>{home.shopInfo.server} · {home.shopInfo.address}</span></div></div>
     </section>
 
@@ -70,7 +77,7 @@ export default function HomeLanding({home}:{home:HomeData}){
 
     {!!home.carousels.length&&<section className="home-events">
       <header><div><span>EORZEA WEEKLY</span><h2>本期夢境</h2></div><a href="/gallery">VIEW ALL REPORTS ↗</a></header>
-      <div className="home-event-track">{home.carousels.map((event,index)=><a href={`/gallery/${event.albumId}`} className="home-event-card" key={event.id}><img src={event.imageUrl} alt={event.title}/><span>{event.eventTime}</span><div><small>REPORT / {String(index+1).padStart(2,"0")}</small><h3>{event.title}</h3><p>{event.summary}</p><b>{event.ctaLabel} ↗</b></div></a>)}</div>
+      <div className="home-event-track">{home.carousels.map((event,index)=><a href={`/gallery/${event.albumId}`} className={`home-event-card${loadedEvents[event.id]?" is-image-loaded":""}`} key={event.id}><img src={event.imageUrl} alt={event.title} loading="lazy" decoding="async" onLoad={()=>markEventLoaded(event.id)} onError={()=>markEventLoaded(event.id)}/><span>{event.eventTime}</span><div><small>REPORT / {String(index+1).padStart(2,"0")}</small><h3>{event.title}</h3><p>{event.summary}</p><b>{event.ctaLabel} ↗</b></div></a>)}</div>
     </section>}
 
     <section className="home-rules">

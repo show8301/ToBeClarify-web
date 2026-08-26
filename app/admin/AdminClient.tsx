@@ -3,6 +3,8 @@
 import { useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { AdminRouter } from "./_components/AdminRouter.jsx";
+import { AdminImageProcessingProvider } from "./_components/AdminImageProcessingProvider.jsx";
+import { AdminToastProvider } from "./_components/AdminToastProvider.jsx";
 
 export default function AdminClient() {
   const pathname = usePathname();
@@ -11,7 +13,11 @@ export default function AdminClient() {
 
   return (
     <div className="adminTheme">
-      <AdminRouter route={pathname} navigate={navigate} />
+      <AdminToastProvider>
+        <AdminImageProcessingProvider>
+          <AdminRouter route={pathname} navigate={navigate} />
+        </AdminImageProcessingProvider>
+      </AdminToastProvider>
     </div>
   );
 }

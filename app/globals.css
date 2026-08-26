@@ -1647,3 +1647,76 @@ body.modal-open .site-parallax-bubbles i{animation-play-state:paused}
 }
 @media(prefers-reduced-motion:reduce){.site-floating-top{transition-duration:.01ms}}
 .home-admin-trigger{color:inherit;text-decoration:none;font:inherit;letter-spacing:inherit;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}.home-admin-trigger:focus-visible{outline:1px solid currentColor;outline-offset:2px;border-radius:2px}
+
+/* Performance guard: keep the dream atmosphere without scroll-bound GPU work. */
+.site-frame::before,.site-frame::after{will-change:auto;filter:blur(24px);animation-duration:32s}
+.site-frame::after{filter:blur(28px);animation-duration:24s}
+.site-parallax-bubbles,.site-parallax-mist{will-change:auto}
+.site-parallax-bubbles i{backdrop-filter:none}
+.site-parallax-mist{filter:blur(24px)}
+.site-header,.site-header nav,.site-navigation,.site-floating-top{backdrop-filter:blur(12px) saturate(1.05)}
+.home-dream-caustics{filter:blur(7px) contrast(1.1);animation-duration:28s}
+.home-dream-mist{filter:blur(18px);animation-duration:22s}
+
+/* Image placeholders reserve the existing media boxes and fade away after load. */
+.home-hero-visual:not(.is-image-loaded)::before,
+.home-about-photo:not(.is-image-loaded)::after,
+.home-event-card:not(.is-image-loaded)::before{
+  content:"";position:absolute;pointer-events:none;
+  background:linear-gradient(105deg,rgba(255,255,255,.16),rgba(255,255,255,.48),rgba(160,217,214,.2),rgba(255,255,255,.16));
+  background-size:220% 100%;animation:home-image-shimmer 1.6s linear infinite;
+}
+.home-hero-visual:not(.is-image-loaded)::before{inset:0;z-index:1}
+.home-about-photo:not(.is-image-loaded)::after{inset:13px 13px 48px;z-index:1;border-radius:14px}
+.home-event-card:not(.is-image-loaded)::before{inset:0 0 auto;aspect-ratio:4/3;z-index:1}
+.home-about-photo.is-image-loaded::after,.home-event-card.is-image-loaded::before{opacity:0;animation:none}
+.home-event-card>span,.home-event-card>div{position:relative;z-index:2}
+@keyframes home-image-shimmer{from{background-position:200% 0}to{background-position:-20% 0}}
+
+@media(max-width:620px){
+  body{background-attachment:scroll}
+  .home-dream-entry{display:none}
+  .site-frame::before,.site-frame::after{animation:none;filter:blur(16px);opacity:.35}
+  .site-parallax-bubbles{display:none}
+  .site-parallax-mist{opacity:.24!important;filter:blur(16px)!important;animation:none}
+  .site-header,.site-header nav,.site-navigation,.site-floating-top{backdrop-filter:none}
+  .home-dream-caustics{display:none}
+  .home-dream-mist{opacity:.14;filter:none;animation:none}
+  .home-page .home-pricing article,.home-page .home-event-card{backdrop-filter:none!important;background:rgba(247,247,251,.9)}
+  .home-page .home-hero-index,.home-page .home-hero-ticket,.home-page .home-event-card>span{backdrop-filter:none;background:rgba(247,247,251,.88)}
+}
+@media(prefers-reduced-motion:reduce){
+  .site-frame::before,.site-frame::after,.home-dream-caustics,.home-dream-mist,.home-image-shimmer{animation:none}
+  .home-hero-visual:not(.is-image-loaded)::before,.home-about-photo:not(.is-image-loaded)::after,.home-event-card:not(.is-image-loaded)::before{animation:none}
+}
+
+/* Gallery loading and paint containment. */
+.weekly-card-photo::before,.weekly-collage button::before,.weekly-photo-stage figure::before{
+  content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:linear-gradient(105deg,rgba(255,255,255,.12),rgba(255,255,255,.42),rgba(160,217,214,.18),rgba(255,255,255,.12));
+  background-size:220% 100%;animation:home-image-shimmer 1.6s linear infinite;
+  transition:opacity .25s ease;
+}
+.weekly-card-photo:has(>img.is-loaded)::before,.weekly-collage button:has(>img.is-loaded)::before,.weekly-photo-stage figure:has(>img.is-loaded)::before{opacity:0;animation:none}
+.weekly-photo-stage figure{position:relative}
+.weekly-card-photo img,.weekly-collage img,.weekly-photo-stage figure img{position:relative;z-index:1}
+.weekly-card-photo i,.weekly-collage span{z-index:2}
+.weekly-photo-stage figcaption{position:relative;z-index:2}
+.weekly-collage-sentinel{position:relative;z-index:1;min-height:64px;display:flex;align-items:center;justify-content:center;gap:10px;color:rgba(49,51,74,.62);font:800 9px/1 var(--font-geist-mono),ui-monospace,monospace;letter-spacing:.14em}
+.weekly-collage-sentinel i{width:28px;height:2px;background:linear-gradient(90deg,var(--dream-violet),var(--dream-blue));animation:home-image-shimmer 1.2s linear infinite}
+.weekly-modal{backdrop-filter:blur(4px) saturate(1.01)}
+.weekly-modal-sheet>header{backdrop-filter:blur(6px) saturate(1.04)}
+.weekly-photo-stage,.weekly-photo-stage>header{backdrop-filter:blur(6px)}
+
+@media(max-width:620px){
+  .weekly-card{backdrop-filter:none!important;transform:none!important;transition:none}
+  .weekly-card-photo img,.weekly-collage img{transition:none}
+  .weekly-modal,.weekly-photo-stage,.weekly-photo-stage>header,.weekly-modal-sheet>header,.weekly-sheet-grabber{backdrop-filter:none!important}
+  .weekly-modal-sheet::before,.weekly-modal-sheet::after{display:none}
+  .weekly-modal-intro{box-shadow:none}
+  .weekly-collage button,.weekly-collage button.photo-0,.weekly-collage button.photo-4{aspect-ratio:4/3;contain:layout paint;box-shadow:none;transform:none}
+  .weekly-collage img{width:100%;height:100%;object-fit:cover}
+}
+@media(prefers-reduced-motion:reduce){
+  .weekly-card-photo::before,.weekly-collage button::before,.weekly-photo-stage figure::before,.weekly-collage-sentinel i{animation:none}
+}

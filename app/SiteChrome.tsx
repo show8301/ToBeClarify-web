@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { NavigationItem, ShopInfo } from "./site-types";
@@ -17,10 +17,6 @@ export default function SiteChrome({navigation,shopInfo,menuHidden=false,childre
   const pathname = usePathname();
   const router = useRouter();
   const reduceMotion = useReducedMotion();
-  const {scrollYProgress} = useScroll();
-  const nearBubbleDrift = useTransform(scrollYProgress,[0,1],["0vh","28vh"]);
-  const farBubbleDrift = useTransform(scrollYProgress,[0,1],["0vh","9vh"]);
-  const mistDrift = useTransform(scrollYProgress,[0,1],["0vh","-8vh"]);
   const items = useMemo(()=>navigation.flatMap((item)=>item.children?.length?item.children:item).filter((item)=>item.routePath!=="/home"&&!(menuHidden&&item.routePath==="/menu")),[menuHidden,navigation]);
 
   const clearNavigation = useCallback(() => {
@@ -83,9 +79,9 @@ export default function SiteChrome({navigation,shopInfo,menuHidden=false,childre
   };
 
   return <div className="site-frame">
-    <motion.div className="site-parallax-bubbles site-bubbles-far" style={reduceMotion?undefined:{y:farBubbleDrift}} aria-hidden="true"><i/><i/><i/><i/></motion.div>
-    <motion.div className="site-parallax-bubbles site-bubbles-near" style={reduceMotion?undefined:{y:nearBubbleDrift}} aria-hidden="true"><i/><i/></motion.div>
-    <motion.div className="site-parallax-mist" style={reduceMotion?undefined:{y:mistDrift}} aria-hidden="true"/>
+    <div className="site-parallax-bubbles site-bubbles-far" aria-hidden="true"><i/><i/><i/><i/></div>
+    <div className="site-parallax-bubbles site-bubbles-near" aria-hidden="true"><i/><i/></div>
+    <div className="site-parallax-mist" aria-hidden="true"/>
     <header className="site-header">
       <a className="site-brand" href="/" onClick={(event)=>navigate(event,"/")}><strong>{shopInfo.name||"清醒夢"}</strong><span>LUCID DREAM</span></a>
       <span className="site-header-note">WAKING DREAM · EORZEA SALON</span>

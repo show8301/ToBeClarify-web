@@ -23,7 +23,7 @@ export default function MenuCatalog({menu}:{menu:MenuData}){
     <section className="menu-sets">
       <header><div><span>CURATED SETS</span><h2>今夜套餐</h2></div><p>主餐、甜點與飲品已為不同的相遇節奏搭配成席。</p></header>
       <div>{menu.sets.map((set,index)=><motion.article key={set.id} initial={reduceMotion?false:{opacity:0,y:30}} whileInView={{opacity:1,y:0}} viewport={{once:true,amount:.15}} transition={{delay:index*.07}}>
-        <span className="menu-set-photo">{set.imageUrl?<img src={set.imageUrl} alt={set.setName}/>:<i>LD</i>}<small>SET / {String(index+1).padStart(2,"0")}</small></span>
+        <span className="menu-set-photo">{set.imageUrl?<img src={set.imageUrl} alt={set.setName} loading="lazy" decoding="async"/>:<i>LD</i>}<small>SET / {String(index+1).padStart(2,"0")}</small></span>
         <div><h3>{set.setName}</h3><p>{set.setDescription}</p><ul>{set.items.map(item=><li key={item.id}><span>{item.itemRole.toUpperCase()}</span><b>{item.itemName}</b></li>)}</ul><strong>{gil(set.setPrice)}</strong></div>
       </motion.article>)}</div>
     </section>

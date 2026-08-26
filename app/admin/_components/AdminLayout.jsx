@@ -44,7 +44,7 @@ export function AdminLayout({ route, navigate, children }) {
 
   return (
     <main className="adminShell">
-      <header className="adminTopbar">
+      <header className={`adminTopbar ${isMenuOpen ? 'isMenuOpen' : ''}`.trim()}>
         <div className="adminTopbarBrand">
           <span className="adminTopbarMark"><img src="/favicon.svg" alt="" /></span>
           <span><strong>清醒夢</strong><small>LUCID DREAM / ADMIN</small></span>
@@ -69,7 +69,7 @@ export function AdminLayout({ route, navigate, children }) {
         </nav>
         <div className="adminTopbarUtilities">
           <div className="adminAccount">
-            <div><strong>{user.displayName}</strong><span>{user.roleLabel}</span></div>
+            <div className="adminAccountIdentity"><strong>{user.displayName}</strong><span>{user.roleLabel}</span></div>
             {canGetRegisterKey ? <div className="adminRegisterKeyAction">
               <AdminButton variant="secondary" onClick={handleGetRegisterKey} disabled={registerKeyState.loading}>
                 {registerKeyState.loading ? '取得中…' : '取得註冊金鑰'}

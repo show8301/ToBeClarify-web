@@ -75,6 +75,80 @@ function Write-InstallerLogTail {
     Write-Host '::endgroup::'
 }
 
+function Install-UrlRewriteAsLocalSystem {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$InstallerPath,
+
+        [Parameter(Mandatory = $true)]
+        [string]$LogPath,
+
+        [Parameter(Mandatory = $true)]
+        [string]$ExpectedHash
+    )
+
+    $systemInstallerScript = Join-Path $PSScriptRoot 'invoke-signed-msi-as-system.ps1'
+    if (-not (Test-Path -LiteralPath $systemInstallerScript -PathType Leaf)) {
+        throw "The one-time LocalSystem installer script was not found: $systemInstallerScript"
+    }
+
+    $taskName = 'ToBeClarify-UrlRewrite-' + [guid]::NewGuid().ToString('N')
+    $powershellPath = Join-Path $env:windir 'System32\WindowsPowerShell\v1.0\powershell.exe'
+    $actionArguments = @(
+        '-NoLogo'
+        '-NoProfile'
+        '-NonInteractive'
+        '-ExecutionPolicy Bypass'
+        "-File `"$systemInstallerScript`""
+        "-InstallerPath `"$InstallerPath`""
+        "-LogPath `"$LogPath`""
+        "-ExpectedSha256 `"$ExpectedHash`""
+    ) -join ' '
+
+    $action = New-ScheduledTaskAction -Execute $powershellPath -Argument $actionArguments
+    $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(5)
+    $principal = New-ScheduledTaskPrincipal `
+        -UserId 'S-1-5-18' `
+        -LogonType ServiceAccount `
+        -RunLevel Highest
+    $settings = New-ScheduledTaskSettingsSet `
+        -ExecutionTimeLimit (New-TimeSpan -Minutes 10) `
+        -AllowStartIfOnBatteries `
+        -DontStopIfGoingOnBatteries
+
+    try {
+        Write-Host "Registering one-time LocalSystem installer task: $taskName"
+        Register-ScheduledTask `
+            -TaskName $taskName `
+            -Action $action `
+            -Trigger $trigger `
+            -Principal $principal `
+            -Settings $settings `
+            -ErrorAction Stop | Out-Null
+
+        Start-ScheduledTask -TaskName $taskName -ErrorAction Stop
+        $deadline = (Get-Date).AddMinutes(10)
+        do {
+            Start-Sleep -Seconds 2
+            $task = Get-ScheduledTask -TaskName $taskName -ErrorAction Stop
+            $taskInfo = Get-ScheduledTaskInfo -TaskName $taskName -ErrorAction Stop
+            $hasRun = $taskInfo.LastRunTime.Year -gt 2000
+        } while ((-not $hasRun -or $task.State -eq 'Running') -and (Get-Date) -lt $deadline)
+
+        if (-not $hasRun -or $task.State -eq 'Running') {
+            throw "The one-time LocalSystem installer task did not finish within 10 minutes: $taskName"
+        }
+
+        return [int]$taskInfo.LastTaskResult
+    }
+    finally {
+        if ($null -ne (Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue)) {
+            Unregister-ScheduledTask -TaskName $taskName -Confirm:$false -ErrorAction SilentlyContinue
+            Write-Host "Removed one-time LocalSystem installer task: $taskName"
+        }
+    }
+}
+
 if (Test-UrlRewriteModule) {
     Write-Host 'IIS URL Rewrite is already installed.'
     exit 0
@@ -119,28 +193,24 @@ try {
     Start-WindowsInstallerService
     Test-WindowsInstallerComRegistration
 
-    $msiexecPath = Join-Path $env:windir 'System32\msiexec.exe'
-    $arguments = "/i `"$installerPath`" /qn /norestart /L*v `"$logPath`""
-    $installerProcess = Start-Process `
-        -FilePath $msiexecPath `
-        -ArgumentList $arguments `
-        -WindowStyle Hidden `
-        -Wait `
-        -PassThru
+    $installerExitCode = Install-UrlRewriteAsLocalSystem `
+        -InstallerPath $installerPath `
+        -LogPath $logPath `
+        -ExpectedHash $ExpectedSha256
 
-    if ($installerProcess.ExitCode -ne 0 -and $installerProcess.ExitCode -ne 3010) {
+    if ($installerExitCode -ne 0 -and $installerExitCode -ne 3010) {
         Write-InstallerLogTail -Path $logPath
-        throw "URL Rewrite installation failed with MSI exit code $($installerProcess.ExitCode). Log: $logPath"
+        throw "URL Rewrite installation failed with MSI exit code $installerExitCode. Log: $logPath"
     }
 
     if (-not (Test-UrlRewriteModule)) {
-        if ($installerProcess.ExitCode -eq 3010) {
+        if ($installerExitCode -eq 3010) {
             throw "URL Rewrite installation requires a server restart before the module is available. Log: $logPath"
         }
         throw "URL Rewrite installation completed, but IIS does not list RewriteModule. Log: $logPath"
     }
 
-    if ($installerProcess.ExitCode -eq 3010) {
+    if ($installerExitCode -eq 3010) {
         Write-Warning 'The installer requested a restart, but RewriteModule is already available to IIS.'
     }
 

@@ -14,5 +14,5 @@ export default async function GalleryModalPage({params}:{params:Promise<{id:stri
   const {id}=await params;
   const home=getSiteHome();
   const albums=getGalleryAlbums().map((album)=>getGalleryAlbum(album.id)).filter((album)=>album!==null);
-  return <SiteChrome navigation={home.navigation} shopInfo={home.shopInfo}><GalleryArchive albums={albums} initialAlbumId={id}/></SiteChrome>;
+  return <SiteChrome navigation={home.navigation} shopInfo={home.shopInfo} menuHidden={home.menuHidden}><GalleryArchive albums={albums} initialAlbumId={id}/></SiteChrome>;
 }

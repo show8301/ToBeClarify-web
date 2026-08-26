@@ -508,6 +508,8 @@
 .adminPageHeading h1 { margin: 0; font-family: var(--font-display); font-size: clamp(32px, 5vw, 56px); line-height: 1.1; }
 .adminPageHeading p:not(.eyebrow) { max-width: 680px; margin: 10px 0 0; color: var(--color-fg-soft); }
 .adminPageActions, .adminPanelActions, .adminInlineActions, .adminRowActions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.adminPageLoginStatus { display: inline-flex; align-items: center; gap: 7px; padding: 8px 12px; border: 1px solid rgba(var(--color-accent-2-rgb), .28); border-radius: 999px; background: rgba(var(--color-accent-2-rgb), .08); color: var(--color-accent-2); font-size: 12px; font-weight: 700; white-space: nowrap; }
+.adminPageLoginStatus::before { width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 4px rgba(var(--color-accent-2-rgb), .12); content: ''; }
 .adminButton { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 9px 15px; border: 1px solid transparent; border-radius: 10px; color: var(--color-fg); font-weight: 600; transition: transform .2s ease, background .2s ease, border-color .2s ease; }
 .adminButton:hover:not(:disabled) { transform: translateY(-1px); }
 .adminButton:disabled { cursor: wait; opacity: .55; }
@@ -570,6 +572,10 @@
 .adminDashboardCards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .adminDashboardCards .adminPanel { margin: 0; }
 .adminModuleStatus.isReady { display: inline-flex; margin: 0; background: rgba(var(--color-accent-2-rgb), .1); color: var(--color-accent-2); }
+.adminDeveloperTools { margin-top: 18px; }
+.adminDeveloperTools .adminPanel { margin: 0; border-color: rgba(var(--color-accent-rgb), .32); }
+.adminDeveloperToolState { display: block; margin-top: 8px; color: var(--color-fg-mute); font-size: 12px; }
+.adminDeveloperToolState.isError { color: #ffabab; }
 
 .adminDragList { display: grid; gap: 10px; }
 .adminDragCard { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 13px 14px; border: 1px solid var(--color-border); border-radius: 13px; background: rgba(7, 19, 31, .34); cursor: grab; transition: border-color .18s ease, background .18s ease, opacity .18s ease, transform .18s ease; }

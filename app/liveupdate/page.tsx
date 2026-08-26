@@ -5,5 +5,5 @@ import { getStaffList } from "../staff-data";
 
 export default function LiveUpdatePage(){
   const home=getSiteHome();
-  return <SiteChrome navigation={home.navigation} shopInfo={home.shopInfo}><LiveUpdateBoard staff={getStaffList()} config={home.liveUpdateConfig}/></SiteChrome>;
+  return <SiteChrome navigation={home.navigation} shopInfo={home.shopInfo} menuHidden={home.menuHidden}><LiveUpdateBoard staff={getStaffList()} config={home.liveUpdateConfig}/></SiteChrome>;
 }

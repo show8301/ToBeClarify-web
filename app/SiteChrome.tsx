@@ -8,7 +8,7 @@ import type { NavigationItem, ShopInfo } from "./site-types";
 const pathAliases:Record<string,string> = { "/home":"/", "/event":"/gallery" };
 const resolvePath = (path:string) => pathAliases[path] ?? path;
 
-export default function SiteChrome({navigation,shopInfo,children}:{navigation:NavigationItem[];shopInfo:ShopInfo;children:React.ReactNode}) {
+export default function SiteChrome({navigation,shopInfo,menuHidden=false,children}:{navigation:NavigationItem[];shopInfo:ShopInfo;menuHidden?:boolean;children:React.ReactNode}) {
   const [open,setOpen] = useState(false);
   const [leaving,setLeaving] = useState<string|null>(null);
   const [showFloatingTop,setShowFloatingTop] = useState(false);
@@ -21,7 +21,7 @@ export default function SiteChrome({navigation,shopInfo,children}:{navigation:Na
   const nearBubbleDrift = useTransform(scrollYProgress,[0,1],["0vh","28vh"]);
   const farBubbleDrift = useTransform(scrollYProgress,[0,1],["0vh","9vh"]);
   const mistDrift = useTransform(scrollYProgress,[0,1],["0vh","-8vh"]);
-  const items = useMemo(()=>navigation.flatMap((item)=>item.children?.length?item.children:item).filter((item)=>item.routePath!=="/home"),[navigation]);
+  const items = useMemo(()=>navigation.flatMap((item)=>item.children?.length?item.children:item).filter((item)=>item.routePath!=="/home"&&!(menuHidden&&item.routePath==="/menu")),[menuHidden,navigation]);
 
   const clearNavigation = useCallback(() => {
     if (navigationTimer.current) window.clearTimeout(navigationTimer.current);

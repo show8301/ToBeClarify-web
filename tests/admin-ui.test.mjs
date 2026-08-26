@@ -17,6 +17,30 @@ test('staff avatar editor keeps separate upload, crop, and delete actions', asyn
   assert.match(source, /const AVATAR_HEIGHT = 1500/);
 });
 
+test('homepage slides expose an editable playback duration', async () => {
+  const source = await readFile(new URL('../app/admin/_components/AdminHomeSettingsPage.jsx', import.meta.url), 'utf8');
+  const landing = await readFile(new URL('../app/HomeLanding.tsx', import.meta.url), 'utf8');
+
+  assert.match(source, /label="播放秒數"><input type="number"/);
+  assert.match(source, /displaySeconds: Math\.min\(60, Math\.max\(1/);
+  assert.match(source, /播放 \{Number\(item\.displaySeconds\) \|\| 10\} 秒/);
+  assert.match(landing, /const seconds=Math\.min\(60,Math\.max\(1,Number\(current\?\.displaySeconds\)\|\|10\)\)/);
+});
+
+test('developer can hide the public menu from the admin home', async () => {
+  const dashboard = await readFile(new URL('../app/admin/_components/AdminHomePage.jsx', import.meta.url), 'utf8');
+  const data = await readFile(new URL('../app/site-data.ts', import.meta.url), 'utf8');
+  const chrome = await readFile(new URL('../app/SiteChrome.tsx', import.meta.url), 'utf8');
+  const menu = await readFile(new URL('../app/menu/page.tsx', import.meta.url), 'utf8');
+
+  assert.match(dashboard, /user\.role === 'developer'/);
+  assert.match(dashboard, /siteVisibility/);
+  assert.match(dashboard, /label="隱藏 MENU 功能"/);
+  assert.match(data, /menuHidden:siteVisibility\.menuHidden === true/);
+  assert.match(chrome, /menuHidden&&item\.routePath==="\/menu"/);
+  assert.match(menu, /if\(home\.menuHidden\)notFound\(\)/);
+});
+
 test('staff ordering settings expose buffer, staff nomination, and public service prices', async () => {
   const source = await readFile(new URL('../app/admin/_components/AdminStaffSettingsPage.jsx', import.meta.url), 'utf8');
   const archive = await readFile(new URL('../app/StaffArchive.tsx', import.meta.url), 'utf8');

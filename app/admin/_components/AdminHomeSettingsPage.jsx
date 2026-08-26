@@ -34,7 +34,11 @@ export function AdminHomeSettingsPage() {
       setSite({ ...emptySite, ...shopInfo, aboutText: (shopInfo.about || []).join('\n\n') });
       setRules(nextRules.map((item) => ({ ...item })));
       setCarousels(nextCarousels.map((item) => ({ ...item, _file: null })));
-      setSlides(nextSlides.map((item) => ({ ...item, _file: null })));
+      setSlides(nextSlides.map((item) => ({
+        ...item,
+        displaySeconds: Math.min(60, Math.max(1, Number(item.displaySeconds) || 10)),
+        _file: null,
+      })));
       setReports(nextReports);
       setRemovedSlideIds([]);
       setState({ loading: false, error: null });
@@ -117,6 +121,7 @@ export function AdminHomeSettingsPage() {
         }
         await adminApi.saveHomeSlide(slide.id.startsWith('local-') ? null : slide.id, {
           mediaId, imageUrl, sortOrder: Number(slide.sortOrder) || 0, isEnabled: slide.isEnabled,
+          displaySeconds: Math.min(60, Math.max(1, Number(slide.displaySeconds) || 10)),
         });
       }
       setMessage('首頁設定已儲存。');
@@ -143,7 +148,7 @@ export function AdminHomeSettingsPage() {
     setEditingCarousel(item);
   };
   const addSlide = () => {
-    const item = { id: newId(), mediaId: null, imageUrl: '', sortOrder: slides.length, isEnabled: true, _file: null };
+    const item = { id: newId(), mediaId: null, imageUrl: '', sortOrder: slides.length, isEnabled: true, displaySeconds: 10, _file: null };
     setSlides((current) => [...current, item]);
     setEditingSlide(item);
   };
@@ -197,7 +202,7 @@ export function AdminHomeSettingsPage() {
             items={slides}
             onReorder={setSlides}
             onItemClick={(item) => setEditingSlide({ ...item })}
-            renderItem={(item) => <><div className="adminDragCardWithImage">{item.imageUrl ? <img src={item.imageUrl} alt="" /> : null}<div><strong>{item.imageUrl ? '首頁背景圖片' : (item._file?.name || '尚未選擇圖片')}</strong><small>第 {Number(item.sortOrder) + 1} 張 · 約播放 10 秒</small></div></div><div className="adminDragCardMeta"><AdminButton variant="danger" onClick={(event) => { event.stopPropagation(); removeSlide(item); }}>刪除</AdminButton></div></>}
+            renderItem={(item) => <><div className="adminDragCardWithImage">{item.imageUrl ? <img src={item.imageUrl} alt="" /> : null}<div><strong>{item.imageUrl ? '首頁背景圖片' : (item._file?.name || '尚未選擇圖片')}</strong><small>第 {Number(item.sortOrder) + 1} 張 · 播放 {Number(item.displaySeconds) || 10} 秒</small></div></div><div className="adminDragCardMeta"><AdminButton variant="danger" onClick={(event) => { event.stopPropagation(); removeSlide(item); }}>刪除</AdminButton></div></>}
             emptyText="尚無首頁幻燈片，請新增第一張圖片。"
           />
         </AdminPanel>
@@ -232,7 +237,7 @@ export function AdminHomeSettingsPage() {
       </AdminDialog>
 
       <AdminDialog open={Boolean(editingSlide)} title={editingSlide?.id?.startsWith('local-') ? '新增首頁幻燈片' : '編輯首頁幻燈片'} description="圖片會先在本機預覽，按下首頁的儲存按鈕後才會上傳。排序請回到卡片清單拖曳調整。" onClose={() => setEditingSlide(null)} actions={<><AdminButton variant="ghost" onClick={() => setEditingSlide(null)}>取消</AdminButton><AdminButton onClick={saveSlideEditor}>完成編輯</AdminButton></>}>
-        {editingSlide ? <div className="adminFormGrid"><AdminImagePicker label="背景圖片" value={editingSlide.imageUrl} pendingFile={editingSlide._file} onChange={(file) => updateSlideEditor('_file', file)} onClear={() => { updateSlideEditor('_file', null); updateSlideEditor('imageUrl', ''); updateSlideEditor('mediaId', null); }} /><div><AdminToggle checked={editingSlide.isEnabled} onChange={(value) => updateSlideEditor('isEnabled', value)} label="公開播放" /></div></div> : null}
+        {editingSlide ? <div className="adminFormGrid"><AdminImagePicker label="背景圖片" value={editingSlide.imageUrl} pendingFile={editingSlide._file} onChange={(file) => updateSlideEditor('_file', file)} onClear={() => { updateSlideEditor('_file', null); updateSlideEditor('imageUrl', ''); updateSlideEditor('mediaId', null); }} /><AdminField label="播放秒數"><input type="number" min="1" max="60" value={editingSlide.displaySeconds || 10} onChange={(event) => updateSlideEditor('displaySeconds', event.target.value)} /></AdminField><div><AdminToggle checked={editingSlide.isEnabled} onChange={(value) => updateSlideEditor('isEnabled', value)} label="公開播放" /></div></div> : null}
       </AdminDialog>
     </AdminPage>
   );

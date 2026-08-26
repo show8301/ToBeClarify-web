@@ -13,7 +13,7 @@ export default function HomeLanding({home}:{home:HomeData}){
 
   useEffect(()=>{
     if(reduceMotion||images.length<2)return;
-    const seconds=Math.min(5,Math.max(3.5,current?.displaySeconds||5));
+    const seconds=Math.min(60,Math.max(1,Number(current?.displaySeconds)||10));
     const timer=window.setTimeout(()=>setSlide(value=>(value+1)%images.length),seconds*1000);
     return()=>window.clearTimeout(timer);
   },[current?.displaySeconds,images.length,reduceMotion,slide]);
@@ -78,6 +78,6 @@ export default function HomeLanding({home}:{home:HomeData}){
       <ol>{home.shopRules.map((rule,index)=><li key={rule.id}><span>{String(index+1).padStart(2,"0")}</span><div><p>{rule.ruleText}</p>{rule.ruleNote&&<small>{rule.ruleNote}</small>}</div></li>)}</ol>
     </section>
 
-    <section className="home-final-cta"><span>READY TO ENTER?</span><h2>今晚，想遇見<br/>哪一場夢？</h2><div><a href="/staff">店員一覽 <i>↗</i></a><a href="/menu">佳餚名錄 <i>↗</i></a></div></section>
+    <section className="home-final-cta"><span>READY TO ENTER?</span><h2>今晚，想遇見<br/>哪一場夢？</h2><div><a href="/staff">店員一覽 <i>↗</i></a>{!home.menuHidden&&<a href="/menu">佳餚名錄 <i>↗</i></a>}</div></section>
   </div>;
 }

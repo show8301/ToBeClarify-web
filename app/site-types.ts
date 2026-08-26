@@ -36,6 +36,7 @@ export type LiveUpdateConfig = {
 export type HomeData = {
   shopInfo:ShopInfo;
   liveUpdateConfig:LiveUpdateConfig;
+  menuHidden:boolean;
   navigation:NavigationItem[];
   shopRules:ShopRule[];
   slides:HomeSlide[];

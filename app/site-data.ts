@@ -35,7 +35,8 @@ function useCache<T>(entry:CacheEntry<T>,loader:()=>Promise<T>):T{
 
 function normalizeHome(raw:{siteSettings:{settingKey:string;settingValue:unknown}[];navigation:HomeData["navigation"];shopRules:HomeData["shopRules"];slides:HomeData["slides"];carousels:HomeData["carousels"]}):HomeData{
   const settings=Object.fromEntries(raw.siteSettings.map((item)=>[item.settingKey,item.settingValue]));
-  return{shopInfo:settings.shopInfo as HomeData["shopInfo"],liveUpdateConfig:settings.liveUpdateConfig as HomeData["liveUpdateConfig"],navigation:raw.navigation??[],shopRules:raw.shopRules??[],slides:raw.slides??[],carousels:raw.carousels??[]};
+  const siteVisibility=settings.siteVisibility && typeof settings.siteVisibility === "object" ? settings.siteVisibility as {menuHidden?:unknown} : {};
+  return{shopInfo:settings.shopInfo as HomeData["shopInfo"],liveUpdateConfig:settings.liveUpdateConfig as HomeData["liveUpdateConfig"],menuHidden:siteVisibility.menuHidden === true,navigation:raw.navigation??[],shopRules:raw.shopRules??[],slides:raw.slides??[],carousels:raw.carousels??[]};
 }
 
 export function getSiteHome():HomeData{

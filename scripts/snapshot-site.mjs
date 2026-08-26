@@ -28,6 +28,7 @@ const snapshot = {
   home:{
     shopInfo:settings.shopInfo ?? {},
     liveUpdateConfig:settings.liveUpdateConfig ?? {},
+    menuHidden:settings.siteVisibility?.menuHidden === true,
     navigation:rawHome.navigation ?? [],
     shopRules:rawHome.shopRules ?? [],
     slides:rawHome.slides ?? [],

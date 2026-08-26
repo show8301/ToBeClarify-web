@@ -638,6 +638,7 @@
 .adminDragHandle:not(.isDisabled):active { cursor: grabbing; }
 
 .adminStaffEditDialog { width: min(1320px, 100%); }
+.adminStaffMobilePreviewAction { display: none; }
 .adminStaffEditDialog .adminDialogBody { display: flex; min-height: 0; overflow: hidden; }
 .adminStaffEditorLayout {
   display: grid;
@@ -771,13 +772,39 @@
 .adminStaffPreviewExpandedDialog .adminDialogBody { padding: 20px; }
 .adminStaffPreviewExpandedCanvas { min-width: 0; }
 .adminStaffPreviewExpandedCanvas .adminPreviewStaffDialog { height: min(68vh, 680px); }
+.adminStaffListPanel .adminPanelHeader { margin-bottom: 18px; }
+.adminStaffListPanel .adminDragList { gap: 12px; }
+.adminStaffListPanel .adminDragCard { min-height: 88px; padding: 9px 12px; border-radius: 16px; cursor: pointer; }
+.adminStaffListPanel .adminDragHandle { align-self: stretch; display: grid; width: 24px; place-items: center; border-right: 1px solid rgba(101,120,159,.16); }
+.adminStaffListPanel .adminDragCardContent { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: stretch; gap: 18px; }
+.adminStaffListIdentity { display: flex; align-items: center; gap: 13px; min-width: 0; }
+.adminStaffListPortrait { position: relative; flex: 0 0 70px; width: 70px; aspect-ratio: 4 / 5; overflow: hidden; border: 1px solid rgba(255,255,255,.94); border-radius: 11px; background: linear-gradient(145deg,#c9cce2,#9ab8d7); box-shadow: 0 6px 14px rgba(101,120,159,.15); }
+.adminStaffListPortrait img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 30%; }
+.adminStaffListPortrait > span { display: grid; width: 100%; height: 100%; place-items: center; color: rgba(255,255,255,.9); font-family: var(--font-display); font-size: 19px; }
+.adminStaffListPortrait > i { position: absolute; right: 5px; bottom: 5px; width: 8px; height: 8px; border: 2px solid #eef1f8; border-radius: 50%; background: #9ba0af; box-shadow: 0 2px 6px rgba(49,51,74,.24); }
+.adminStaffListPortrait > i.isWorking { background: #43c993; }
+.adminStaffListCopy { display: grid; align-content: center; min-width: 0; }
+.adminStaffListHeading { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.adminStaffListHeading strong { overflow: hidden; color: #31334a; font-size: 16px; text-overflow: ellipsis; white-space: nowrap; }
+.adminStaffListHeading > span { flex: 0 0 auto; padding: 4px 7px; border: 1px solid rgba(101,120,159,.18); border-radius: 999px; background: rgba(255,255,255,.52); color: #69708d; font-size: 9px; font-weight: 750; }
+.adminStaffListHeading > span.isPublic { background: rgba(160,217,214,.36); color: #366b68; }
+.adminStaffListHeading > span.isHidden { background: rgba(232,199,218,.34); color: #884c63; }
+.adminStaffListRole { margin-top: 7px !important; color: rgba(49,51,74,.62) !important; }
+.adminStaffListSummary { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.adminStaffListSummary > span { padding: 5px 8px; border-radius: 7px; background: rgba(184,187,216,.26); color: #666d88; font-size: 9px !important; font-weight: 700; }
+.adminStaffListSummary > span.isWorking { background: rgba(160,217,214,.32); color: #366b68; }
+.adminStaffListSummary .adminStaffBufferLine { color: #74709c; }
+.adminStaffListControls { position: relative; display: grid; grid-template-columns: repeat(2,minmax(112px,1fr)) auto; align-items: center; gap: 12px; min-width: 382px; padding-left: 18px; border-left: 1px solid rgba(101,120,159,.16); }
+.adminStaffListControl { display: grid; align-content: center; gap: 7px; min-width: 0; }
+.adminStaffListControlLabel { color: rgba(49,51,74,.48); font: 700 9px/1 var(--font-mono); letter-spacing: .08em; }
+.adminStaffListControl .adminToggle { color: #4f5575; font-size: 11px; font-weight: 700; }
+.adminStaffListEditButton { min-width: 82px; min-height: 40px; }
+.adminStaffListControls > small { position: absolute; right: 0; bottom: -3px; color: #477077; font-size: 9px; }
+.adminStaffListControls.isSaving { opacity: .72; }
 .adminStaffWorkToggle { display: grid; flex: 0 0 78px; justify-items: center; gap: 0; min-width: 78px; }
 .adminStaffWorkToggle small,
 .adminDragCardMeta > small { color: var(--color-fg-mute); font-size: 10px; white-space: nowrap; }
-.adminStaffListIdentity { flex: 1; }
-.adminStaffListIdentity > div { min-width: 0; }
 .adminStaffListIdentity .adminStaffBufferLine { min-height: 14px; color: var(--color-accent-2); }
-.adminStaffListIdentity .adminStaffBufferLine.isEmpty { visibility: hidden; }
 .adminStaffBasicToggle { display: grid; align-content: center; gap: 6px; min-width: 0; }
 .adminStaffBasicToggle > small { color: var(--color-fg-mute); font-size: 11px; line-height: 1.5; }
 .adminStaffGalleryCard > img { flex: 0 0 92px; width: 92px; height: 68px; border-radius: 9px; }
@@ -810,6 +837,8 @@
   .adminStaffEditorLayout { grid-template-columns: 1fr; }
   .adminStaffPreview { position: static; }
   .adminStaffWorkToggle { align-self: flex-start; }
+  .adminStaffListPanel .adminDragCardContent { grid-template-columns: 1fr; gap: 10px; }
+  .adminStaffListControls { grid-template-columns: repeat(2,minmax(110px,1fr)) auto; min-width: 0; padding: 12px 0 0; border-top: 1px solid rgba(101,120,159,.14); border-left: 0; }
   .adminStaffEditDialog .adminDialogBody { display: block; overflow: auto; }
   .adminStaffEditorLayout { flex: none; min-height: auto; }
   .adminStaffEditorForm, .adminStaffPreview { overflow: visible; padding-right: 0; scrollbar-gutter: auto; }
@@ -831,6 +860,65 @@
   .adminDialogBody { padding: 14px; }
   .adminDragCardContent { align-items: flex-start; flex-direction: column; gap: 9px; }
   .adminDragCardMeta { align-self: flex-end; }
+  .adminStaffListPanel { padding: 12px; }
+  .adminStaffListPanel .adminDragCard { align-items: stretch; min-height: 0; padding: 10px; }
+  .adminStaffListPanel .adminDragHandle { flex: 0 0 17px; width: 17px; }
+  .adminStaffListPanel .adminDragCardContent { width: calc(100% - 1px); gap: 12px; }
+  .adminStaffListIdentity { align-items: flex-start; gap: 12px; }
+  .adminStaffListPortrait { flex-basis: 56px; width: 56px; border-radius: 10px; }
+  .adminStaffListHeading { align-items: center; flex-direction: row; gap: 7px; }
+  .adminStaffListHeading strong { width: 100%; font-size: 15px; }
+  .adminStaffListRole { white-space: normal !important; line-height: 1.4; }
+  .adminStaffListSummary { margin-top: 8px; }
+  .adminStaffListControls { grid-template-columns: max-content max-content max-content; align-items: center; justify-content: space-between; gap: 12px; padding-top: 9px; }
+  .adminStaffListControl { display: flex; align-items: center; min-width: 0; padding: 0; background: transparent; }
+  .adminStaffListControlLabel { display: none; }
+  .adminStaffListControl .adminToggle { min-height: 44px; }
+  .adminStaffListEditButton { grid-column: auto; width: auto; min-width: 70px; min-height: 40px; padding: 7px 11px; gap: 6px; }
+  .adminStaffListEditButton > span { font-size: 18px; line-height: 1; }
+  .adminStaffListControls > small { position: static; grid-column: 1 / -1; }
+}
+
+@media (max-width: 360px) {
+  .adminStaffListHeading { align-items: flex-start; flex-direction: column; gap: 5px; }
+  .adminStaffListControls { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .adminStaffListEditButton { grid-column: 1 / -1; width: max-content; }
+}
+
+@media (max-width: 720px) {
+  .adminStaffEditDialogPopup { place-items: end center; padding: 0; }
+  .adminStaffEditDialog { width: 100%; height: 100dvh; max-height: 100dvh; border-radius: 20px 20px 0 0; }
+  .adminStaffEditDialog .adminDialogHeader { align-items: flex-start; gap: 10px; padding: calc(13px + env(safe-area-inset-top)) 14px 13px; }
+  .adminStaffEditDialog .adminDialogHeader > div { min-width: 0; }
+  .adminStaffEditDialog .adminDialogHeader h2 { font-size: 20px; line-height: 1.3; overflow-wrap: anywhere; }
+  .adminStaffEditDialog .adminDialogHeader p { margin-top: 4px; font-size: 11px; line-height: 1.5; }
+  .adminStaffEditDialog .adminDialogHeader .adminButton { min-height: 38px; padding: 7px 10px; }
+  .adminStaffEditDialog .adminDialogBody { display: block; width: 100%; min-width: 0; padding: 12px; overflow-x: hidden; overflow-y: auto; }
+  .adminStaffEditorLayout { display: block; width: 100%; min-width: 0; }
+  .adminStaffEditorForm { width: 100%; min-width: 0; overflow: visible; }
+  .adminStaffEditorForm .adminPanel { width: 100%; min-width: 0; margin-bottom: 12px; padding: 14px; border-radius: 16px; }
+  .adminStaffEditorForm .adminPanelHeader { gap: 8px; margin-bottom: 14px; }
+  .adminStaffEditorForm .adminPanelHeader h2 { font-size: 20px; }
+  .adminStaffEditorForm .adminPanelHeader p { font-size: 11px; line-height: 1.55; }
+  .adminStaffEditDialog .adminFormGrid { gap: 13px; }
+  .adminStaffEditDialog .adminDragCardContent { width: 100%; min-width: 0; }
+  .adminStaffEditDialog .adminDragCardContent > div { width: 100%; max-width: 100%; min-width: 0; }
+  .adminStaffEditDialog .adminDragCardContent strong,
+  .adminStaffEditDialog .adminDragCardContent small { max-width: 100%; }
+  .adminStaffEditDialog .adminStaffPreview { display: none; }
+  .adminStaffMobilePreviewAction { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+  .adminStaffMobilePreviewAction .adminButton { min-height: 38px; padding: 7px 11px; font-size: 12px; }
+  .adminStaffEditDialog .adminAvatarPreview { width: min(180px,100%); }
+  .adminStaffEditDialog .adminDialogFooter { gap: 8px; padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); }
+  .adminStaffEditDialog .adminDialogActionSpacer { display: none; }
+  .adminStaffEditDialog .adminDialogFooter .adminButton { min-height: 44px; padding: 8px 11px; white-space: nowrap; }
+  .adminStaffEditDialog .adminDialogFooter .adminButton-danger { margin-right: auto; }
+  .adminStaffEditDialog .adminDialogFooter .adminButton-primary { flex: 1 1 auto; max-width: 150px; }
+}
+
+@media (max-width: 360px) {
+  .adminStaffEditDialog .adminDialogFooter .adminButton { padding-right: 8px; padding-left: 8px; font-size: 11px; }
+  .adminStaffEditDialog .adminDialogFooter .adminButton-primary { max-width: 130px; }
 }
 
 .adminLoginShell,
@@ -1016,6 +1104,11 @@
 .adminDialogBackdrop { background: rgba(45,47,70,.58); backdrop-filter: blur(10px); }
 .adminDialogFooter,
 .adminDialogHeader { border-color: rgba(255,255,255,.68); }
+.adminDeleteConfirmDialog { width: min(480px,100%); }
+.adminDeleteConfirmContent { display: grid; grid-template-columns: 48px minmax(0,1fr); align-items: start; gap: 14px; padding: 16px; border: 1px solid rgba(175,91,115,.22); border-radius: 14px; background: rgba(232,199,218,.22); color: #31334a; }
+.adminDeleteConfirmContent > span { display: grid; width: 48px; height: 48px; place-items: center; border-radius: 50%; background: rgba(232,199,218,.72); color: #884c63; font-size: 24px; font-weight: 800; }
+.adminDeleteConfirmContent strong { display: block; font-size: 17px; }
+.adminDeleteConfirmContent p { margin: 7px 0 0; color: rgba(49,51,74,.68); font-size: 13px; line-height: 1.65; }
 
 /* Public roster card preview, matched to the current /staff#roster composition. */
 .adminStaffPreview { background: linear-gradient(145deg,rgba(250,250,253,.88),rgba(220,226,243,.74)); color: #31334a; }

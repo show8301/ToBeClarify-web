@@ -1,0 +1,94 @@
+name: Vinext DEV CI/CD
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vinext-dev-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Validate and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.0
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and test
+        run: npm test
+
+      - name: Upload Vinext application
+        uses: actions/upload-artifact@v4
+        with:
+          name: tobeclarify-vinext-dev
+          path: |
+            dist
+            package.json
+            package-lock.json
+            deploy/web.config.template
+            scripts/start-vinext.ps1
+          if-no-files-found: error
+          retention-days: 7
+
+  deploy:
+    name: Deploy Vinext to IIS DEV
+    needs: build
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout deployment scripts
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.0
+
+      - name: Download Vinext application
+        uses: actions/download-artifact@v4
+        with:
+          name: tobeclarify-vinext-dev
+          path: ${{ runner.temp }}\tobeclarify-vinext-dev
+
+      - name: Deploy Node runtime and configure IIS reverse proxy
+        shell: powershell
+        env:
+          ARTIFACT_PATH: ${{ runner.temp }}\tobeclarify-vinext-dev
+          DEPLOY_PATH: ${{ vars.DEV_WEB_DEPLOY_PATH }}
+          HEALTH_CHECK_URL: ${{ vars.DEV_WEB_HEALTHCHECK_URL }}
+          NODE_PORT: ${{ vars.DEV_NODE_PORT }}
+          NODE_TASK_NAME: ${{ vars.DEV_NODE_TASK_NAME }}
+          ADMIN_API_BASE_URL: ${{ vars.DEV_ADMIN_API_BASE_URL }}
+          PUBLIC_MEDIA_BASE_URL: ${{ vars.DEV_PUBLIC_MEDIA_BASE_URL }}
+        run: |
+          $port = if ([string]::IsNullOrWhiteSpace($env:NODE_PORT)) { 4310 } else { [int]$env:NODE_PORT }
+          $taskName = if ([string]::IsNullOrWhiteSpace($env:NODE_TASK_NAME)) { 'ToBeClarify Vinext DEV' } else { $env:NODE_TASK_NAME }
+
+          .\scripts\deploy-vinext-iis.ps1 `
+            -ArtifactPath $env:ARTIFACT_PATH `
+            -DeployPath $env:DEPLOY_PATH `
+            -HealthCheckUrl $env:HEALTH_CHECK_URL `
+            -ExpectedDeployLeaf 'ToBeClarify_web_dev' `
+            -NodePort $port `
+            -TaskName $taskName `
+            -AdminApiBaseUrl $env:ADMIN_API_BASE_URL `
+            -PublicMediaBaseUrl $env:PUBLIC_MEDIA_BASE_URL

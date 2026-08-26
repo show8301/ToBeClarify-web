@@ -9,7 +9,7 @@ param(
     [string]$HealthCheckUrl,
 
     [Parameter(Mandatory = $true)]
-    [ValidateSet('ToBeClarify_web', '_dev')]
+    [ValidateSet('ToBeClarify_web', 'ToBeClarify_web_dev')]
     [string]$ExpectedDeployLeaf
 )
 

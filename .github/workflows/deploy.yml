@@ -82,5 +82,5 @@ jobs:
           ARTIFACT_PATH: ${{ runner.temp }}\tobeclarify-web-dist
           DEPLOY_PATH: ${{ github.ref == 'refs/heads/dev' && vars.DEV_WEB_DEPLOY_PATH || vars.WEB_DEPLOY_PATH }}
           HEALTH_CHECK_URL: ${{ github.ref == 'refs/heads/dev' && vars.DEV_WEB_HEALTHCHECK_URL || vars.WEB_HEALTHCHECK_URL }}
-          EXPECTED_DEPLOY_LEAF: ${{ github.ref == 'refs/heads/dev' && '_dev' || 'ToBeClarify_web' }}
+          EXPECTED_DEPLOY_LEAF: ${{ github.ref == 'refs/heads/dev' && 'ToBeClarify_web_dev' || 'ToBeClarify_web' }}
         run: .\scripts\deploy-iis.ps1 -ArtifactPath $env:ARTIFACT_PATH -DeployPath $env:DEPLOY_PATH -HealthCheckUrl $env:HEALTH_CHECK_URL -ExpectedDeployLeaf $env:EXPECTED_DEPLOY_LEAF

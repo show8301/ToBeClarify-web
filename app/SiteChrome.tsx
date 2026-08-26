@@ -42,7 +42,7 @@ export default function SiteChrome({navigation,shopInfo,pageVisibility,menuHidde
     setLivePageVisibility(pageVisibility);
     if(!pageVisibility)return;
     const controller=new AbortController();
-    fetch("/api/client-home",{cache:"no-store",headers:{Accept:"application/json"},signal:controller.signal})
+    fetch("https://api.marchgroup.net/api/client/home",{cache:"no-store",headers:{Accept:"application/json"},signal:controller.signal})
       .then((response)=>response.ok?response.json():null)
       .then((payload:unknown)=>{
         const data=payload as {success?:boolean;data?:{pageVisibility?:Partial<HomePageVisibility>}}|null;

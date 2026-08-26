@@ -3,11 +3,39 @@ import { adminApi } from '../admin-api.js';
 import { useAdminAuth } from './AdminAuthContext.jsx';
 import { AdminButton, AdminPage, AdminPanel, AdminToggle } from './AdminShared.jsx';
 
+const PUBLIC_PAGES = [
+  { key: 'home', number: '00', label: '首頁' },
+  { key: 'staff', number: '01', label: '店員珍藏' },
+  { key: 'gallery', number: '02', label: '艾歐澤亞週報' },
+  { key: 'menu', number: '03', label: '佳餚名錄' },
+  { key: 'guestbook', number: '04', label: '留聲機' },
+  { key: 'liveUpdate', number: '05', label: '店舖動態' },
+  { key: 'staffRanking', number: '06', label: '店員榜' },
+  { key: 'monetaryRanking', number: '07', label: '消費榜' },
+];
+
+const defaultPageVisibility = Object.fromEntries(PUBLIC_PAGES.map((page) => [page.key, true]));
+
+function normalizePageVisibility(value) {
+  if (!value || typeof value !== 'object') return { ...defaultPageVisibility };
+  const legacyMenuHidden = value.menuHidden === true;
+  return {
+    home: value.home !== false,
+    staff: value.staff !== false,
+    gallery: value.gallery !== false,
+    menu: typeof value.menu === 'boolean' ? value.menu : !legacyMenuHidden,
+    guestbook: value.guestbook !== false,
+    liveUpdate: value.liveUpdate !== false,
+    staffRanking: value.staffRanking !== false,
+    monetaryRanking: value.monetaryRanking !== false,
+  };
+}
+
 export function AdminHomePage({ navigate }) {
   const { user } = useAdminAuth();
   const canManageAll = user.role === 'developer' || user.role === 'manager';
   const canHideMenu = user.role === 'developer';
-  const [visibility, setVisibility] = useState({ loading: canHideMenu, saving: false, menuHidden: false, error: '' });
+  const [visibility, setVisibility] = useState({ loading: canHideMenu, saving: false, pages: { ...defaultPageVisibility }, error: '' });
 
   useEffect(() => {
     if (!canHideMenu) return undefined;
@@ -16,8 +44,7 @@ export function AdminHomePage({ navigate }) {
       .then((settings) => {
         if (!active) return;
         const setting = settings?.find((item) => item.settingKey === 'siteVisibility');
-        const value = setting?.settingValue;
-        setVisibility({ loading: false, saving: false, menuHidden: Boolean(value && typeof value === 'object' && value.menuHidden === true), error: '' });
+        setVisibility({ loading: false, saving: false, pages: normalizePageVisibility(setting?.settingValue), error: '' });
       })
       .catch((error) => {
         if (active) setVisibility((current) => ({ ...current, loading: false, error: error?.message || '無法讀取公開網站顯示設定。' }));
@@ -25,18 +52,19 @@ export function AdminHomePage({ navigate }) {
     return () => { active = false; };
   }, [canHideMenu]);
 
-  const updateMenuVisibility = async (menuHidden) => {
-    const previous = visibility.menuHidden;
-    setVisibility((current) => ({ ...current, menuHidden, saving: true, error: '' }));
+  const updatePageVisibility = async (key, visible) => {
+    const previous = visibility.pages;
+    const pages = { ...previous, [key]: visible };
+    setVisibility((current) => ({ ...current, pages, saving: true, error: '' }));
     try {
       await adminApi.saveSiteSetting('siteVisibility', {
-        settingValue: { menuHidden },
-        description: '公開網站 MENU 顯示設定',
+        settingValue: pages,
+        description: '公開網站各頁面顯示設定',
         isActive: true,
       });
       setVisibility((current) => ({ ...current, saving: false }));
     } catch (error) {
-      setVisibility((current) => ({ ...current, saving: false, menuHidden: previous, error: error?.message || '儲存公開網站顯示設定失敗。' }));
+      setVisibility((current) => ({ ...current, saving: false, pages: previous, error: error?.message || '儲存公開網站顯示設定失敗。' }));
     }
   };
 
@@ -49,8 +77,13 @@ export function AdminHomePage({ navigate }) {
         </> : <AdminPanel title="店員設定" description="維護自己的公開資料與服務內容。"><AdminButton onClick={() => navigate('/admin/staff')}>進入設定</AdminButton></AdminPanel>}
       </div>
       {canHideMenu ? <div className="adminDeveloperTools">
-        <AdminPanel title="開發者功能" description="僅開發者可調整公開網站的實驗性顯示設定。">
-          <AdminToggle checked={visibility.menuHidden} onChange={updateMenuVisibility} disabled={visibility.loading || visibility.saving} label="隱藏 MENU 功能" />
+        <AdminPanel title="開發者功能" description="僅開發者可調整公開網站 MENU 中 00–07 各頁面的顯示狀態。">
+          <div className="adminPageVisibilityList">
+            {PUBLIC_PAGES.map((page) => <div className="adminPageVisibilityRow" key={page.key}>
+              <span><b>{page.number}</b>{page.label}</span>
+              <AdminToggle checked={visibility.pages[page.key]} onChange={(value) => updatePageVisibility(page.key, value)} disabled={visibility.loading || visibility.saving} label={visibility.pages[page.key] ? '顯示' : '隱藏'} ariaLabel={`${page.number} ${page.label}`} />
+            </div>)}
+          </div>
           {visibility.loading ? <small className="adminDeveloperToolState">讀取設定中…</small> : null}
           {visibility.saving ? <small className="adminDeveloperToolState">儲存中…</small> : null}
           {visibility.error ? <small className="adminDeveloperToolState isError">{visibility.error}</small> : null}

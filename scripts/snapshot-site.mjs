@@ -22,13 +22,24 @@ const [rawHome, menu, albums, staffRanking, monetaryRanking, guestbook] = await 
 ]);
 
 const settings = Object.fromEntries(rawHome.siteSettings.map((item) => [item.settingKey, item.settingValue]));
+const pageVisibility = rawHome.pageVisibility ?? settings.siteVisibility ?? {};
 const albumEntries = await Promise.all(albums.map(async (album) => [album.id, await get(`/gallery-albums/${album.id}`)]));
 const snapshot = {
   generatedAt:new Date().toISOString(),
   home:{
     shopInfo:settings.shopInfo ?? {},
     liveUpdateConfig:settings.liveUpdateConfig ?? {},
-    menuHidden:settings.siteVisibility?.menuHidden === true,
+    pageVisibility:{
+      home:pageVisibility.home !== false,
+      staff:pageVisibility.staff !== false,
+      gallery:pageVisibility.gallery !== false,
+      menu:typeof pageVisibility.menu === "boolean" ? pageVisibility.menu : pageVisibility.menuHidden !== true,
+      guestbook:pageVisibility.guestbook !== false,
+      liveUpdate:pageVisibility.liveUpdate !== false,
+      staffRanking:pageVisibility.staffRanking !== false,
+      monetaryRanking:pageVisibility.monetaryRanking !== false,
+    },
+    menuHidden:pageVisibility.menu === false || pageVisibility.menuHidden === true,
     navigation:rawHome.navigation ?? [],
     shopRules:rawHome.shopRules ?? [],
     slides:rawHome.slides ?? [],

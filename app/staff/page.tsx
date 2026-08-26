@@ -6,5 +6,5 @@ import { getStaffList } from "../staff-data";
 export default function StaffIndexPage(){
   const staff=getStaffList();
   const home=getSiteHome();
-  return <SiteChrome navigation={home.navigation} shopInfo={home.shopInfo} menuHidden={home.menuHidden}><StaffArchive initialStaff={staff} embedded/></SiteChrome>;
+  return <SiteChrome navigation={home.navigation} shopInfo={home.shopInfo} pageVisibility={home.pageVisibility}><StaffArchive initialStaff={staff} embedded/></SiteChrome>;
 }

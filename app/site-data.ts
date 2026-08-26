@@ -1,5 +1,5 @@
 import snapshotJson from "./data/site-snapshot.json";
-import type { GalleryAlbum, GalleryAlbumSummary, GuestbookPage, HomeData, MenuData, RankingItem, SiteSnapshot } from "./site-types";
+import type { GalleryAlbum, GalleryAlbumSummary, GuestbookPage, HomeData, HomePageVisibility, MenuData, RankingItem, SiteSnapshot } from "./site-types";
 
 const API="https://api.marchgroup.net/api/client";
 const CACHE_TTL=10*60*1000;
@@ -33,10 +33,29 @@ function useCache<T>(entry:CacheEntry<T>,loader:()=>Promise<T>):T{
   return entry.value;
 }
 
-function normalizeHome(raw:{siteSettings:{settingKey:string;settingValue:unknown}[];navigation:HomeData["navigation"];shopRules:HomeData["shopRules"];slides:HomeData["slides"];carousels:HomeData["carousels"]}):HomeData{
+const defaultPageVisibility:HomePageVisibility={home:true,staff:true,gallery:true,menu:true,guestbook:true,liveUpdate:true,staffRanking:true,monetaryRanking:true};
+
+function normalizePageVisibility(value:unknown):HomePageVisibility{
+  if(!value||typeof value!=="object")return defaultPageVisibility;
+  const source=value as Record<string,unknown>;
+  const legacyMenuHidden=source.menuHidden===true;
+  return{
+    home:source.home!==false,
+    staff:source.staff!==false,
+    gallery:source.gallery!==false,
+    menu:typeof source.menu==="boolean"?source.menu:!legacyMenuHidden,
+    guestbook:source.guestbook!==false,
+    liveUpdate:source.liveUpdate!==false,
+    staffRanking:source.staffRanking!==false,
+    monetaryRanking:source.monetaryRanking!==false,
+  };
+}
+
+function normalizeHome(raw:{siteSettings:{settingKey:string;settingValue:unknown}[];pageVisibility?:unknown;navigation:HomeData["navigation"];shopRules:HomeData["shopRules"];slides:HomeData["slides"];carousels:HomeData["carousels"]}):HomeData{
   const settings=Object.fromEntries(raw.siteSettings.map((item)=>[item.settingKey,item.settingValue]));
   const siteVisibility=settings.siteVisibility && typeof settings.siteVisibility === "object" ? settings.siteVisibility as {menuHidden?:unknown} : {};
-  return{shopInfo:settings.shopInfo as HomeData["shopInfo"],liveUpdateConfig:settings.liveUpdateConfig as HomeData["liveUpdateConfig"],menuHidden:siteVisibility.menuHidden === true,navigation:raw.navigation??[],shopRules:raw.shopRules??[],slides:raw.slides??[],carousels:raw.carousels??[]};
+  const pageVisibility=normalizePageVisibility(raw.pageVisibility??siteVisibility);
+  return{shopInfo:settings.shopInfo as HomeData["shopInfo"],liveUpdateConfig:settings.liveUpdateConfig as HomeData["liveUpdateConfig"],pageVisibility,menuHidden:pageVisibility.menu===false,navigation:raw.navigation??[],shopRules:raw.shopRules??[],slides:raw.slides??[],carousels:raw.carousels??[]};
 }
 
 export function getSiteHome():HomeData{

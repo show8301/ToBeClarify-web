@@ -3,21 +3,60 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { NavigationItem, ShopInfo } from "./site-types";
+import type { HomePageVisibility, NavigationItem, ShopInfo } from "./site-types";
 
 const pathAliases:Record<string,string> = { "/home":"/", "/event":"/gallery" };
 const resolvePath = (path:string) => pathAliases[path] ?? path;
+const pageRouteKeys:Record<string,keyof HomePageVisibility> = {
+  "/": "home",
+  "/staff": "staff",
+  "/gallery": "gallery",
+  "/menu": "menu",
+  "/guestbook": "guestbook",
+  "/liveupdate": "liveUpdate",
+  "/staffRanking": "staffRanking",
+  "/monetaryRanking": "monetaryRanking",
+};
+const pageNumbers:Record<string,string> = {
+  "/": "00",
+  "/staff": "01",
+  "/gallery": "02",
+  "/menu": "03",
+  "/guestbook": "04",
+  "/liveupdate": "05",
+  "/staffRanking": "06",
+  "/monetaryRanking": "07",
+};
 
-export default function SiteChrome({navigation,shopInfo,menuHidden=false,children}:{navigation:NavigationItem[];shopInfo:ShopInfo;menuHidden?:boolean;children:React.ReactNode}) {
+export default function SiteChrome({navigation,shopInfo,pageVisibility,menuHidden=false,children}:{navigation:NavigationItem[];shopInfo:ShopInfo;pageVisibility?:HomePageVisibility;menuHidden?:boolean;children:React.ReactNode}) {
   const [open,setOpen] = useState(false);
   const [leaving,setLeaving] = useState<string|null>(null);
   const [showFloatingTop,setShowFloatingTop] = useState(false);
+  const [livePageVisibility,setLivePageVisibility] = useState(pageVisibility);
   const navigationTimer = useRef<ReturnType<typeof window.setTimeout>|null>(null);
   const navigationWatchdog = useRef<ReturnType<typeof window.setTimeout>|null>(null);
   const pathname = usePathname();
   const router = useRouter();
   const reduceMotion = useReducedMotion();
-  const items = useMemo(()=>navigation.flatMap((item)=>item.children?.length?item.children:item).filter((item)=>item.routePath!=="/home"&&!(menuHidden&&item.routePath==="/menu")),[menuHidden,navigation]);
+  useEffect(()=>{
+    setLivePageVisibility(pageVisibility);
+    if(!pageVisibility)return;
+    const controller=new AbortController();
+    fetch("https://api.marchgroup.net/api/client/home",{cache:"no-store",headers:{Accept:"application/json"},signal:controller.signal})
+      .then((response)=>response.ok?response.json():null)
+      .then((payload:unknown)=>{
+        const data=payload as {success?:boolean;data?:{pageVisibility?:Partial<HomePageVisibility>}}|null;
+        if(data?.success&&data.data?.pageVisibility)setLivePageVisibility({...pageVisibility,...data.data.pageVisibility});
+      })
+      .catch(()=>{});
+    return()=>controller.abort();
+  },[pageVisibility]);
+  const visibility=livePageVisibility ?? pageVisibility;
+  const isPageVisible = useCallback((route:string) => {
+    const key = pageRouteKeys[resolvePath(route)];
+    return visibility ? (!key || visibility[key] !== false) : !(menuHidden && resolvePath(route) === "/menu");
+  }, [menuHidden, visibility]);
+  const items = useMemo(()=>navigation.flatMap((item)=>item.children?.length?item.children:item).filter((item)=>item.routePath!=="/home"&&isPageVisible(item.routePath)),[isPageVisible,navigation]);
 
   const clearNavigation = useCallback(() => {
     if (navigationTimer.current) window.clearTimeout(navigationTimer.current);
@@ -88,8 +127,8 @@ export default function SiteChrome({navigation,shopInfo,menuHidden=false,childre
       <button className={`site-menu-toggle${open?" is-open":""}`} onClick={()=>setOpen(value=>!value)} aria-expanded={open} aria-controls="site-navigation"><span/><span/><b>{open?"CLOSE":"MENU"}</b></button>
     </header>
     <nav id="site-navigation" className={`site-navigation${open?" is-open":""}`} aria-label="主要導覽">
-      <a className={pathname==="/"?"active":""} href="/" onClick={(event)=>navigate(event,"/")}><i>00</i><span>首頁</span></a>
-      {items.map((item,index)=>{const href=resolvePath(item.routePath);return <a className={pathname===href?"active":""} href={href} onClick={(event)=>navigate(event,href)} key={item.id}><i>{String(index+1).padStart(2,"0")}</i><span>{item.label}</span></a>})}
+      {(!visibility || visibility.home !== false) && <a className={pathname==="/"?"active":""} href="/" onClick={(event)=>navigate(event,"/")}><i>00</i><span>首頁</span></a>}
+      {items.map((item,index)=>{const href=resolvePath(item.routePath);return <a className={pathname===href?"active":""} href={href} onClick={(event)=>navigate(event,href)} key={item.id}><i>{pageNumbers[href] ?? String(index+1).padStart(2,"0")}</i><span>{item.label}</span></a>})}
     </nav>
     <button
       className={`site-floating-top${showFloatingTop?" is-visible":""}`}
@@ -100,7 +139,7 @@ export default function SiteChrome({navigation,shopInfo,menuHidden=false,childre
     <footer className="site-footer">
       <div><span>LUCID DREAM · EORZEA</span><strong>{shopInfo.name||"清醒夢"}</strong><p>{shopInfo.footerText}</p></div>
       <div><b>OPEN</b><span>{shopInfo.openHours}</span><b>LOCATION</b><span>{shopInfo.server} · {shopInfo.address}</span></div>
-      <a href="/staff" onClick={(event)=>navigate(event,"/staff")}>MEET THE DREAMERS <i>↗</i></a>
+      {(!visibility || visibility.staff !== false) && <a href="/staff" onClick={(event)=>navigate(event,"/staff")}>MEET THE DREAMERS <i>↗</i></a>}
     </footer>
     <AnimatePresence>{leaving&&<motion.div className="site-route-transition" initial={{clipPath:"inset(100% 0 0 0)",filter:"blur(5px)"}} animate={{clipPath:"inset(0% 0 0 0)",filter:"blur(0px)"}} exit={{opacity:0}} transition={{duration:.58,ease:[.76,0,.24,1]}} aria-hidden="true"><motion.span initial={{opacity:0,y:18,letterSpacing:".42em"}} animate={{opacity:1,y:0,letterSpacing:".23em"}} transition={{delay:.25,duration:.55,ease:[.22,1,.36,1]}}>ENTERING ANOTHER DREAM <i>✦</i></motion.span></motion.div>}</AnimatePresence>
   </div>;

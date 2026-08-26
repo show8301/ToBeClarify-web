@@ -33,9 +33,22 @@ export type LiveUpdateConfig = {
   lastUpdatedAt:string; scheduleStart:string; scheduleEnd:string; timeSlots:string[];
 };
 
+export type HomePageVisibility = {
+  home:boolean;
+  staff:boolean;
+  gallery:boolean;
+  menu:boolean;
+  guestbook:boolean;
+  liveUpdate:boolean;
+  staffRanking:boolean;
+  monetaryRanking:boolean;
+};
+
 export type HomeData = {
   shopInfo:ShopInfo;
   liveUpdateConfig:LiveUpdateConfig;
+  pageVisibility:HomePageVisibility;
+  /** @deprecated use pageVisibility.menu */
   menuHidden:boolean;
   navigation:NavigationItem[];
   shopRules:ShopRule[];

@@ -39,7 +39,7 @@ test('homepage slides expose an editable playback duration', async () => {
   assert.match(landing, /const seconds=Math\.min\(60,Math\.max\(1,Number\(current\?\.displaySeconds\)\|\|10\)\)/);
 });
 
-test('developer can hide the public menu from the admin home', async () => {
+test('developer can control each public menu page from the admin home', async () => {
   const dashboard = await readFile(new URL('../app/admin/_components/AdminHomePage.jsx', import.meta.url), 'utf8');
   const data = await readFile(new URL('../app/site-data.ts', import.meta.url), 'utf8');
   const chrome = await readFile(new URL('../app/SiteChrome.tsx', import.meta.url), 'utf8');
@@ -47,10 +47,15 @@ test('developer can hide the public menu from the admin home', async () => {
 
   assert.match(dashboard, /user\.role === 'developer'/);
   assert.match(dashboard, /siteVisibility/);
-  assert.match(dashboard, /label="隱藏 MENU 功能"/);
-  assert.match(data, /menuHidden:siteVisibility\.menuHidden === true/);
-  assert.match(chrome, /menuHidden&&item\.routePath==="\/menu"/);
-  assert.match(menu, /if\(home\.menuHidden\)notFound\(\)/);
+  assert.match(dashboard, /PUBLIC_PAGES/);
+  assert.match(dashboard, /number: '00'/);
+  assert.match(dashboard, /number: '07'/);
+  assert.match(dashboard, /label=\{visibility\.pages\[page\.key\] \? '顯示' : '隱藏'\}/);
+  assert.doesNotMatch(dashboard, /label="隱藏 MENU 功能"/);
+  assert.match(data, /pageVisibility/);
+  assert.match(chrome, /pageVisibility/);
+  assert.match(chrome, /pageNumbers/);
+  assert.match(menu, /if\(!home\.pageVisibility\.menu\)notFound\(\)/);
 });
 
 test('staff ordering settings expose buffer, staff nomination, and public service prices', async () => {

@@ -4,5 +4,5 @@ import { getSiteHome } from "./site-data";
 
 export default function Home() {
   const home=getSiteHome();
-  return <SiteChrome navigation={home.navigation} shopInfo={home.shopInfo} menuHidden={home.menuHidden}><HomeLanding home={home}/></SiteChrome>;
+  return <SiteChrome navigation={home.navigation} shopInfo={home.shopInfo} pageVisibility={home.pageVisibility}><HomeLanding home={home}/></SiteChrome>;
 }

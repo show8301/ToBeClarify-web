@@ -6,13 +6,29 @@ import type { HomeData } from "./site-types";
 
 export default function HomeLanding({home}:{home:HomeData}){
   const [slide,setSlide]=useState(0);
+  const [slides,setSlides]=useState(home.slides);
+  const [livePageVisibility,setLivePageVisibility]=useState(home.pageVisibility);
   const [heroLoaded,setHeroLoaded]=useState(false);
   const [aboutLoaded,setAboutLoaded]=useState(false);
   const [loadedEvents,setLoadedEvents]=useState<Record<string,boolean>>({});
   const adminTriggerClicks=useRef(0);
   const reduceMotion=useReducedMotion();
-  const images=home.slides.length?home.slides:home.shopInfo.heroImage?[{id:"hero",imageUrl:home.shopInfo.heroImage,displaySeconds:10}]:[];
+  const images=slides.length?slides:home.shopInfo.heroImage?[{id:"hero",imageUrl:home.shopInfo.heroImage,displaySeconds:10}]:[];
   const current=images[slide%Math.max(images.length,1)];
+
+  useEffect(()=>{
+    const controller=new AbortController();
+    fetch("https://api.marchgroup.net/api/client/home",{cache:"no-store",headers:{Accept:"application/json"},signal:controller.signal})
+      .then((response)=>response.ok?response.json():null)
+      .then((payload:unknown)=>{
+        const data=payload as {success?:boolean;data?:{slides?:HomeData["slides"];pageVisibility?:Partial<HomeData["pageVisibility"]>}}|null;
+        if(!data?.success)return;
+        if(Array.isArray(data.data?.slides))setSlides(data.data.slides);
+        if(data.data?.pageVisibility)setLivePageVisibility({...home.pageVisibility,...data.data.pageVisibility});
+      })
+      .catch(()=>{});
+    return()=>controller.abort();
+  },[]);
 
   useEffect(()=>{
     if(reduceMotion||images.length<2)return;
@@ -57,7 +73,7 @@ export default function HomeLanding({home}:{home:HomeData}){
         <h1><i>LUCID</i><br/>DREAM</h1>
         <p>{home.shopInfo.subtitle}</p>
         <div className="home-business-status"><b><i aria-hidden="true"/><span><small>LIVE STATUS</small>{home.shopInfo.businessStatus}</span></b><span>{home.shopInfo.openHours}</span></div>
-        <a href="/staff">MEET THE DREAMERS <i>↗</i></a>
+        {livePageVisibility.staff&&<a href="/staff">MEET THE DREAMERS <i>↗</i></a>}
       </motion.div>
       <div className="home-hero-ticket"><span>SERVER</span><b>{home.shopInfo.server}</b><span>ADDRESS</span><b>{home.shopInfo.address}</b><em><a className="home-admin-trigger" href="/admin/login" onClick={openAdminAfterFiveClicks} aria-label="開啟後台登入頁">LD</a> · 2026</em></div>
     </section>
@@ -85,6 +101,6 @@ export default function HomeLanding({home}:{home:HomeData}){
       <ol>{home.shopRules.map((rule,index)=><li key={rule.id}><span>{String(index+1).padStart(2,"0")}</span><div><p>{rule.ruleText}</p>{rule.ruleNote&&<small>{rule.ruleNote}</small>}</div></li>)}</ol>
     </section>
 
-    <section className="home-final-cta"><span>READY TO ENTER?</span><h2>今晚，想遇見<br/>哪一場夢？</h2><div><a href="/staff">店員一覽 <i>↗</i></a>{!home.menuHidden&&<a href="/menu">佳餚名錄 <i>↗</i></a>}</div></section>
+    <section className="home-final-cta"><span>READY TO ENTER?</span><h2>今晚，想遇見<br/>哪一場夢？</h2><div>{livePageVisibility.staff&&<a href="/staff">店員一覽 <i>↗</i></a>}{livePageVisibility.menu&&<a href="/menu">佳餚名錄 <i>↗</i></a>}</div></section>
   </div>;
 }

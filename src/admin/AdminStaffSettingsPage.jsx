@@ -106,6 +106,8 @@ export function AdminStaffSettingsPage() {
   const [statusSavingIds, setStatusSavingIds] = useState(() => new Set());
   const [staffOrderDirty, setStaffOrderDirty] = useState(false);
   const [message, setMessage] = useState('');
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const localPreviewUrlsRef = useRef(new Set());
   const staffDetailRequestRef = useRef(null);
   const [editorLoadingId, setEditorLoadingId] = useState(null);
@@ -197,6 +199,7 @@ export function AdminStaffSettingsPage() {
   };
 
   const closeEditor = () => {
+    setDeleteConfirmOpen(false);
     setEditorOpen(false);
     setDetailPreviewOpen(false);
   };
@@ -341,9 +344,11 @@ export function AdminStaffSettingsPage() {
   };
 
   const deleteStaff = async () => {
-    if (!canManageAll || !form.id || !window.confirm(`確定刪除 ${form.displayName}？`)) return;
+    if (!canManageAll || !form.id || deleting) return;
+    setDeleting(true);
     try {
       await adminApi.deleteStaffMember(form.id);
+      setDeleteConfirmOpen(false);
       setEditorOpen(false);
       setDetailPreviewOpen(false);
       setForm(emptyStaff);
@@ -351,6 +356,8 @@ export function AdminStaffSettingsPage() {
       await load();
     } catch (error) {
       setMessage(error.message);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -418,7 +425,7 @@ export function AdminStaffSettingsPage() {
       {message ? <div className="adminNotice" role="alert">{message}</div> : null}
       <AdminState loading={state.loading} error={state.error} onRetry={load} />
       {!state.loading && !state.error ? <>
-        <AdminPanel title="店員列表" description={canManageAll ? '拖曳卡片調整公開列表順序；開關會立即儲存。' : '可查看所有店員資料；只能修改自己的公開狀態與今日上班狀態。'} actions={canManageAll ? <AdminButton variant="secondary" onClick={saveStaffOrder} disabled={!staffOrderDirty || orderSaving}>{orderSaving ? '儲存中…' : '儲存店員順序'}</AdminButton> : null}>
+        <AdminPanel className="adminStaffListPanel" title="店員列表" description={canManageAll ? '拖曳卡片調整公開列表順序；排班與公開狀態會立即儲存。' : '可查看所有店員資料；只能修改自己的公開狀態與今日排班。'} actions={canManageAll ? <AdminButton variant="secondary" onClick={saveStaffOrder} disabled={!staffOrderDirty || orderSaving}>{orderSaving ? '儲存中…' : '儲存店員順序'}</AdminButton> : null}>
           <AdminDragList
             items={staffList}
             canDrag={canManageAll}
@@ -428,15 +435,34 @@ export function AdminStaffSettingsPage() {
               const canChange = canManageAll || item.id === user.staffMemberId;
               const statusSaving = statusSavingIds.has(item.id);
               return <>
-                <div className="adminStaffWorkToggle" onClick={(event) => event.stopPropagation()}>
-                  <AdminToggle checked={item.isWorkingToday} disabled={!canChange || statusSaving} onChange={(value) => toggleStaffStatus(item, 'isWorkingToday', value)} label="" ariaLabel={`切換${item.displayName}今日有上班`} />
-                  <small>今日上班</small>
+                <div className="adminStaffListIdentity">
+                  <div className="adminStaffListPortrait">
+                    {item.avatarUrl ? <img src={item.avatarUrl} alt={`${item.displayName} 頭像預覽`} loading="lazy" decoding="async" /> : <span>{item.displayName?.trim()?.slice(0, 1) || 'LD'}</span>}
+                    <i className={item.isWorkingToday ? 'isWorking' : ''} aria-hidden="true" />
+                  </div>
+                  <div className="adminStaffListCopy">
+                    <div className="adminStaffListHeading">
+                      <strong>{item.displayName}</strong>
+                      <span className={item.isActive ? 'isPublic' : 'isHidden'}>{item.isActive ? '公開中' : '未公開'}</span>
+                    </div>
+                    <small className="adminStaffListRole">{item.roleTitle || '尚未設定角色'}</small>
+                    <div className="adminStaffListSummary">
+                      <span className={item.isWorkingToday ? 'isWorking' : ''}>{item.isWorkingToday ? '今日上班' : '今日休假'}</span>
+                      {item.bufferMinutes === null || item.bufferMinutes === undefined ? null : <span className="adminStaffBufferLine">中間休息 {item.bufferMinutes} 分鐘</span>}
+                    </div>
+                  </div>
                 </div>
-                <div className="adminDragCardWithImage adminStaffListIdentity">{item.avatarUrl ? <img src={item.avatarUrl} alt="" /> : null}<div><strong>{item.displayName}</strong><small>{item.roleTitle || '尚未設定角色'} · {item.isWorkingToday ? '今日上班' : '今日休假'}</small><small className={`adminStaffBufferLine ${item.bufferMinutes === null || item.bufferMinutes === undefined ? 'isEmpty' : ''}`.trim()}>{item.bufferMinutes === null || item.bufferMinutes === undefined ? '\u00a0' : `中間休息 ${item.bufferMinutes} 分鐘`}</small></div></div>
-                <div className="adminDragCardMeta" onClick={(event) => event.stopPropagation()}>
-                  <AdminButton variant="ghost" className="adminIconButton" onClick={() => openEditor(item)} disabled={editorLoadingId === item.id} aria-label={`查看${item.displayName}資料`}>{editorLoadingId === item.id ? '…' : '✎'}</AdminButton>
-                  <AdminToggle checked={item.isActive} disabled={!canChange || statusSaving} onChange={(value) => toggleStaffStatus(item, 'isActive', value)} label="" ariaLabel={`切換${item.displayName}公開狀態`} />
-                  <small>{item.isActive ? '公開' : '不公開'}</small>
+                <div className={`adminStaffListControls ${statusSaving ? 'isSaving' : ''}`} onClick={(event) => event.stopPropagation()}>
+                  <div className="adminStaffListControl">
+                    <span className="adminStaffListControlLabel">今日排班</span>
+                    <AdminToggle checked={item.isWorkingToday} disabled={!canChange || statusSaving} onChange={(value) => toggleStaffStatus(item, 'isWorkingToday', value)} label={item.isWorkingToday ? '上班' : '休假'} ariaLabel={`切換${item.displayName}今日有上班`} />
+                  </div>
+                  <div className="adminStaffListControl">
+                    <span className="adminStaffListControlLabel">公開狀態</span>
+                    <AdminToggle checked={item.isActive} disabled={!canChange || statusSaving} onChange={(value) => toggleStaffStatus(item, 'isActive', value)} label={item.isActive ? '公開' : '隱藏'} ariaLabel={`切換${item.displayName}公開狀態`} />
+                  </div>
+                  <AdminButton variant="ghost" className="adminStaffListEditButton" onClick={() => openEditor(item)} disabled={editorLoadingId === item.id}>{editorLoadingId === item.id ? '讀取中…' : canChange ? '編輯' : '查看'}<span aria-hidden="true">›</span></AdminButton>
+                  {statusSaving ? <small role="status">狀態儲存中…</small> : null}
                 </div>
               </>;
             }}
@@ -445,9 +471,10 @@ export function AdminStaffSettingsPage() {
         </AdminPanel>
       </> : null}
 
-      <AdminDialog className="adminStaffEditDialog" open={editorOpen} title={`${isReadOnly ? '查看' : '編輯'}店員：${selectedStaffLabel}`} description={isReadOnly ? '目前帳號只能查看其他店員資料，不能修改或儲存。' : '左側修改資料，右側即時呈現新版公開卡片；詳細資料可另開彈窗預覽。'} onClose={closeEditor} actions={<>{canManageAll ? <AdminButton variant="danger" onClick={deleteStaff}>刪除此店員</AdminButton> : null}<span className="adminDialogActionSpacer" /><AdminButton variant="ghost" onClick={closeEditor}>關閉</AdminButton>{canEditSelected ? <AdminButton onClick={save} disabled={saving}>{saving ? '儲存中…' : '儲存店員資料'}</AdminButton> : null}</>}>
+      <AdminDialog className="adminStaffEditDialog" open={editorOpen} title={`${isReadOnly ? '查看' : '編輯'}店員：${selectedStaffLabel}`} description={isReadOnly ? '目前帳號只能查看其他店員資料，不能修改或儲存。' : '修改資料時會同步更新公開卡片預覽；詳細資料也可另開彈窗查看。'} onClose={closeEditor} actions={<>{canManageAll ? <AdminButton variant="danger" onClick={() => setDeleteConfirmOpen(true)}>刪除此店員</AdminButton> : null}<span className="adminDialogActionSpacer" /><AdminButton variant="ghost" onClick={closeEditor}>關閉</AdminButton>{canEditSelected ? <AdminButton onClick={save} disabled={saving}>{saving ? '儲存中…' : '儲存店員資料'}</AdminButton> : null}</>}>
         {form.id ? <>
           {message ? <div className="adminNotice adminDialogNotice" role="alert">{message}</div> : null}
+          <div className="adminStaffMobilePreviewAction"><AdminButton variant="secondary" onClick={() => setDetailPreviewOpen(true)}>預覽公開卡片</AdminButton></div>
           <div className="adminStaffEditorLayout">
           <div className="adminStaffEditorForm">
             <AdminPanel title="基本資料" description="公開店員卡片與詳細內容會使用這些欄位。紅色＊為必填欄位" className="adminFormPanel">
@@ -474,6 +501,20 @@ export function AdminStaffSettingsPage() {
           <StaffPreview form={previewForm} navigation={previewNavigation} onOpenDetail={() => setDetailPreviewOpen(true)} />
           </div>
         </> : null}
+      </AdminDialog>
+
+      <AdminDialog
+        className="adminDeleteConfirmDialog"
+        open={deleteConfirmOpen}
+        title="確定刪除店員？"
+        description="此操作無法復原，相關公開資料也會一併移除。"
+        onClose={() => { if (!deleting) setDeleteConfirmOpen(false); }}
+        actions={<><AdminButton variant="ghost" autoFocus disabled={deleting} onClick={() => setDeleteConfirmOpen(false)}>取消</AdminButton><AdminButton variant="danger" disabled={deleting} onClick={deleteStaff}>{deleting ? '刪除中…' : `確認刪除「${selectedStaffLabel}」`}</AdminButton></>}
+      >
+        <div className="adminDeleteConfirmContent">
+          <span aria-hidden="true">!</span>
+          <div><strong>{selectedStaffLabel}</strong><p>刪除後無法從後台復原。請確認目前選取的是正確店員。</p></div>
+        </div>
       </AdminDialog>
 
       <AdminDialog className="adminStaffDetailPreviewDialog" open={detailPreviewOpen} title={`詳細資料預覽：${selectedStaffLabel}`} showHeader={false} onClose={() => setDetailPreviewOpen(false)}>

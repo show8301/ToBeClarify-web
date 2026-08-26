@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import './admin.css';
 import { AdminAuthProvider, useAdminAuth } from './AdminAuthContext.jsx';
+import { AdminImageProcessingProvider } from './AdminImageProcessingProvider.jsx';
 import { AdminHomePage } from './AdminHomePage.jsx';
 import { AdminLoginPage } from './AdminLoginPage.jsx';
 import { AdminLayout } from './AdminLayout.jsx';
@@ -8,12 +8,17 @@ import { AdminHomeSettingsPage } from './AdminHomeSettingsPage.jsx';
 import { AdminStaffSettingsPage } from './AdminStaffSettingsPage.jsx';
 import { AdminEventsPage } from './AdminEventsPage.jsx';
 import { AdminMenuPage } from './AdminMenuPage.jsx';
+import { AdminToastProvider } from './AdminToastProvider.jsx';
 
 export function AdminRouter({ route, navigate }) {
   return (
-    <AdminAuthProvider>
-      <AdminRouteView route={route} navigate={navigate} />
-    </AdminAuthProvider>
+    <AdminToastProvider>
+      <AdminImageProcessingProvider>
+        <AdminAuthProvider>
+          <AdminRouteView route={route} navigate={navigate} />
+        </AdminAuthProvider>
+      </AdminImageProcessingProvider>
+    </AdminToastProvider>
   );
 }
 

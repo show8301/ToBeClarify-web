@@ -4,7 +4,6 @@ import {
   AdminButton, AdminDialog, AdminDragList, AdminField, AdminImagePicker, AdminPanel, AdminState,
   AdminToggle, AdminPage, newId, splitParagraphs,
 } from './AdminShared.jsx';
-import { cleanupAdminMedia } from './adminMedia.js';
 
 const emptySite = {
   name: '', shortName: '', subtitle: '', businessStatus: '', openHours: '', server: '', address: '',
@@ -78,13 +77,11 @@ export function AdminHomeSettingsPage() {
   const saveAll = async () => {
     setSaving(true);
     setMessage('');
-    const uploadedMediaIds = [];
     try {
       let heroImageMediaId = site.heroImageMediaId || null;
       let heroImage = site.heroImage || null;
       if (site.heroFile) {
         const uploaded = await adminApi.uploadMedia(site.heroFile, 'site');
-        uploadedMediaIds.push(uploaded.id);
         heroImageMediaId = uploaded.id;
         heroImage = uploaded.url;
       }
@@ -103,7 +100,6 @@ export function AdminHomeSettingsPage() {
         let overrideImageUrl = carousel.overrideImageUrl || null;
         if (carousel._file) {
           const uploaded = await adminApi.uploadMedia(carousel._file, 'site');
-          uploadedMediaIds.push(uploaded.id);
           overrideMediaId = uploaded.id;
           overrideImageUrl = uploaded.url;
         }
@@ -120,7 +116,6 @@ export function AdminHomeSettingsPage() {
         let imageUrl = slide.imageUrl || null;
         if (slide._file) {
           const uploaded = await adminApi.uploadMedia(slide._file, 'home');
-          uploadedMediaIds.push(uploaded.id);
           mediaId = uploaded.id;
           imageUrl = uploaded.url;
         }
@@ -132,7 +127,6 @@ export function AdminHomeSettingsPage() {
       setMessage('首頁設定已儲存。');
       await load();
     } catch (error) {
-      await cleanupAdminMedia(uploadedMediaIds);
       setMessage(error.message);
     } finally {
       setSaving(false);

@@ -4,7 +4,6 @@ import {
   AdminButton, AdminDialog, AdminDragList, AdminField, AdminImagePicker, AdminPage, AdminPanel, AdminState, AdminToggle,
   newId,
 } from './AdminShared.jsx';
-import { cleanupAdminMedia } from './adminMedia.js';
 
 const tabs = [['pricing', '消費規則'], ['categories', '分類'], ['items', '餐點品項'], ['sets', '套餐']];
 const emptyPricing = { id: '', title: '', description: '', priceText: '', sortOrder: 0, isEnabled: true };
@@ -56,7 +55,6 @@ export function AdminMenuPage() {
     if (!editing) return;
     setSaving(true);
     setMessage('');
-    const uploadedMediaIds = [];
     try {
       const { type, form } = editing;
       let saved;
@@ -73,7 +71,6 @@ export function AdminMenuPage() {
         let imageUrl = form.imageUrl || null;
         if (form.imageFile) {
           const uploaded = await adminApi.uploadMedia(form.imageFile, 'menu');
-          uploadedMediaIds.push(uploaded.id);
           mediaId = uploaded.id;
           imageUrl = uploaded.url;
         }
@@ -89,7 +86,6 @@ export function AdminMenuPage() {
         let imageUrl = form.imageUrl || null;
         if (form.imageFile) {
           const uploaded = await adminApi.uploadMedia(form.imageFile, 'menu');
-          uploadedMediaIds.push(uploaded.id);
           mediaId = uploaded.id;
           imageUrl = uploaded.url;
         }
@@ -99,7 +95,6 @@ export function AdminMenuPage() {
       setEditing(null);
       setMessage('菜單資料已儲存。');
     } catch (error) {
-      await cleanupAdminMedia(uploadedMediaIds);
       setMessage(error.message);
     } finally {
       setSaving(false);

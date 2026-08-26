@@ -3,6 +3,7 @@ import { adminApi } from './admin-api.js';
 import { useAdminAuth } from './AdminAuthContext.jsx';
 import { AdminAvatarPicker } from './AdminAvatarPicker.jsx';
 import { cleanupAdminMedia } from './adminMedia.js';
+import { useAdminToast } from './AdminToastProvider.jsx';
 import {
   AdminButton, AdminDialog, AdminDragList, AdminField, AdminImagePicker, AdminPage, AdminPanel, AdminState,
   AdminToggle, newId,
@@ -93,6 +94,7 @@ function getPreviewGalleryItems(form) {
 
 export function AdminStaffSettingsPage() {
   const { user } = useAdminAuth();
+  const toast = useAdminToast();
   const [staffList, setStaffList] = useState([]);
   const [form, setForm] = useState(emptyStaff);
   const [editorOpen, setEditorOpen] = useState(false);
@@ -216,7 +218,8 @@ export function AdminStaffSettingsPage() {
     try {
       await adminApi.reorderStaffMembers(staffList.map((item, index) => ({ id: item.id, sortOrder: index })));
       setStaffOrderDirty(false);
-      setMessage('店員順序已儲存。');
+      setMessage('');
+      toast.add({ title: '操作完成', description: '店員順序已儲存。', type: 'success' });
     } catch (error) {
       setMessage(error.message);
     } finally {
@@ -235,7 +238,8 @@ export function AdminStaffSettingsPage() {
       const saved = await adminApi.updateStaffMemberStatus(item.id, { [field]: value });
       setStaffList((current) => current.map((staff) => staff.id === item.id ? saved : staff));
       if (form.id === item.id) setForm((current) => ({ ...current, [field]: saved[field] }));
-      setMessage(`${field === 'isActive' ? '公開狀態' : '今日上班狀態'}已更新。`);
+      setMessage('');
+      toast.add({ title: '操作完成', description: `${field === 'isActive' ? '公開狀態' : '今日上班狀態'}已更新。`, type: 'success' });
     } catch (error) {
       setStaffList((current) => current.map((staff) => staff.id === item.id ? { ...staff, [field]: previous } : staff));
       if (form.id === item.id) setForm((current) => ({ ...current, [field]: previous }));
@@ -334,7 +338,8 @@ export function AdminStaffSettingsPage() {
       };
       setForm(toEditor(savedWithFrontendServiceFields));
       setStaffList((current) => current.map((item) => item.id === saved.id ? saved : item));
-      setMessage('店員資料已儲存。');
+      setMessage('');
+      toast.add({ title: '操作完成', description: '店員資料已儲存。', type: 'success' });
     } catch (error) {
       await cleanupAdminMedia(uploadedMediaIds);
       setMessage(error.message);
@@ -352,10 +357,12 @@ export function AdminStaffSettingsPage() {
       setEditorOpen(false);
       setDetailPreviewOpen(false);
       setForm(emptyStaff);
-      setMessage('店員資料已刪除。');
+      setMessage('');
+      toast.add({ title: '刪除完成', description: '店員資料已刪除。', type: 'success' });
       await load();
     } catch (error) {
       setMessage(error.message);
+      toast.add({ title: '刪除失敗', description: error.message, type: 'error', priority: 'high' });
     } finally {
       setDeleting(false);
     }
@@ -471,7 +478,7 @@ export function AdminStaffSettingsPage() {
         </AdminPanel>
       </> : null}
 
-      <AdminDialog className="adminStaffEditDialog" open={editorOpen} title={`${isReadOnly ? '查看' : '編輯'}店員：${selectedStaffLabel}`} description={isReadOnly ? '目前帳號只能查看其他店員資料，不能修改或儲存。' : '修改資料時會同步更新公開卡片預覽；詳細資料也可另開彈窗查看。'} onClose={closeEditor} actions={<>{canManageAll ? <AdminButton variant="danger" onClick={() => setDeleteConfirmOpen(true)}>刪除此店員</AdminButton> : null}<span className="adminDialogActionSpacer" /><AdminButton variant="ghost" onClick={closeEditor}>關閉</AdminButton>{canEditSelected ? <AdminButton onClick={save} disabled={saving}>{saving ? '儲存中…' : '儲存店員資料'}</AdminButton> : null}</>}>
+      <AdminDialog className="adminStaffEditDialog" open={editorOpen} title={`${isReadOnly ? '查看' : '編輯'}店員：${selectedStaffLabel}`} description={isReadOnly ? '目前帳號只能查看其他店員資料，不能修改或儲存。' : '修改資料時會同步更新公開卡片預覽；詳細資料也可另開視窗查看。'} onClose={closeEditor} actions={<>{canManageAll ? <AdminButton variant="danger" onClick={() => setDeleteConfirmOpen(true)}>刪除此店員</AdminButton> : null}<span className="adminDialogActionSpacer" /><AdminButton variant="ghost" onClick={closeEditor}>關閉</AdminButton>{canEditSelected ? <AdminButton onClick={save} disabled={saving}>{saving ? '儲存中…' : '儲存店員資料'}</AdminButton> : null}</>}>
         {form.id ? <>
           {message ? <div className="adminNotice adminDialogNotice" role="alert">{message}</div> : null}
           <div className="adminStaffMobilePreviewAction"><AdminButton variant="secondary" onClick={() => setDetailPreviewOpen(true)}>預覽公開卡片</AdminButton></div>
@@ -486,7 +493,7 @@ export function AdminStaffSettingsPage() {
                 <div className="adminStaffBasicToggle"><AdminToggle checked={form.isNominatable === true} disabled={isReadOnly} onChange={(value) => update('isNominatable', value)} label="開放指名" /><small>必填狀態，預設關閉；公開卡片會依此顯示「可以指名」。</small></div>
                 <AdminField label="卡片簡介" className="span-2" required><textarea required disabled={isReadOnly} rows="3" value={form.shortBio || ''} onChange={(event) => update('shortBio', event.target.value)} /></AdminField>
                 <AdminField label="詳細介紹" className="span-2"><textarea disabled={isReadOnly} rows="7" value={form.profileBio || ''} onChange={(event) => update('profileBio', event.target.value)} /></AdminField>
-                <AdminAvatarPicker label="頭像" value={form.avatarUrl} pendingFile={form.avatarFile} hint="上傳時會先壓縮；調整圖片可裁切新上傳或資料庫中的原始頭像。儲存店員資料後才會正式上傳。" disabled={isReadOnly} onChange={updateAvatarFile} onClear={() => { update('avatarFile', null); update('avatarPreviewUrl', ''); update('avatarUrl', ''); update('avatarMediaId', null); }} />
+                <AdminAvatarPicker label="頭像" value={form.avatarUrl} pendingFile={form.avatarFile} hint="選擇圖片後會開啟 4:5 裁切框，輸出固定為 1200 × 1500px WebP；既有頭像也能重新調整。儲存店員資料後才會正式上傳。" disabled={isReadOnly} onChange={updateAvatarFile} onClear={() => { update('avatarFile', null); update('avatarPreviewUrl', ''); update('avatarUrl', ''); update('avatarMediaId', null); }} />
               </div>
             </AdminPanel>
 

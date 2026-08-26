@@ -1,4 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
+import { Dialog } from '@base-ui/react/dialog';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { useAdminImageProcessing } from './AdminImageProcessingContext.js';
+import { formatImageFileSize } from './adminImageProcessing.js';
 
 export function AdminPage({ eyebrow, title, description, actions, children }) {
   return (
@@ -67,7 +71,8 @@ export function AdminToggle({ checked, onChange, label = '啟用', ariaLabel, di
 export function AdminImagePicker({ label = '圖片', value, pendingFile, onChange, onClear, hint, className = '', disabled = false, required = false }) {
   const [preview, setPreview] = useState(value || '');
   const [processing, setProcessing] = useState(false);
-  const [error, setError] = useState('');
+  const [feedback, setFeedback] = useState({ status: '', error: '' });
+  const { processImage } = useAdminImageProcessing();
 
   useEffect(() => {
     if (!pendingFile) {
@@ -81,25 +86,14 @@ export function AdminImagePicker({ label = '圖片', value, pendingFile, onChang
 
   const handleFile = async (file) => {
     if (!file) return;
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-      setError('圖片僅支援 JPEG、PNG 或 WebP 格式。');
-      return;
-    }
     setProcessing(true);
-    setError('');
+    setFeedback({ status: '正在轉換並壓縮圖片…', error: '' });
     try {
-      const { default: imageCompression } = await import('browser-image-compression');
-      const compressed = await imageCompression(file, {
-        maxSizeMB: 1.8,
-        maxWidthOrHeight: 2400,
-        initialQuality: 0.9,
-        fileType: 'image/webp',
-        useWebWorker: true,
-      });
-      const baseName = (file.name.replace(/\.[^.]+$/, '') || 'image');
-      onChange(new File([compressed], `${baseName}.webp`, { type: 'image/webp', lastModified: Date.now() }));
-    } catch (processError) {
-      setError(processError?.message || '圖片壓縮失敗，請換一張圖片再試。');
+      const processed = await processImage({ file, crop: false });
+      onChange(processed);
+      setFeedback({ status: `已轉為 WebP：${formatImageFileSize(file.size)} → ${formatImageFileSize(processed.size)}。`, error: '' });
+    } catch (error) {
+      setFeedback({ status: '', error: error?.message || '圖片處理失敗，請重新選擇。' });
     } finally {
       setProcessing(false);
     }
@@ -116,12 +110,13 @@ export function AdminImagePicker({ label = '圖片', value, pendingFile, onChang
       </div>
       <div className="adminImagePickerActions">
         {!disabled ? <label className={`adminButton adminButton-secondary${processing ? ' isDisabled' : ''}`}>
-          {processing ? '壓縮中…' : '選擇圖片'}
-          <input type="file" disabled={processing} accept="image/jpeg,image/png,image/webp" onChange={(event) => { void handleFile(event.target.files?.[0] || null); event.target.value = ''; }} />
+          {processing ? '處理中…' : '選擇圖片'}
+          <input type="file" disabled={processing} accept="image/jpeg,image/png,image/webp" onChange={(event) => { handleFile(event.target.files?.[0] || null); event.target.value = ''; }} />
         </label> : null}
-        {preview && !disabled ? <AdminButton variant="ghost" onClick={onClear} disabled={processing}>清除</AdminButton> : null}
+        {preview && !disabled ? <AdminButton variant="ghost" disabled={processing} onClick={() => { setFeedback({ status: '', error: '' }); onClear(); }}>清除</AdminButton> : null}
       </div>
-      {error ? <small className="adminAvatarError" role="alert">{error}</small> : null}
+      {feedback.status ? <small className="adminFieldHint" role="status">{feedback.status}</small> : null}
+      {feedback.error ? <small className="adminImageProcessorError" role="alert">{feedback.error}</small> : null}
       {hint ? <small className="adminFieldHint">{hint}</small> : null}
     </div>
   );
@@ -134,21 +129,47 @@ export function AdminState({ loading, error, onRetry }) {
 }
 
 export function AdminDialog({ open, title, description, children, onClose, actions, className = '', showHeader = true }) {
-  if (!open) return null;
+  const reduceMotion = useReducedMotion();
+  const popupClassName = `adminDialogPopup${className.includes('adminStaffEditDialog') ? ' adminStaffEditDialogPopup' : ''}`;
+
   return (
-    <div className="adminDialogBackdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose?.(); }}>
-      <section className={`adminDialog ${className}`.trim()} role="dialog" aria-modal="true" aria-label={title} onMouseDown={(event) => event.stopPropagation()}>
-        {showHeader ? <header className="adminDialogHeader">
-          <div>
-            <h2>{title}</h2>
-            {description ? <p>{description}</p> : null}
-          </div>
-          <AdminButton variant="ghost" onClick={onClose} aria-label="關閉編輯視窗">關閉</AdminButton>
-        </header> : null}
-        <div className="adminDialogBody">{children}</div>
-        {actions ? <footer className="adminDialogFooter">{actions}</footer> : null}
-      </section>
-    </div>
+    <Dialog.Root open={open} onOpenChange={(nextOpen) => { if (!nextOpen) onClose?.(); }}>
+      <AnimatePresence>
+        {open ? (
+          <Dialog.Portal keepMounted>
+            <div className="adminTheme adminDialogPortalTheme">
+              <Dialog.Backdrop
+                render={<motion.div className="adminDialogBackdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reduceMotion ? 0.1 : 0.2 }} />}
+              />
+              <Dialog.Popup
+                className={popupClassName}
+                render={(
+                  <div>
+                    <motion.section
+                      className={`adminDialog ${className}`.trim()}
+                      initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 28, scale: 0.975 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 18, scale: 0.985 }}
+                      transition={reduceMotion ? { duration: 0.1 } : { type: 'spring', stiffness: 310, damping: 30 }}
+                    >
+                      {showHeader ? <header className="adminDialogHeader">
+                        <div>
+                          <Dialog.Title className="adminDialogTitle">{title}</Dialog.Title>
+                          {description ? <Dialog.Description className="adminDialogDescription">{description}</Dialog.Description> : null}
+                        </div>
+                        <Dialog.Close className="adminButton adminButton-ghost" aria-label="關閉編輯視窗">關閉</Dialog.Close>
+                      </header> : <><Dialog.Title className="adminVisuallyHidden">{title}</Dialog.Title>{description ? <Dialog.Description className="adminVisuallyHidden">{description}</Dialog.Description> : null}</>}
+                      <div className="adminDialogBody">{children}</div>
+                      {actions ? <footer className="adminDialogFooter">{actions}</footer> : null}
+                    </motion.section>
+                  </div>
+                )}
+              />
+            </div>
+          </Dialog.Portal>
+        ) : null}
+      </AnimatePresence>
+    </Dialog.Root>
   );
 }
 

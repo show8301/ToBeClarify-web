@@ -74,6 +74,10 @@ jobs:
           name: tobeclarify-vinext-dev
           path: ${{ runner.temp }}\tobeclarify-vinext-dev
 
+      - name: Ensure Microsoft IIS URL Rewrite is installed
+        shell: powershell
+        run: .\scripts\install-iis-url-rewrite.ps1
+
       - name: Deploy Node runtime and configure IIS reverse proxy
         shell: powershell
         env:

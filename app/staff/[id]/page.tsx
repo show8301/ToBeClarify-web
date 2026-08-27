@@ -23,5 +23,5 @@ export default async function StaffPage({params}:{params:Promise<{id:string}>}){
   const total=list.length;
   const previous=total>1?list[(safeIndex-1+total)%total]:null;
   const next=total>1?list[(safeIndex+1)%total]:null;
-  return <StaffProfile staff={staff} index={safeIndex} navigation={{previous,next,total,list}}/>;
+  return <StaffProfile key={staff.id} staff={staff} index={safeIndex} navigation={{previous,next,total,list}}/>;
 }

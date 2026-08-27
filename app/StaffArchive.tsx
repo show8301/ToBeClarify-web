@@ -7,6 +7,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import type { StaffSummary } from "./staff-types";
 
 const fallbackPortrait = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='1000'%3E%3Crect width='100%25' height='100%25' fill='%23d9d2c5'/%3E%3Ccircle cx='400' cy='390' r='150' fill='%23eee9df'/%3E%3Cpath d='M150 950c30-240 150-350 250-350s220 110 250 350' fill='%23eee9df'/%3E%3C/svg%3E";
+const rosterPageTitle = "清醒夢 Lucid Dream｜艾歐澤亞深夜沙龍";
 
 export default function StaffArchive({ initialStaff, embedded=false }:{ initialStaff:StaffSummary[];embedded?:boolean }) {
   const [query, setQuery] = useState("");
@@ -37,6 +38,7 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
   }, [featuredPaused, featuredPool.length]);
 
   useLayoutEffect(() => {
+    document.title = rosterPageTitle;
     const savedPosition = sessionStorage.getItem("lucid-roster-scroll");
     const root = document.documentElement;
     if (!savedPosition) {
@@ -130,17 +132,14 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
       </section>
 
       <section className="staff-gallery" aria-label="店員視覺名單">
-        <AnimatePresence mode="popLayout">
-          {filtered.map((person, index) => {
+        {filtered.map((person, index) => {
             const services = [...(person.commonServices ?? []), ...(person.specialServices ?? [])];
             const canBeNominated = person.isNominatable === true;
             const fileNumber = String(index + 1).padStart(2,"0");
             return (
-              <motion.a layout href={`/staff/${person.id}`} onClick={(event) => openProfile(event, `/staff/${person.id}`)} key={person.id} className="dreamer-card"
-                initial={reduceMotion ? {opacity:0}:{opacity:0,y:24}} animate={{opacity:1,y:0}} exit={{opacity:0,scale:.98}}
-                transition={{duration:.38,delay:Math.min(index*.025,.2),ease:[.22,1,.36,1]}} aria-label={`查看 ${person.displayName} 的完整介紹`}>
+              <a href={`/staff/${person.id}`} onClick={(event) => openProfile(event, `/staff/${person.id}`)} key={person.id} className="dreamer-card" aria-label={`查看 ${person.displayName} 的完整介紹`}>
                 <span className="dreamer-card-photo">
-                  <img src={person.avatarUrl || fallbackPortrait} alt={`${person.displayName} 的店員照片`} loading={index > 5 ? "lazy" : "eager"} decoding="async"/>
+                  <img src={person.avatarUrl || fallbackPortrait} alt={`${person.displayName} 的店員照片`} loading={index < 2 ? "eager" : "lazy"} decoding="async"/>
                   <span className="dreamer-role-ribbon" title={person.roleTitle || "DREAM STAFF"}>
                     <i>✦</i><b>{person.roleTitle || "DREAM STAFF"}</b><i>✦</i>
                   </span>
@@ -161,10 +160,9 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
                   </span>}
                   <span className="dreamer-card-link"><small>FILE · {fileNumber}</small><b>VIEW PROFILE <ArrowUpRight aria-hidden="true"/></b></span>
                 </span>
-              </motion.a>
+              </a>
             );
-          })}
-        </AnimatePresence>
+        })}
         {!filtered.length && <div className="empty-state"><b>NO MATCHES</b><p>換一個關鍵字，再找找看。</p></div>}
       </section>
 

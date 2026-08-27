@@ -1216,7 +1216,7 @@ body{background-image:radial-gradient(ellipse 75% 55% at 4% 4%,rgba(232,199,218,
   border:1px solid rgba(255,255,255,.9);border-radius:16px;
   background:linear-gradient(150deg,rgba(255,255,255,.72),rgba(245,240,248,.48) 54%,rgba(227,235,247,.5));
   box-shadow:0 20px 48px rgba(118,121,161,.13),inset 0 1px rgba(255,255,255,.94);
-  color:var(--ink);content-visibility:auto;contain-intrinsic-size:560px;
+  color:var(--ink);
   transition:transform .4s cubic-bezier(.22,1,.36,1),box-shadow .4s ease,border-color .4s ease;
 }
 .dreamer-card:nth-child(3n+2){background:linear-gradient(150deg,rgba(255,255,255,.72),rgba(234,230,247,.48) 52%,rgba(244,229,238,.46))}
@@ -1247,7 +1247,7 @@ body{background-image:radial-gradient(ellipse 75% 55% at 4% 4%,rgba(232,199,218,
 @media(max-width:1040px){.dreamer-card{grid-column:span 6}}
 @media(max-width:620px){
   .staff-gallery{gap:18px;padding-inline:16px}
-  .dreamer-card{grid-column:span 12;grid-template-columns:minmax(132px,42%) minmax(0,58%);grid-template-rows:1fr;min-height:246px;border-radius:14px;contain-intrinsic-size:246px}
+  .dreamer-card{grid-column:span 12;grid-template-columns:minmax(132px,42%) minmax(0,58%);grid-template-rows:1fr;min-height:246px;border-radius:14px}
   .dreamer-card:hover{transform:none}
   .dreamer-card-photo{height:100%;aspect-ratio:auto}
   .dreamer-file-number{left:10px;top:10px;min-width:34px;height:27px;padding-inline:8px;border-radius:8px;font-size:9px}
@@ -1596,6 +1596,15 @@ body.modal-open .site-parallax-bubbles i{animation-play-state:paused}
   .dreamer-photo-statuses .dreamer-file-number{font-size:19px;padding-left:9px}
   .dreamer-services{margin-bottom:12px}
   .dreamer-services img{flex-basis:13px;width:13px;height:13px}
+}
+
+/* Keep the mobile roster cheap to repaint while preserving the card appearance. */
+@media(max-width:620px){
+  .dreamer-card{box-shadow:0 8px 20px rgba(101,120,159,.1),inset 0 1px rgba(255,255,255,.8);transition:none}
+  .dreamer-card-photo img{filter:none;transition:none}
+  .dreamer-role-ribbon,.dreamer-photo-statuses{backdrop-filter:none}
+  .dreamer-services>b,.dreamer-services>i{box-shadow:none}
+  .dreamer-services img{filter:none}
 }
 
 /* Deep-page navigation: keep a compact menu affordance within reach without pinning the full header. */

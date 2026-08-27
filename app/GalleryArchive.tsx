@@ -8,8 +8,14 @@ type GalleryPhoto = GalleryAlbum["items"][number];
 const PHOTO_BATCH_SIZE = 4;
 
 function GalleryImage({src,alt,loading="lazy"}:{src:string;alt:string;loading?:"eager"|"lazy"}){
-  const [loaded,setLoaded]=useState(false);
-  return <img className={loaded?"is-loaded":""} src={src} alt={alt} loading={loading} decoding="async" onLoad={()=>setLoaded(true)} onError={()=>setLoaded(true)}/>;
+  const [imageState,setImageState]=useState<{src:string;status:"loading"|"loaded"|"error"}>({src,status:"loading"});
+  const status=imageState.src===src?imageState.status:"loading";
+  const syncCompletedImage=useCallback((image:HTMLImageElement|null)=>{
+    if(!image?.complete)return;
+    setImageState({src,status:image.naturalWidth>0?"loaded":"error"});
+  },[src]);
+
+  return <img ref={syncCompletedImage} className={status==="loaded"?"is-loaded":status==="error"?"is-error":""} src={src} alt={alt} loading={loading} decoding="async" onLoad={()=>setImageState({src,status:"loaded"})} onError={()=>setImageState({src,status:"error"})}/>;
 }
 
 function GalleryCollage({photos,onSelect}:{photos:GalleryPhoto[];onSelect:(index:number)=>void}){

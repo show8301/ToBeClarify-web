@@ -13,8 +13,10 @@ export async function generateMetadata({params}:{params:Promise<{id:string}>}):P
   return{title,description,openGraph:{title,description,images:image},twitter:{title,description,images:image}};
 }
 
-export default async function StaffPage({params}:{params:Promise<{id:string}>}){
+export default async function StaffPage({params,searchParams}:{params:Promise<{id:string}>;searchParams:Promise<{from?:string|string[]}>}){
   const {id}=await params;
+  const query=await searchParams;
+  const source=query.from==="liveupdate"?"liveupdate":null;
   const staff=await getStaffDetail(id);
   if(!staff)notFound();
   const list=getStaffList();
@@ -23,5 +25,5 @@ export default async function StaffPage({params}:{params:Promise<{id:string}>}){
   const total=list.length;
   const previous=total>1?list[(safeIndex-1+total)%total]:null;
   const next=total>1?list[(safeIndex+1)%total]:null;
-  return <StaffProfile key={staff.id} staff={staff} index={safeIndex} navigation={{previous,next,total,list}}/>;
+  return <StaffProfile key={staff.id} staff={staff} index={safeIndex} navigation={{previous,next,total,list}} source={source}/>;
 }

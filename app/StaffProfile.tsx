@@ -8,6 +8,7 @@ import type { StaffDetail, StaffSummary } from "./staff-types";
 const fallbackPortrait = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='1000'%3E%3Crect width='100%25' height='100%25' fill='%23d9d2c5'/%3E%3Ccircle cx='400' cy='390' r='150' fill='%23eee9df'/%3E%3Cpath d='M150 950c30-240 150-350 250-350s220 110 250 350' fill='%23eee9df'/%3E%3C/svg%3E";
 
 type ProfileNavigation = { previous:StaffSummary|null; next:StaffSummary|null; total:number; list:StaffSummary[] };
+type ProfileSource = "liveupdate"|null;
 type ClientCacheEntry = { data:StaffDetail; expiresAt:number };
 
 const clientStaffCache = new Map<string,ClientCacheEntry>();
@@ -44,7 +45,7 @@ async function loadStaffDetail(id:string) {
   try{return await request}finally{clientStaffRequests.delete(id)}
 }
 
-export default function StaffProfile({ staff, index, navigation }:{ staff:StaffDetail; index:number; navigation:ProfileNavigation }) {
+export default function StaffProfile({ staff, index, navigation, source=null }:{ staff:StaffDetail; index:number; navigation:ProfileNavigation; source?:ProfileSource }) {
   const [currentStaff, setCurrentStaff] = useState(staff);
   const [lightboxIndex, setLightboxIndex] = useState<number|null>(null);
   const [leaving, setLeaving] = useState(false);
@@ -61,6 +62,9 @@ export default function StaffProfile({ staff, index, navigation }:{ staff:StaffD
   const next=navigation.total>1?navigation.list[(currentIndex+1)%navigation.total]:null;
   const services = [...(currentStaff.commonServices ?? []), ...(currentStaff.specialServices ?? [])];
   const images = currentStaff.gallery?.length ? currentStaff.gallery : currentStaff.avatarUrl ? [{id:"avatar",imageUrl:currentStaff.avatarUrl,thumbnailUrl:currentStaff.avatarUrl}] : [];
+  const sourceQuery=source==="liveupdate"?"?from=liveupdate":"";
+  const returnPath=source==="liveupdate"?"/liveupdate":"/staff#roster";
+  const returnLabel=source==="liveupdate"?"BACK TO LIVE":"BACK TO STAFF";
   const closeLightbox = useCallback(()=>setLightboxIndex(null),[]);
   const step = useCallback((amount:number)=>setLightboxIndex(current=>current===null||!images.length?null:(current+amount+images.length)%images.length),[images.length]);
   const replaceWithFallback = useCallback((href:string, hasArrived:()=>boolean) => {
@@ -85,24 +89,25 @@ export default function StaffProfile({ staff, index, navigation }:{ staff:StaffD
     document.documentElement.classList.remove("route-returning");
   }, []);
 
-  const returnToRoster = useCallback(() => {
+  const returnFromProfile = useCallback(() => {
     if (navigationLock.current || leaving) return;
     navigationLock.current = true;
     const navigate = () => {
       history.scrollRestoration = "manual";
       document.documentElement.classList.add("route-returning");
-      replaceWithFallback("/staff#roster",()=>window.location.pathname==="/staff"&&window.location.hash==="#roster");
+      const target=new URL(returnPath,window.location.href);
+      replaceWithFallback(returnPath,()=>window.location.pathname===target.pathname&&window.location.hash===target.hash);
     };
     if (reduceMotion) return navigate();
     setLeaving(true);
     navigate();
     navigationWatchdog.current = window.setTimeout(clearNavigationState, 3500);
-  }, [clearNavigationState, leaving, reduceMotion, replaceWithFallback]);
+  }, [clearNavigationState, leaving, reduceMotion, replaceWithFallback, returnPath]);
 
   const switchStaff = useCallback(async (target:StaffSummary|null, direction:"previous"|"next") => {
     if (!target || navigationLock.current || switching || leaving) return;
     navigationLock.current = true;
-    const href=`/staff/${target.id}`;
+    const href=`/staff/${target.id}${sourceQuery}`;
     if(!reduceMotion)setSwitching(direction);
     navigationTimer.current=window.setTimeout(()=>window.location.replace(href),3200);
     try{
@@ -113,7 +118,7 @@ export default function StaffProfile({ staff, index, navigation }:{ staff:StaffD
       setLightboxIndex(null);
       setCurrentStaff(data);
     }catch{window.location.replace(href)}
-  }, [leaving, reduceMotion, router, switching]);
+  }, [leaving, reduceMotion, router, sourceQuery, switching]);
 
   const startSwipe = useCallback((event:React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType === "mouse" || !event.isPrimary) return;
@@ -174,7 +179,7 @@ export default function StaffProfile({ staff, index, navigation }:{ staff:StaffD
       <span className="profile-pearl pearl-one"/><span className="profile-pearl pearl-two"/><span className="profile-pearl pearl-three"/>
     </div>
     <motion.article key={currentStaff.id} className="profile-spread" initial={reduceMotion?{opacity:0}:{opacity:0,y:24}} animate={{opacity:1,y:0}} transition={{duration:.5,ease:[.22,1,.36,1]}}>
-      <header className="profile-modal-head"><div><span>清醒夢 · PERSONNEL FILE</span><b>{currentStaff.displayName}</b></div><nav className="profile-switcher" aria-label="切換店員"><button onClick={()=>switchStaff(previous,"previous")} disabled={!previous} aria-label={`上一位${previous?`：${previous.displayName}`:""}`}><i>←</i><span>PREV</span><b>{previous?.displayName}</b></button><em>{String(currentIndex+1).padStart(2,"0")} / {String(navigation.total).padStart(2,"0")}</em><button onClick={()=>switchStaff(next,"next")} disabled={!next} aria-label={`下一位${next?`：${next.displayName}`:""}`}><span>NEXT</span><b>{next?.displayName}</b><i>→</i></button></nav><button className="back-to-staff" onClick={returnToRoster} aria-label="返回店員列表"><span className="back-label-wide">BACK TO STAFF</span><span className="back-label-short">LIST</span><i>←</i></button></header>
+      <header className="profile-modal-head"><div><span>清醒夢 · PERSONNEL FILE</span><b>{currentStaff.displayName}</b></div><nav className="profile-switcher" aria-label="切換店員"><button onClick={()=>switchStaff(previous,"previous")} disabled={!previous} aria-label={`上一位${previous?`：${previous.displayName}`:""}`}><i>←</i><span>PREV</span><b>{previous?.displayName}</b></button><em>{String(currentIndex+1).padStart(2,"0")} / {String(navigation.total).padStart(2,"0")}</em><button onClick={()=>switchStaff(next,"next")} disabled={!next} aria-label={`下一位${next?`：${next.displayName}`:""}`}><span>NEXT</span><b>{next?.displayName}</b><i>→</i></button></nav><button className="back-to-staff" onClick={returnFromProfile} aria-label={source==="liveupdate"?"返回即時動態":"返回店員列表"}><span className="back-label-wide">{returnLabel}</span><span className="back-label-short">{source==="liveupdate"?"LIVE":"LIST"}</span><i>←</i></button></header>
       <motion.div className="portrait-zone" onPointerDown={startSwipe} onPointerUp={finishSwipe} onPointerCancel={()=>{swipeStart.current=null}}>
         <motion.button className="main-polaroid" onClick={(event)=>{if(suppressPhotoClick.current){suppressPhotoClick.current=false;event.preventDefault();return}images.length&&setLightboxIndex(0)}} aria-label="放大查看店員照片" initial={reduceMotion?false:{opacity:0,y:-56,scale:1.025}} animate={{opacity:1,y:0,rotate:0,scale:1}} transition={{type:"spring",stiffness:125,damping:16,mass:.9,delay:.12}}><motion.span className="clip" initial={reduceMotion?false:{opacity:0,y:-25,rotate:-8}} animate={{opacity:1,y:0,rotate:0}} transition={{type:"spring",stiffness:240,damping:15,delay:.52}}>Ⅱ</motion.span><span className="main-photo"><img src={currentStaff.avatarUrl||fallbackPortrait} alt={`${currentStaff.displayName} 店員照片`}/></span><motion.span className="photo-caption" initial={reduceMotion?false:{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{delay:.48,duration:.28}}><b>{currentStaff.displayName}</b><i>PORTRAIT / 01</i></motion.span></motion.button>
         <motion.div className="status-stamp" initial={reduceMotion?false:{opacity:0,x:55,rotate:5}} animate={{opacity:1,x:0,rotate:-2}} transition={{type:"spring",stiffness:170,damping:17,delay:.58}}><i/><div><small>ON DUTY · TODAY</small><b>{currentStaff.statusText||"今日待命"}</b></div><em>LD</em></motion.div>

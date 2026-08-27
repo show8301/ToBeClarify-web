@@ -1,34 +1,40 @@
 name: Vinext DEV CI/CD
 
 on:
+  pull_request:
+    branches:
+      - dev
   push:
     branches:
       - dev
   workflow_dispatch:
     inputs:
-      allow_one_time_system_install:
-        description: Allow one LocalSystem task to install signed Microsoft URL Rewrite
+      preflight_only:
+        description: Check the DEV runner and IIS prerequisites without deploying
         required: true
         default: false
         type: boolean
-      preflight_only:
-        description: Check IIS prerequisites without deploying the site
+      allow_one_time_url_rewrite_install:
+        description: Allow one LocalSystem task to install signed Microsoft URL Rewrite
         required: true
-        default: true
+        default: false
         type: boolean
 
 permissions:
   contents: read
 
-concurrency:
-  group: vinext-dev-${{ github.ref }}-${{ github.event_name }}-${{ github.sha }}
-  cancel-in-progress: true
+env:
+  NODE_VERSION: 22.13.0
+  ARTIFACT_NAME: tobeclarify-vinext-dev
 
 jobs:
   build:
-    name: Validate and build
+    name: Clean install, build, and test
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    concurrency:
+      group: vinext-dev-build-${{ github.event_name }}-${{ github.ref }}
+      cancel-in-progress: true
 
     steps:
       - name: Checkout
@@ -37,24 +43,22 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 22.13.0
+          node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
-      - name: Normalize upstream lockfile for CI
-        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
-
-      - name: Install dependencies
-        run: npm ci
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
 
       - name: Build and test
         env:
           NODE_OPTIONS: --experimental-strip-types
         run: npm test
 
-      - name: Upload Vinext application
+      - name: Upload deployable Vinext application
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.preflight_only != true)
         uses: actions/upload-artifact@v4
         with:
-          name: tobeclarify-vinext-dev
+          name: ${{ env.ARTIFACT_NAME }}
           path: |
             dist
             package.json
@@ -65,10 +69,17 @@ jobs:
           retention-days: 7
 
   deploy:
-    name: Deploy Vinext to IIS DEV
+    name: Preflight and deploy to IIS DEV
+    if: github.event_name != 'pull_request'
     needs: build
     runs-on: [self-hosted, Windows, X64]
-    timeout-minutes: 20
+    timeout-minutes: 25
+    concurrency:
+      group: vinext-dev-iis-deployment
+      cancel-in-progress: false
+    environment:
+      name: development
+      url: ${{ vars.DEV_WEB_HEALTHCHECK_URL }}
 
     steps:
       - name: Checkout deployment scripts
@@ -77,25 +88,46 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 22.13.0
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
 
-      - name: Download Vinext application
-        uses: actions/download-artifact@v4
-        with:
-          name: tobeclarify-vinext-dev
-          path: ${{ runner.temp }}\tobeclarify-vinext-dev
+      - name: Validate required repository variables
+        shell: powershell
+        env:
+          DEPLOY_PATH: ${{ vars.DEV_WEB_DEPLOY_PATH }}
+          HEALTH_CHECK_URL: ${{ vars.DEV_WEB_HEALTHCHECK_URL }}
+        run: |
+          $missing = @()
+          if ([string]::IsNullOrWhiteSpace($env:DEPLOY_PATH)) { $missing += 'DEV_WEB_DEPLOY_PATH' }
+          if ([string]::IsNullOrWhiteSpace($env:HEALTH_CHECK_URL)) { $missing += 'DEV_WEB_HEALTHCHECK_URL' }
+          if ($missing.Count -gt 0) {
+            throw "Missing GitHub Actions repository variables: $($missing -join ', ')"
+          }
 
-      - name: Ensure Microsoft IIS URL Rewrite is installed
-        if: github.event_name == 'workflow_dispatch' && inputs.allow_one_time_system_install
+      - name: Install Microsoft IIS URL Rewrite when explicitly requested
+        if: github.event_name == 'workflow_dispatch' && inputs.allow_one_time_url_rewrite_install
         shell: powershell
         run: .\scripts\install-iis-url-rewrite.ps1 -AllowLocalSystemInstall
 
-      - name: Check IIS reverse proxy prerequisites
+      - name: Check DEV runner and IIS prerequisites
         shell: powershell
-        run: .\scripts\test-iis-reverse-proxy-prerequisites.ps1
+        env:
+          DEPLOY_PATH: ${{ vars.DEV_WEB_DEPLOY_PATH }}
+        run: |
+          .\scripts\test-iis-reverse-proxy-prerequisites.ps1 `
+            -DeployPath $env:DEPLOY_PATH `
+            -MinimumNodeVersion '${{ env.NODE_VERSION }}'
+
+      - name: Download Vinext application
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.preflight_only != true)
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ runner.temp }}\tobeclarify-vinext-dev
 
       - name: Deploy Node runtime and configure IIS reverse proxy
-        if: github.event_name == 'workflow_dispatch' && !inputs.preflight_only
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.preflight_only != true)
         shell: powershell
         env:
           ARTIFACT_PATH: ${{ runner.temp }}\tobeclarify-vinext-dev
@@ -105,6 +137,7 @@ jobs:
           NODE_TASK_NAME: ${{ vars.DEV_NODE_TASK_NAME }}
           ADMIN_API_BASE_URL: ${{ vars.DEV_ADMIN_API_BASE_URL }}
           PUBLIC_MEDIA_BASE_URL: ${{ vars.DEV_PUBLIC_MEDIA_BASE_URL }}
+          DEPLOYMENT_SHA: ${{ github.sha }}
         run: |
           $port = if ([string]::IsNullOrWhiteSpace($env:NODE_PORT)) { 4310 } else { [int]$env:NODE_PORT }
           $taskName = if ([string]::IsNullOrWhiteSpace($env:NODE_TASK_NAME)) { 'ToBeClarify Vinext DEV' } else { $env:NODE_TASK_NAME }
@@ -116,5 +149,6 @@ jobs:
             -ExpectedDeployLeaf 'ToBeClarify_web_dev' `
             -NodePort $port `
             -TaskName $taskName `
+            -DeploymentSha $env:DEPLOYMENT_SHA `
             -AdminApiBaseUrl $env:ADMIN_API_BASE_URL `
             -PublicMediaBaseUrl $env:PUBLIC_MEDIA_BASE_URL

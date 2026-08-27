@@ -20,6 +20,10 @@ param(
     [ValidateNotNullOrEmpty()]
     [string]$TaskName,
 
+    [Parameter(Mandatory = $true)]
+    [ValidatePattern('^[0-9A-Fa-f]{7,64}$')]
+    [string]$DeploymentSha,
+
     [string]$AdminApiBaseUrl,
 
     [string]$PublicMediaBaseUrl
@@ -159,10 +163,40 @@ function Register-VinextTask {
     Start-ScheduledTask -TaskName $Name
 }
 
+function Get-HealthCheckUrl {
+    param([Parameter(Mandatory = $true)][string]$BaseUrl)
+
+    $trimmedUrl = $BaseUrl.Trim().TrimEnd('/')
+    [System.Uri]$parsedUrl = $null
+    if (-not [System.Uri]::TryCreate($trimmedUrl, [System.UriKind]::Absolute, [ref]$parsedUrl)) {
+        throw "Health check URL is not an absolute URL: $BaseUrl"
+    }
+
+    if ($parsedUrl.Scheme -ne 'http' -and $parsedUrl.Scheme -ne 'https') {
+        throw "Health check URL must use HTTP or HTTPS: $BaseUrl"
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($parsedUrl.Query) -or
+        -not [string]::IsNullOrWhiteSpace($parsedUrl.Fragment)) {
+        throw "Health check URL must not include a query string or fragment: $BaseUrl"
+    }
+
+    if ($parsedUrl.AbsolutePath.TrimEnd('/') -ieq '/api/health') {
+        return "$($parsedUrl.Scheme)://$($parsedUrl.Authority)/api/health"
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($parsedUrl.AbsolutePath.Trim('/'))) {
+        throw "Health check URL must be the site origin or /api/health: $BaseUrl"
+    }
+
+    return "$($parsedUrl.Scheme)://$($parsedUrl.Authority)/api/health"
+}
+
 function Wait-VinextHealth {
     param(
         [Parameter(Mandatory = $true)][string]$Url,
-        [Parameter(Mandatory = $true)][int]$Attempts
+        [Parameter(Mandatory = $true)][int]$Attempts,
+        [Parameter(Mandatory = $true)][string]$ExpectedDeploymentSha
     )
 
     $lastError = $null
@@ -172,9 +206,15 @@ function Wait-VinextHealth {
             $cacheBuster = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
             $response = Invoke-WebRequest -Uri "$Url${separator}deploymentCheck=$cacheBuster" -UseBasicParsing -TimeoutSec 15
             if ($response.StatusCode -ge 200 -and $response.StatusCode -lt 400) {
-                return $response
+                $payload = $response.Content | ConvertFrom-Json
+                if ($payload.status -eq 'ok' -and $payload.deploymentSha -eq $ExpectedDeploymentSha) {
+                    return $response
+                }
+                $lastError = "Unexpected health payload (status=$($payload.status), deploymentSha=$($payload.deploymentSha))"
             }
-            $lastError = "HTTP $($response.StatusCode)"
+            else {
+                $lastError = "HTTP $($response.StatusCode)"
+            }
         }
         catch {
             $lastError = $_.Exception.Message
@@ -187,7 +227,7 @@ function Wait-VinextHealth {
 }
 
 $artifactRoot = Get-NormalizedPath -Path (Resolve-Path -LiteralPath $ArtifactPath).Path
-$deployRoot = Get-NormalizedPath -Path (Resolve-Path -LiteralPath $DeployPath).Path
+$deployRoot = Get-NormalizedPath -Path $DeployPath
 $deployParent = Get-NormalizedPath -Path (Split-Path -Parent $deployRoot)
 $deployLeaf = Split-Path -Leaf $deployRoot
 
@@ -198,6 +238,12 @@ if ($deployLeaf -ine $ExpectedDeployLeaf) {
 if ([string]::IsNullOrWhiteSpace($HealthCheckUrl)) {
     throw 'DEV_WEB_HEALTHCHECK_URL is not configured.'
 }
+
+if (-not (Test-Path -LiteralPath $deployParent -PathType Container)) {
+    throw "The deployment parent directory does not exist: $deployParent"
+}
+
+$publicHealthCheckUrl = Get-HealthCheckUrl -BaseUrl $HealthCheckUrl
 
 $requiredFiles = @(
     'dist\server\index.js',
@@ -227,7 +273,10 @@ if (-not (Test-Path -LiteralPath $appcmdPath -PathType Leaf)) {
 }
 
 $prerequisiteScript = Join-Path $PSScriptRoot 'test-iis-reverse-proxy-prerequisites.ps1'
-& $prerequisiteScript -AppCmdPath $appcmdPath
+& $prerequisiteScript `
+    -AppCmdPath $appcmdPath `
+    -DeployPath $deployRoot `
+    -MinimumNodeVersion '22.13.0'
 
 if ($null -eq (Get-Command Register-ScheduledTask -ErrorAction SilentlyContinue)) {
     throw 'The Windows ScheduledTasks module is not available on the DEV runner.'
@@ -252,7 +301,7 @@ foreach ($item in (Get-ChildItem -LiteralPath $artifactRoot -Force)) {
 
 Push-Location $stagingRoot
 try {
-    & $npmCommand.Source ci --include=dev --no-audit --no-fund
+    & $npmCommand.Source ci --omit=dev --no-audit --no-fund
     if ($LASTEXITCODE -ne 0) {
         throw "npm ci failed with exit code $LASTEXITCODE"
     }
@@ -266,6 +315,7 @@ $webConfig = $webConfigTemplate.Replace('__NODE_PORT__', [string]$NodePort)
 Set-Content -LiteralPath (Join-Path $stagingRoot 'web.config') -Value $webConfig -Encoding UTF8
 
 $runtimeConfig = [ordered]@{}
+$runtimeConfig.DEPLOYMENT_SHA = $DeploymentSha
 if (-not [string]::IsNullOrWhiteSpace($AdminApiBaseUrl)) {
     $runtimeConfig.ADMIN_API_BASE_URL = $AdminApiBaseUrl.TrimEnd('/')
 }
@@ -277,9 +327,12 @@ $runtimeConfig | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $stagingRo
 $hadExistingTask = Stop-VinextTask -Name $TaskName
 Assert-PortAvailable -Port $NodePort
 
+$hadExistingDeployment = Test-Path -LiteralPath $deployRoot -PathType Container
 $swapped = $false
 try {
-    Rename-Item -LiteralPath $deployRoot -NewName (Split-Path -Leaf $rollbackRoot)
+    if ($hadExistingDeployment) {
+        Rename-Item -LiteralPath $deployRoot -NewName (Split-Path -Leaf $rollbackRoot)
+    }
     Rename-Item -LiteralPath $stagingRoot -NewName $ExpectedDeployLeaf
     $swapped = $true
 
@@ -299,14 +352,20 @@ try {
 
     Register-VinextTask -Name $TaskName -AppPath $deployRoot -NodePath $nodeCommand.Source -Port $NodePort
 
-    Wait-VinextHealth -Url "http://127.0.0.1:$NodePort/" -Attempts 30 | Out-Null
-    $publicResponse = Wait-VinextHealth -Url $HealthCheckUrl -Attempts 15
-    if ($publicResponse.Content -notmatch '(/_vinext/|__VINEXT|__next_f)') {
-        throw "The public DEV health check returned HTML that does not look like the Vinext site: $HealthCheckUrl"
-    }
+    Wait-VinextHealth `
+        -Url "http://127.0.0.1:$NodePort/api/health" `
+        -Attempts 30 `
+        -ExpectedDeploymentSha $DeploymentSha | Out-Null
+    Wait-VinextHealth `
+        -Url $publicHealthCheckUrl `
+        -Attempts 15 `
+        -ExpectedDeploymentSha $DeploymentSha | Out-Null
 
     Write-Host "Vinext DEV deployment completed: $deployRoot"
-    Write-Host "Rollback copy retained at: $rollbackRoot"
+    Write-Host "Verified deployment SHA through IIS: $DeploymentSha"
+    if ($hadExistingDeployment) {
+        Write-Host "Rollback copy retained at: $rollbackRoot"
+    }
 }
 catch {
     $deploymentError = $_
@@ -318,7 +377,7 @@ catch {
         if (Test-Path -LiteralPath $deployRoot) {
             Remove-Item -LiteralPath $deployRoot -Recurse -Force
         }
-        if (Test-Path -LiteralPath $rollbackRoot) {
+        if ($hadExistingDeployment -and (Test-Path -LiteralPath $rollbackRoot)) {
             Rename-Item -LiteralPath $rollbackRoot -NewName $ExpectedDeployLeaf
         }
     }

@@ -5,6 +5,7 @@ import { useState } from "react";
 import type { MenuData } from "./site-types";
 
 const gil=(value:number)=>`${new Intl.NumberFormat("zh-TW").format(value)} Gil`;
+const isInternalCopy=(value:string)=>/(demo|mock|測試|api\s*(提供|維護)|後台.*維護)/i.test(value);
 
 export default function MenuCatalog({menu}:{menu:MenuData}){
   const [category,setCategory]=useState(menu.categories[0]?.id??"");
@@ -13,11 +14,11 @@ export default function MenuCatalog({menu}:{menu:MenuData}){
   return <div className="menu-page">
     <section className="menu-hero">
       <div><span>THE TASTE OF A WAKING DREAM</span><h1>NIGHT<br/><i>MENU</i></h1></div>
-      <div className="menu-cover-card"><span>清醒夢 · LUCID DREAM</span><b>佳餚名錄</b><p>在每一場夜談之間，留一點溫度給餐桌。所有價格與組合皆由現行菜單 API 提供。</p><i>EDITION / 2026</i></div>
+      <div className="menu-cover-card"><span>清醒夢 · LUCID DREAM</span><b>佳餚名錄</b><p>在每一場夜談之間，留一點溫度給餐桌。飲品、甜點與套餐，為今晚的相遇添上一筆餘韻。</p><i>EDITION / 2026</i></div>
     </section>
 
     <section className="menu-pricing-rules">
-      {menu.pricingRules.map((rule,index)=><article key={rule.id}><span>{String(index+1).padStart(2,"0")}</span><div><small>HOUSE CHARGE</small><h2>{rule.title}</h2><p>{rule.description}</p></div><b>{rule.priceText}</b></article>)}
+      {menu.pricingRules.map((rule,index)=><article key={rule.id}><span>{String(index+1).padStart(2,"0")}</span><div><small>HOUSE CHARGE</small><h2>{rule.title}</h2>{rule.description&&!isInternalCopy(rule.description)&&<p>{rule.description}</p>}</div><b>{rule.priceText}</b></article>)}
     </section>
 
     <section className="menu-sets">

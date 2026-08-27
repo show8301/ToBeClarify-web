@@ -27,6 +27,42 @@ const pageNumbers:Record<string,string> = {
   "/staffRanking": "06",
   "/monetaryRanking": "07",
 };
+const pageEnglishLabels:Record<string,string> = {
+  "/": "HOME",
+  "/staff": "DREAMERS",
+  "/gallery": "GALLERY",
+  "/menu": "SERVICE MENU",
+  "/guestbook": "GUESTBOOK",
+  "/liveupdate": "LIVE TONIGHT",
+  "/staffRanking": "STAFF RANKING",
+  "/monetaryRanking": "SUPPORT RANKING",
+};
+
+type MenuLinkProps = {
+  active:boolean;
+  href:string;
+  label:string;
+  number:string;
+  onNavigate:(event:React.MouseEvent<HTMLAnchorElement>,path:string)=>void;
+};
+
+function FullscreenMenuLink({active,href,label,number,onNavigate}:MenuLinkProps){
+  return <motion.a
+    className={`site-menu-link${active?" active":""}`}
+    href={href}
+    onClick={(event)=>onNavigate(event,href)}
+    aria-current={active?"page":undefined}
+    initial={false}
+  >
+    <i>{number}</i>
+    <span className="site-menu-label">
+      <span className="site-menu-label-base">{label}</span>
+      <motion.span className="site-menu-label-reveal" aria-hidden="true" initial={false} variants={{idle:{clipPath:"inset(0 100% 0 0)"},reveal:{clipPath:"inset(0 0% 0 0)"}}} animate={active?"reveal":"idle"}>{label}</motion.span>
+    </span>
+    <small>{pageEnglishLabels[href]??"EXPLORE"}</small>
+    <b aria-hidden="true">↗</b>
+  </motion.a>;
+}
 
 export default function SiteChrome({navigation,shopInfo,pageVisibility,menuHidden=false,children}:{navigation:NavigationItem[];shopInfo:ShopInfo;pageVisibility?:HomePageVisibility;menuHidden?:boolean;children:React.ReactNode}) {
   const [open,setOpen] = useState(false);
@@ -90,18 +126,28 @@ export default function SiteChrome({navigation,shopInfo,pageVisibility,menuHidde
   }, []);
   useEffect(() => {
     if (!open) return;
+    const previousOverflow=document.body.style.overflow;
+    const previousPaddingRight=document.body.style.paddingRight;
+    const scrollbarWidth=window.innerWidth-document.documentElement.clientWidth;
+    const bodyPaddingRight=Number.parseFloat(window.getComputedStyle(document.body).paddingRight)||0;
+    if(scrollbarWidth>0)document.body.style.paddingRight=`${bodyPaddingRight+scrollbarWidth}px`;
+    document.body.style.overflow="hidden";
     const closeOnEscape = (event:KeyboardEvent) => {
       if (event.key === "Escape") setOpen(false);
     };
     window.addEventListener("keydown", closeOnEscape);
-    return () => window.removeEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow=previousOverflow;
+      document.body.style.paddingRight=previousPaddingRight;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
   }, [open]);
 
   const navigate = (event:React.MouseEvent<HTMLAnchorElement>,path:string) => {
     const href=resolvePath(path);
-    if(href===pathname)return;
     event.preventDefault();
     setOpen(false);
+    if(href===pathname)return;
     if(reduceMotion)return router.push(href);
     setLeaving(href);
     navigationTimer.current = window.setTimeout(() => {
@@ -117,7 +163,12 @@ export default function SiteChrome({navigation,shopInfo,pageVisibility,menuHidde
     },3200);
   };
 
-  return <div className="site-frame">
+  const menuEntries=[
+    ...((!visibility || visibility.home !== false)?[{id:"site-home",label:"首頁",routePath:"/"}]:[]),
+    ...items.map((item)=>({id:item.id,label:item.label,routePath:resolvePath(item.routePath)})),
+  ];
+
+  return <div className={`site-frame${open?" is-menu-open":""}`}>
     <div className="site-parallax-bubbles site-bubbles-far" aria-hidden="true"><i/><i/><i/><i/></div>
     <div className="site-parallax-bubbles site-bubbles-near" aria-hidden="true"><i/><i/></div>
     <div className="site-parallax-mist" aria-hidden="true"/>
@@ -126,10 +177,19 @@ export default function SiteChrome({navigation,shopInfo,pageVisibility,menuHidde
       <span className="site-header-note">WAKING DREAM · EORZEA SALON</span>
       <button className={`site-menu-toggle${open?" is-open":""}`} onClick={()=>setOpen(value=>!value)} aria-expanded={open} aria-controls="site-navigation"><span/><span/><b>{open?"CLOSE":"MENU"}</b></button>
     </header>
-    <nav id="site-navigation" className={`site-navigation${open?" is-open":""}`} aria-label="主要導覽">
-      {(!visibility || visibility.home !== false) && <a className={pathname==="/"?"active":""} href="/" onClick={(event)=>navigate(event,"/")}><i>00</i><span>首頁</span></a>}
-      {items.map((item,index)=>{const href=resolvePath(item.routePath);return <a className={pathname===href?"active":""} href={href} onClick={(event)=>navigate(event,href)} key={item.id}><i>{pageNumbers[href] ?? String(index+1).padStart(2,"0")}</i><span>{item.label}</span></a>})}
-    </nav>
+    <AnimatePresence>
+      {open&&<motion.div className="site-navigation-shell" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} transition={{duration:reduceMotion?.01:.16}}>
+        <div className="site-navigation-backdrop"/>
+        <nav id="site-navigation" className="site-navigation" aria-label="主要導覽">
+          {menuEntries.map((item,index)=><FullscreenMenuLink active={pathname===item.routePath} href={item.routePath} key={item.id} label={item.label} number={pageNumbers[item.routePath]??String(index).padStart(2,"0")} onNavigate={navigate}/>) }
+        </nav>
+        <aside className="site-menu-meta">
+          <span><b>OPEN</b>{shopInfo.openHours}</span>
+          <span><b>LOCATION</b>{shopInfo.server} · {shopInfo.address}</span>
+          <i>SELECT A DREAM TO ENTER ✦</i>
+        </aside>
+      </motion.div>}
+    </AnimatePresence>
     <button
       className={`site-floating-top${showFloatingTop?" is-visible":""}`}
       onClick={()=>window.scrollTo({top:0,behavior:reduceMotion?"auto":"smooth"})}

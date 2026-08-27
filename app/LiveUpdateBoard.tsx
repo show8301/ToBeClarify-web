@@ -26,7 +26,7 @@ function LiveStaffCard({person,duplicate=false,onNavigate}:{person:StaffSummary;
 function LiveMarqueeRow({people,reverse=false,onNavigate}:{people:StaffSummary[];reverse?:boolean;onNavigate:(event:React.MouseEvent<HTMLAnchorElement>)=>void}){
   const rowRef=useRef<HTMLDivElement>(null);
   const pausedUntil=useRef(0);
-  const focused=useRef(false);
+  const interacting=useRef(false);
   useEffect(()=>{
     const row=rowRef.current;
     if(!row||people.length<2)return;
@@ -40,7 +40,7 @@ function LiveMarqueeRow({people,reverse=false,onNavigate}:{people:StaffSummary[]
       const width=segment.offsetWidth;
       const elapsed=Math.min(64,now-previous);
       previous=now;
-      if(width>0&&!focused.current&&Date.now()>=pausedUntil.current){
+      if(width>0&&!interacting.current&&Date.now()>=pausedUntil.current){
         row.scrollLeft+=(reverse?-1:1)*elapsed*.022;
         if(row.scrollLeft>=width*2)row.scrollLeft-=width;
         else if(row.scrollLeft<=0)row.scrollLeft+=width;
@@ -50,9 +50,9 @@ function LiveMarqueeRow({people,reverse=false,onNavigate}:{people:StaffSummary[]
     frame=requestAnimationFrame(tick);
     return()=>{cancelAnimationFrame(initialFrame);cancelAnimationFrame(frame)};
   },[people.length,reverse]);
-  const pause=()=>{pausedUntil.current=Date.now()+2000};
-  const resume=()=>{pausedUntil.current=0};
-  return <div ref={rowRef} className={`live-marquee-row${reverse?" is-reverse":""}`} aria-label={reverse?"今晚待命店員第二排":"今晚待命店員第一排"} onPointerDown={pause} onPointerUp={resume} onPointerCancel={resume} onWheel={()=>{pausedUntil.current=Date.now()+350}} onPointerEnter={event=>{if(event.pointerType==="mouse")focused.current=true}} onPointerLeave={event=>{if(event.pointerType==="mouse"){focused.current=false;resume()}}} onFocus={event=>{const target=event.target as HTMLElement;focused.current=target.matches(":focus-visible");if(!focused.current)resume()}} onBlur={()=>{focused.current=false;resume()}}>
+  const beginInteraction=()=>{interacting.current=true};
+  const endInteraction=()=>{interacting.current=false;pausedUntil.current=0};
+  return <div ref={rowRef} className={`live-marquee-row${reverse?" is-reverse":""}`} aria-label={reverse?"今晚待命店員第二排":"今晚待命店員第一排"} onPointerDown={beginInteraction} onPointerUp={endInteraction} onPointerCancel={endInteraction} onWheel={()=>{pausedUntil.current=Date.now()+350}}>
     <div className="live-marquee-track">
       <div className="live-marquee-group" aria-hidden="true">{people.map(person=><LiveStaffCard key={`before-${person.id}`} person={person} duplicate onNavigate={onNavigate}/>)}</div>
       <div className="live-marquee-group" data-marquee-segment>{people.map(person=><LiveStaffCard key={person.id} person={person} onNavigate={onNavigate}/>)}</div>

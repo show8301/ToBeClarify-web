@@ -40,6 +40,29 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Validate PowerShell deployment scripts
+        shell: pwsh
+        run: |
+          $parseErrors = @()
+          Get-ChildItem -Path scripts -Filter '*.ps1' | ForEach-Object {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              $_.FullName,
+              [ref]$tokens,
+              [ref]$errors
+            ) | Out-Null
+
+            foreach ($error in $errors) {
+              $parseErrors += "$($_.Name):$($error.Extent.StartLineNumber): $($error.Message)"
+            }
+          }
+
+          if ($parseErrors.Count -gt 0) {
+            $parseErrors | ForEach-Object { Write-Host "PowerShell parser error: $_" }
+            throw 'One or more PowerShell deployment scripts contain syntax errors.'
+          }
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:

@@ -146,7 +146,7 @@ function Stop-StaleVinextListener {
     $isNode = $listenerProcess.Name -ieq 'node.exe'
     $isVinext = $commandLine.IndexOf('vinext', [System.StringComparison]::OrdinalIgnoreCase) -ge 0
     $isExpectedApp = $commandLine.IndexOf($normalizedAppPath, [System.StringComparison]::OrdinalIgnoreCase) -ge 0
-    $portPattern = "(?i)(?:^|\s)--port(?:\s+|=)[`\"']?$Port(?:[`\"']?(?:\s|$))"
+    $portPattern = '(?i)(?:^|\s)--port(?:\s+|=)"?{0}"?(?:\s|$)' -f $Port
     $isExpectedPort = $commandLine -match $portPattern
 
     if (-not ($isNode -and $isVinext -and $isExpectedApp -and $isExpectedPort)) {

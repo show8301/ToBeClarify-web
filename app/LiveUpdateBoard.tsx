@@ -45,7 +45,7 @@ function LiveMarqueeRow({people,reverse=false,onNavigate}:{people:StaffSummary[]
         if(interacting.current||Date.now()<pausedUntil.current){
           position=row.scrollLeft;
         }else{
-          position+=(reverse?-1:1)*elapsed*.022;
+          position+=(reverse?-1:1)*elapsed*.05;
           if(position>=width*2)position-=width;
           else if(position<=0)position+=width;
           row.scrollLeft=position;

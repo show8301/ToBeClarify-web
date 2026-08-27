@@ -34,16 +34,22 @@ function LiveMarqueeRow({people,reverse=false,onNavigate}:{people:StaffSummary[]
     if(!segment)return;
     let frame=0;
     let previous=performance.now();
-    const initialFrame=requestAnimationFrame(()=>{row.scrollLeft=segment.offsetWidth});
+    let position=segment.offsetWidth;
+    const initialFrame=requestAnimationFrame(()=>{row.scrollLeft=position});
     if(window.matchMedia("(prefers-reduced-motion: reduce)").matches)return()=>cancelAnimationFrame(initialFrame);
     const tick=(now:number)=>{
       const width=segment.offsetWidth;
       const elapsed=Math.min(64,now-previous);
       previous=now;
-      if(width>0&&!interacting.current&&Date.now()>=pausedUntil.current){
-        row.scrollLeft+=(reverse?-1:1)*elapsed*.022;
-        if(row.scrollLeft>=width*2)row.scrollLeft-=width;
-        else if(row.scrollLeft<=0)row.scrollLeft+=width;
+      if(width>0){
+        if(interacting.current||Date.now()<pausedUntil.current){
+          position=row.scrollLeft;
+        }else{
+          position+=(reverse?-1:1)*elapsed*.022;
+          if(position>=width*2)position-=width;
+          else if(position<=0)position+=width;
+          row.scrollLeft=position;
+        }
       }
       frame=requestAnimationFrame(tick);
     };

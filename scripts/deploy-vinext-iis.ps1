@@ -77,7 +77,7 @@ function Stop-VinextTask {
     return $true
 }
 
-function Assert-PortAvailable {
+function Get-PortListenerProcessId {
     param([Parameter(Mandatory = $true)][int]$Port)
 
     $listenerPid = $null
@@ -96,8 +96,69 @@ function Assert-PortAvailable {
         }
     }
 
-    if ($null -ne $listenerPid) {
-        throw "Node port $Port is already in use after stopping the scheduled task (PID $listenerPid)."
+    return $listenerPid
+}
+
+function Wait-PortAvailable {
+    param(
+        [Parameter(Mandatory = $true)][int]$Port,
+        [int]$Attempts = 20,
+        [int]$DelayMilliseconds = 500
+    )
+
+    for ($attempt = 0; $attempt -lt $Attempts; $attempt++) {
+        $listenerPid = Get-PortListenerProcessId -Port $Port
+        if ($null -eq $listenerPid) {
+            return $true
+        }
+
+        Start-Sleep -Milliseconds $DelayMilliseconds
+    }
+
+    return $false
+}
+
+function Stop-StaleVinextListener {
+    param(
+        [Parameter(Mandatory = $true)][int]$Port,
+        [Parameter(Mandatory = $true)][string]$AppPath
+    )
+
+    if (Wait-PortAvailable -Port $Port) {
+        return
+    }
+
+    $listenerPid = Get-PortListenerProcessId -Port $Port
+    if ($null -eq $listenerPid) {
+        return
+    }
+
+    $listenerProcess = Get-CimInstance `
+        -ClassName Win32_Process `
+        -Filter "ProcessId = $listenerPid" `
+        -ErrorAction SilentlyContinue
+    if ($null -eq $listenerProcess) {
+        throw "Node port $Port is still in use after stopping the scheduled task (PID $listenerPid), but the listener process could not be inspected."
+    }
+
+    $normalizedAppPath = Get-NormalizedPath -Path $AppPath
+    $commandLine = [string]$listenerProcess.CommandLine
+    $isNode = $listenerProcess.Name -ieq 'node.exe'
+    $isVinext = $commandLine.IndexOf('vinext', [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+    $isExpectedApp = $commandLine.IndexOf($normalizedAppPath, [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+    $portPattern = "(?i)(?:^|\s)--port(?:\s+|=)[`\"']?$Port(?:[`\"']?(?:\s|$))"
+    $isExpectedPort = $commandLine -match $portPattern
+
+    if (-not ($isNode -and $isVinext -and $isExpectedApp -and $isExpectedPort)) {
+        throw "Port $Port is occupied by an unexpected process and will not be terminated (PID $listenerPid, name $($listenerProcess.Name))."
+    }
+
+    Write-Warning "Scheduled Task stopped but its Vinext Node child process is still listening on port $Port (PID $listenerPid). Stopping the verified stale listener."
+    Stop-Process -Id $listenerPid -Force -ErrorAction Stop
+
+    if (-not (Wait-PortAvailable -Port $Port -Attempts 20 -DelayMilliseconds 250)) {
+        $remainingPid = Get-PortListenerProcessId -Port $Port
+        throw "Node port $Port was not released after stopping the verified stale Vinext process (PID $remainingPid)."
     }
 }
 
@@ -325,7 +386,7 @@ if (-not [string]::IsNullOrWhiteSpace($PublicMediaBaseUrl)) {
 $runtimeConfig | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $stagingRoot 'runtime-config.json') -Encoding UTF8
 
 $hadExistingTask = Stop-VinextTask -Name $TaskName
-Assert-PortAvailable -Port $NodePort
+Stop-StaleVinextListener -Port $NodePort -AppPath $deployRoot
 
 $hadExistingDeployment = Test-Path -LiteralPath $deployRoot -PathType Container
 $swapped = $false

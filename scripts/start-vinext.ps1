@@ -58,14 +58,16 @@ $arguments = @(
     '127.0.0.1'
 )
 
-$process = Start-Process `
-    -FilePath $nodeExecutable `
-    -ArgumentList $arguments `
-    -WorkingDirectory $appRoot `
-    -WindowStyle Hidden `
-    -RedirectStandardOutput $stdoutPath `
-    -RedirectStandardError $stderrPath `
-    -Wait `
-    -PassThru
+Push-Location $appRoot
+try {
+    # Keep Node attached to the Scheduled Task's PowerShell process. Using
+    # Start-Process here can leave the Node child alive after Stop-ScheduledTask
+    # reports that the outer task has stopped.
+    & $nodeExecutable @arguments 1>> $stdoutPath 2>> $stderrPath
+    $exitCode = $LASTEXITCODE
+}
+finally {
+    Pop-Location
+}
 
-exit $process.ExitCode
+exit $exitCode

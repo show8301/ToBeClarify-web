@@ -41,7 +41,7 @@ $env:HOSTNAME = '127.0.0.1'
 $env:WRANGLER_LOG_PATH = Join-Path $appRoot 'logs\wrangler.log'
 $env:WRANGLER_WRITE_LOGS = 'false'
 $env:MINIFLARE_REGISTRY_PATH = Join-Path $appRoot '.wrangler\registry'
-$env:RUNNER_TRACKING_ID = "tobeclarify-vinext-dev-$Port"
+$env:RUNNER_TRACKING_ID = "tobeclarify-vinext-$Port"
 
 $logRoot = Join-Path $appRoot 'logs'
 New-Item -Path $logRoot -ItemType Directory -Force | Out-Null

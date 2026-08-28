@@ -9,7 +9,7 @@ param(
     [string]$HealthCheckUrl,
 
     [Parameter(Mandatory = $true)]
-    [ValidateSet('ToBeClarify_web_dev')]
+    [ValidateSet('ToBeClarify_web', 'ToBeClarify_web_dev')]
     [string]$ExpectedDeployLeaf,
 
     [Parameter(Mandatory = $true)]
@@ -218,7 +218,7 @@ function Register-VinextTask {
         -Trigger $trigger `
         -Principal $principal `
         -Settings $settings `
-        -Description 'Runs the ToBeClarify Vinext DEV server behind IIS.' `
+        -Description "Runs the ToBeClarify Vinext server behind IIS on port $Port." `
         -Force | Out-Null
 
     Start-ScheduledTask -TaskName $Name
@@ -297,7 +297,7 @@ if ($deployLeaf -ine $ExpectedDeployLeaf) {
 }
 
 if ([string]::IsNullOrWhiteSpace($HealthCheckUrl)) {
-    throw 'DEV_WEB_HEALTHCHECK_URL is not configured.'
+    throw 'The deployment health check URL is not configured.'
 }
 
 if (-not (Test-Path -LiteralPath $deployParent -PathType Container)) {
@@ -340,7 +340,7 @@ $prerequisiteScript = Join-Path $PSScriptRoot 'test-iis-reverse-proxy-prerequisi
     -MinimumNodeVersion '22.13.0'
 
 if ($null -eq (Get-Command Register-ScheduledTask -ErrorAction SilentlyContinue)) {
-    throw 'The Windows ScheduledTasks module is not available on the DEV runner.'
+    throw 'The Windows ScheduledTasks module is not available on the deployment runner.'
 }
 
 $stagingRoot = Join-Path $deployParent "$ExpectedDeployLeaf.staging"
@@ -422,7 +422,7 @@ try {
         -Attempts 15 `
         -ExpectedDeploymentSha $DeploymentSha | Out-Null
 
-    Write-Host "Vinext DEV deployment completed: $deployRoot"
+    Write-Host "Vinext deployment completed: $deployRoot"
     Write-Host "Verified deployment SHA through IIS: $DeploymentSha"
     if ($hadExistingDeployment) {
         Write-Host "Rollback copy retained at: $rollbackRoot"
@@ -430,7 +430,7 @@ try {
 }
 catch {
     $deploymentError = $_
-    Write-Warning 'Vinext deployment failed. Restoring the previous DEV site.'
+    Write-Warning 'Vinext deployment failed. Restoring the previous site.'
 
     Stop-VinextTask -Name $TaskName | Out-Null
 

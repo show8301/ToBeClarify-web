@@ -57,6 +57,16 @@ export const adminApi = {
     method: 'POST',
     signal,
   }),
+  getPasswordResetKey: (body, signal) => request('/auth/password-reset-key', {
+    method: 'POST',
+    body: JSON.stringify(body),
+    signal,
+  }),
+  resetPassword: (body, signal) => request('/auth/forgot-password/reset', {
+    method: 'POST',
+    body: JSON.stringify(body),
+    signal,
+  }),
   getMe: (signal) => request('/auth/me', { signal }),
   logout: (signal) => request('/auth/logout', {
     method: 'POST',

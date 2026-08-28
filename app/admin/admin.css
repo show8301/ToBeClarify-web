@@ -220,6 +220,58 @@
   padding: 13px 18px;
 }
 
+.adminForgotPasswordLink {
+  justify-self: center;
+  margin-top: -4px;
+  color: var(--color-accent-dark);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.adminForgotPasswordLink:hover,
+.adminForgotPasswordLink:focus-visible {
+  color: var(--color-accent);
+}
+
+.adminCredentialActions {
+  display: grid;
+  gap: 6px;
+}
+
+.adminPasswordResetKeyForm {
+  display: grid;
+  gap: 16px;
+}
+
+.adminPasswordResetKeyResult {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid rgba(var(--color-accent-2-rgb), 0.5);
+  border-radius: var(--radius-md);
+  background: rgba(var(--color-accent-2-rgb), 0.1);
+}
+
+.adminPasswordResetKeyResult > span {
+  color: var(--color-fg-mute);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.adminPasswordResetKeyResult code {
+  overflow-wrap: anywhere;
+  color: var(--color-fg);
+  font: 700 14px/1.5 var(--font-mono);
+  user-select: all;
+}
+
+.adminPasswordResetKeyResult small {
+  color: var(--color-fg-mute);
+  font-size: 11px;
+}
+
 .adminFormError {
   margin: 0;
   padding: 10px 12px;

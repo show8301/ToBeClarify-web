@@ -122,6 +122,9 @@ export function AdminLoginPage({ navigate }) {
           <button className="adminGhostButton adminRegisterButton" type="button" onClick={() => { setIsRegisterOpen(true); setRegisterError(null); setRegisterSuccess(''); }} disabled={isSubmitting}>
             註冊店員帳號
           </button>
+          <a className="adminForgotPasswordLink" href="/admin/forgot-password">
+            忘記密碼？
+          </a>
         </form>
       </section>
 

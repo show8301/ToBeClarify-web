@@ -82,6 +82,7 @@ export const adminApi = {
     method: 'POST', body: JSON.stringify({ mediaIds }), signal,
   }),
   getSiteSettings: (signal) => request('/site-settings', { signal }),
+  getAllStaffList: (signal) => request('/all-staff-list', { signal }),
   saveSiteSetting: (key, body, signal) => request(`/site-settings/${encodeURIComponent(key)}`, {
     method: 'PUT', body: JSON.stringify(body), signal,
   }),

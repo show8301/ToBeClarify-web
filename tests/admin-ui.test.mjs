@@ -42,6 +42,8 @@ test('homepage slides expose an editable playback duration', async () => {
 
 test('developer can control each public menu page from the admin home', async () => {
   const dashboard = await readFile(new URL('../app/admin/_components/AdminHomePage.jsx', import.meta.url), 'utf8');
+  const api = await readFile(new URL('../app/admin/admin-api.js', import.meta.url), 'utf8');
+  const styles = await readFile(new URL('../app/admin/admin.css', import.meta.url), 'utf8');
   const data = await readFile(new URL('../app/site-data.ts', import.meta.url), 'utf8');
   const chrome = await readFile(new URL('../app/SiteChrome.tsx', import.meta.url), 'utf8');
   const menu = await readFile(new URL('../app/menu/page.tsx', import.meta.url), 'utf8');
@@ -49,6 +51,13 @@ test('developer can control each public menu page from the admin home', async ()
   assert.match(dashboard, /user\.role === 'developer'/);
   assert.match(dashboard, /siteVisibility/);
   assert.match(dashboard, /PUBLIC_PAGES/);
+  assert.match(dashboard, /DeveloperDisclosure/);
+  assert.match(dashboard, /getAllStaffList/);
+  assert.match(dashboard, /STAFF_PAGE_SIZE = 20/);
+  assert.match(dashboard, /adminStaffDirectoryPagination/);
+  assert.match(api, /getAllStaffList: \(signal\) => request\('\/all-staff-list'/);
+  assert.match(styles, /\.adminDeveloperDisclosure/);
+  assert.match(styles, /\.adminStaffDirectoryTable/);
   assert.match(dashboard, /number: '00'/);
   assert.match(dashboard, /number: '07'/);
   assert.match(dashboard, /label=\{visibility\.pages\[page\.key\] \? '顯示' : '隱藏'\}/);

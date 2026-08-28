@@ -640,12 +640,36 @@
 .adminModuleStatus.isReady { display: inline-flex; margin: 0; background: rgba(var(--color-accent-2-rgb), .1); color: var(--color-accent-2); }
 .adminDeveloperTools { margin-top: 18px; }
 .adminDeveloperTools .adminPanel { margin: 0; border-color: rgba(var(--color-accent-rgb), .32); }
+.adminDeveloperDisclosure { overflow: hidden; border: 1px solid rgba(var(--color-accent-rgb), .32); border-radius: 22px; background: linear-gradient(145deg,rgba(250,250,253,.9),rgba(226,229,242,.74)); box-shadow: 0 18px 48px rgba(101,120,159,.15),inset 0 1px rgba(255,255,255,.96); }
+.adminDeveloperDisclosure + .adminDeveloperDisclosure { margin-top: 14px; }
+.adminDeveloperDisclosureSummary { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 22px; color: var(--color-fg); cursor: pointer; list-style: none; }
+.adminDeveloperDisclosureSummary::-webkit-details-marker { display: none; }
+.adminDeveloperDisclosureSummary:focus-visible { outline: 3px solid rgba(var(--color-accent-rgb), .32); outline-offset: -3px; }
+.adminDeveloperDisclosureSummary > span { display: grid; gap: 6px; min-width: 0; }
+.adminDeveloperDisclosureSummary b { font-size: 18px; }
+.adminDeveloperDisclosureSummary small { color: var(--color-fg-mute); font-size: 12px; line-height: 1.5; }
+.adminDeveloperDisclosureSummary > i { display: grid; flex: 0 0 34px; width: 34px; height: 34px; place-items: center; border: 1px solid rgba(var(--color-accent-rgb), .35); border-radius: 50%; color: var(--color-accent-dark); font-size: 21px; font-style: normal; line-height: 1; transform: rotate(0deg); transition: transform .2s ease, background .2s ease; }
+.adminDeveloperDisclosure[open] .adminDeveloperDisclosureSummary > i { transform: rotate(180deg); background: rgba(var(--color-accent-rgb), .12); }
+.adminDeveloperDisclosureBody { padding: 0 22px 22px; }
+.adminDeveloperDisclosureBody::before { content: ''; display: block; margin-bottom: 18px; border-top: 1px solid var(--color-border); }
 .adminDeveloperToolState { display: block; margin-top: 8px; color: var(--color-fg-mute); font-size: 12px; }
 .adminDeveloperToolState.isError { color: #ffabab; }
 .adminPageVisibilityList { display: grid; gap: 9px; }
 .adminPageVisibilityRow { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 12px; border: 1px solid var(--color-border); border-radius: 12px; background: rgba(7, 19, 31, .28); }
 .adminPageVisibilityRow > span { display: flex; align-items: center; gap: 10px; color: var(--color-fg-soft); }
 .adminPageVisibilityRow > span b { min-width: 24px; color: var(--color-accent); font: 700 11px var(--font-mono); }
+.adminStaffDirectoryTableWrap { overflow-x: auto; border: 1px solid var(--color-border); border-radius: 14px; background: rgba(255,255,255,.28); }
+.adminStaffDirectoryTable { width: 100%; min-width: 560px; border-collapse: collapse; color: var(--color-fg-soft); font-size: 13px; }
+.adminStaffDirectoryTable th { padding: 12px 14px; border-bottom: 1px solid var(--color-border); color: var(--color-fg-mute); font: 700 9px/1.2 var(--font-mono); letter-spacing: .1em; text-align: left; white-space: nowrap; }
+.adminStaffDirectoryTable td { padding: 13px 14px; border-bottom: 1px solid rgba(101,120,159,.12); vertical-align: middle; }
+.adminStaffDirectoryTable tbody tr:last-child td { border-bottom: 0; }
+.adminStaffDirectoryTable tbody tr:hover { background: rgba(var(--color-accent-rgb), .08); }
+.adminStaffDirectoryTable td code { color: var(--color-accent-dark); font: 700 11px/1.4 var(--font-mono); overflow-wrap: anywhere; }
+.adminStaffDirectoryFooter { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-top: 14px; }
+.adminStaffDirectoryFooter > small { color: var(--color-fg-mute); font-size: 11px; }
+.adminStaffDirectoryPagination { display: flex; align-items: center; justify-content: flex-end; gap: 9px; }
+.adminStaffDirectoryPagination > span { min-width: 88px; color: var(--color-fg-soft); font: 700 10px/1.2 var(--font-mono); text-align: center; }
+.adminStaffDirectoryPagination .adminButton { min-height: 34px; padding: 7px 11px; font-size: 11px; }
 
 .adminDragList { display: grid; gap: 10px; }
 .adminDragCard { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 13px 14px; border: 1px solid var(--color-border); border-radius: 13px; background: rgba(7, 19, 31, .34); cursor: grab; transition: border-color .18s ease, background .18s ease, opacity .18s ease, transform .18s ease; }
@@ -928,6 +952,10 @@
   .adminFormGrid, .adminSplitView, .adminDashboardCards, .adminGalleryEditor { grid-template-columns: 1fr; }
   .adminField.span-2, .adminFormWide { grid-column: auto; }
   .adminImagePicker { grid-column: auto; }
+  .adminDeveloperDisclosureSummary { align-items: flex-start; padding: 15px 16px; }
+  .adminDeveloperDisclosureBody { padding: 0 16px 16px; }
+  .adminStaffDirectoryFooter { align-items: stretch; flex-direction: column; }
+  .adminStaffDirectoryPagination { justify-content: space-between; }
   .adminEditableRow, .adminServiceRow, .adminSetItemRow { grid-template-columns: 1fr; align-items: stretch; }
   .adminRowActions { justify-content: space-between; }
   .adminShell { padding-right: 14px; padding-left: 14px; }

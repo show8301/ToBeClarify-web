@@ -118,3 +118,28 @@ test('password reset API methods use the admin auth endpoints', async () => {
     globalThis.fetch = originalFetch;
   }
 });
+
+test('all staff list uses the dedicated developer endpoint', async () => {
+  const calls = [];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url, options) => {
+    calls.push({ url, options });
+    return new Response(JSON.stringify({
+      success: true,
+      data: [{ displayName: '測試店員', loginName: 'tester', id: 'staff-1' }],
+    }), { status: 200, headers: { 'content-type': 'application/json' } });
+  };
+
+  try {
+    const moduleUrl = new URL('../app/admin/admin-api.js', import.meta.url);
+    moduleUrl.searchParams.set('test', `${process.pid}-${Date.now()}-all-staff-list`);
+    const { adminApi } = await import(moduleUrl.href);
+    const result = await adminApi.getAllStaffList();
+
+    assert.deepEqual(result, [{ displayName: '測試店員', loginName: 'tester', id: 'staff-1' }]);
+    assert.equal(calls[0].url, '/api/admin/all-staff-list');
+    assert.equal(calls[0].options.method, undefined);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

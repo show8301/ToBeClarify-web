@@ -55,6 +55,37 @@ test('admin proxy accepts same-origin mutations behind a trusted reverse proxy',
   assert.equal(isSameOriginRequest(crossSiteRequest), false);
 });
 
+test('admin proxy preserves bodyless 204 responses instead of converting them to 502', async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response(null, { status: 204 });
+
+  try {
+    const moduleUrl = new URL('../app/api/admin/[...path]/route.ts', import.meta.url);
+    moduleUrl.searchParams.set('test', `${process.pid}-${Date.now()}-204`);
+    const { POST } = await import(moduleUrl.href);
+    const request = new Request('http://internal-service:3000/api/admin/auth/forgot-password/reset', {
+      method: 'POST',
+      headers: {
+        origin: 'https://lucid.zeabur.app',
+        host: 'internal-service:3000',
+        'x-forwarded-host': 'lucid.zeabur.app',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ loginName: 'clerk-demo' }),
+    });
+
+    const response = await POST(request, {
+      params: Promise.resolve({ path: ['auth', 'forgot-password', 'reset'] }),
+    });
+
+    assert.equal(response.status, 204);
+    assert.equal(await response.text(), '');
+    assert.equal(response.headers.has('content-type'), false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test('password reset API methods use the admin auth endpoints', async () => {
   const calls = [];
   const originalFetch = globalThis.fetch;

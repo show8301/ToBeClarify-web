@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { AdminAuthProvider, useAdminAuth } from './AdminAuthContext.jsx';
 import { AdminHomePage } from './AdminHomePage.jsx';
 import { AdminLoginPage } from './AdminLoginPage.jsx';
+import { AdminForgotPasswordPage } from './AdminForgotPasswordPage.jsx';
 import { AdminLayout } from './AdminLayout.jsx';
 import { AdminHomeSettingsPage } from './AdminHomeSettingsPage.jsx';
 import { AdminStaffSettingsPage } from './AdminStaffSettingsPage.jsx';
@@ -19,18 +20,21 @@ export function AdminRouter({ route, navigate }) {
 function AdminRouteView({ route, navigate }) {
   const { loading, user, error } = useAdminAuth();
   const canManageAll = user?.role === 'developer' || user?.role === 'manager';
+  const isPasswordRecoveryRoute = route === '/admin/forgot-password';
+  const isAnonymousAuthRoute = route === '/admin/login' || isPasswordRecoveryRoute;
   const routeAllowed = route === '/admin' || route === '/admin/staff'
     || (canManageAll && ['/admin/home', '/admin/events', '/admin/menu'].includes(route));
 
   useEffect(() => {
     if (!loading && route === '/admin/login' && user) navigate('/admin');
-    if (!loading && route !== '/admin/login' && !user) navigate('/admin/login');
-    if (!loading && user && !routeAllowed) navigate('/admin/staff');
-  }, [loading, navigate, route, routeAllowed, user]);
+    if (!loading && !isAnonymousAuthRoute && !user) navigate('/admin/login');
+    if (!loading && user && !isAnonymousAuthRoute && !routeAllowed) navigate('/admin/staff');
+  }, [isAnonymousAuthRoute, loading, navigate, route, routeAllowed, user]);
 
   if (loading) return <AdminLoading />;
   if (error) return <AdminError error={error} />;
   if (route === '/admin/login') return user ? null : <AdminLoginPage navigate={navigate} />;
+  if (isPasswordRecoveryRoute) return <AdminForgotPasswordPage navigate={navigate} />;
   if (!user) return null;
 
   if (!routeAllowed) return null;

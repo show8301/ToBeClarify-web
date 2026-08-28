@@ -54,3 +54,36 @@ test('admin proxy accepts same-origin mutations behind a trusted reverse proxy',
   assert.equal(isSameOriginRequest(proxiedRequest), true);
   assert.equal(isSameOriginRequest(crossSiteRequest), false);
 });
+
+test('password reset API methods use the admin auth endpoints', async () => {
+  const calls = [];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url, options) => {
+    calls.push({ url, options });
+    if (url.endsWith('/password-reset-key')) {
+      return new Response(JSON.stringify({
+        success: true,
+        data: { key: 'reset-key', expiresAt: '2026-08-28T12:00:00Z' },
+      }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }
+    return new Response(null, { status: 204 });
+  };
+
+  try {
+    const moduleUrl = new URL('../app/admin/admin-api.js', import.meta.url);
+    moduleUrl.searchParams.set('test', `${process.pid}-${Date.now()}`);
+    const { adminApi } = await import(moduleUrl.href);
+    const key = await adminApi.getPasswordResetKey({ loginName: 'clerk-demo' });
+    await adminApi.resetPassword({ loginName: 'clerk-demo', newPassword: 'new-password', verificationCode: 'reset-key' });
+
+    assert.deepEqual(key, { key: 'reset-key', expiresAt: '2026-08-28T12:00:00Z' });
+    assert.equal(calls[0].url, '/api/admin/auth/password-reset-key');
+    assert.equal(calls[0].options.method, 'POST');
+    assert.deepEqual(JSON.parse(calls[0].options.body), { loginName: 'clerk-demo' });
+    assert.equal(calls[1].url, '/api/admin/auth/forgot-password/reset');
+    assert.equal(calls[1].options.method, 'POST');
+    assert.deepEqual(JSON.parse(calls[1].options.body), { loginName: 'clerk-demo', newPassword: 'new-password', verificationCode: 'reset-key' });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

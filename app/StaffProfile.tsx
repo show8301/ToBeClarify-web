@@ -10,10 +10,17 @@ const fallbackPortrait = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/200
 type ProfileNavigation = { previous:StaffSummary|null; next:StaffSummary|null; total:number; list:StaffSummary[] };
 type ProfileSource = "liveupdate"|null;
 type ClientCacheEntry = { data:StaffDetail; expiresAt:number };
+type StaffSwitchDirection = "previous"|"next";
+type StaffSwitchState =
+  | { phase:"idle" }
+  | { phase:"loading"; direction:StaffSwitchDirection; requestId:number; targetId:string }
+  | { phase:"transitioning"; direction:StaffSwitchDirection; requestId:number; targetId:string };
 
 const clientStaffCache = new Map<string,ClientCacheEntry>();
 const clientStaffRequests = new Map<string,Promise<StaffDetail>>();
+const clientImageRequests = new Map<string,Promise<void>>();
 const CLIENT_CACHE_TTL = 10*60*1000;
+const idleStaffSwitch:StaffSwitchState={phase:"idle"};
 
 function gil(value:number) {
   return `${value.toLocaleString("en-US")} Gil`;
@@ -45,19 +52,44 @@ async function loadStaffDetail(id:string) {
   try{return await request}finally{clientStaffRequests.delete(id)}
 }
 
+function preloadImage(src:string|null|undefined) {
+  if(!src||typeof window==="undefined")return Promise.resolve();
+  const pending=clientImageRequests.get(src);
+  if(pending)return pending;
+  const request=new Promise<void>(resolve=>{
+    const image=new Image();
+    let settled=false;
+    const finish=()=>{
+      if(settled)return;
+      settled=true;
+      window.clearTimeout(timeout);
+      resolve();
+    };
+    const timeout=window.setTimeout(finish,1500);
+    image.onload=finish;
+    image.onerror=finish;
+    image.src=src;
+    if(image.complete)void image.decode().catch(()=>{}).finally(finish);
+  });
+  clientImageRequests.set(src,request);
+  return request;
+}
+
 export default function StaffProfile({ staff, index, navigation, source=null }:{ staff:StaffDetail; index:number; navigation:ProfileNavigation; source?:ProfileSource }) {
   const [currentStaff, setCurrentStaff] = useState(staff);
   const [lightboxIndex, setLightboxIndex] = useState<number|null>(null);
   const [leaving, setLeaving] = useState(false);
-  const [switching, setSwitching] = useState<"previous"|"next"|null>(null);
-  const navigationLock = useRef(false);
+  const [staffSwitch, setStaffSwitch] = useState<StaffSwitchState>(idleStaffSwitch);
+  const switchRequestId = useRef(0);
+  const staffSwitchTimer = useRef<ReturnType<typeof window.setTimeout>|null>(null);
   const navigationTimer = useRef<ReturnType<typeof window.setTimeout>|null>(null);
   const navigationWatchdog = useRef<ReturnType<typeof window.setTimeout>|null>(null);
   const swipeStart = useRef<{x:number;y:number;pointerId:number}|null>(null);
   const suppressPhotoClick = useRef(false);
   const router = useRouter();
   const reduceMotion = useReducedMotion();
-  const currentIndex=Math.max(navigation.list.findIndex(person=>person.id===currentStaff.id),index,0);
+  const listedIndex=navigation.list.findIndex(person=>person.id===currentStaff.id);
+  const currentIndex=listedIndex>=0?listedIndex:Math.max(index,0);
   const previous=navigation.total>1?navigation.list[(currentIndex-1+navigation.total)%navigation.total]:null;
   const next=navigation.total>1?navigation.list[(currentIndex+1)%navigation.total]:null;
   const services = [...(currentStaff.commonServices ?? []), ...(currentStaff.specialServices ?? [])];
@@ -65,6 +97,8 @@ export default function StaffProfile({ staff, index, navigation, source=null }:{
   const sourceQuery=source==="liveupdate"?"?from=liveupdate":"";
   const returnPath=source==="liveupdate"?"/liveupdate":"/staff#roster";
   const returnLabel=source==="liveupdate"?"BACK TO LIVE":"BACK TO STAFF";
+  const isSwitching=staffSwitch.phase!=="idle";
+  const isProfileTransition=staffSwitch.phase==="transitioning";
   const closeLightbox = useCallback(()=>setLightboxIndex(null),[]);
   const step = useCallback((amount:number)=>setLightboxIndex(current=>current===null||!images.length?null:(current+amount+images.length)%images.length),[images.length]);
   const replaceWithFallback = useCallback((href:string, hasArrived:()=>boolean) => {
@@ -81,17 +115,18 @@ export default function StaffProfile({ staff, index, navigation, source=null }:{
   const clearNavigationState = useCallback(() => {
     if (navigationTimer.current) window.clearTimeout(navigationTimer.current);
     if (navigationWatchdog.current) window.clearTimeout(navigationWatchdog.current);
+    if (staffSwitchTimer.current) window.clearTimeout(staffSwitchTimer.current);
     navigationTimer.current = null;
     navigationWatchdog.current = null;
-    navigationLock.current = false;
-    setSwitching(null);
+    staffSwitchTimer.current = null;
+    switchRequestId.current+=1;
+    setStaffSwitch(idleStaffSwitch);
     setLeaving(false);
     document.documentElement.classList.remove("route-returning");
   }, []);
 
   const returnFromProfile = useCallback(() => {
-    if (navigationLock.current || leaving) return;
-    navigationLock.current = true;
+    if (isSwitching || leaving) return;
     const navigate = () => {
       history.scrollRestoration = "manual";
       document.documentElement.classList.add("route-returning");
@@ -102,23 +137,39 @@ export default function StaffProfile({ staff, index, navigation, source=null }:{
     setLeaving(true);
     navigate();
     navigationWatchdog.current = window.setTimeout(clearNavigationState, 3500);
-  }, [clearNavigationState, leaving, reduceMotion, replaceWithFallback, returnPath]);
+  }, [clearNavigationState, isSwitching, leaving, reduceMotion, replaceWithFallback, returnPath]);
 
-  const switchStaff = useCallback(async (target:StaffSummary|null, direction:"previous"|"next") => {
-    if (!target || navigationLock.current || switching || leaving) return;
-    navigationLock.current = true;
+  const applyStaffSwitch = useCallback((data:StaffDetail,href:string) => {
+    window.history.replaceState(window.history.state,"",href);
+    document.title=`${data.displayName}｜清醒夢 Lucid Dream`;
+    setLightboxIndex(null);
+    setCurrentStaff(data);
+  }, []);
+
+  const switchStaff = useCallback(async (target:StaffSummary|null, direction:StaffSwitchDirection) => {
+    if (!target || target.id===currentStaff.id || isSwitching || leaving) return;
+    const requestId=++switchRequestId.current;
     const href=`/staff/${target.id}${sourceQuery}`;
-    if(!reduceMotion)setSwitching(direction);
-    navigationTimer.current=window.setTimeout(()=>window.location.replace(href),3200);
+    setStaffSwitch({phase:"loading",direction,requestId,targetId:target.id});
     try{
       const data=await loadStaffDetail(target.id);
-      if(navigationTimer.current)window.clearTimeout(navigationTimer.current);
-      window.history.replaceState(window.history.state,"",href);
-      document.title=`${data.displayName}｜清醒夢 Lucid Dream`;
-      setLightboxIndex(null);
-      setCurrentStaff(data);
-    }catch{window.location.replace(href)}
-  }, [leaving, reduceMotion, sourceQuery, switching]);
+      await preloadImage(data.avatarUrl);
+      if(requestId!==switchRequestId.current)return;
+      if(reduceMotion){
+        applyStaffSwitch(data,href);
+        setStaffSwitch(idleStaffSwitch);
+        return;
+      }
+      setStaffSwitch({phase:"transitioning",direction,requestId,targetId:target.id});
+      applyStaffSwitch(data,href);
+      staffSwitchTimer.current=window.setTimeout(()=>{
+        if(requestId===switchRequestId.current)setStaffSwitch(idleStaffSwitch);
+        staffSwitchTimer.current=null;
+      },1100);
+    }catch{
+      if(requestId===switchRequestId.current)setStaffSwitch(idleStaffSwitch);
+    }
+  }, [applyStaffSwitch, currentStaff.id, isSwitching, leaving, reduceMotion, sourceQuery]);
 
   const startSwipe = useCallback((event:React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType === "mouse" || !event.isPrimary) return;
@@ -138,7 +189,6 @@ export default function StaffProfile({ staff, index, navigation, source=null }:{
   }, [next, previous, switchStaff]);
 
   useLayoutEffect(() => {
-    clearNavigationState();
     const root = document.documentElement;
     const previousBehavior = root.style.scrollBehavior;
     root.style.scrollBehavior = "auto";
@@ -163,8 +213,8 @@ export default function StaffProfile({ staff, index, navigation, source=null }:{
 
   useEffect(() => {
     clientStaffCache.set(currentStaff.id,{data:currentStaff,expiresAt:Date.now()+CLIENT_CACHE_TTL});
-    if(previous)void loadStaffDetail(previous.id).catch(()=>{});
-    if(next)void loadStaffDetail(next.id).catch(()=>{});
+    if(previous)void loadStaffDetail(previous.id).then(data=>preloadImage(data.avatarUrl)).catch(()=>{});
+    if(next)void loadStaffDetail(next.id).then(data=>preloadImage(data.avatarUrl)).catch(()=>{});
   }, [currentStaff, next, previous]);
 
   useEffect(()=>{
@@ -178,8 +228,8 @@ export default function StaffProfile({ staff, index, navigation, source=null }:{
     <div className="profile-dream-atmosphere" aria-hidden="true">
       <span className="profile-pearl pearl-one"/><span className="profile-pearl pearl-two"/><span className="profile-pearl pearl-three"/>
     </div>
-    <motion.article key={currentStaff.id} className="profile-spread" initial={reduceMotion?{opacity:0}:{opacity:0,y:24}} animate={{opacity:1,y:0}} transition={{duration:.5,ease:[.22,1,.36,1]}}>
-      <header className="profile-modal-head"><div><span>清醒夢 · PERSONNEL FILE</span><b>{currentStaff.displayName}</b></div><nav className="profile-switcher" aria-label="切換店員"><button onClick={()=>switchStaff(previous,"previous")} disabled={!previous} aria-label={`上一位${previous?`：${previous.displayName}`:""}`}><i>←</i><span>PREV</span><b>{previous?.displayName}</b></button><em>{String(currentIndex+1).padStart(2,"0")} / {String(navigation.total).padStart(2,"0")}</em><button onClick={()=>switchStaff(next,"next")} disabled={!next} aria-label={`下一位${next?`：${next.displayName}`:""}`}><span>NEXT</span><b>{next?.displayName}</b><i>→</i></button></nav><button className="back-to-staff" onClick={returnFromProfile} aria-label={source==="liveupdate"?"返回即時動態":"返回店員列表"}><span className="back-label-wide">{returnLabel}</span><span className="back-label-short">{source==="liveupdate"?"LIVE":"LIST"}</span><i>←</i></button></header>
+    <motion.article key={currentStaff.id} className="profile-spread" initial={reduceMotion||isProfileTransition?false:{opacity:0,y:24}} animate={{opacity:1,y:0}} transition={{duration:.5,ease:[.22,1,.36,1]}}>
+      <header className="profile-modal-head"><div><span>清醒夢 · PERSONNEL FILE</span><b>{currentStaff.displayName}</b></div><nav className="profile-switcher" aria-label="切換店員" aria-busy={staffSwitch.phase==="loading"}><button onClick={()=>switchStaff(previous,"previous")} disabled={!previous||isSwitching||leaving} aria-label={`上一位${previous?`：${previous.displayName}`:""}`}><i>←</i><span>{staffSwitch.phase==="loading"&&staffSwitch.direction==="previous"?"LOADING":"PREV"}</span><b>{previous?.displayName}</b></button><em>{String(currentIndex+1).padStart(2,"0")} / {String(navigation.total).padStart(2,"0")}</em><button onClick={()=>switchStaff(next,"next")} disabled={!next||isSwitching||leaving} aria-label={`下一位${next?`：${next.displayName}`:""}`}><span>{staffSwitch.phase==="loading"&&staffSwitch.direction==="next"?"LOADING":"NEXT"}</span><b>{next?.displayName}</b><i>→</i></button></nav><button className="back-to-staff" onClick={returnFromProfile} disabled={isSwitching||leaving} aria-label={source==="liveupdate"?"返回即時動態":"返回店員列表"}><span className="back-label-wide">{returnLabel}</span><span className="back-label-short">{source==="liveupdate"?"LIVE":"LIST"}</span><i>←</i></button></header>
       <motion.div className="portrait-zone" onPointerDown={startSwipe} onPointerUp={finishSwipe} onPointerCancel={()=>{swipeStart.current=null}}>
         <motion.button className="main-polaroid" onClick={(event)=>{if(suppressPhotoClick.current){suppressPhotoClick.current=false;event.preventDefault();return}images.length&&setLightboxIndex(0)}} aria-label="放大查看店員照片" initial={reduceMotion?false:{opacity:0,y:-56,scale:1.025}} animate={{opacity:1,y:0,rotate:0,scale:1}} transition={{type:"spring",stiffness:125,damping:16,mass:.9,delay:.12}}><motion.span className="clip" initial={reduceMotion?false:{opacity:0,y:-25,rotate:-8}} animate={{opacity:1,y:0,rotate:0}} transition={{type:"spring",stiffness:240,damping:15,delay:.52}}>Ⅱ</motion.span><span className="main-photo"><img src={currentStaff.avatarUrl||fallbackPortrait} alt={`${currentStaff.displayName} 店員照片`}/></span><motion.span className="photo-caption" initial={reduceMotion?false:{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{delay:.48,duration:.28}}><b>{currentStaff.displayName}</b><i>PORTRAIT / 01</i></motion.span></motion.button>
         <motion.div className="status-stamp" initial={reduceMotion?false:{opacity:0,x:55,rotate:5}} animate={{opacity:1,x:0,rotate:-2}} transition={{type:"spring",stiffness:170,damping:17,delay:.58}}><i/><div><small>ON DUTY · TODAY</small><b>{currentStaff.statusText||"今日待命"}</b></div><em>LD</em></motion.div>
@@ -188,7 +238,7 @@ export default function StaffProfile({ staff, index, navigation, source=null }:{
       <motion.div className="dossier" initial={reduceMotion?false:{opacity:0,x:92,y:16,rotate:1.4,scale:.975}} animate={{opacity:1,x:0,y:0,rotate:0,scale:1}} transition={{type:"spring",stiffness:105,damping:18,mass:.9,delay:.2}}>
         <motion.div className="dossier-head" initial={reduceMotion?false:{opacity:0,clipPath:"inset(0 100% 0 0)"}} animate={{opacity:1,clipPath:"inset(0 0% 0 0)"}} transition={{duration:.52,ease:[.22,1,.36,1],delay:.42}}><div><span>DISPLAY NAME</span><h1>{currentStaff.displayName}</h1></div><motion.b className="file-number" initial={reduceMotion?false:{scale:0,rotate:-18}} animate={{scale:1,rotate:0}} transition={{type:"spring",stiffness:260,damping:16,delay:.72}}>{String(currentIndex+1).padStart(2,"0")}</motion.b></motion.div>
         <motion.div className="role-row" initial={reduceMotion?false:{scaleX:0}} animate={{scaleX:1}} style={{transformOrigin:"left center"}} transition={{duration:.42,ease:[.22,1,.36,1],delay:.58}}><motion.span initial={reduceMotion?false:{opacity:0,x:-14}} animate={{opacity:1,x:0}} transition={{delay:.78,duration:.25}}>{currentStaff.roleTitle||"DREAM STAFF"}</motion.span>{currentStaff.nickname&&<motion.i initial={reduceMotion?false:{opacity:0,x:14}} animate={{opacity:1,x:0}} transition={{delay:.84,duration:.25}}>AKA. {currentStaff.nickname}</motion.i>}</motion.div>
-        <motion.div className="dossier-scroll" initial="hidden" animate="visible" variants={{hidden:{},visible:{transition:{delayChildren:.68,staggerChildren:.1}}}}>
+        <motion.div className="dossier-scroll" initial={reduceMotion?"visible":"hidden"} animate="visible" variants={{hidden:{},visible:{transition:{delayChildren:.68,staggerChildren:.1}}}}>
           <motion.section className="gallery-block" variants={{hidden:reduceMotion?{opacity:1}:{opacity:0,y:20},visible:{opacity:1,y:0}}} transition={{duration:.36,ease:[.22,1,.36,1]}}><header><b>影像紀錄</b><button onClick={()=>images.length&&setLightboxIndex(0)} disabled={!images.length}>OPEN LIGHTBOX ↗</button></header><div className="filmstrip">{images.slice(0,6).map((image,i)=><button key={image.id} onClick={()=>setLightboxIndex(i)} aria-label={`查看第 ${i+1} 張照片`}><img src={image.thumbnailUrl||image.imageUrl} alt="" loading="lazy" decoding="async"/><span>{String(i+1).padStart(2,"0")}</span></button>)}</div></motion.section>
           <motion.section className="bio-block" variants={{hidden:reduceMotion?{opacity:1}:{opacity:0,y:20},visible:{opacity:1,y:0}}} transition={{duration:.36,ease:[.22,1,.36,1]}}><header><b>人物誌</b><span>PROFILE NOTE</span></header><p>{currentStaff.profileBio||currentStaff.shortBio||"這位夢境成員正在準備自己的介紹。"}</p></motion.section>
           {!!services.length&&<motion.section className="service-block" variants={{hidden:reduceMotion?{opacity:1}:{opacity:0,y:20},visible:{opacity:1,y:0}}} transition={{duration:.36,ease:[.22,1,.36,1]}}><header><b>服務項目</b><span>{services.length} SERVICES</span></header><div className="service-grid">{services.map((service,i)=>{
@@ -203,8 +253,6 @@ export default function StaffProfile({ staff, index, navigation, source=null }:{
     </motion.article>
 
     <AnimatePresence>{leaving&&<motion.div className="route-transition route-transition-back" initial={{opacity:0,clipPath:"inset(0 0 100% 0)"}} animate={{opacity:1,clipPath:"inset(0 0 0% 0)"}} exit={{opacity:0}} transition={{duration:.26,ease:[.76,0,.24,1]}} aria-hidden="true"><motion.span initial={{opacity:0,y:-12}} animate={{opacity:1,y:0}} transition={{delay:.08,duration:.18}}>RETURNING TO STAFF <i>←</i></motion.span></motion.div>}</AnimatePresence>
-    <AnimatePresence>{switching&&<motion.div className={`route-transition route-transition-staff ${switching}`} initial={{opacity:0,clipPath:switching==="next"?"inset(0 0 0 100%)":"inset(0 100% 0 0)"}} animate={{opacity:1,clipPath:"inset(0 0 0 0)"}} exit={{opacity:0}} transition={{duration:.26,ease:[.76,0,.24,1]}} aria-hidden="true"><motion.span initial={{opacity:0,x:switching==="next"?18:-18}} animate={{opacity:1,x:0}} transition={{delay:.08,duration:.18}}>{switching==="next"?"NEXT":"PREVIOUS"} PERSONNEL FILE <i>{switching==="next"?"→":"←"}</i></motion.span></motion.div>}</AnimatePresence>
-
     <AnimatePresence>{lightboxIndex!==null&&images[lightboxIndex]&&<motion.div className="lightbox" role="dialog" aria-modal="true" aria-label={`${currentStaff.displayName} 照片瀏覽器`} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
       <div className="lightbox-top"><div><span>清醒夢 · PHOTO ARCHIVE</span><b>{currentStaff.displayName}</b></div><button onClick={closeLightbox}>CLOSE <i>×</i></button></div>
       <button className="lightbox-arrow prev" onClick={()=>step(-1)} aria-label="上一張">←</button>

@@ -1,5 +1,6 @@
 const DEFAULT_ADMIN_API_BASE_URL = "https://api.marchgroup.net/api/admin";
 const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+const BODYLESS_RESPONSE_STATUSES = new Set([204, 205, 304]);
 
 type RouteContext = { params: Promise<{ path: string[] }> };
 
@@ -72,14 +73,18 @@ async function proxy(request: Request, { params }: RouteContext) {
       signal: AbortSignal.timeout(20_000),
     });
 
-    const responseHeaders = new Headers({
-      "Cache-Control": "no-store",
-      "Content-Type": upstream.headers.get("content-type") || "application/json; charset=utf-8",
-    });
+    const responseHasBody = method !== "HEAD" && !BODYLESS_RESPONSE_STATUSES.has(upstream.status);
+    const responseHeaders = new Headers({ "Cache-Control": "no-store" });
+    if (responseHasBody) {
+      responseHeaders.set(
+        "Content-Type",
+        upstream.headers.get("content-type") || "application/json; charset=utf-8",
+      );
+    }
     const setCookie = upstream.headers.get("set-cookie");
     if (setCookie) responseHeaders.set("Set-Cookie", rewriteAdminCookie(setCookie, request));
 
-    return new Response(await upstream.arrayBuffer(), {
+    return new Response(responseHasBody ? await upstream.arrayBuffer() : null, {
       status: upstream.status,
       headers: responseHeaders,
     });

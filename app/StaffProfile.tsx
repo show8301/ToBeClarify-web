@@ -113,12 +113,12 @@ export default function StaffProfile({ staff, index, navigation, source=null }:{
     try{
       const data=await loadStaffDetail(target.id);
       if(navigationTimer.current)window.clearTimeout(navigationTimer.current);
-      router.replace(href);
+      window.history.replaceState(window.history.state,"",href);
       document.title=`${data.displayName}｜清醒夢 Lucid Dream`;
       setLightboxIndex(null);
       setCurrentStaff(data);
     }catch{window.location.replace(href)}
-  }, [leaving, reduceMotion, router, sourceQuery, switching]);
+  }, [leaving, reduceMotion, sourceQuery, switching]);
 
   const startSwipe = useCallback((event:React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType === "mouse" || !event.isPrimary) return;

@@ -115,13 +115,36 @@ function AdminOrderCard({ order, user, loading, act }) {
   const mineWaiting = order.nominees?.some((item) => item.staffId === user.staffMemberId && item.confirmationStatus === 'waiting');
   const cancelable = ['submitted', 'partially_confirmed', 'needs_reschedule'].includes(order.status);
   return <article className={`adminOrderCard is-${order.status}`}><button type="button" className="adminOrderCardHead" onClick={() => setOpen(!open)}><div><span>{order.orderNumber}</span><strong>{labels[order.status] || order.status}</strong><small>{order.queueStage}{order.queueMinutes ? ` · ${order.queueMinutes} 分鐘` : ''}</small></div><div><span>{new Date(order.submittedAt).toLocaleString('zh-TW')}</span><b>{money(order.totalAmount)}</b></div></button>{open ? <div className="adminOrderCardBody">
-    <div className="adminOrderItemList">{order.items.map((item) => <div key={item.id}><span><small>{item.itemType}</small><strong>{item.name}</strong></span><b>{money(item.lineTotal)}</b><button type="button" disabled={loading} onClick={() => act(() => adminApi.deleteOrderItem(order.id, item.id), '訂單項目已刪除。')}>快速刪除</button></div>)}</div>
+    <div className="adminOrderItemList">{order.items.map((item) => <AdminOrderItemRow key={item.id} orderId={order.id} item={item} loading={loading} act={act} />)}</div>
     {order.nominees?.length ? <div className="adminNomineeGrid">{order.nominees.map((item) => <article key={item.id}><span>{item.confirmationStatus}</span><strong>{item.staffName}</strong><p>{item.serviceName} · {item.segmentCount} 節</p><small>{new Date(item.requestedStartsAt).toLocaleString('zh-TW')} ～ {new Date(item.busyUntil).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}</small></article>)}</div> : null}
     {mineWaiting ? <AdminButton disabled={loading} onClick={() => act(() => adminApi.confirmNominee(order.id), '已確認自己的指名；多人訂單會等待其他被指名店員。')}>確認我的指名</AdminButton> : null}
     {order.status === 'needs_reschedule' || order.status === 'submitted' ? <div className="adminOrderReschedule"><label>重新安排開始時間<input type="datetime-local" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} /></label><AdminButton variant="secondary" disabled={!startsAt || loading} onClick={() => act(() => adminApi.rescheduleOrder(order.id, new Date(startsAt).toISOString()), '已重新排程並退回等待確認。')}>重新排程</AdminButton></div> : null}
     <div className="adminOrderEmergency"><label>內部備註<textarea value={note} onChange={(event) => setNote(event.target.value)} /></label><label>緊急狀態<select value={status} onChange={(event) => setStatus(event.target.value)}>{editableStatuses.map((value) => <option key={value} value={value}>{labels[value]}</option>)}</select></label><AdminButton variant="secondary" disabled={loading} onClick={() => act(() => adminApi.updateOrder(order.id, { internalNote: note, status }), '訂單內容與狀態已更新並留下稽核紀錄。')}>儲存緊急調整</AdminButton>{cancelable ? <AdminButton variant="danger" disabled={loading} onClick={() => act(() => adminApi.cancelOrder(order.id, '後台刪除未執行訂單'), '未執行訂單已取消，餐點信物折抵已退回。')}>刪除未執行訂單</AdminButton> : null}</div>
     <div className="adminOrderTotals"><span>小計 {money(order.subtotal)}</span><span>信物折抵 −{money(order.mealCreditApplied)}</span><strong>應付 {money(order.totalAmount)}</strong></div>
   </div> : null}</article>;
+}
+
+function AdminOrderItemRow({ orderId, item, loading, act }) {
+  const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState({ name: item.name, unitPrice: Number(item.unitPrice), quantity: Number(item.quantity) });
+  const locksQuantity = item.itemType === 'nomination_base' || item.itemType === 'staff_service';
+  useEffect(() => setForm({ name: item.name, unitPrice: Number(item.unitPrice), quantity: Number(item.quantity) }), [item.id, item.name, item.unitPrice, item.quantity]);
+  const save = () => act(
+    () => adminApi.updateOrderItem(orderId, item.id, { name: form.name.trim(), unitPrice: Number(form.unitPrice), quantity: locksQuantity ? undefined : Number(form.quantity) }),
+    '訂單項目已修改，金額已重新計算並留下稽核紀錄。',
+  );
+  return <div className={editing ? 'isEditing' : ''}>
+    <span><small>{item.itemType}</small><strong>{item.name}</strong>{item.quantity > 1 ? <em>× {item.quantity}</em> : null}</span>
+    <b>{money(item.lineTotal)}</b>
+    <div className="adminOrderItemActions"><button type="button" disabled={loading} onClick={() => setEditing(!editing)}>{editing ? '收起編輯' : '修改'}</button><button type="button" disabled={loading} onClick={() => act(() => adminApi.deleteOrderItem(orderId, item.id), '訂單項目已刪除。')}>快速刪除</button></div>
+    {editing ? <div className="adminOrderItemEditor">
+      <label>品名<input value={form.name} maxLength="160" onChange={(event) => setForm({ ...form, name: event.target.value })} /></label>
+      <label>單價<input type="number" min="0" max="1000000" value={form.unitPrice} onChange={(event) => setForm({ ...form, unitPrice: Number(event.target.value) })} /></label>
+      <label>數量<input type="number" min="1" max="99" value={form.quantity} disabled={locksQuantity} title={locksQuantity ? '既有指名不可直接延長，請另開新訂單。' : undefined} onChange={(event) => setForm({ ...form, quantity: Number(event.target.value) })} /></label>
+      <AdminButton variant="secondary" disabled={loading || !form.name.trim()} onClick={save}>儲存項目</AdminButton>
+      {locksQuantity ? <small>既有指名不可修改節數；需要追加時數請另開新訂單。</small> : null}
+    </div> : null}
+  </div>;
 }
 
 function CreateSessionPanel({ onClose, onIssued }) {

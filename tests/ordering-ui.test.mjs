@@ -38,6 +38,8 @@ test('admin ordering workspace groups customers and exposes permission-gated ope
   assert.match(source, /升級（分鐘）/);
   assert.match(source, /失效（分鐘）/);
   assert.match(source, /確認我的指名/);
+  assert.match(source, /adminApi\.updateOrderItem/);
+  assert.match(source, /既有指名不可修改節數/);
   assert.match(api, /confirmNominee/);
   assert.match(api, /pauseNomination/);
   assert.match(api, /reissueOrderSession/);

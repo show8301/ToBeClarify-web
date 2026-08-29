@@ -55,6 +55,30 @@ function Assert-ChildPath {
     }
 }
 
+function Rename-DirectoryWithRetry {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$NewName,
+        [int]$Attempts = 20,
+        [int]$DelayMilliseconds = 500
+    )
+
+    for ($attempt = 1; $attempt -le $Attempts; $attempt++) {
+        try {
+            Rename-Item -LiteralPath $Path -NewName $NewName -ErrorAction Stop
+            return
+        }
+        catch {
+            if ($attempt -eq $Attempts) {
+                throw
+            }
+
+            Write-Warning "Directory rename is temporarily blocked (attempt $attempt of $Attempts): $Path"
+            Start-Sleep -Milliseconds $DelayMilliseconds
+        }
+    }
+}
+
 function Stop-VinextTask {
     param([Parameter(Mandatory = $true)][string]$Name)
 
@@ -392,9 +416,13 @@ $hadExistingDeployment = Test-Path -LiteralPath $deployRoot -PathType Container
 $swapped = $false
 try {
     if ($hadExistingDeployment) {
-        Rename-Item -LiteralPath $deployRoot -NewName (Split-Path -Leaf $rollbackRoot)
+        Rename-DirectoryWithRetry `
+            -Path $deployRoot `
+            -NewName (Split-Path -Leaf $rollbackRoot)
     }
-    Rename-Item -LiteralPath $stagingRoot -NewName $ExpectedDeployLeaf
+    Rename-DirectoryWithRetry `
+        -Path $stagingRoot `
+        -NewName $ExpectedDeployLeaf
     $swapped = $true
 
     $proxyArguments = @(
@@ -439,7 +467,9 @@ catch {
             Remove-Item -LiteralPath $deployRoot -Recurse -Force
         }
         if ($hadExistingDeployment -and (Test-Path -LiteralPath $rollbackRoot)) {
-            Rename-Item -LiteralPath $rollbackRoot -NewName $ExpectedDeployLeaf
+            Rename-DirectoryWithRetry `
+                -Path $rollbackRoot `
+                -NewName $ExpectedDeployLeaf
         }
     }
 

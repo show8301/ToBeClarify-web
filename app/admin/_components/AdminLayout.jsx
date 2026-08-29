@@ -5,9 +5,10 @@ import { AdminButton, AdminDialog } from './AdminShared.jsx';
 
 const allItems = [
   { route: '/admin/home', label: '首頁設定', index: '01', roles: ['developer', 'manager'] },
-  { route: '/admin/staff', label: '店員設定', index: '02', roles: ['developer', 'manager', 'clerk'] },
-  { route: '/admin/events', label: '活動設定', index: '03', roles: ['developer', 'manager'] },
-  { route: '/admin/menu', label: '菜單設定', index: '04', roles: ['developer', 'manager'] },
+  { route: '/admin/orders', label: '點單管理', index: '02', roles: ['developer', 'manager', 'clerk'] },
+  { route: '/admin/staff', label: '店員設定', index: '03', roles: ['developer', 'manager', 'clerk'] },
+  { route: '/admin/events', label: '活動設定', index: '04', roles: ['developer', 'manager'] },
+  { route: '/admin/menu', label: '菜單設定', index: '05', roles: ['developer', 'manager'] },
 ];
 
 export function AdminLayout({ route, navigate, children }) {

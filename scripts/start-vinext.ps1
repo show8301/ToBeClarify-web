@@ -58,6 +58,10 @@ $arguments = @(
     '127.0.0.1'
 )
 
+# This process is the long-lived IIS backend, not a child workload that should
+# be reaped when the self-hosted GitHub Actions job completes.
+Remove-Item Env:RUNNER_TRACKING_ID -ErrorAction SilentlyContinue
+
 Push-Location $appRoot
 try {
     # Keep Node attached to the Scheduled Task's PowerShell process. Using

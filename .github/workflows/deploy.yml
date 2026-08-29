@@ -1,16 +1,18 @@
-name: Vinext DEV CI/CD
+name: Vinext Web CI/CD
 
 on:
   pull_request:
     branches:
+      - main
       - dev
   push:
     branches:
+      - main
       - dev
   workflow_dispatch:
     inputs:
       preflight_only:
-        description: Check the DEV runner and IIS prerequisites without deploying
+        description: Check the selected branch runner and IIS prerequisites without deploying
         required: true
         default: false
         type: boolean
@@ -25,7 +27,7 @@ permissions:
 
 env:
   NODE_VERSION: 22.13.0
-  ARTIFACT_NAME: tobeclarify-vinext-dev
+  ARTIFACT_NAME: tobeclarify-vinext-web
 
 jobs:
   build:
@@ -33,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     concurrency:
-      group: vinext-dev-build-${{ github.event_name }}-${{ github.ref }}
+      group: vinext-${{ github.ref_name }}-build-${{ github.event_name }}-${{ github.ref }}
       cancel-in-progress: true
 
     steps:
@@ -92,17 +94,18 @@ jobs:
           retention-days: 7
 
   deploy:
-    name: Preflight and deploy to IIS DEV
-    if: github.event_name != 'pull_request'
+    name: Preflight and deploy to IIS
+    if: >-
+      github.event_name != 'pull_request' &&
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
     needs: build
     runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 25
     concurrency:
-      group: vinext-dev-iis-deployment
+      group: vinext-${{ github.ref_name }}-iis-deployment
       cancel-in-progress: false
     environment:
-      name: development
-      url: ${{ vars.DEV_WEB_HEALTHCHECK_URL }}
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
 
     steps:
       - name: Checkout deployment scripts
@@ -115,28 +118,81 @@ jobs:
           cache: npm
           cache-dependency-path: package-lock.json
 
-      - name: Validate required repository variables
+      - name: Select and validate deployment target
         shell: powershell
         env:
-          DEPLOY_PATH: ${{ vars.DEV_WEB_DEPLOY_PATH }}
-          HEALTH_CHECK_URL: ${{ vars.DEV_WEB_HEALTHCHECK_URL }}
+          BRANCH_REF: ${{ github.ref }}
+          DEV_DEPLOY_PATH: ${{ vars.DEV_WEB_DEPLOY_PATH }}
+          DEV_HEALTH_CHECK_URL: ${{ vars.DEV_WEB_HEALTHCHECK_URL }}
+          DEV_NODE_PORT: ${{ vars.DEV_NODE_PORT }}
+          DEV_NODE_TASK_NAME: ${{ vars.DEV_NODE_TASK_NAME }}
+          DEV_ADMIN_API_BASE_URL: ${{ vars.DEV_ADMIN_API_BASE_URL }}
+          DEV_PUBLIC_MEDIA_BASE_URL: ${{ vars.DEV_PUBLIC_MEDIA_BASE_URL }}
+          PROD_DEPLOY_PATH: ${{ vars.WEB_DEPLOY_PATH }}
+          PROD_HEALTH_CHECK_URL: ${{ vars.WEB_HEALTHCHECK_URL }}
+          PROD_NODE_PORT: ${{ vars.WEB_NODE_PORT }}
+          PROD_NODE_TASK_NAME: ${{ vars.WEB_NODE_TASK_NAME }}
+          PROD_ADMIN_API_BASE_URL: ${{ vars.WEB_ADMIN_API_BASE_URL }}
+          PROD_PUBLIC_MEDIA_BASE_URL: ${{ vars.WEB_PUBLIC_MEDIA_BASE_URL }}
         run: |
-          $missing = @()
-          if ([string]::IsNullOrWhiteSpace($env:DEPLOY_PATH)) { $missing += 'DEV_WEB_DEPLOY_PATH' }
-          if ([string]::IsNullOrWhiteSpace($env:HEALTH_CHECK_URL)) { $missing += 'DEV_WEB_HEALTHCHECK_URL' }
-          if ($missing.Count -gt 0) {
-            throw "Missing GitHub Actions repository variables: $($missing -join ', ')"
+          if ($env:BRANCH_REF -eq 'refs/heads/main') {
+            $targetName = 'production'
+            $deployPathVariable = 'WEB_DEPLOY_PATH'
+            $healthCheckVariable = 'WEB_HEALTHCHECK_URL'
+            $deployPath = $env:PROD_DEPLOY_PATH
+            $healthCheckUrl = $env:PROD_HEALTH_CHECK_URL
+            $nodePort = if ([string]::IsNullOrWhiteSpace($env:PROD_NODE_PORT)) { '4300' } else { $env:PROD_NODE_PORT }
+            $taskName = if ([string]::IsNullOrWhiteSpace($env:PROD_NODE_TASK_NAME)) { 'ToBeClarify Vinext PROD' } else { $env:PROD_NODE_TASK_NAME }
+            $adminApiBaseUrl = $env:PROD_ADMIN_API_BASE_URL
+            $publicMediaBaseUrl = $env:PROD_PUBLIC_MEDIA_BASE_URL
+            $expectedDeployLeaf = 'ToBeClarify_web'
           }
+          elseif ($env:BRANCH_REF -eq 'refs/heads/dev') {
+            $targetName = 'development'
+            $deployPathVariable = 'DEV_WEB_DEPLOY_PATH'
+            $healthCheckVariable = 'DEV_WEB_HEALTHCHECK_URL'
+            $deployPath = $env:DEV_DEPLOY_PATH
+            $healthCheckUrl = $env:DEV_HEALTH_CHECK_URL
+            $nodePort = if ([string]::IsNullOrWhiteSpace($env:DEV_NODE_PORT)) { '4310' } else { $env:DEV_NODE_PORT }
+            $taskName = if ([string]::IsNullOrWhiteSpace($env:DEV_NODE_TASK_NAME)) { 'ToBeClarify Vinext DEV' } else { $env:DEV_NODE_TASK_NAME }
+            $adminApiBaseUrl = $env:DEV_ADMIN_API_BASE_URL
+            $publicMediaBaseUrl = $env:DEV_PUBLIC_MEDIA_BASE_URL
+            $expectedDeployLeaf = 'ToBeClarify_web_dev'
+          }
+          else {
+            throw "Deployment is not allowed from branch ref $($env:BRANCH_REF)."
+          }
+
+          $missing = @()
+          if ([string]::IsNullOrWhiteSpace($deployPath)) { $missing += $deployPathVariable }
+          if ([string]::IsNullOrWhiteSpace($healthCheckUrl)) { $missing += $healthCheckVariable }
+          if ($missing.Count -gt 0) {
+            throw "Missing GitHub Actions repository variables for ${targetName}: $($missing -join ', ')"
+          }
+
+          $parsedPort = 0
+          if (-not [int]::TryParse($nodePort, [ref]$parsedPort) -or $parsedPort -lt 1024 -or $parsedPort -gt 65535) {
+            throw "Invalid Node port for ${targetName}: $nodePort"
+          }
+
+          @(
+            "DEPLOY_TARGET=$targetName"
+            "DEPLOY_PATH=$deployPath"
+            "HEALTH_CHECK_URL=$healthCheckUrl"
+            "NODE_PORT=$parsedPort"
+            "NODE_TASK_NAME=$taskName"
+            "ADMIN_API_BASE_URL=$adminApiBaseUrl"
+            "PUBLIC_MEDIA_BASE_URL=$publicMediaBaseUrl"
+            "EXPECTED_DEPLOY_LEAF=$expectedDeployLeaf"
+          ) | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Install Microsoft IIS URL Rewrite when explicitly requested
         if: github.event_name == 'workflow_dispatch' && inputs.allow_one_time_url_rewrite_install
         shell: powershell
         run: .\scripts\install-iis-url-rewrite.ps1 -AllowLocalSystemInstall
 
-      - name: Check DEV runner and IIS prerequisites
+      - name: Check runner and IIS prerequisites
         shell: powershell
-        env:
-          DEPLOY_PATH: ${{ vars.DEV_WEB_DEPLOY_PATH }}
         run: |
           .\scripts\test-iis-reverse-proxy-prerequisites.ps1 `
             -DeployPath $env:DEPLOY_PATH `
@@ -147,31 +203,22 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ env.ARTIFACT_NAME }}
-          path: ${{ runner.temp }}\tobeclarify-vinext-dev
+          path: ${{ runner.temp }}\tobeclarify-vinext-web
 
       - name: Deploy Node runtime and configure IIS reverse proxy
         if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.preflight_only != true)
         shell: powershell
         env:
-          ARTIFACT_PATH: ${{ runner.temp }}\tobeclarify-vinext-dev
-          DEPLOY_PATH: ${{ vars.DEV_WEB_DEPLOY_PATH }}
-          HEALTH_CHECK_URL: ${{ vars.DEV_WEB_HEALTHCHECK_URL }}
-          NODE_PORT: ${{ vars.DEV_NODE_PORT }}
-          NODE_TASK_NAME: ${{ vars.DEV_NODE_TASK_NAME }}
-          ADMIN_API_BASE_URL: ${{ vars.DEV_ADMIN_API_BASE_URL }}
-          PUBLIC_MEDIA_BASE_URL: ${{ vars.DEV_PUBLIC_MEDIA_BASE_URL }}
+          ARTIFACT_PATH: ${{ runner.temp }}\tobeclarify-vinext-web
           DEPLOYMENT_SHA: ${{ github.sha }}
         run: |
-          $port = if ([string]::IsNullOrWhiteSpace($env:NODE_PORT)) { 4310 } else { [int]$env:NODE_PORT }
-          $taskName = if ([string]::IsNullOrWhiteSpace($env:NODE_TASK_NAME)) { 'ToBeClarify Vinext DEV' } else { $env:NODE_TASK_NAME }
-
           .\scripts\deploy-vinext-iis.ps1 `
             -ArtifactPath $env:ARTIFACT_PATH `
             -DeployPath $env:DEPLOY_PATH `
             -HealthCheckUrl $env:HEALTH_CHECK_URL `
-            -ExpectedDeployLeaf 'ToBeClarify_web_dev' `
-            -NodePort $port `
-            -TaskName $taskName `
+            -ExpectedDeployLeaf $env:EXPECTED_DEPLOY_LEAF `
+            -NodePort ([int]$env:NODE_PORT) `
+            -TaskName $env:NODE_TASK_NAME `
             -DeploymentSha $env:DEPLOYMENT_SHA `
             -AdminApiBaseUrl $env:ADMIN_API_BASE_URL `
             -PublicMediaBaseUrl $env:PUBLIC_MEDIA_BASE_URL

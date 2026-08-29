@@ -41,7 +41,10 @@ $env:HOSTNAME = '127.0.0.1'
 $env:WRANGLER_LOG_PATH = Join-Path $appRoot 'logs\wrangler.log'
 $env:WRANGLER_WRITE_LOGS = 'false'
 $env:MINIFLARE_REGISTRY_PATH = Join-Path $appRoot '.wrangler\registry'
-$env:RUNNER_TRACKING_ID = "tobeclarify-vinext-dev-$Port"
+
+# This process is the long-lived IIS backend, not a child workload that should
+# be reaped when the self-hosted GitHub Actions job completes.
+Remove-Item Env:RUNNER_TRACKING_ID -ErrorAction SilentlyContinue
 
 $logRoot = Join-Path $appRoot 'logs'
 New-Item -Path $logRoot -ItemType Directory -Force | Out-Null

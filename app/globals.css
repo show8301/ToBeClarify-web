@@ -13,6 +13,24 @@
 @media(max-width:560px){.archive-header{padding:0 15px}.header-count span{display:none}.roster-intro{min-height:390px}.roster-intro h1{font-size:21vw}.intro-note{padding:19px 20px}.intro-index{display:none}.gallery-controls{align-items:stretch;gap:14px;flex-direction:column}.gallery-controls label{width:100%}.staff-gallery{grid-template-columns:1fr;gap:24px}.staff-card{height:620px;max-width:440px;width:100%;justify-self:center}.staff-card:nth-child(n){margin-top:0;transform:none}.staff-card-copy strong{font-size:36px}.archive-footer{font-size:6px}.service-grid{grid-template-columns:1fr}.lightbox-arrow{top:auto;bottom:17px;width:40px;height:40px}.lightbox-arrow.prev{left:16px}.lightbox-arrow.next{right:16px}.lightbox-thumbs{bottom:19px;max-width:58vw}.lightbox figure{width:90vw;height:68vh;margin:20px 0 65px}.lightbox-top{height:58px;padding:0 16px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
 
+/* Immersive image inspection — shared by gallery reports and staff portraits. */
+.zoom-photo{width:100%;height:100%;position:relative;overflow:hidden;background:radial-gradient(circle at 50% 40%,rgba(169,199,234,.2),transparent 48%),rgba(49,51,74,.72);isolation:isolate;touch-action:none}
+.zoom-photo-canvas{width:100%;height:100%;position:relative;display:grid;place-items:center;transform-origin:center;cursor:zoom-in;will-change:transform,filter}
+.zoom-photo.is-zoomed .zoom-photo-canvas{cursor:grab}.zoom-photo.is-zoomed .zoom-photo-canvas:active{cursor:grabbing}
+.zoom-photo-canvas>img{grid-area:1/1;width:100%;height:100%;display:block;object-fit:contain;user-select:none;-webkit-user-drag:none}
+.zoom-photo-placeholder{z-index:0;filter:blur(18px) saturate(.7);transform:scale(1.035);opacity:.78;transition:opacity .25s ease}.zoom-photo-placeholder.is-hidden{opacity:0}
+.zoom-photo-canvas>img:last-child{z-index:1;opacity:0;transition:opacity .3s ease}.zoom-photo-canvas>img:last-child.is-loaded{opacity:1}
+.zoom-photo-hint{position:absolute;z-index:4;left:14px;top:14px;min-height:32px;padding:0 12px;display:flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.45);border-radius:999px;background:rgba(49,51,74,.48);color:rgba(255,255,255,.88);font:700 9px/1 var(--font-geist-mono),monospace;letter-spacing:.08em;backdrop-filter:blur(12px);pointer-events:none;transition:opacity .22s ease}
+.zoom-photo-hint svg{width:13px;height:13px}.zoom-photo.is-zoomed .zoom-photo-hint{opacity:.76}
+.zoom-photo-controls{position:absolute;z-index:5;right:14px;bottom:14px;height:42px;padding:4px;display:flex;align-items:center;gap:2px;border:1px solid rgba(255,255,255,.52);border-radius:999px;background:rgba(49,51,74,.58);color:white;box-shadow:0 8px 24px rgba(49,51,74,.25);backdrop-filter:blur(16px)}
+.zoom-photo-controls button{width:34px;height:34px;padding:0;display:grid;place-items:center;border-radius:50%;background:transparent;color:white;cursor:pointer;transition:background-color .2s ease,transform .2s ease,opacity .2s ease}
+.zoom-photo-controls button:hover:not(:disabled){background:rgba(255,255,255,.18);transform:scale(1.06)}.zoom-photo-controls button:disabled{opacity:.28;cursor:default}.zoom-photo-controls svg{width:15px;height:15px}
+.zoom-photo-controls output{min-width:50px;text-align:center;font:750 9px/1 var(--font-geist-mono),monospace;letter-spacing:.04em;font-variant-numeric:tabular-nums}.zoom-photo-controls .zoom-photo-reset{margin-left:2px;border-left:1px solid rgba(255,255,255,.22);border-radius:0 999px 999px 0}
+.weekly-photo-stage figure>.zoom-photo,.lightbox figure>.zoom-photo{height:calc(100% - 38px)}
+.lightbox figure>.zoom-photo{height:calc(100% - 36px)}
+@media(max-width:560px){.zoom-photo-hint{left:9px;top:9px;min-height:30px;padding-inline:10px;font-size:8px}.zoom-photo-controls{right:9px;bottom:9px;height:46px}.zoom-photo-controls button{width:38px;height:38px}.zoom-photo-controls output{min-width:44px}.zoom-photo-controls .zoom-photo-reset{display:none}}
+@media(prefers-reduced-motion:reduce){.zoom-photo-canvas,.zoom-photo-placeholder,.zoom-photo-canvas>img,.zoom-photo-controls button{transition:none!important}}
+
 /* Random dreamer feature and tactile roster interactions */
 .intro-feature{width:min(420px,100%);height:230px;justify-self:end;display:grid;grid-template-columns:44% 56%;position:relative;background:rgba(250,247,239,.86);border:1px solid var(--ink);box-shadow:10px 11px 0 var(--mint);overflow:visible;isolation:isolate}
 .intro-feature::before{content:"PICK";position:absolute;z-index:4;right:-12px;top:-13px;padding:7px 9px;background:var(--coral);color:white;border:1px solid var(--ink);font:800 8px/1 monospace;letter-spacing:.16em;transform:rotate(3deg)}
@@ -1851,6 +1869,16 @@ body.modal-open .site-parallax-bubbles i{animation-play-state:paused}
 .timeline-empty>strong{margin-top:18px;font-size:clamp(28px,3vw,46px);line-height:1.15}
 .timeline-empty>p{max-width:560px;margin:16px 0 0;font-size:17px;line-height:1.8}
 @media(max-width:760px){.timeline-empty{min-height:190px;margin-top:32px;padding:28px 24px;box-shadow:7px 8px 0 rgba(160,217,214,.62)}}
+
+/* The lightbox starts in true contain mode; zoom is applied only to the canvas. */
+.lightbox figure .zoom-photo-canvas>img,
+.weekly-photo-stage figure .zoom-photo-canvas>img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
 
 /* Step one card at a time, while keeping both rows natively scrollable. */
 .live-marquee-hint{display:block;margin-top:25px;color:rgba(49,51,74,.58);font:750 var(--type-caption)/1.4 var(--font-geist-mono),ui-monospace,monospace;letter-spacing:.1em;text-align:right}

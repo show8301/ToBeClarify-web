@@ -5,6 +5,12 @@ import { orderingApi } from './ordering-api.js';
 
 const TOKEN_KEY = 'lucid-dream-order-token';
 const money = (value) => `${Number(value || 0).toLocaleString('zh-TW')} G`;
+const tipMoney = (value) => `${Number(value || 0).toLocaleString('zh-TW')} Gil`;
+const defaultTipPresetAmounts = [50, 100, 200, 500];
+const normalizeTipPresetAmounts = (values) => {
+  const next = Array.isArray(values) ? values.map(Number) : [];
+  return next.length === 4 && next.every((value) => Number.isFinite(value) && value > 0) ? next : defaultTipPresetAmounts;
+};
 const statusLabels = { waiting: '等待確認', submitted: '等待確認', partially_confirmed: '部分確認', needs_reschedule: '需重新排程', confirmed: '已成立', in_service: '服務中', completed: '已完成', cancelled: '已取消', expired: '已失效', rejected: '已退回' };
 
 function defaultStart() {
@@ -125,7 +131,7 @@ export default function OrderClient() {
         <div className="orderMain">
           {tab === 'meal' ? <MealPage menu={catalog.menu} cart={cart} setCart={setCart} /> : null}
           {tab === 'nomination' ? <NominationPage session={session} settings={catalog.settings} staff={catalog.staff} cart={cart} setCart={setCart} onNotice={setNotice} /> : null}
-          {tab === 'tip' ? <TipPage staff={catalog.staff} setCart={setCart} onAdded={() => setNotice({ message: '小費分配已加入本次點餐。', error: false })} /> : null}
+          {tab === 'tip' ? <TipPage staff={catalog.staff} settings={catalog.settings} setCart={setCart} onAdded={() => setNotice({ message: '小費分配已加入本次點餐。', error: false })} /> : null}
           {tab === 'cart' ? <CartPage cart={cart} setCart={setCart} session={session} subtotal={cartSubtotal} onSubmit={submit} loading={loading} /> : null}
           {tab === 'orders' ? <MyOrders orders={orders} catalog={catalog} loading={loading} onAddon={async (body) => { setLoading(true); try { await orderingApi.submitAddon(token, body); setOrders(await orderingApi.orders(token)); setNotice({ message: '加購服務已送出，等待被指名店員確認。', error: false }); } catch (error) { setNotice({ message: error.message, error: true }); } finally { setLoading(false); } }} /> : null}
           {tab === 'help' ? <HelpPage currentGameId={session.gameId} onRecover={recover} loading={loading} /> : null}
@@ -226,8 +232,9 @@ function NominationPage({ session, settings, staff, cart, setCart, onNotice }) {
   </div>;
 }
 
-function TipPage({ staff, setCart, onAdded }) {
-  const [amount, setAmount] = useState(100);
+function TipPage({ staff, settings, setCart, onAdded }) {
+  const presetAmounts = normalizeTipPresetAmounts(settings?.tipPresetAmounts);
+  const [amount, setAmount] = useState(() => presetAmounts[1] || presetAmounts[0]);
   const [staffId, setStaffId] = useState('');
   const [staffPercentage, setStaffPercentage] = useState(50);
   const selected = staff.find((person) => person.id === staffId);
@@ -236,7 +243,7 @@ function TipPage({ staff, setCart, onAdded }) {
   const storeAmount = amount - staffAmount;
   const add = () => { setCart((current) => ({ ...current, tips: [...current.tips, { id: crypto.randomUUID(), staffId, staffName: selected?.displayName || '', amount, staffPercentage: effectiveStaff }] })); onAdded(); };
   return <div className="orderPage"><PageHeading kicker="TIP ALLOCATION" title="小費" text="先選金額，再選店員與比例；未指定店員時，小費 100% 歸店家。" />
-    <section className="tipComposer"><div className="tipAmountButtons">{[50, 100, 200, 500].map((value) => <button className={amount === value ? 'isActive' : ''} key={value} onClick={() => setAmount(value)}>{money(value)}</button>)}<label>自訂<input type="number" min="1" value={amount} onChange={(event) => setAmount(Math.max(1, Number(event.target.value)))} /></label></div>
+    <section className="tipComposer"><div className="tipAmountButtons">{presetAmounts.map((value) => <button type="button" className={amount === value ? 'isActive' : ''} key={value} onClick={() => setAmount(value)}>{tipMoney(value)}</button>)}<label>自訂<input type="number" min="1" value={amount} onChange={(event) => setAmount(Math.max(1, Number(event.target.value)))} /></label></div>
       <label className="tipStaffSelect">指定店員（選填）<select value={staffId} onChange={(event) => setStaffId(event.target.value)}><option value="">不指定，店家 100%</option>{staff.map((person) => <option key={person.id} value={person.id}>{person.displayName}</option>)}</select></label>
       <div className="tipSplit"><div><strong>{selected?.displayName || '店員'}</strong><span>{effectiveStaff}% · {money(staffAmount)}</span></div><div className="tipRange"><input aria-label="店員小費比例" type="range" min="0" max="100" value={effectiveStaff} disabled={!selected} onChange={(event) => setStaffPercentage(Number(event.target.value))} /><small><span>店員比例增加</span><span>店家比例增加</span></small></div><div><strong>店家</strong><span>{100 - effectiveStaff}% · {money(storeAmount)}</span></div></div>
       <div className="tipResult"><span>分配後實際金額</span><strong>{selected ? `${selected.displayName} ${money(staffAmount)} ／ ` : ''}店家 {money(storeAmount)}</strong></div>

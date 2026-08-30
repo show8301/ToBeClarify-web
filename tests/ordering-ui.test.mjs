@@ -14,6 +14,9 @@ test('customer ordering implements meals, staff-first nomination, tips, dependen
   assert.match(source, /請先刪除服務項目/);
   assert.match(source, /將此分配結果加入本次點餐/);
   assert.match(source, /店員小費比例/);
+  assert.match(source, /tipPresetAmounts/);
+  assert.match(source, /tipMoney/);
+  assert.match(await readFile(new URL('../app/order/ordering.css', import.meta.url), 'utf8'), /\.tipRange input\{direction:rtl\}/);
   assert.match(source, /找回並刷新點餐 UI/);
   assert.match(source, /我的訂單/);
   assert.match(source, /純陪伴/);
@@ -46,6 +49,8 @@ test('admin ordering workspace groups customers and exposes permission-gated ope
   assert.match(source, /凌晨 02:00 的訂單仍歸前一個營業日/);
   assert.match(source, /確認我的指名/);
   assert.match(source, /退回重新排程/);
+  assert.match(source, /強制啟動並重新排程/);
+  assert.match(source, /小費按鈕 \{index \+ 1\}（Gil）/);
   assert.match(source, /狀態操作原因（取消／退回／提早完成必填）/);
   assert.match(source, /實際提早完成/);
   assert.match(source, /正式縮短為/);

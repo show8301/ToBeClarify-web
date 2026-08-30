@@ -4,6 +4,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { StaffDetail, StaffSummary } from "./staff-types";
+import ZoomablePhoto from "./ZoomablePhoto";
 
 const fallbackPortrait = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='1000'%3E%3Crect width='100%25' height='100%25' fill='%23d9d2c5'/%3E%3Ccircle cx='400' cy='390' r='150' fill='%23eee9df'/%3E%3Cpath d='M150 950c30-240 150-350 250-350s220 110 250 350' fill='%23eee9df'/%3E%3C/svg%3E";
 
@@ -253,10 +254,10 @@ export default function StaffProfile({ staff, index, navigation, source=null }:{
     </motion.article>
 
     <AnimatePresence>{leaving&&<motion.div className="route-transition route-transition-back" initial={{opacity:0,clipPath:"inset(0 0 100% 0)"}} animate={{opacity:1,clipPath:"inset(0 0 0% 0)"}} exit={{opacity:0}} transition={{duration:.26,ease:[.76,0,.24,1]}} aria-hidden="true"><motion.span initial={{opacity:0,y:-12}} animate={{opacity:1,y:0}} transition={{delay:.08,duration:.18}}>RETURNING TO STAFF <i>←</i></motion.span></motion.div>}</AnimatePresence>
-    <AnimatePresence>{lightboxIndex!==null&&images[lightboxIndex]&&<motion.div className="lightbox" role="dialog" aria-modal="true" aria-label={`${currentStaff.displayName} 照片瀏覽器`} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
+    <AnimatePresence>{lightboxIndex!==null&&images[lightboxIndex]&&<motion.div className="lightbox" role="dialog" aria-modal="true" aria-label={`${currentStaff.displayName} 照片瀏覽器`} initial={reduceMotion?false:{opacity:0,backdropFilter:"blur(0px)"}} animate={{opacity:1,backdropFilter:"blur(18px)"}} exit={reduceMotion?{opacity:0}:{opacity:0,backdropFilter:"blur(0px)"}} transition={{duration:.28}} onPointerDown={(event)=>{if(event.target===event.currentTarget)closeLightbox()}}>
       <div className="lightbox-top"><div><span>清醒夢 · PHOTO ARCHIVE</span><b>{currentStaff.displayName}</b></div><button onClick={closeLightbox}>CLOSE <i>×</i></button></div>
       <button className="lightbox-arrow prev" onClick={()=>step(-1)} aria-label="上一張">←</button>
-      <motion.figure key={images[lightboxIndex].id} drag="x" dragConstraints={{left:0,right:0}} dragElastic={.7} onDragEnd={(_,info)=>Math.abs(info.offset.x)>70&&step(info.offset.x<0?1:-1)} initial={reduceMotion?{opacity:0}:{opacity:0,scale:.92}} animate={{opacity:1,scale:1}}><img src={images[lightboxIndex].imageUrl} alt={`${currentStaff.displayName} 的第 ${lightboxIndex+1} 張照片`}/><figcaption><span>LUCID DREAM / VISUAL RECORD</span><b>{String(lightboxIndex+1).padStart(2,"0")} — {String(images.length).padStart(2,"0")}</b></figcaption></motion.figure>
+      <motion.figure key={images[lightboxIndex].id} initial={reduceMotion?false:{opacity:0,y:28,scale:.9,rotate:.8}} animate={{opacity:1,y:0,scale:1,rotate:0}} exit={reduceMotion?{opacity:0}:{opacity:0,y:16,scale:.96}} transition={{type:"spring",stiffness:210,damping:24,mass:.85}}><ZoomablePhoto src={images[lightboxIndex].imageUrl} placeholderSrc={images[lightboxIndex].thumbnailUrl||images[lightboxIndex].imageUrl} alt={`${currentStaff.displayName} 的第 ${lightboxIndex+1} 張照片`} onSwipe={step}/><figcaption><span>LUCID DREAM / VISUAL RECORD</span><b>{String(lightboxIndex+1).padStart(2,"0")} — {String(images.length).padStart(2,"0")}</b></figcaption></motion.figure>
       <button className="lightbox-arrow next" onClick={()=>step(1)} aria-label="下一張">→</button><div className="lightbox-thumbs">{images.map((image,i)=><button key={image.id} className={i===lightboxIndex?"active":""} onClick={()=>setLightboxIndex(i)}><img src={image.thumbnailUrl||image.imageUrl} alt="" loading="lazy" decoding="async"/></button>)}</div>
     </motion.div>}</AnimatePresence>
   </main>;

@@ -1,3 +1,7 @@
+// The restricted account supplied for direct SQL maintenance cannot delete rows.
+// That restriction does not prohibit these authorized API DELETE calls: the API
+// deployment identity and backend business rules determine whether deletion runs.
+// Removing an item from an unsent client-side cart is local state only and is safe.
 const ADMIN_API_BASE_URL = "/api/admin";
 
 export class ApiError extends Error {
@@ -141,4 +145,31 @@ export const adminApi = {
     method: id ? 'PUT' : 'POST', body: JSON.stringify(body), signal,
   }),
   deleteMenuSet: (id, signal) => request(`/menu/sets/${encodeURIComponent(id)}`, { method: 'DELETE', signal }),
+  getOrderSessions: ({ businessDate, search } = {}, signal) => {
+    const params = new URLSearchParams();
+    if (businessDate) params.set('businessDate', businessDate);
+    if (search) params.set('search', search);
+    return request(`/order-sessions${params.size ? `?${params}` : ''}`, { signal });
+  },
+  createOrderSession: (body, signal) => request('/order-sessions', { method: 'POST', body: JSON.stringify(body), signal }),
+  updateOrderSession: (id, body, signal) => request(`/order-sessions/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(body), signal }),
+  reissueOrderSession: (id, signal) => request(`/order-sessions/${encodeURIComponent(id)}/reissue`, { method: 'POST', signal }),
+  getSessionOrders: (id, signal) => request(`/order-sessions/${encodeURIComponent(id)}/orders`, { signal }),
+  getOrderingSettings: (signal) => request('/ordering-settings', { signal }),
+  getOrderingContext: (signal) => request('/ordering-context', { signal }),
+  saveOrderingSettings: (body, signal) => request('/ordering-settings', { method: 'PUT', body: JSON.stringify(body), signal }),
+  pauseNomination: (minutes, signal) => request('/ordering-settings/pause-nomination', { method: 'POST', body: JSON.stringify({ minutes }), signal }),
+  confirmNominee: (orderId, signal) => request(`/orders/${encodeURIComponent(orderId)}/confirm-nominee`, { method: 'POST', signal }),
+  getAddonOptions: (nomineeId, signal) => request(`/order-nominees/${encodeURIComponent(nomineeId)}/addon-options`, { signal }),
+  submitAdminAddon: (nomineeId, body, signal) => request(`/order-nominees/${encodeURIComponent(nomineeId)}/addons`, { method: 'POST', body: JSON.stringify({ ...body, parentNomineeId: nomineeId }), signal }),
+  confirmAddon: (orderId, signal) => request(`/orders/${encodeURIComponent(orderId)}/confirm-addon`, { method: 'POST', signal }),
+  rescheduleOrder: (orderId, requestedStartsAt, signal) => request(`/orders/${encodeURIComponent(orderId)}/reschedule`, { method: 'POST', body: JSON.stringify({ requestedStartsAt }), signal }),
+  backfillServedOrder: (orderId, body, signal) => request(`/orders/${encodeURIComponent(orderId)}/backfill-served`, { method: 'POST', body: JSON.stringify(body), signal }),
+  shortenNomination: (orderId, nomineeId, segmentCount, reason, signal) => request(`/orders/${encodeURIComponent(orderId)}/nominees/${encodeURIComponent(nomineeId)}/shorten`, { method: 'POST', body: JSON.stringify({ segmentCount, reason }), signal }),
+  updateOrder: (orderId, body, signal) => request(`/orders/${encodeURIComponent(orderId)}`, { method: 'PUT', body: JSON.stringify(body), signal }),
+  transitionOrder: (orderId, action, reason, signal) => request(`/orders/${encodeURIComponent(orderId)}/transition`, { method: 'POST', body: JSON.stringify({ action, reason: reason || null }), signal }),
+  updateOrderItem: (orderId, itemId, body, signal) => request(`/orders/${encodeURIComponent(orderId)}/items/${encodeURIComponent(itemId)}`, { method: 'PUT', body: JSON.stringify(body), signal }),
+  deleteOrderItem: (orderId, itemId, signal) => request(`/orders/${encodeURIComponent(orderId)}/items/${encodeURIComponent(itemId)}`, { method: 'DELETE', signal }),
+  cancelOrder: (orderId, reason, signal) => request(`/orders/${encodeURIComponent(orderId)}`, { method: 'DELETE', body: JSON.stringify({ reason }), signal }),
+  getOrderingReport: (from, to, signal) => request(`/ordering-reports?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`, { signal }),
 };

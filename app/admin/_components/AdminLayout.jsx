@@ -5,9 +5,10 @@ import { AdminButton, AdminDialog } from './AdminShared.jsx';
 
 const allItems = [
   { route: '/admin/home', label: '首頁設定', index: '01', roles: ['developer', 'manager'] },
-  { route: '/admin/staff', label: '店員設定', index: '02', roles: ['developer', 'manager', 'clerk'] },
-  { route: '/admin/events', label: '活動設定', index: '03', roles: ['developer', 'manager'] },
-  { route: '/admin/menu', label: '菜單設定', index: '04', roles: ['developer', 'manager'] },
+  { route: '/admin/orders', label: '點單管理', index: '02', roles: ['developer', 'manager', 'clerk'] },
+  { route: '/admin/staff', label: '店員設定', index: '03', roles: ['developer', 'manager', 'clerk'] },
+  { route: '/admin/events', label: '活動設定', index: '04', roles: ['developer', 'manager'] },
+  { route: '/admin/menu', label: '菜單設定', index: '05', roles: ['developer', 'manager'] },
 ];
 
 export function AdminLayout({ route, navigate, children }) {
@@ -96,7 +97,8 @@ export function AdminLayout({ route, navigate, children }) {
       <header className={`adminTopbar ${isMenuOpen ? 'isMenuOpen' : ''}`.trim()}>
         <div className="adminTopbarBrand">
           <span className="adminTopbarMark"><img src="/favicon.svg" alt="" /></span>
-          <span><strong>清醒夢</strong><small>LUCID DREAM / ADMIN</small></span>
+          <span className="adminTopbarBrandCopy"><strong>清醒夢</strong><small>LUCID DREAM / ADMIN</small></span>
+          <button className="adminBackToSite adminBrandSiteLink" type="button" onClick={() => handleNavigate('/home')}>↗ 公開網站</button>
         </div>
         <button
           className="adminMenuButton"
@@ -130,7 +132,6 @@ export function AdminLayout({ route, navigate, children }) {
               </div>
               {registerKeyState.message ? <span className={registerKeyState.error ? 'isError' : ''} role="status">{registerKeyState.message}</span> : null}
             </div> : null}
-            <button className="adminBackToSite" type="button" onClick={() => handleNavigate('/home')}>↗ 公開網站</button>
             <AdminButton variant="ghost" onClick={handleLogout}>登出</AdminButton>
           </div>
         </div>

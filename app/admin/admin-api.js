@@ -164,6 +164,7 @@ export const adminApi = {
   submitAdminAddon: (nomineeId, body, signal) => request(`/order-nominees/${encodeURIComponent(nomineeId)}/addons`, { method: 'POST', body: JSON.stringify({ ...body, parentNomineeId: nomineeId }), signal }),
   confirmAddon: (orderId, signal) => request(`/orders/${encodeURIComponent(orderId)}/confirm-addon`, { method: 'POST', signal }),
   rescheduleOrder: (orderId, requestedStartsAt, signal) => request(`/orders/${encodeURIComponent(orderId)}/reschedule`, { method: 'POST', body: JSON.stringify({ requestedStartsAt }), signal }),
+  backfillServedOrder: (orderId, body, signal) => request(`/orders/${encodeURIComponent(orderId)}/backfill-served`, { method: 'POST', body: JSON.stringify(body), signal }),
   shortenNomination: (orderId, nomineeId, segmentCount, reason, signal) => request(`/orders/${encodeURIComponent(orderId)}/nominees/${encodeURIComponent(nomineeId)}/shorten`, { method: 'POST', body: JSON.stringify({ segmentCount, reason }), signal }),
   updateOrder: (orderId, body, signal) => request(`/orders/${encodeURIComponent(orderId)}`, { method: 'PUT', body: JSON.stringify(body), signal }),
   transitionOrder: (orderId, action, reason, signal) => request(`/orders/${encodeURIComponent(orderId)}/transition`, { method: 'POST', body: JSON.stringify({ action, reason: reason || null }), signal }),

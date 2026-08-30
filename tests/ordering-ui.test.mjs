@@ -49,7 +49,12 @@ test('admin ordering workspace groups customers and exposes permission-gated ope
   assert.match(source, /凌晨 02:00 的訂單仍歸前一個營業日/);
   assert.match(source, /確認我的指名/);
   assert.match(source, /退回重新排程/);
-  assert.match(source, /強制啟動並重新排程/);
+  assert.match(source, /重新排程（尚未接待）/);
+  assert.match(source, /已接待補登/);
+  assert.match(source, /補登服務中/);
+  assert.match(source, /補登已完成/);
+  assert.match(source, /backfillServedOrder/);
+  assert.match(api, /backfillServedOrder/);
   assert.match(source, /小費按鈕 \{index \+ 1\}（Gil）/);
   assert.match(source, /狀態操作原因（取消／退回／提早完成必填）/);
   assert.match(source, /實際提早完成/);

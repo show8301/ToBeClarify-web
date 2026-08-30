@@ -157,6 +157,13 @@ export const adminApi = {
   getSessionOrders: (id, signal) => request(`/order-sessions/${encodeURIComponent(id)}/orders`, { signal }),
   getOrderingSettings: (signal) => request('/ordering-settings', { signal }),
   getOrderingContext: (signal) => request('/ordering-context', { signal }),
+  getBusinessDayOverride: (signal) => request('/ordering-settings/business-day-override', { signal }),
+  saveBusinessDayOverride: (body, signal) => request('/ordering-settings/business-day-override', {
+    method: 'PUT', body: JSON.stringify(body), signal,
+  }),
+  disableBusinessDayOverride: (signal) => request('/ordering-settings/business-day-override/disable', {
+    method: 'POST', signal,
+  }),
   saveOrderingSettings: (body, signal) => request('/ordering-settings', { method: 'PUT', body: JSON.stringify(body), signal }),
   pauseNomination: (minutes, signal) => request('/ordering-settings/pause-nomination', { method: 'POST', body: JSON.stringify({ minutes }), signal }),
   confirmNominee: (orderId, signal) => request(`/orders/${encodeURIComponent(orderId)}/confirm-nominee`, { method: 'POST', signal }),

@@ -97,7 +97,8 @@ export function AdminLayout({ route, navigate, children }) {
       <header className={`adminTopbar ${isMenuOpen ? 'isMenuOpen' : ''}`.trim()}>
         <div className="adminTopbarBrand">
           <span className="adminTopbarMark"><img src="/favicon.svg" alt="" /></span>
-          <span><strong>清醒夢</strong><small>LUCID DREAM / ADMIN</small></span>
+          <span className="adminTopbarBrandCopy"><strong>清醒夢</strong><small>LUCID DREAM / ADMIN</small></span>
+          <button className="adminBackToSite adminBrandSiteLink" type="button" onClick={() => handleNavigate('/home')}>↗ 公開網站</button>
         </div>
         <button
           className="adminMenuButton"
@@ -131,7 +132,6 @@ export function AdminLayout({ route, navigate, children }) {
               </div>
               {registerKeyState.message ? <span className={registerKeyState.error ? 'isError' : ''} role="status">{registerKeyState.message}</span> : null}
             </div> : null}
-            <button className="adminBackToSite" type="button" onClick={() => handleNavigate('/home')}>↗ 公開網站</button>
             <AdminButton variant="ghost" onClick={handleLogout}>登出</AdminButton>
           </div>
         </div>

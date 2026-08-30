@@ -214,8 +214,30 @@ function CreateSessionPanel({ onClose, onIssued }) {
 }
 
 function IssuedPanel({ issued, onClose }) {
-  const copy = (value) => navigator.clipboard?.writeText(value);
-  return <div className="adminIssuedPanel"><header><div><span>ORDER PASS READY</span><h2>{issued.session.customerName} 的今日點餐資料</h2></div><button onClick={onClose}>×</button></header><div><label>點餐網址<code>{issued.orderUrl}</code><button onClick={() => copy(issued.orderUrl)}>複製網址</button></label><label>六位數協助碼<code>{issued.recoveryCode}</code><button onClick={() => copy(issued.recoveryCode)}>複製協助碼</button></label></div><p>重新補發會使舊網址失效；協助碼只在顧客遺失點餐碼時由店員提供。</p></div>;
+  const [copied, setCopied] = useState('');
+  const copy = async (value, key) => {
+    if (!navigator.clipboard?.writeText) return;
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(key);
+      window.setTimeout(() => setCopied((current) => current === key ? '' : current), 1800);
+    } catch { setCopied(''); }
+  };
+  const compactUrl = compactOrderUrl(issued.orderUrl);
+  return <div className="adminIssuedPanel"><header><div><span>ORDER PASS READY</span><h2>{issued.session.customerName} 的今日點餐資料</h2></div><button type="button" aria-label="關閉點餐資料" onClick={onClose}>×</button></header><div className="adminIssuedFields"><div className="adminIssuedField adminIssuedUrlField"><div className="adminIssuedFieldLabel"><strong>點餐網址</strong><small>畫面顯示縮短版，複製會帶出完整網址</small></div><code title={issued.orderUrl}>{compactUrl}</code><button className="adminCopyIconButton" type="button" aria-label="複製完整點餐網址" title="複製完整點餐網址" onClick={() => copy(issued.orderUrl, 'url')}><CopyIcon />{copied === 'url' ? <span className="adminCopyStatus">已複製</span> : null}</button></div><div className="adminIssuedField adminRecoveryField"><div className="adminIssuedFieldLabel"><strong>六位數協助碼</strong><small>顧客遺失網址時提供</small></div><code>{issued.recoveryCode}</code><button className="adminCopyIconButton" type="button" aria-label="複製協助碼" title="複製協助碼" onClick={() => copy(issued.recoveryCode, 'recovery')}><CopyIcon />{copied === 'recovery' ? <span className="adminCopyStatus">已複製</span> : null}</button></div></div><p>重新補發會使舊網址失效；協助碼只在顧客遺失點餐碼時由店員提供。</p></div>;
+}
+
+function compactOrderUrl(value) {
+  try {
+    const url = new URL(value);
+    const code = url.searchParams.get('code');
+    if (!code) return value;
+    return `${url.host}${url.pathname}?code=${code.slice(0, 10)}…`;
+  } catch { return value; }
+}
+
+function CopyIcon() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="8" y="8" width="11" height="11" rx="2" /><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" /></svg>;
 }
 
 function SettingsPanel({ settings, onSaved }) {

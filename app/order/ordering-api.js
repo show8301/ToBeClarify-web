@@ -38,4 +38,5 @@ export const orderingApi = {
   catalog: (token, signal) => request('/catalog', { token, signal }),
   orders: (token, signal) => request('/orders', { token, signal }),
   submit: (token, body, signal) => request('/orders', { token, method: 'POST', body: JSON.stringify(body), signal }),
+  submitAddon: (token, body, signal) => request('/addons', { token, method: 'POST', body: JSON.stringify(body), signal }),
 };

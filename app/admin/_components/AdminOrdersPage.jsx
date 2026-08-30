@@ -5,8 +5,11 @@ import { AdminButton } from './AdminShared.jsx';
 
 const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 const money = (value) => `${Number(value || 0).toLocaleString('zh-TW')} G`;
-const labels = { submitted: '等待確認', partially_confirmed: '部分確認', needs_reschedule: '需重新排程', confirmed: '已成立', in_service: '服務中', completed: '已完成', cancelled: '已取消', expired: '已失效', rejected: '已退回' };
-const editableStatuses = ['submitted', 'needs_reschedule', 'confirmed', 'in_service', 'completed', 'rejected', 'cancelled'];
+const labels = { waiting: '等待確認', submitted: '等待確認', partially_confirmed: '部分確認', needs_reschedule: '需重新排程', confirmed: '已成立', in_service: '服務中', completed: '已完成', cancelled: '已取消', expired: '已失效', rejected: '已退回' };
+const transitionLabels = { start: '開始服務', complete: '完成訂單', cancel: '取消訂單', reject: '退回訂單', return_to_reschedule: '退回重新排程' };
+
+const minutesToTime = (value) => `${String(Math.floor(Number(value || 0) / 60)).padStart(2, '0')}:${String(Number(value || 0) % 60).padStart(2, '0')}`;
+const timeToMinutes = (value) => { const [hours, minutes] = value.split(':').map(Number); return hours * 60 + minutes; };
 
 function localDateTimeValue(value) {
   if (!value) return '';
@@ -24,6 +27,7 @@ export function AdminOrdersPage() {
   const [selectedId, setSelectedId] = useState('');
   const [orders, setOrders] = useState([]);
   const [settings, setSettings] = useState(null);
+  const [businessContext, setBusinessContext] = useState(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ text: '', error: false });
   const [showCreate, setShowCreate] = useState(false);
@@ -45,6 +49,7 @@ export function AdminOrdersPage() {
   };
 
   useEffect(() => { loadSessions(); }, [businessDate]);
+  useEffect(() => { adminApi.getOrderingContext().then((value) => { setBusinessContext(value); setBusinessDate(value.referenceBusinessDate); }).catch(() => {}); }, []);
   useEffect(() => { if (canManage) adminApi.getOrderingSettings().then(setSettings).catch(() => {}); }, [canManage]);
 
   const selected = sessions.find((item) => item.session.id === selectedId);
@@ -80,7 +85,7 @@ export function AdminOrdersPage() {
     {canManage && showSettings && settings ? <SettingsPanel settings={settings} onSaved={(value) => { setSettings(value); setMessage({ text: '營運參數已更新。', error: false }); }} /> : null}
     <div className="adminOrderWorkspace">
       <aside className="adminCustomerPane">
-        <div className="adminCustomerToolbar"><label>營業日<input type="date" value={businessDate} onChange={(event) => setBusinessDate(event.target.value)} /></label><form onSubmit={(event) => { event.preventDefault(); loadSessions(); }}><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="搜尋顧客名稱或遊戲 ID" /><button type="submit">搜尋</button></form><div><span>今日顧客</span><strong>{sessions.length}</strong></div></div>
+        <div className="adminCustomerToolbar"><label>營業日<input type="date" value={businessDate} onChange={(event) => setBusinessDate(event.target.value)} /></label>{businessContext ? <p className={businessContext.orderingOpen ? 'adminBusinessPeriod isOpen' : 'adminBusinessPeriod'}><strong>{businessContext.orderingOpen ? '目前營業中' : '目前非營業時段'}</strong><span>{new Date(businessContext.referenceStartsAt).toLocaleString('zh-TW', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })} ～ {new Date(businessContext.referenceEndsAt).toLocaleString('zh-TW', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span></p> : null}<form onSubmit={(event) => { event.preventDefault(); loadSessions(); }}><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="搜尋顧客名稱或遊戲 ID" /><button type="submit">搜尋</button></form><div><span>本營業日顧客</span><strong>{sessions.length}</strong></div></div>
         <CustomerGroup title="待處理" count={groups.attention.length} open={groupsOpen.attention} onToggle={() => setGroupsOpen((current) => ({ ...current, attention: !current.attention }))}>{groups.attention.map((item) => <CustomerRow key={item.session.id} item={item} active={item.session.id === selectedId} onClick={() => selectSession(item.session.id)} />)}</CustomerGroup>
         <CustomerGroup title="其他顧客" count={groups.others.length} open={groupsOpen.others} onToggle={() => setGroupsOpen((current) => ({ ...current, others: !current.others }))}>{groups.others.map((item) => <CustomerRow key={item.session.id} item={item} active={item.session.id === selectedId} onClick={() => selectSession(item.session.id)} />)}</CustomerGroup>
       </aside>
@@ -110,18 +115,71 @@ function SessionHeader({ item, onUpdate, onReissue, loading }) {
 function AdminOrderCard({ order, user, loading, act }) {
   const [open, setOpen] = useState(order.status === 'submitted' || order.status === 'needs_reschedule');
   const [note, setNote] = useState(order.internalNote || '');
-  const [status, setStatus] = useState(order.status);
+  const [transitionReason, setTransitionReason] = useState('');
   const [startsAt, setStartsAt] = useState(localDateTimeValue(order.nominees?.[0]?.requestedStartsAt));
   const mineWaiting = order.nominees?.some((item) => item.staffId === user.staffMemberId && item.confirmationStatus === 'waiting');
+  const mineWaitingAddon = order.addons?.some((item) => item.staffId === user.staffMemberId && item.status === 'waiting');
+  const canManageAddons = user.role === 'developer' || user.role === 'manager';
   const cancelable = ['submitted', 'partially_confirmed', 'needs_reschedule'].includes(order.status);
-  return <article className={`adminOrderCard is-${order.status}`}><button type="button" className="adminOrderCardHead" onClick={() => setOpen(!open)}><div><span>{order.orderNumber}</span><strong>{labels[order.status] || order.status}</strong><small>{order.queueStage}{order.queueMinutes ? ` · ${order.queueMinutes} 分鐘` : ''}</small></div><div><span>{new Date(order.submittedAt).toLocaleString('zh-TW')}</span><b>{money(order.totalAmount)}</b></div></button>{open ? <div className="adminOrderCardBody">
+  const transitions = order.status === 'confirmed' ? (order.orderKind === 'service_addon' ? ['start', 'cancel'] : ['start', 'return_to_reschedule', 'cancel']) : order.status === 'in_service' ? ['complete'] : cancelable ? ['reject', 'cancel'] : [];
+  const isEarlyCompletion = order.status === 'in_service' && order.nominees?.some((item) => new Date(item.requestedServiceEndsAt).getTime() > Date.now());
+  return <article className={`adminOrderCard is-${order.status}`}><button type="button" className="adminOrderCardHead" onClick={() => setOpen(!open)}><div><span>{order.orderKind === 'service_addon' ? '附掛加購服務單' : order.orderNumber}</span><strong>{labels[order.status] || order.status}</strong><small>{order.queueStage}{order.queueMinutes ? ` · ${order.queueMinutes} 分鐘` : ''}</small></div><div><span>{new Date(order.submittedAt).toLocaleString('zh-TW')}</span><b>{money(order.totalAmount)}</b></div></button>{open ? <div className="adminOrderCardBody">
     <div className="adminOrderItemList">{order.items.map((item) => <AdminOrderItemRow key={item.id} orderId={order.id} item={item} loading={loading} act={act} />)}</div>
-    {order.nominees?.length ? <div className="adminNomineeGrid">{order.nominees.map((item) => <article key={item.id}><span>{item.confirmationStatus}</span><strong>{item.staffName}</strong><p>{item.serviceName} · {item.segmentCount} 節</p><small>{new Date(item.requestedStartsAt).toLocaleString('zh-TW')} ～ {new Date(item.busyUntil).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}</small></article>)}</div> : null}
+    {order.addons?.length ? <div className="adminAddonSummary">{order.addons.map((item) => <article key={item.id}><span>ADD-ON · {labels[item.status] || item.status}</span><strong>{item.staffName}｜{item.serviceName}</strong><small>{item.serviceDurationMinutes} 分鐘 · {item.participantCount} 人 · 附掛於既有指名，不新增基礎費與忙碌區段</small></article>)}</div> : null}
+    {order.nominees?.length ? <div className="adminNomineeGrid">{order.nominees.map((item) => <article key={item.id}><span>{item.confirmationStatus}</span><strong>{item.staffName}</strong><p>{item.serviceName} · {item.segmentCount} 節</p><small>{new Date(item.requestedStartsAt).toLocaleString('zh-TW')} ～ {new Date(item.busyUntil).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}</small><NominationShortenControl orderId={order.id} orderStatus={order.status} item={item} loading={loading} act={act} />{['confirmed', 'in_service'].includes(order.status) && new Date(item.requestedServiceEndsAt).getTime() > Date.now() && (item.staffId === user.staffMemberId || canManageAddons) ? <AdminAddonComposer nominee={item} loading={loading} act={act} /> : null}</article>)}</div> : null}
     {mineWaiting ? <AdminButton disabled={loading} onClick={() => act(() => adminApi.confirmNominee(order.id), '已確認自己的指名；多人訂單會等待其他被指名店員。')}>確認我的指名</AdminButton> : null}
+    {mineWaitingAddon ? <AdminButton disabled={loading} onClick={() => act(() => adminApi.confirmAddon(order.id), '已確認顧客送出的附掛加購服務單。')}>確認我的加購服務</AdminButton> : null}
     {order.status === 'needs_reschedule' || order.status === 'submitted' ? <div className="adminOrderReschedule"><label>重新安排開始時間<input type="datetime-local" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} /></label><AdminButton variant="secondary" disabled={!startsAt || loading} onClick={() => act(() => adminApi.rescheduleOrder(order.id, new Date(startsAt).toISOString()), '已重新排程並退回等待確認。')}>重新排程</AdminButton></div> : null}
-    <div className="adminOrderEmergency"><label>內部備註<textarea value={note} onChange={(event) => setNote(event.target.value)} /></label><label>緊急狀態<select value={status} onChange={(event) => setStatus(event.target.value)}>{editableStatuses.map((value) => <option key={value} value={value}>{labels[value]}</option>)}</select></label><AdminButton variant="secondary" disabled={loading} onClick={() => act(() => adminApi.updateOrder(order.id, { internalNote: note, status }), '訂單內容與狀態已更新並留下稽核紀錄。')}>儲存緊急調整</AdminButton>{cancelable ? <AdminButton variant="danger" disabled={loading} onClick={() => act(() => adminApi.cancelOrder(order.id, '後台刪除未執行訂單'), '未執行訂單已取消，餐點信物折抵已退回。')}>刪除未執行訂單</AdminButton> : null}</div>
+    <div className="adminOrderEmergency"><label>內部備註<textarea value={note} onChange={(event) => setNote(event.target.value)} /></label><AdminButton variant="secondary" disabled={loading} onClick={() => act(() => adminApi.updateOrder(order.id, { internalNote: note }), '內部備註已儲存並留下稽核紀錄。')}>儲存備註</AdminButton></div>
+    {transitions.length ? <div className="adminOrderTransitions"><label>狀態操作原因（取消／退回／提早完成必填）<input value={transitionReason} maxLength="500" placeholder="例如：顧客改期、雙方同意提早結束" onChange={(event) => setTransitionReason(event.target.value)} /></label>{isEarlyCompletion ? <p>目前早於預約結束時間；完成後會記為「實際提早完成」，釋放店員但不自動改價。</p> : null}<div>{transitions.map((value) => { const needsReason = value === 'cancel' || value === 'reject' || value === 'return_to_reschedule' || (value === 'complete' && isEarlyCompletion); const actionLabel = value === 'complete' && isEarlyCompletion ? '實際提早完成' : transitionLabels[value]; return <AdminButton key={value} variant={value === 'cancel' || value === 'reject' ? 'danger' : 'secondary'} disabled={loading || (needsReason && !transitionReason.trim())} onClick={() => act(() => adminApi.transitionOrder(order.id, value, transitionReason.trim()), `已執行「${actionLabel}」，忙碌區段與訂單狀態已同步。`)}>{actionLabel}</AdminButton>; })}</div></div> : null}
     <div className="adminOrderTotals"><span>小計 {money(order.subtotal)}</span><span>信物折抵 −{money(order.mealCreditApplied)}</span><strong>應付 {money(order.totalAmount)}</strong></div>
   </div> : null}</article>;
+}
+
+function AdminAddonComposer({ nominee, loading, act }) {
+  const [open, setOpen] = useState(false);
+  const [options, setOptions] = useState([]);
+  const [fetching, setFetching] = useState(false);
+  const [error, setError] = useState('');
+  const [serviceId, setServiceId] = useState('');
+  const [segments, setSegments] = useState(1);
+  const [participants, setParticipants] = useState(1);
+  const service = options.find((item) => item.id === serviceId);
+  const segmentMinutes = Number(nominee.segmentMinutes || 20);
+  const effectiveStart = Math.max(Date.now(), new Date(nominee.requestedStartsAt).getTime());
+  const remainingMinutes = Math.max(0, Math.floor((new Date(nominee.requestedServiceEndsAt).getTime() - effectiveStart) / 60_000));
+  const minimumSegments = service?.durationMinutes ? Math.ceil(service.durationMinutes / segmentMinutes) : 1;
+  const maxSegments = Math.max(0, Math.floor(remainingMinutes / segmentMinutes));
+  const safeSegments = Math.max(minimumSegments, Math.min(segments, maxSegments || minimumSegments));
+  const duration = service?.durationMinutes || safeSegments * segmentMinutes;
+  const unit = service ? Number(service.price) + Math.max(0, participants - 1) * Number(service.additionalPersonPrice || 0) : 0;
+  const total = service ? unit * (service.durationMinutes ? 1 : safeSegments) : 0;
+  const toggle = async () => {
+    if (open) return setOpen(false);
+    setOpen(true);
+    if (options.length) return;
+    setFetching(true);
+    try {
+      const next = await adminApi.getAddonOptions(nominee.id);
+      setOptions(next || []);
+      setServiceId(next?.[0]?.id || '');
+      setError('');
+    } catch (reason) { setError(reason.message); }
+    finally { setFetching(false); }
+  };
+  useEffect(() => { if (service) setSegments(service.durationMinutes ? Math.ceil(service.durationMinutes / segmentMinutes) : 1); }, [serviceId]);
+  return <div className="adminAddonComposer"><button type="button" onClick={toggle}>{open ? '收起代客加購' : '＋ 代客加購服務'}</button>{open ? <div><p>剩餘約 {remainingMinutes} 分鐘。被指名者代客送出後直接成立，不再收基礎指名費，也不延長原時段。</p>{error ? <small className="adminFormError">{error}</small> : fetching ? <small>載入服務中…</small> : options.length ? <><label>服務<select value={serviceId} onChange={(event) => setServiceId(event.target.value)}>{options.map((item) => <option key={item.id} value={item.id}>{item.serviceName}｜{money(item.price)}{item.durationMinutes ? `／${item.durationMinutes} 分鐘` : '／節'}</option>)}</select></label><div><label>節數<input type="number" min={minimumSegments} max={maxSegments} disabled={Boolean(service?.durationMinutes)} value={safeSegments} onChange={(event) => setSegments(Number(event.target.value))} /></label><label>人數<input type="number" min="1" max="20" value={participants} onChange={(event) => setParticipants(Number(event.target.value))} /></label></div>{service?.priceText ? <small>標示價格：{service.priceText}</small> : null}<footer><span>{duration} 分鐘</span><strong>{money(total)}</strong><button type="button" disabled={loading || !service || duration > remainingMinutes} onClick={() => act(() => adminApi.submitAdminAddon(nominee.id, { serviceId, segmentCount: safeSegments, participantCount: participants }), `已代客送出「${service?.serviceName}」並直接成立。`)}>選好並代客送單</button></footer></> : <small>沒有可附掛的服務。</small>}</div> : null}</div>;
+}
+
+function NominationShortenControl({ orderId, orderStatus, item, loading, act }) {
+  const minimum = Number(item.minimumSegmentCount || 1);
+  const canEditStatus = ['submitted', 'partially_confirmed', 'needs_reschedule', 'confirmed'].includes(orderStatus);
+  const canShorten = canEditStatus && new Date(item.requestedStartsAt).getTime() > Date.now() && item.segmentCount > minimum;
+  const [segments, setSegments] = useState(Math.max(minimum, item.segmentCount - 1));
+  const [reason, setReason] = useState('');
+  useEffect(() => { setSegments(Math.max(minimum, item.segmentCount - 1)); setReason(''); }, [item.id, item.segmentCount, minimum]);
+  if (!canShorten) return <small className="adminNomineeLimit">{item.segmentCount <= minimum ? `已達服務最低 ${minimum} 節` : '開始後不可正式縮短'}</small>;
+  return <div className="adminNomineeShorten"><label>正式縮短為<input type="number" min={minimum} max={item.segmentCount - 1} value={segments} onChange={(event) => setSegments(Number(event.target.value))} /> 節</label><input value={reason} maxLength="500" placeholder="縮短原因（必填）" onChange={(event) => setReason(event.target.value)} /><button type="button" disabled={loading || !reason.trim() || segments < minimum || segments >= item.segmentCount} onClick={() => act(() => adminApi.shortenNomination(orderId, item.id, segments, reason.trim()), `已由 ${item.segmentCount} 節正式縮短為 ${segments} 節；金額與忙碌區段已同步。`)}>確認縮短</button></div>;
 }
 
 function AdminOrderItemRow({ orderId, item, loading, act }) {
@@ -163,7 +221,7 @@ function IssuedPanel({ issued, onClose }) {
 function SettingsPanel({ settings, onSaved }) {
   const [form, setForm] = useState(settings);
   const [pause, setPause] = useState(30);
-  const save = async () => onSaved(await adminApi.saveOrderingSettings({ minimumMealCredit: form.minimumMealCredit, baseNominationFee: form.baseNominationFee, segmentMinutes: form.segmentMinutes, reminderAfterMinutes: form.reminderAfterMinutes, escalateAfterMinutes: form.escalateAfterMinutes, expireAfterMinutes: form.expireAfterMinutes }));
+  const save = async () => onSaved(await adminApi.saveOrderingSettings({ minimumMealCredit: form.minimumMealCredit, baseNominationFee: form.baseNominationFee, segmentMinutes: form.segmentMinutes, reminderAfterMinutes: form.reminderAfterMinutes, escalateAfterMinutes: form.escalateAfterMinutes, expireAfterMinutes: form.expireAfterMinutes, businessDayStartMinute: form.businessDayStartMinute, businessDayEndMinute: form.businessDayEndMinute, businessDayEndsNextDay: form.businessDayEndsNextDay }));
   const pauseNow = async () => onSaved(await adminApi.pauseNomination(pause));
-  return <div className="adminOrderingSettings"><header><div><span>MANAGER / DEVELOPER</span><h2>點餐營運參數</h2><p>價格變更只影響新訂單；既有訂單保留送出時快照。</p></div><AdminButton onClick={save}>儲存參數</AdminButton></header><div className="adminOrderingSettingsGrid"><label>低消／信物可折抵金額<input type="number" min="0" value={form.minimumMealCredit} onChange={(event) => setForm({ ...form, minimumMealCredit: Number(event.target.value) })} /></label><label>每節基礎指名費<input type="number" min="0" value={form.baseNominationFee} onChange={(event) => setForm({ ...form, baseNominationFee: Number(event.target.value) })} /></label><label>每節分鐘<input type="number" min="1" value={form.segmentMinutes} onChange={(event) => setForm({ ...form, segmentMinutes: Number(event.target.value) })} /></label><label>提醒（分鐘）<input type="number" min="1" value={form.reminderAfterMinutes} onChange={(event) => setForm({ ...form, reminderAfterMinutes: Number(event.target.value) })} /></label><label>升級（分鐘）<input type="number" min="1" value={form.escalateAfterMinutes} onChange={(event) => setForm({ ...form, escalateAfterMinutes: Number(event.target.value) })} /></label><label>失效（分鐘）<input type="number" min="1" value={form.expireAfterMinutes} onChange={(event) => setForm({ ...form, expireAfterMinutes: Number(event.target.value) })} /></label></div><div className="adminNominationPause"><label>暫停指名分鐘<input type="number" min="0" max="1440" value={pause} onChange={(event) => setPause(Number(event.target.value))} /></label><AdminButton variant="secondary" onClick={pauseNow}>{pause === 0 ? '立即解除暫停' : `暫停 ${pause} 分鐘`}</AdminButton><span>{settings.nominationPaused ? `目前暫停至 ${new Date(settings.nominationPausedUntil).toLocaleString('zh-TW')}` : '目前開放指名'}</span></div></div>;
+  return <div className="adminOrderingSettings"><header><div><span>MANAGER / DEVELOPER</span><h2>點餐營運參數</h2><p>價格與時間變更只影響新營業日／新訂單；既有訂單保留送出時快照。</p></div><AdminButton onClick={save}>儲存參數</AdminButton></header><div className="adminBusinessHours"><label>營業開始<input type="time" value={minutesToTime(form.businessDayStartMinute)} onChange={(event) => setForm({ ...form, businessDayStartMinute: timeToMinutes(event.target.value) })} /></label><label>營業結束<input type="time" value={minutesToTime(form.businessDayEndMinute)} onChange={(event) => setForm({ ...form, businessDayEndMinute: timeToMinutes(event.target.value) })} /></label><label className="adminBusinessNextDay"><input type="checkbox" checked={form.businessDayEndsNextDay} onChange={(event) => setForm({ ...form, businessDayEndsNextDay: event.target.checked })} />結束時間屬於隔日</label><p>例如 18:00～隔日 03:00：凌晨 02:00 的訂單仍歸前一個營業日。</p></div><div className="adminOrderingSettingsGrid"><label>低消／信物可折抵金額<input type="number" min="0" value={form.minimumMealCredit} onChange={(event) => setForm({ ...form, minimumMealCredit: Number(event.target.value) })} /></label><label>每節基礎指名費<input type="number" min="0" value={form.baseNominationFee} onChange={(event) => setForm({ ...form, baseNominationFee: Number(event.target.value) })} /></label><label>每節分鐘<input type="number" min="1" value={form.segmentMinutes} onChange={(event) => setForm({ ...form, segmentMinutes: Number(event.target.value) })} /></label><label>提醒（分鐘）<input type="number" min="1" value={form.reminderAfterMinutes} onChange={(event) => setForm({ ...form, reminderAfterMinutes: Number(event.target.value) })} /></label><label>升級（分鐘）<input type="number" min="1" value={form.escalateAfterMinutes} onChange={(event) => setForm({ ...form, escalateAfterMinutes: Number(event.target.value) })} /></label><label>失效（分鐘）<input type="number" min="1" value={form.expireAfterMinutes} onChange={(event) => setForm({ ...form, expireAfterMinutes: Number(event.target.value) })} /></label></div><div className="adminNominationPause"><label>暫停指名分鐘<input type="number" min="0" max="1440" value={pause} onChange={(event) => setPause(Number(event.target.value))} /></label><AdminButton variant="secondary" onClick={pauseNow}>{pause === 0 ? '立即解除暫停' : `暫停 ${pause} 分鐘`}</AdminButton><span>{settings.nominationPaused ? `目前暫停至 ${new Date(settings.nominationPausedUntil).toLocaleString('zh-TW')}` : '目前開放指名'}</span></div></div>;
 }

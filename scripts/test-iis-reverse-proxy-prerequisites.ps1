@@ -109,11 +109,11 @@ foreach ($detail in $details) {
 }
 
 if ($missing.Count -gt 0) {
-    Write-Host '::error::The DEV IIS runner is not ready for Vinext deployment.'
+    Write-Host '::error::The IIS runner is not ready for Vinext deployment.'
     foreach ($item in $missing) {
         Write-Host "::error::Missing prerequisite: $item"
     }
-    throw "Missing DEV deployment prerequisites: $($missing -join '; ')"
+    throw "Missing deployment prerequisites: $($missing -join '; ')"
 }
 
-Write-Host 'All Vinext DEV IIS deployment prerequisites are available.'
+Write-Host 'All Vinext IIS deployment prerequisites are available.'

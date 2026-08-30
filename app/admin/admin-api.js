@@ -1,3 +1,7 @@
+// Database permission policy: the API account can SELECT/INSERT/UPDATE only.
+// Do not call the DELETE methods below or add new destructive requests until the
+// backend has an approved update-based (soft-disable/cancel) replacement.
+// Removing an item from an unsent client-side cart is local state only and is safe.
 const ADMIN_API_BASE_URL = "/api/admin";
 
 export class ApiError extends Error {

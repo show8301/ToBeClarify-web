@@ -1582,3 +1582,54 @@
   .adminIssuedField { grid-template-columns: minmax(88px, auto) minmax(0, 1fr) auto; }
   .adminRecoveryField code { text-align: left; }
 }
+
+.adminBusinessOverride {
+  margin: 14px 0;
+  padding: 14px;
+  border: 1px solid rgba(216, 78, 58, .35);
+  border-radius: 12px;
+  background: rgba(255, 237, 233, .7);
+}
+.adminBusinessOverride > header {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+.adminBusinessOverride header span {
+  color: #9d3425;
+  font: 700 8px/1 var(--font-mono);
+  letter-spacing: .14em;
+}
+.adminBusinessOverride h3 { margin: 5px 0; font-size: 17px; }
+.adminBusinessOverride p { margin: 4px 0; color: var(--color-fg-mute); font-size: 11px; line-height: 1.45; }
+.adminOverrideStatus {
+  padding: 5px 9px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-fg-mute);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.adminOverrideStatus.isActive { border-color: rgba(216, 78, 58, .5); background: #ffe1db; color: #9d3425; }
+.adminOverrideWarning { margin: 10px 0; padding: 9px; border-radius: 8px; background: #ffe1db; color: #9d3425; font-size: 11px; font-weight: 700; }
+.adminBusinessOverrideGrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; }
+.adminBusinessOverrideGrid label { display: grid; gap: 5px; color: var(--color-fg-mute); font-size: 10px; }
+.adminBusinessOverrideGrid input { width: 100%; padding: 9px; border: 1px solid var(--color-border-strong); border-radius: 8px; background: rgba(255, 255, 255, .78); }
+.adminBusinessOverrideGrid small { font-size: 9px; }
+.adminBusinessOverrideReason { grid-column: 1 / -1; }
+.adminBusinessOverrideActions { display: flex; gap: 9px; flex-wrap: wrap; margin-top: 12px; }
+.adminOverrideMessage { color: var(--color-accent-2) !important; }
+.adminOverrideError { color: #9d3425 !important; }
+
+@media (max-width: 1100px) {
+  .adminBusinessOverrideGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .adminBusinessOverride > header { display: block; }
+  .adminOverrideStatus { display: inline-flex; margin-top: 9px; }
+  .adminBusinessOverrideGrid { grid-template-columns: 1fr; }
+  .adminBusinessOverrideReason { grid-column: auto; }
+  .adminBusinessOverrideActions > * { flex: 1; }
+}

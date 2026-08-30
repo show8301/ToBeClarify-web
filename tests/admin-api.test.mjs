@@ -143,3 +143,49 @@ test('all staff list uses the dedicated developer endpoint', async () => {
     globalThis.fetch = originalFetch;
   }
 });
+
+test('business-day override uses manager-only read/write endpoints', async () => {
+  const calls = [];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url, options = {}) => {
+    calls.push({ url, options });
+    return new Response(JSON.stringify({ success: true, data: url.endsWith('/disable') ? true : {
+      enabled: true,
+      businessDate: '2026-08-31',
+      startsAt: '2026-08-31T12:00:00+08:00',
+      endsAt: '2026-09-01T02:00:00+08:00',
+      expiresAt: '2026-08-31T13:00:00+08:00',
+    } }), { status: 200, headers: { 'content-type': 'application/json' } });
+  };
+
+  try {
+    const moduleUrl = new URL('../app/admin/admin-api.js', import.meta.url);
+    moduleUrl.searchParams.set('test', `${process.pid}-${Date.now()}-business-day-override`);
+    const { adminApi } = await import(moduleUrl.href);
+    await adminApi.getBusinessDayOverride();
+    await adminApi.saveBusinessDayOverride({
+      businessDate: '2026-08-31',
+      startsAt: '2026-08-31T12:00:00',
+      endsAt: '2026-09-01T02:00:00',
+      durationMinutes: 60,
+      reason: '營業日測試',
+    });
+    await adminApi.disableBusinessDayOverride();
+
+    assert.equal(calls[0].url, '/api/admin/ordering-settings/business-day-override');
+    assert.equal(calls[0].options.method, undefined);
+    assert.equal(calls[1].url, '/api/admin/ordering-settings/business-day-override');
+    assert.equal(calls[1].options.method, 'PUT');
+    assert.deepEqual(JSON.parse(calls[1].options.body), {
+      businessDate: '2026-08-31',
+      startsAt: '2026-08-31T12:00:00',
+      endsAt: '2026-09-01T02:00:00',
+      durationMinutes: 60,
+      reason: '營業日測試',
+    });
+    assert.equal(calls[2].url, '/api/admin/ordering-settings/business-day-override/disable');
+    assert.equal(calls[2].options.method, 'POST');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

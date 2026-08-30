@@ -1,6 +1,6 @@
 # vinext-starter
 
-> **後端資料庫權限限制：** API 使用的資料庫帳號沒有刪除資料或資料表的權限。後台前端不得呼叫 `DELETE` API；內容下架、訂單取消與移除應改由後端以狀態更新保留歷史資料。尚未送出的顧客購物車在瀏覽器內移除項目不會寫入資料庫，與資料庫刪除不同。
+> **直接 SQL 維護帳號限制：** 提供給直接 SQL 操作的帳號沒有刪除資料或資料表的權限；這不等同於 API 執行帳號。後台前端可依 API 授權呼叫受控的 `DELETE` 業務端點。尚未送出的顧客購物車在瀏覽器內移除項目不會寫入資料庫，與資料庫刪除不同。
 
 A clean full-stack starter running on
 [vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and

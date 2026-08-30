@@ -1,6 +1,6 @@
-// Database permission policy: the API account can SELECT/INSERT/UPDATE only.
-// Do not call the DELETE methods below or add new destructive requests until the
-// backend has an approved update-based (soft-disable/cancel) replacement.
+// The restricted account supplied for direct SQL maintenance cannot delete rows.
+// That restriction does not prohibit these authorized API DELETE calls: the API
+// deployment identity and backend business rules determine whether deletion runs.
 // Removing an item from an unsent client-side cart is local state only and is safe.
 const ADMIN_API_BASE_URL = "/api/admin";
 

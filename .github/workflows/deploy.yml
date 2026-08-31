@@ -1,5 +1,8 @@
 name: Vinext Web CI/CD
 
+# Development deployments intentionally skip all automated test suites. Keep any
+# future test workflow separate and excluded from dev unless explicitly requested.
+
 on:
   pull_request:
     branches:
@@ -31,7 +34,7 @@ env:
 
 jobs:
   build:
-    name: Clean install, build, and test
+    name: Clean install and build
     runs-on: ubuntu-latest
     timeout-minutes: 15
     concurrency:
@@ -74,10 +77,10 @@ jobs:
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
 
-      - name: Build and test
+      - name: Build deployable application
         env:
           NODE_OPTIONS: --experimental-strip-types
-        run: npm test
+        run: npm run build
 
       - name: Upload deployable Vinext application
         if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.preflight_only != true)

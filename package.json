@@ -11,7 +11,8 @@
     "start": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext start",
     "snapshot:staff": "node scripts/snapshot-staff.mjs",
     "snapshot:site": "node scripts/snapshot-site.mjs",
-    "test": "npm run build && node --test tests/rendered-html.test.mjs tests/admin-api.test.mjs tests/admin-ui.test.mjs tests/deployment-health.test.mjs tests/deployment-workflow.test.mjs",
+    "test": "npm run build && npm run test:non-e2e",
+    "test:non-e2e": "node --test tests/rendered-html.test.mjs tests/admin-api.test.mjs tests/admin-ui.test.mjs tests/ordering-ui.test.mjs tests/deployment-health.test.mjs tests/deployment-workflow.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate"
   },

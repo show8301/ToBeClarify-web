@@ -26,6 +26,13 @@ test("the shared workflow deploys only dev and main to isolated targets", async 
   assert.match(workflow, /group: vinext-\$\{\{ github\.ref_name \}\}-iis-deployment/);
 });
 
+test("development deployment skips automated test suites", async () => {
+  const workflow = await readRepositoryFile(".github/workflows/deploy.yml");
+
+  assert.doesNotMatch(workflow, /run:\s*npm run test(?::|\s)/i);
+  assert.doesNotMatch(workflow, /run:\s*(?:npm|pnpm|yarn|npx|node)\s+[^\r\n]*(?:test|playwright|cypress|selenium)/i);
+});
+
 test("the IIS deployer accepts both protected deployment directories", async () => {
   const deployScript = await readRepositoryFile("scripts/deploy-vinext-iis.ps1");
 

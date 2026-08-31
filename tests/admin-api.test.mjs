@@ -189,3 +189,34 @@ test('business-day override uses manager-only read/write endpoints', async () =>
     globalThis.fetch = originalFetch;
   }
 });
+
+test('operational business-day actions and coordination decisions use explicit endpoints', async () => {
+  const calls = [];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url, options = {}) => {
+    calls.push({ url, options });
+    return new Response(JSON.stringify({ success: true, data: { periodStatus: 'open' } }), {
+      status: 200,
+      headers: { 'content-type': 'application/json' },
+    });
+  };
+
+  try {
+    const moduleUrl = new URL('../app/admin/admin-api.js', import.meta.url);
+    moduleUrl.searchParams.set('test', `${process.pid}-${Date.now()}-operational-day`);
+    const { adminApi } = await import(moduleUrl.href);
+    await adminApi.openBusinessPeriod({ businessDate: '2026-08-31', projectedCloseAt: '2026-09-01T02:00' });
+    await adminApi.applyBusinessPeriodAction({ action: 'set_intake_mode', intakeMode: 'coordination', reason: '關店前協調' });
+    await adminApi.decideStoreConfirmation('order/1', 'approved', '現場可承接');
+
+    assert.equal(calls[0].url, '/api/admin/business-period/open');
+    assert.equal(calls[0].options.method, 'POST');
+    assert.equal(calls[1].url, '/api/admin/business-period/action');
+    assert.equal(calls[1].options.method, 'POST');
+    assert.equal(calls[2].url, '/api/admin/orders/order%2F1/store-confirmation');
+    assert.equal(calls[2].options.method, 'POST');
+    assert.deepEqual(JSON.parse(calls[2].options.body), { decision: 'approved', reason: '現場可承接' });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

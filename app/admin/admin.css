@@ -2117,6 +2117,90 @@
   color: var(--color-fg);
 }
 
+:root[data-admin-theme="dark"] .adminDeveloperDisclosure {
+  border-color: rgba(159, 199, 232, .34);
+  background: linear-gradient(145deg, rgba(24, 40, 55, .96), rgba(15, 29, 43, .98));
+  color: var(--color-fg);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, .28), inset 0 1px rgba(255, 255, 255, .05);
+}
+
+:root[data-admin-theme="dark"] .adminDeveloperDisclosureSummary,
+:root[data-admin-theme="dark"] .adminDeveloperDisclosureSummary b {
+  color: var(--color-fg);
+}
+
+:root[data-admin-theme="dark"] .adminDeveloperDisclosureSummary small,
+:root[data-admin-theme="dark"] .adminDeveloperToolState {
+  color: var(--color-fg-soft);
+}
+
+:root[data-admin-theme="dark"] .adminDeveloperDisclosureBody::before {
+  border-top-color: rgba(218, 234, 244, .24);
+}
+
+:root[data-admin-theme="dark"] .adminPageVisibilityRow {
+  border-color: rgba(218, 234, 244, .22);
+  background: rgba(28, 48, 65, .9);
+  color: var(--color-fg);
+}
+
+:root[data-admin-theme="dark"] .adminPageVisibilityRow > span {
+  color: var(--color-fg-soft);
+}
+
+:root[data-admin-theme="dark"] .adminStaffListHeading strong {
+  color: var(--color-fg);
+}
+
+:root[data-admin-theme="dark"] .adminStaffListHeading > span {
+  border-color: rgba(218, 234, 244, .28);
+  background: rgba(37, 58, 75, .9);
+  color: var(--color-fg-soft);
+}
+
+:root[data-admin-theme="dark"] .adminStaffListHeading > span.isPublic {
+  border-color: rgba(143, 214, 198, .38);
+  background: rgba(46, 112, 101, .52);
+  color: #b8f1e2;
+}
+
+:root[data-admin-theme="dark"] .adminStaffListHeading > span.isHidden {
+  border-color: rgba(236, 146, 163, .38);
+  background: rgba(120, 54, 73, .5);
+  color: #ffc0ca;
+}
+
+:root[data-admin-theme="dark"] .adminStaffListRole {
+  color: var(--color-fg-soft) !important;
+}
+
+:root[data-admin-theme="dark"] .adminStaffListSummary > span {
+  background: rgba(46, 65, 84, .9);
+  color: var(--color-fg-soft) !important;
+}
+
+:root[data-admin-theme="dark"] .adminStaffListSummary > span.isWorking {
+  background: rgba(46, 112, 101, .5);
+  color: #b8f1e2 !important;
+}
+
+:root[data-admin-theme="dark"] .adminStaffListSummary .adminStaffBufferLine {
+  color: #d0c7ff !important;
+}
+
+:root[data-admin-theme="dark"] .adminStaffListControls {
+  border-left-color: rgba(218, 234, 244, .2);
+}
+
+:root[data-admin-theme="dark"] .adminStaffListControlLabel {
+  color: var(--color-fg-mute);
+}
+
+:root[data-admin-theme="dark"] .adminStaffListControl .adminToggle,
+:root[data-admin-theme="dark"] .adminStaffListControls > small {
+  color: var(--color-fg-soft);
+}
+
 @media (max-width: 1100px) {
   .adminBusinessOverrideGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

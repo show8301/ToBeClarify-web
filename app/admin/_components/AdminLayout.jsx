@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { adminApi } from '../admin-api.js';
 import { useAdminAuth } from './AdminAuthContext.jsx';
 import { AdminButton, AdminDialog } from './AdminShared.jsx';
@@ -15,12 +15,33 @@ export function AdminLayout({ route, navigate, children }) {
   const { user, logout } = useAdminAuth();
   const items = useMemo(() => allItems.filter((item) => item.roles.includes(user.role)), [user.role]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [themeReady, setThemeReady] = useState(false);
   const [registerKeyState, setRegisterKeyState] = useState({ loading: false, message: '', error: false });
   const [isPasswordResetKeyOpen, setIsPasswordResetKeyOpen] = useState(false);
   const [passwordResetKeyForm, setPasswordResetKeyForm] = useState({ loginName: '' });
   const [passwordResetKeyState, setPasswordResetKeyState] = useState({ loading: false, result: null, message: '', error: false, copied: false });
   const canGetRegisterKey = user.role === 'developer' || user.role === 'manager';
   const canCopyPasswordResetKey = typeof navigator !== 'undefined' && Boolean(navigator.clipboard?.writeText);
+
+  useEffect(() => {
+    try {
+      setIsDarkMode(window.localStorage.getItem('lucid-dream-admin-theme') === 'dark');
+    } catch {
+      setIsDarkMode(false);
+    }
+    setThemeReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!themeReady) return;
+    document.documentElement.dataset.adminTheme = isDarkMode ? 'dark' : 'light';
+    try {
+      window.localStorage.setItem('lucid-dream-admin-theme', isDarkMode ? 'dark' : 'light');
+    } catch {
+      // The current session still follows the selected theme without persistence.
+    }
+  }, [isDarkMode, themeReady]);
 
   const handleNavigate = (nextRoute) => {
     navigate(nextRoute);
@@ -132,6 +153,17 @@ export function AdminLayout({ route, navigate, children }) {
               </div>
               {registerKeyState.message ? <span className={registerKeyState.error ? 'isError' : ''} role="status">{registerKeyState.message}</span> : null}
             </div> : null}
+            <AdminButton
+              variant="ghost"
+              className="adminThemeToggle"
+              aria-pressed={isDarkMode}
+              aria-label={isDarkMode ? '切換為淺色模式' : '切換為暗色模式'}
+              title={isDarkMode ? '切換為淺色模式' : '切換為暗色模式'}
+              disabled={!themeReady}
+              onClick={() => setIsDarkMode((current) => !current)}
+            >
+              {isDarkMode ? '☀ 淺色模式' : '☾ 暗色模式'}
+            </AdminButton>
             <AdminButton variant="ghost" onClick={handleLogout}>登出</AdminButton>
           </div>
         </div>

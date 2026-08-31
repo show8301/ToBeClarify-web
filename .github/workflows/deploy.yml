@@ -1,5 +1,8 @@
 name: Vinext Web CI/CD
 
+# Development deployments intentionally run no browser E2E tests. Keep any future
+# Playwright/Cypress/Selenium suite in a separate workflow excluded from dev.
+
 on:
   pull_request:
     branches:
@@ -74,10 +77,15 @@ jobs:
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
 
-      - name: Build and test
+      - name: Build deployable application
         env:
           NODE_OPTIONS: --experimental-strip-types
-        run: npm test
+        run: npm run build
+
+      - name: Run enumerated non-E2E regression tests
+        env:
+          NODE_OPTIONS: --experimental-strip-types
+        run: npm run test:non-e2e
 
       - name: Upload deployable Vinext application
         if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.preflight_only != true)

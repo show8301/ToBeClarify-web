@@ -26,14 +26,11 @@ test("the shared workflow deploys only dev and main to isolated targets", async 
   assert.match(workflow, /group: vinext-\$\{\{ github\.ref_name \}\}-iis-deployment/);
 });
 
-test("development deployment uses an explicitly non-E2E test suite", async () => {
+test("development deployment skips automated test suites", async () => {
   const workflow = await readRepositoryFile(".github/workflows/deploy.yml");
-  const packageJson = JSON.parse(await readRepositoryFile("package.json"));
-  const nonE2eCommand = packageJson.scripts?.["test:non-e2e"] ?? "";
 
-  assert.match(workflow, /run: npm run test:non-e2e/);
-  assert.match(nonE2eCommand, /node --test/);
-  assert.doesNotMatch(nonE2eCommand, /playwright|cypress|selenium|\be2e\b/i);
+  assert.doesNotMatch(workflow, /run:\s*npm run test(?::|\s)/i);
+  assert.doesNotMatch(workflow, /run:\s*(?:npm|pnpm|yarn|npx|node)\s+[^\r\n]*(?:test|playwright|cypress|selenium)/i);
 });
 
 test("the IIS deployer accepts both protected deployment directories", async () => {

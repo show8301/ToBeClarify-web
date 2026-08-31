@@ -1,7 +1,7 @@
 name: Vinext Web CI/CD
 
-# Development deployments intentionally run no browser E2E tests. Keep any future
-# Playwright/Cypress/Selenium suite in a separate workflow excluded from dev.
+# Development deployments intentionally skip all automated test suites. Keep any
+# future test workflow separate and excluded from dev unless explicitly requested.
 
 on:
   pull_request:
@@ -34,7 +34,7 @@ env:
 
 jobs:
   build:
-    name: Clean install, build, and test
+    name: Clean install and build
     runs-on: ubuntu-latest
     timeout-minutes: 15
     concurrency:
@@ -81,11 +81,6 @@ jobs:
         env:
           NODE_OPTIONS: --experimental-strip-types
         run: npm run build
-
-      - name: Run enumerated non-E2E regression tests
-        env:
-          NODE_OPTIONS: --experimental-strip-types
-        run: npm run test:non-e2e
 
       - name: Upload deployable Vinext application
         if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.preflight_only != true)

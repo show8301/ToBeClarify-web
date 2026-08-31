@@ -174,6 +174,10 @@ function AdminOrderCard({ order, user, loading, act }) {
   const mineWaiting = order.storeConfirmationStatus !== 'pending' && order.nominees?.some((item) => item.staffId === user.staffMemberId && item.confirmationStatus === 'waiting');
   const mineWaitingAddon = order.storeConfirmationStatus !== 'pending' && order.addons?.some((item) => item.staffId === user.staffMemberId && item.status === 'waiting');
   const canManageAddons = user.role === 'developer' || user.role === 'manager';
+  const canManageNomineeConfirmation = user.role === 'developer' || user.role === 'manager';
+  const canConfirmNominee = order.storeConfirmationStatus !== 'pending' &&
+    order.nominees?.some((item) => item.confirmationStatus === 'waiting') &&
+    (canManageNomineeConfirmation || mineWaiting);
   const canBackfill = order.status === 'expired' && order.orderKind !== 'service_addon' && order.nominees?.length > 0 &&
     (canManageAddons || (order.nominees.length === 1 && order.nominees[0].staffId === user.staffMemberId));
   const cancelable = ['submitted', 'partially_confirmed', 'needs_reschedule'].includes(order.status);
@@ -185,7 +189,7 @@ function AdminOrderCard({ order, user, loading, act }) {
      {order.addons?.length ? <div className="adminAddonSummary">{order.addons.map((item) => <article key={item.id}><span>ADD-ON · {labels[item.status] || item.status}</span><strong>{item.staffName}｜{item.serviceName}</strong><small>{item.serviceDurationMinutes} 分鐘 · {item.participantCount} 人 · 附掛於既有指名，不新增基礎費與忙碌區段</small></article>)}</div> : null}
       {order.nominees?.length ? <div className="adminNomineeGrid">{order.nominees.map((item) => <article key={item.id}><span>{item.confirmationStatus}</span><strong>{item.staffName}</strong><p>{item.serviceName} · {item.segmentCount} 節</p><small>{new Date(item.requestedStartsAt).toLocaleString('zh-TW')} ～ {new Date(item.busyUntil).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}</small><NominationShortenControl orderId={order.id} orderStatus={order.status} item={item} loading={loading} act={act} />{['confirmed', 'in_service'].includes(order.status) && new Date(item.requestedServiceEndsAt).getTime() > Date.now() && (item.staffId === user.staffMemberId || canManageAddons) ? <AdminAddonComposer nominee={item} loading={loading} act={act} /> : null}</article>)}</div> : null}
       {order.startedAt || order.completedAt ? <div className="adminOrderActualTimes"><span>實際開始：{order.startedAt ? new Date(order.startedAt).toLocaleString('zh-TW') : '—'}</span><span>實際結束：{order.completedAt ? new Date(order.completedAt).toLocaleString('zh-TW') : '服務中'}</span></div> : null}
-      {mineWaiting ? <AdminButton disabled={loading} onClick={() => act(() => adminApi.confirmNominee(order.id), '已確認自己的指名；多人訂單會等待其他被指名店員。')}>確認我的指名</AdminButton> : null}
+      {canConfirmNominee ? <AdminButton disabled={loading} onClick={() => act(() => adminApi.confirmNominee(order.id), canManageNomineeConfirmation ? '已代為確認所有指名；訂單成立狀態已同步。' : '已確認自己的指名；多人訂單會等待其他被指名店員。')}>{canManageNomineeConfirmation ? '代為確認指名服務' : '確認我的指名'}</AdminButton> : null}
       {mineWaitingAddon ? <AdminButton disabled={loading} onClick={() => act(() => adminApi.confirmAddon(order.id), '已確認顧客送出的附掛加購服務單。')}>確認我的加購服務</AdminButton> : null}
     {order.status === 'expired' ? <>
       <div className="adminOrderReschedule"><label>重新安排開始時間（尚未接待）<input type="datetime-local" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} /></label><small>此流程只適用於顧客尚未被接待；重新排程後會回到等待被指名店員確認，並重新計入原本的信物折抵。</small><AdminButton variant="secondary" disabled={!startsAt || loading} onClick={() => act(() => adminApi.rescheduleOrder(order.id, new Date(startsAt).toISOString()), '已重新排程，訂單已恢復等待確認。')}>重新排程（尚未接待）</AdminButton></div>

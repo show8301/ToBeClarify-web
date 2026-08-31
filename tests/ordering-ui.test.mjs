@@ -52,6 +52,8 @@ test('admin ordering workspace groups customers and exposes permission-gated ope
   assert.match(source, /結束時間屬於隔日/);
   assert.match(source, /凌晨 02:00 的訂單仍歸前一個營業日/);
   assert.match(source, /確認我的指名/);
+  assert.match(source, /代為確認指名服務/);
+  assert.match(source, /canManageNomineeConfirmation/);
   assert.match(source, /退回重新排程/);
   assert.match(source, /重新排程（尚未接待）/);
   assert.match(source, /已接待補登/);

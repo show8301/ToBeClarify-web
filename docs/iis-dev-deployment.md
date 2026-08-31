@@ -56,10 +56,18 @@ Development optionally accepts:
 
 ## Workflow behavior
 
-- Pull requests targeting `main` or `dev` perform a clean locked install,
-  build, and test without deploying.
-- Pushes to `dev` deploy automatically to the development environment.
-- Pushes to `main` deploy automatically to the production environment.
+- Pull requests targeting `dev` perform a clean locked install, build, and
+  static/deployment validation without deploying. Automated test suites are
+  intentionally skipped unless the user explicitly requests a test run.
+- The only permitted production promotion pull request is `dev` → `main`.
+  The workflow rejects a different source branch for a pull request targeting
+  `main`, so feature branches cannot bypass the development environment.
+- Pushes to `dev` deploy automatically to the development environment. This is
+  the required first release for every Web change and must be manually checked
+  by the user.
+- Only after the user confirms the DEV result should the tested `dev` commit be
+  manually merged into `main`; that push then deploys to the production
+  environment.
 - Production and DEV use different IIS directories, Node ports, Scheduled Task
   names, deployment concurrency groups, and GitHub environments.
 - A manual run with `preflight_only` checks the runner and IIS without changing
@@ -67,3 +75,14 @@ Development optionally accepts:
 - Deployment uses a staging directory, retains one rollback directory, starts
   Vinext through a scheduled task, and rolls back automatically when either the
   localhost or public health check does not report the current Git commit SHA.
+
+## Required Web release sequence
+
+1. Commit the change on a `codex/*` branch and open a pull request targeting
+   `dev`.
+2. Merge the change into `dev` (or otherwise push the reviewed commit to
+   `dev`) and wait for the DEV deployment to complete.
+3. Ask the user to verify the DEV site. Keep the change out of `main` until the
+   user confirms it is ready.
+4. Open a new pull request from `dev` to `main` and merge it manually after the
+   confirmation. The resulting `main` push triggers production deployment.

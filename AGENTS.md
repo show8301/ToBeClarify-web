@@ -2,6 +2,6 @@
 
 ## Development deployment checks
 
-- Never run E2E browser tests as part of a `dev` branch deployment or against the deployed development site.
-- Keep the `dev` CI path limited to the application build, static checks, unit/component tests, explicitly enumerated non-E2E integration tests, and the existing HTTP health check.
-- Keep browser E2E commands in a separate workflow that does not run for `refs/heads/dev` if they are added in the future.
+- Skip all automated test suites for a `dev` branch deployment by default, including unit, component, integration, E2E, and browser tests. Run them only when the user explicitly requests testing for that run.
+- Keep the `dev` CI path limited to the application build, static/configuration validation, deployment status, and the existing operational HTTP health check.
+- Keep test scripts available for manual or explicitly requested execution; they must not be invoked by the `dev` deployment workflow.

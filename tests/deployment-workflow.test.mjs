@@ -33,6 +33,15 @@ test("development deployment skips automated test suites", async () => {
   assert.doesNotMatch(workflow, /run:\s*(?:npm|pnpm|yarn|npx|node)\s+[^\r\n]*(?:test|playwright|cypress|selenium)/i);
 });
 
+test("production promotion only accepts the tested dev branch", async () => {
+  const workflow = await readRepositoryFile(".github/workflows/deploy.yml");
+
+  assert.match(workflow, /validate-production-promotion/);
+  assert.match(workflow, /github\.base_ref == 'main'/);
+  assert.match(workflow, /HEAD_REF: \$\{\{ github\.head_ref \}\}/);
+  assert.match(workflow, /HEAD_REF.*!= "dev"/);
+});
+
 test("the IIS deployer accepts both protected deployment directories", async () => {
   const deployScript = await readRepositoryFile("scripts/deploy-vinext-iis.ps1");
 

@@ -1,8 +1,9 @@
 .adminTheme {
   --color-bg-0: #18201d;
   --color-fg: #18201d;
-  --color-fg-soft: rgba(24, 32, 29, 0.76);
-  --color-fg-mute: rgba(24, 32, 29, 0.54);
+  /* Keep secondary copy readable on the light admin surfaces. */
+  --color-fg-soft: rgba(24, 32, 29, 0.84);
+  --color-fg-mute: rgba(24, 32, 29, 0.68);
   --color-accent: #ff705c;
   --color-accent-dark: #d84e3a;
   --color-accent-soft: #c13e2d;
@@ -253,6 +254,28 @@
   border-radius: var(--radius-md);
   background: rgba(var(--color-accent-2-rgb), 0.1);
 }
+
+.adminCredentialTools {
+  margin-top: 18px;
+  border-color: rgba(var(--color-accent-rgb), .32);
+}
+.adminCredentialToolsBody {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+.adminCredentialToolsBody .adminCredentialActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.adminCredentialMessage {
+  color: var(--color-accent-2);
+  font-size: 11px;
+  line-height: 1.4;
+}
+.adminCredentialMessage.isError { color: #ffabab; }
 
 .adminPasswordResetKeyResult > span {
   color: var(--color-fg-mute);
@@ -1467,6 +1490,276 @@
   white-space: nowrap;
 }
 
+/* Optional admin dark mode. Keep the existing component geometry and switch
+   only the shared palette plus the few modern-surface colors that are fixed
+   in the visual refresh below. Customer ordering pages are outside this scope. */
+:root[data-admin-theme="dark"] .adminTheme {
+  --color-bg-0: #0d1722;
+  --color-fg: #edf4f7;
+  --color-fg-soft: rgba(237, 244, 247, .84);
+  --color-fg-mute: rgba(237, 244, 247, .66);
+  --color-accent: #9fc7e8;
+  --color-accent-dark: #b9d8f1;
+  --color-accent-soft: #a9c7ea;
+  --color-accent-rgb: 159, 199, 232;
+  --color-accent-2: #8fd6c6;
+  --color-accent-2-rgb: 143, 214, 198;
+  --color-gold: #c8bdff;
+  --color-border: rgba(218, 234, 244, .2);
+  --color-border-strong: rgba(218, 234, 244, .36);
+  --color-surface: rgba(23, 35, 49, .9);
+  --color-surface-strong: rgba(27, 41, 56, .96);
+  --color-surface-input: rgba(13, 23, 34, .9);
+  --shadow-card: 0 18px 48px rgba(0, 0, 0, .34), inset 0 1px rgba(255, 255, 255, .05);
+  color-scheme: dark;
+}
+
+:root[data-admin-theme="dark"] .adminLoginShell,
+:root[data-admin-theme="dark"] .adminState,
+:root[data-admin-theme="dark"] .adminShell {
+  background:
+    radial-gradient(circle at 8% 8%, rgba(126, 167, 204, .22), transparent 29rem),
+    radial-gradient(circle at 92% 12%, rgba(86, 170, 154, .16), transparent 32rem),
+    linear-gradient(145deg, #172636, #0e1824 58%, #0a1119);
+}
+
+:root[data-admin-theme="dark"] .adminLoginShell::before,
+:root[data-admin-theme="dark"] .adminState::before,
+:root[data-admin-theme="dark"] .adminShell::before {
+  background-image: linear-gradient(rgba(174, 211, 234, .06) 1px, transparent 1px), linear-gradient(90deg, rgba(174, 211, 234, .06) 1px, transparent 1px);
+  opacity: .2;
+}
+
+:root[data-admin-theme="dark"] .adminTopbar,
+:root[data-admin-theme="dark"] .adminLoginCard,
+:root[data-admin-theme="dark"] .adminPanel,
+:root[data-admin-theme="dark"] .adminInlineState,
+:root[data-admin-theme="dark"] .adminDialog {
+  border-color: rgba(218, 234, 244, .22);
+  background: linear-gradient(145deg, rgba(27, 41, 56, .94), rgba(18, 29, 42, .9));
+  color: var(--color-fg);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, .34), inset 0 1px rgba(255, 255, 255, .06);
+}
+
+:root[data-admin-theme="dark"] .adminTopbarMark,
+:root[data-admin-theme="dark"] .adminLoginMark {
+  border-color: rgba(218, 234, 244, .25);
+  background: linear-gradient(145deg, #4d6b86, #263b50);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, .28);
+}
+
+:root[data-admin-theme="dark"] .adminNav button:hover,
+:root[data-admin-theme="dark"] .adminNav button.isActive {
+  border-color: rgba(159, 199, 232, .42);
+  background: linear-gradient(110deg, rgba(103, 142, 177, .42), rgba(71, 139, 128, .32));
+  color: var(--color-fg);
+}
+
+:root[data-admin-theme="dark"] .adminPanelHeader h2,
+:root[data-admin-theme="dark"] .adminPageHeading h1,
+:root[data-admin-theme="dark"] .adminDialogHeader h2,
+:root[data-admin-theme="dark"] .adminNav button,
+:root[data-admin-theme="dark"] .adminAccount strong {
+  color: var(--color-fg);
+}
+
+:root[data-admin-theme="dark"] .adminPanelHeader p,
+:root[data-admin-theme="dark"] .adminPageHeading p:not(.eyebrow),
+:root[data-admin-theme="dark"] .adminDialogHeader p,
+:root[data-admin-theme="dark"] .adminField,
+:root[data-admin-theme="dark"] .adminField > span,
+:root[data-admin-theme="dark"] .adminField small,
+:root[data-admin-theme="dark"] .adminFieldHint,
+:root[data-admin-theme="dark"] .adminImagePickerHeader,
+:root[data-admin-theme="dark"] .adminToggle {
+  color: var(--color-fg-soft);
+}
+
+:root[data-admin-theme="dark"] .adminField input,
+:root[data-admin-theme="dark"] .adminField textarea,
+:root[data-admin-theme="dark"] .adminField select,
+:root[data-admin-theme="dark"] .adminSetItemRow input,
+:root[data-admin-theme="dark"] .adminSetItemRow select,
+:root[data-admin-theme="dark"] .adminBusinessHours input,
+:root[data-admin-theme="dark"] .adminStoreConfirmation input,
+:root[data-admin-theme="dark"] .adminBusinessOverrideGrid input {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface-input);
+  color: var(--color-fg);
+  box-shadow: inset 0 0 0 1px rgba(218, 234, 244, .05);
+}
+
+:root[data-admin-theme="dark"] .adminButton-primary,
+:root[data-admin-theme="dark"] .adminButton-secondary,
+:root[data-admin-theme="dark"] .adminButton-ghost,
+:root[data-admin-theme="dark"] .adminThemeToggle {
+  border-color: rgba(159, 199, 232, .32);
+  background: rgba(62, 91, 117, .42);
+  color: var(--color-fg);
+}
+
+:root[data-admin-theme="dark"] .adminButton-primary {
+  background: linear-gradient(110deg, #6f9bc4, #4f7c9f);
+}
+
+:root[data-admin-theme="dark"] .adminButton-danger {
+  border-color: rgba(236, 146, 163, .34);
+  background: rgba(120, 54, 73, .42);
+  color: #ffc0ca;
+}
+
+:root[data-admin-theme="dark"] .adminButton:hover:not(:disabled),
+:root[data-admin-theme="dark"] .adminThemeToggle:hover:not(:disabled) {
+  border-color: rgba(218, 234, 244, .58);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, .28);
+}
+
+.adminThemeToggle {
+  width: 36px;
+  min-width: 36px;
+  padding-right: 0;
+  padding-left: 0;
+  font-size: 16px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+:root[data-admin-theme="dark"] .adminOrderWorkspace,
+:root[data-admin-theme="dark"] .adminCustomerPane,
+:root[data-admin-theme="dark"] .adminCustomerToolbar,
+:root[data-admin-theme="dark"] .adminStaffDirectoryTableWrap {
+  border-color: var(--color-border-strong);
+  background: rgba(16, 27, 39, .84);
+}
+
+:root[data-admin-theme="dark"] .adminCustomerToolbar input,
+:root[data-admin-theme="dark"] .adminSessionControls input {
+  border-color: rgba(218, 234, 244, .32);
+  background: rgba(25, 42, 57, .92);
+  color: var(--color-fg);
+  color-scheme: dark;
+}
+
+:root[data-admin-theme="dark"] .adminCustomerToolbar input::placeholder {
+  color: rgba(237, 244, 247, .68);
+  opacity: 1;
+}
+
+:root[data-admin-theme="dark"] .adminCustomerToolbar input:disabled {
+  opacity: 1;
+  background: rgba(33, 51, 67, .9);
+  color: var(--color-fg-soft);
+  -webkit-text-fill-color: var(--color-fg-soft);
+}
+
+:root[data-admin-theme="dark"] .adminCustomerToolbar form button {
+  border-color: #5d8db2;
+  background: #4f7c9f;
+  color: #fff;
+}
+
+:root[data-admin-theme="dark"] .adminCustomerGroup > button {
+  border-color: rgba(218, 234, 244, .2);
+  background: rgba(35, 55, 72, .96);
+  color: var(--color-fg);
+}
+
+:root[data-admin-theme="dark"] .adminCustomerGroup > button b {
+  background: var(--color-accent);
+  color: #102131;
+}
+
+:root[data-admin-theme="dark"] .adminCustomerRow {
+  background: rgba(28, 46, 61, .74);
+}
+
+:root[data-admin-theme="dark"] .adminCustomerRow:hover,
+:root[data-admin-theme="dark"] .adminCustomerRow.isActive {
+  background: rgba(63, 116, 108, .5);
+}
+
+:root[data-admin-theme="dark"] .adminCustomerRow small,
+:root[data-admin-theme="dark"] .adminCustomerRow b {
+  color: var(--color-fg-soft);
+}
+
+:root[data-admin-theme="dark"] .adminSelectedCustomer {
+  border-color: rgba(218, 234, 244, .28);
+  background: linear-gradient(135deg, rgba(48, 82, 89, .78), rgba(29, 51, 67, .9));
+  box-shadow: 7px 8px 0 rgba(101, 83, 161, .36);
+}
+
+:root[data-admin-theme="dark"] .adminSelectedCustomer dl > div {
+  border-color: rgba(218, 234, 244, .24);
+  background: rgba(35, 55, 72, .7);
+}
+
+:root[data-admin-theme="dark"] .adminEditableRow,
+:root[data-admin-theme="dark"] .adminCarouselRow,
+:root[data-admin-theme="dark"] .adminDragCard,
+:root[data-admin-theme="dark"] .adminGalleryEditorItem,
+:root[data-admin-theme="dark"] .adminMenuGroupedList .adminPanel,
+:root[data-admin-theme="dark"] .adminBusinessOperations dl div,
+:root[data-admin-theme="dark"] .adminBusinessHours,
+:root[data-admin-theme="dark"] .adminBusinessOverride {
+  border-color: var(--color-border);
+  background: linear-gradient(135deg, rgba(47, 68, 88, .52), rgba(24, 42, 57, .6));
+  color: var(--color-fg);
+}
+
+:root[data-admin-theme="dark"] .adminBusinessOperations {
+  background: linear-gradient(130deg, rgba(28, 48, 64, .92), rgba(31, 75, 75, .58));
+  box-shadow: 7px 8px 0 rgba(101, 83, 161, .36);
+}
+
+:root[data-admin-theme="dark"] .adminStoreConfirmation {
+  border-color: #c58a36;
+  background: rgba(91, 65, 25, .58);
+}
+
+:root[data-admin-theme="dark"] .adminNotice {
+  border-color: rgba(143, 214, 198, .5);
+  background: rgba(57, 117, 105, .34);
+  color: #b8f1e2;
+}
+
+:root[data-admin-theme="dark"] .adminDialogBackdrop {
+  background: rgba(3, 8, 14, .76);
+}
+
+:root[data-admin-theme="dark"] .adminStaffPreview,
+:root[data-admin-theme="dark"] .adminRosterCardPreview,
+:root[data-admin-theme="dark"] .adminPreviewProfileSpread,
+:root[data-admin-theme="dark"] .adminPreviewDossier {
+  border-color: rgba(218, 234, 244, .22);
+  background: linear-gradient(145deg, rgba(31, 49, 67, .96), rgba(17, 31, 44, .94));
+  color: var(--color-fg);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .34), inset 0 1px rgba(255, 255, 255, .05);
+}
+
+:root[data-admin-theme="dark"] .adminRosterStatusBar,
+:root[data-admin-theme="dark"] .adminRosterCardBody,
+:root[data-admin-theme="dark"] .adminPreviewPolaroid,
+:root[data-admin-theme="dark"] .adminPreviewProfileSwitcher {
+  background: rgba(27, 45, 61, .78);
+  color: var(--color-fg);
+}
+
+:root[data-admin-theme="dark"] .adminRosterCardBody h2,
+:root[data-admin-theme="dark"] .adminPreviewDossierHead h2,
+:root[data-admin-theme="dark"] .adminPreviewDossierHead b,
+:root[data-admin-theme="dark"] .adminPreviewServiceGrid h3 {
+  color: var(--color-fg);
+}
+
+:root[data-admin-theme="dark"] .adminRosterCardBody > em,
+:root[data-admin-theme="dark"] .adminRosterCardBody > p,
+:root[data-admin-theme="dark"] .adminPreviewDossierScroll section > p,
+:root[data-admin-theme="dark"] .adminPreviewProfileSwitcher small,
+:root[data-admin-theme="dark"] .adminRosterDuty small {
+  color: var(--color-fg-soft);
+}
+
 .adminIssuedPanel {
   width: min(100%, 980px);
   margin: 0 auto 12px;
@@ -1672,6 +1965,241 @@
 .adminBusinessOverrideActions { display: flex; gap: 9px; flex-wrap: wrap; margin-top: 12px; }
 .adminOverrideMessage { color: var(--color-accent-2) !important; }
 .adminOverrideError { color: #9d3425 !important; }
+
+/* Order detail surfaces need their own dark palette. The order page uses
+   deliberately translucent light surfaces in the default theme, so simply
+   changing the shared variables leaves submitted cards and their item rows
+   with low contrast when the admin theme is dark. */
+:root[data-admin-theme="dark"] .adminOrderDetailPane {
+  background: rgba(9, 20, 31, .22);
+}
+
+:root[data-admin-theme="dark"] .adminSelectedCustomer {
+  border-color: rgba(218, 234, 244, .34);
+  background: linear-gradient(135deg, rgba(48, 82, 89, .88), rgba(22, 41, 56, .96));
+  color: var(--color-fg);
+}
+
+:root[data-admin-theme="dark"] .adminSelectedCustomer p,
+:root[data-admin-theme="dark"] .adminSelectedCustomer dt,
+:root[data-admin-theme="dark"] .adminSelectedCustomer > div:first-child > span {
+  color: var(--color-fg-soft);
+}
+
+:root[data-admin-theme="dark"] .adminSelectedCustomer dl > div {
+  border-color: rgba(218, 234, 244, .3);
+  background: rgba(21, 39, 53, .86);
+}
+
+:root[data-admin-theme="dark"] .adminOrderCard {
+  border-color: rgba(218, 234, 244, .3);
+  background: rgba(22, 38, 53, .96);
+  color: var(--color-fg);
+}
+
+:root[data-admin-theme="dark"] .adminOrderCardHead,
+:root[data-admin-theme="dark"] .adminOrderCardHead span,
+:root[data-admin-theme="dark"] .adminOrderCardHead small,
+:root[data-admin-theme="dark"] .adminOrderCardHead strong,
+:root[data-admin-theme="dark"] .adminOrderCardHead b {
+  color: var(--color-fg);
+}
+
+:root[data-admin-theme="dark"] .adminOrderCardHead {
+  background: rgba(27, 49, 66, .98);
+}
+
+:root[data-admin-theme="dark"] .adminOrderCardBody {
+  border-top-color: rgba(218, 234, 244, .24);
+  background: rgba(27, 61, 70, .7);
+  color: var(--color-fg);
+}
+
+:root[data-admin-theme="dark"] .adminOrderItemList > div {
+  border-color: rgba(218, 234, 244, .24);
+  background: rgba(25, 45, 61, .96);
+  color: var(--color-fg);
+}
+
+:root[data-admin-theme="dark"] .adminOrderItemList > div.isEditing {
+  border-color: rgba(159, 199, 232, .48);
+  background: rgba(39, 68, 86, .98);
+}
+
+:root[data-admin-theme="dark"] .adminOrderItemList small,
+:root[data-admin-theme="dark"] .adminOrderItemList em,
+:root[data-admin-theme="dark"] .adminOrderItemEditor label,
+:root[data-admin-theme="dark"] .adminOrderItemEditor > small {
+  color: var(--color-fg-soft);
+}
+
+:root[data-admin-theme="dark"] .adminOrderItemList button {
+  border-color: rgba(159, 199, 232, .46);
+  background: rgba(45, 76, 98, .72);
+  color: var(--color-accent);
+}
+
+:root[data-admin-theme="dark"] .adminOrderItemEditor,
+:root[data-admin-theme="dark"] .adminNomineeShorten {
+  border-top-color: rgba(218, 234, 244, .24);
+}
+
+:root[data-admin-theme="dark"] .adminOrderItemEditor input,
+:root[data-admin-theme="dark"] .adminNomineeShorten input,
+:root[data-admin-theme="dark"] .adminOrderReschedule input,
+:root[data-admin-theme="dark"] .adminOrderEmergency textarea,
+:root[data-admin-theme="dark"] .adminOrderEmergency select,
+:root[data-admin-theme="dark"] .adminOrderBackfillForm input,
+:root[data-admin-theme="dark"] .adminOrderTransitions input,
+:root[data-admin-theme="dark"] .adminOrderInlinePanel input,
+:root[data-admin-theme="dark"] .adminOrderingSettings input,
+:root[data-admin-theme="dark"] .adminNominationPause input,
+:root[data-admin-theme="dark"] .adminAddonComposer select,
+:root[data-admin-theme="dark"] .adminAddonComposer input {
+  border-color: rgba(218, 234, 244, .36);
+  background: rgba(13, 27, 40, .92);
+  color: var(--color-fg);
+  color-scheme: dark;
+}
+
+:root[data-admin-theme="dark"] .adminNomineeGrid article,
+:root[data-admin-theme="dark"] .adminAddonSummary article,
+:root[data-admin-theme="dark"] .adminAddonComposer > div {
+  border-color: rgba(218, 234, 244, .24);
+  background: rgba(39, 57, 79, .82);
+  color: var(--color-fg);
+}
+
+:root[data-admin-theme="dark"] .adminNomineeGrid small,
+:root[data-admin-theme="dark"] .adminAddonSummary small,
+:root[data-admin-theme="dark"] .adminAddonComposer p,
+:root[data-admin-theme="dark"] .adminAddonComposer label,
+:root[data-admin-theme="dark"] .adminOrderReschedule label,
+:root[data-admin-theme="dark"] .adminOrderEmergency label,
+:root[data-admin-theme="dark"] .adminOrderReschedule small,
+:root[data-admin-theme="dark"] .adminOrderBackfillHint,
+:root[data-admin-theme="dark"] .adminOrderBackfillForm label,
+:root[data-admin-theme="dark"] .adminOrderTransitions label,
+:root[data-admin-theme="dark"] .adminOrderNomineeLimit {
+  color: var(--color-fg-soft);
+}
+
+:root[data-admin-theme="dark"] .adminOrderReschedule,
+:root[data-admin-theme="dark"] .adminOrderEmergency,
+:root[data-admin-theme="dark"] .adminOrderTransitions {
+  border-color: rgba(218, 234, 244, .24);
+  background: rgba(24, 43, 58, .9);
+  color: var(--color-fg);
+}
+
+:root[data-admin-theme="dark"] .adminOrderBackfill {
+  border-color: rgba(224, 164, 78, .52);
+  background: rgba(83, 61, 29, .72);
+  color: var(--color-fg);
+}
+
+:root[data-admin-theme="dark"] .adminOrderInlinePanel,
+:root[data-admin-theme="dark"] .adminIssuedPanel,
+:root[data-admin-theme="dark"] .adminOrderingSettings {
+  border-color: rgba(218, 234, 244, .3);
+  background: rgba(20, 35, 49, .96);
+  color: var(--color-fg);
+}
+
+:root[data-admin-theme="dark"] .adminIssuedPanel label {
+  border-color: rgba(218, 234, 244, .24);
+  background: rgba(27, 49, 66, .84);
+}
+
+:root[data-admin-theme="dark"] .adminIssuedPanel label button {
+  border: 1px solid rgba(159, 199, 232, .44);
+  background: rgba(62, 91, 117, .7);
+  color: var(--color-fg);
+}
+
+:root[data-admin-theme="dark"] .adminDeveloperDisclosure {
+  border-color: rgba(159, 199, 232, .34);
+  background: linear-gradient(145deg, rgba(24, 40, 55, .96), rgba(15, 29, 43, .98));
+  color: var(--color-fg);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, .28), inset 0 1px rgba(255, 255, 255, .05);
+}
+
+:root[data-admin-theme="dark"] .adminDeveloperDisclosureSummary,
+:root[data-admin-theme="dark"] .adminDeveloperDisclosureSummary b {
+  color: var(--color-fg);
+}
+
+:root[data-admin-theme="dark"] .adminDeveloperDisclosureSummary small,
+:root[data-admin-theme="dark"] .adminDeveloperToolState {
+  color: var(--color-fg-soft);
+}
+
+:root[data-admin-theme="dark"] .adminDeveloperDisclosureBody::before {
+  border-top-color: rgba(218, 234, 244, .24);
+}
+
+:root[data-admin-theme="dark"] .adminPageVisibilityRow {
+  border-color: rgba(218, 234, 244, .22);
+  background: rgba(28, 48, 65, .9);
+  color: var(--color-fg);
+}
+
+:root[data-admin-theme="dark"] .adminPageVisibilityRow > span {
+  color: var(--color-fg-soft);
+}
+
+:root[data-admin-theme="dark"] .adminStaffListHeading strong {
+  color: var(--color-fg);
+}
+
+:root[data-admin-theme="dark"] .adminStaffListHeading > span {
+  border-color: rgba(218, 234, 244, .28);
+  background: rgba(37, 58, 75, .9);
+  color: var(--color-fg-soft);
+}
+
+:root[data-admin-theme="dark"] .adminStaffListHeading > span.isPublic {
+  border-color: rgba(143, 214, 198, .38);
+  background: rgba(46, 112, 101, .52);
+  color: #b8f1e2;
+}
+
+:root[data-admin-theme="dark"] .adminStaffListHeading > span.isHidden {
+  border-color: rgba(236, 146, 163, .38);
+  background: rgba(120, 54, 73, .5);
+  color: #ffc0ca;
+}
+
+:root[data-admin-theme="dark"] .adminStaffListRole {
+  color: var(--color-fg-soft) !important;
+}
+
+:root[data-admin-theme="dark"] .adminStaffListSummary > span {
+  background: rgba(46, 65, 84, .9);
+  color: var(--color-fg-soft) !important;
+}
+
+:root[data-admin-theme="dark"] .adminStaffListSummary > span.isWorking {
+  background: rgba(46, 112, 101, .5);
+  color: #b8f1e2 !important;
+}
+
+:root[data-admin-theme="dark"] .adminStaffListSummary .adminStaffBufferLine {
+  color: #d0c7ff !important;
+}
+
+:root[data-admin-theme="dark"] .adminStaffListControls {
+  border-left-color: rgba(218, 234, 244, .2);
+}
+
+:root[data-admin-theme="dark"] .adminStaffListControlLabel {
+  color: var(--color-fg-mute);
+}
+
+:root[data-admin-theme="dark"] .adminStaffListControl .adminToggle,
+:root[data-admin-theme="dark"] .adminStaffListControls > small {
+  color: var(--color-fg-soft);
+}
 
 @media (max-width: 1100px) {
   .adminBusinessOverrideGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }

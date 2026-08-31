@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { AdminRouter } from "./_components/AdminRouter.jsx";
 import { AdminImageProcessingProvider } from "./_components/AdminImageProcessingProvider.jsx";
@@ -10,6 +10,16 @@ export default function AdminClient() {
   const pathname = usePathname();
   const router = useRouter();
   const navigate = useCallback((route: string) => router.push(route), [router]);
+
+  useEffect(() => {
+    let savedTheme = "";
+    try {
+      savedTheme = window.localStorage.getItem("lucid-dream-admin-theme") || "";
+    } catch {
+      // Continue with the light theme when browser storage is unavailable.
+    }
+    document.documentElement.dataset.adminTheme = savedTheme === "dark" ? "dark" : "light";
+  }, []);
 
   return (
     <div className="adminTheme">

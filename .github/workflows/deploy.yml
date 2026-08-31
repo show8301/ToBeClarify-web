@@ -96,6 +96,24 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  validate-production-promotion:
+    name: Require dev-to-main promotion
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require the tested dev branch as the production source
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        shell: bash
+        run: |
+          if [ "$HEAD_REF" != "dev" ]; then
+            echo "Production Web pull requests must use dev as the source branch."
+            echo "Deploy the change to dev and obtain confirmation before opening dev -> main."
+            exit 1
+          fi
+          echo "Accepted production promotion: dev -> main."
+
   deploy:
     name: Preflight and deploy to IIS
     if: >-

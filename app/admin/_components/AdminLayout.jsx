@@ -162,7 +162,7 @@ export function AdminLayout({ route, navigate, children }) {
               disabled={!themeReady}
               onClick={() => setIsDarkMode((current) => !current)}
             >
-              {isDarkMode ? '☀ 淺色模式' : '☾ 暗色模式'}
+              {isDarkMode ? '☀' : '☾'}
             </AdminButton>
             <AdminButton variant="ghost" onClick={handleLogout}>登出</AdminButton>
           </div>

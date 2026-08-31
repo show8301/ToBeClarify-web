@@ -1593,7 +1593,12 @@
 }
 
 .adminThemeToggle {
-  min-width: 42px;
+  width: 36px;
+  min-width: 36px;
+  padding-right: 0;
+  padding-left: 0;
+  font-size: 16px;
+  line-height: 1;
   white-space: nowrap;
 }
 
@@ -1603,6 +1608,68 @@
 :root[data-admin-theme="dark"] .adminStaffDirectoryTableWrap {
   border-color: var(--color-border-strong);
   background: rgba(16, 27, 39, .84);
+}
+
+:root[data-admin-theme="dark"] .adminCustomerToolbar input,
+:root[data-admin-theme="dark"] .adminSessionControls input {
+  border-color: rgba(218, 234, 244, .32);
+  background: rgba(25, 42, 57, .92);
+  color: var(--color-fg);
+  color-scheme: dark;
+}
+
+:root[data-admin-theme="dark"] .adminCustomerToolbar input::placeholder {
+  color: rgba(237, 244, 247, .68);
+  opacity: 1;
+}
+
+:root[data-admin-theme="dark"] .adminCustomerToolbar input:disabled {
+  opacity: 1;
+  background: rgba(33, 51, 67, .9);
+  color: var(--color-fg-soft);
+  -webkit-text-fill-color: var(--color-fg-soft);
+}
+
+:root[data-admin-theme="dark"] .adminCustomerToolbar form button {
+  border-color: #5d8db2;
+  background: #4f7c9f;
+  color: #fff;
+}
+
+:root[data-admin-theme="dark"] .adminCustomerGroup > button {
+  border-color: rgba(218, 234, 244, .2);
+  background: rgba(35, 55, 72, .96);
+  color: var(--color-fg);
+}
+
+:root[data-admin-theme="dark"] .adminCustomerGroup > button b {
+  background: var(--color-accent);
+  color: #102131;
+}
+
+:root[data-admin-theme="dark"] .adminCustomerRow {
+  background: rgba(28, 46, 61, .74);
+}
+
+:root[data-admin-theme="dark"] .adminCustomerRow:hover,
+:root[data-admin-theme="dark"] .adminCustomerRow.isActive {
+  background: rgba(63, 116, 108, .5);
+}
+
+:root[data-admin-theme="dark"] .adminCustomerRow small,
+:root[data-admin-theme="dark"] .adminCustomerRow b {
+  color: var(--color-fg-soft);
+}
+
+:root[data-admin-theme="dark"] .adminSelectedCustomer {
+  border-color: rgba(218, 234, 244, .28);
+  background: linear-gradient(135deg, rgba(48, 82, 89, .78), rgba(29, 51, 67, .9));
+  box-shadow: 7px 8px 0 rgba(101, 83, 161, .36);
+}
+
+:root[data-admin-theme="dark"] .adminSelectedCustomer dl > div {
+  border-color: rgba(218, 234, 244, .24);
+  background: rgba(35, 55, 72, .7);
 }
 
 :root[data-admin-theme="dark"] .adminEditableRow,

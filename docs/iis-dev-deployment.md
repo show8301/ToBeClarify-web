@@ -1,7 +1,8 @@
-# Vinext DEV deployment on IIS
+# Vinext deployment on IIS
 
-The DEV site runs as a Node.js process on localhost. IIS terminates the public
-HTTP(S) connection and reverse-proxies every request to that process.
+Both the production and DEV sites run as separate Node.js processes on
+localhost. IIS terminates each public HTTP(S) connection and reverse-proxies
+requests to the port assigned to that environment.
 
 ## One-time server prerequisites
 
@@ -26,13 +27,27 @@ server before automatic deployment is enabled.
 
 ## GitHub Actions variables
 
-Required repository variables:
+Production requires:
+
+- `WEB_DEPLOY_PATH` — production IIS physical path ending in
+  `ToBeClarify_web`
+- `WEB_HEALTHCHECK_URL` — production origin, for example
+  `https://www.marchgroup.net`
+
+Production optionally accepts:
+
+- `WEB_NODE_PORT` — defaults to `4300`
+- `WEB_NODE_TASK_NAME` — defaults to `ToBeClarify Vinext PROD`
+- `WEB_ADMIN_API_BASE_URL` — defaults in application code when omitted
+- `WEB_PUBLIC_MEDIA_BASE_URL` — defaults in application code when omitted
+
+Development requires:
 
 - `DEV_WEB_DEPLOY_PATH` — `D:\www_root\ToBeClarify_web_dev`
 - `DEV_WEB_HEALTHCHECK_URL` — public DEV origin, for example
   `https://www-dev.marchgroup.net`
 
-Optional repository variables:
+Development optionally accepts:
 
 - `DEV_NODE_PORT` — defaults to `4310`
 - `DEV_NODE_TASK_NAME` — defaults to `ToBeClarify Vinext DEV`
@@ -41,10 +56,14 @@ Optional repository variables:
 
 ## Workflow behavior
 
-- Pull requests targeting `dev` perform a clean locked install, build, and test.
-- Pushes to `dev` perform the same validation and then deploy automatically.
+- Pull requests targeting `main` or `dev` perform a clean locked install,
+  build, and test without deploying.
+- Pushes to `dev` deploy automatically to the development environment.
+- Pushes to `main` deploy automatically to the production environment.
+- Production and DEV use different IIS directories, Node ports, Scheduled Task
+  names, deployment concurrency groups, and GitHub environments.
 - A manual run with `preflight_only` checks the runner and IIS without changing
-  the deployed site.
+  the site selected by the workflow branch.
 - Deployment uses a staging directory, retains one rollback directory, starts
   Vinext through a scheduled task, and rolls back automatically when either the
   localhost or public health check does not report the current Git commit SHA.

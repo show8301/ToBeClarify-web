@@ -161,7 +161,7 @@ if (-not $AllowLocalSystemInstall) {
 }
 
 if (-not [Environment]::Is64BitOperatingSystem) {
-    throw 'The DEV server is not a 64-bit Windows installation.'
+    throw 'The deployment server is not a 64-bit Windows installation.'
 }
 
 $installerPath = Join-Path $env:RUNNER_TEMP 'rewrite_amd64_en-US.msi'

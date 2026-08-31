@@ -1,8 +1,9 @@
 .adminTheme {
   --color-bg-0: #18201d;
   --color-fg: #18201d;
-  --color-fg-soft: rgba(24, 32, 29, 0.76);
-  --color-fg-mute: rgba(24, 32, 29, 0.54);
+  /* Keep secondary copy readable on the light admin surfaces. */
+  --color-fg-soft: rgba(24, 32, 29, 0.84);
+  --color-fg-mute: rgba(24, 32, 29, 0.68);
   --color-accent: #ff705c;
   --color-accent-dark: #d84e3a;
   --color-accent-soft: #c13e2d;

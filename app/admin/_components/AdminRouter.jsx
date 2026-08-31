@@ -46,7 +46,7 @@ function AdminRouteView({ route, navigate }) {
   if (route === '/admin/events') page = <AdminEventsPage />;
   if (route === '/admin/menu') page = <AdminMenuPage />;
   if (route === '/admin/orders') page = <AdminOrdersPage />;
-  return <AdminLayout route={route === '/admin' ? '/admin/home' : route} navigate={navigate}>{page}</AdminLayout>;
+  return <AdminLayout route={route} navigate={navigate}>{page}</AdminLayout>;
 }
 
 function AdminLoading() {

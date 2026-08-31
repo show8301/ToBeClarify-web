@@ -255,6 +255,28 @@
   background: rgba(var(--color-accent-2-rgb), 0.1);
 }
 
+.adminCredentialTools {
+  margin-top: 18px;
+  border-color: rgba(var(--color-accent-rgb), .32);
+}
+.adminCredentialToolsBody {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+.adminCredentialToolsBody .adminCredentialActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.adminCredentialMessage {
+  color: var(--color-accent-2);
+  font-size: 11px;
+  line-height: 1.4;
+}
+.adminCredentialMessage.isError { color: #ffabab; }
+
 .adminPasswordResetKeyResult > span {
   color: var(--color-fg-mute);
   font-size: 11px;

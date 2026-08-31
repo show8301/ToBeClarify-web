@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { adminApi } from '../admin-api.js';
 import { useAdminAuth } from './AdminAuthContext.jsx';
 import { AdminButton, AdminPage, AdminPanel, AdminToggle } from './AdminShared.jsx';
+import { AdminCredentialTools } from './AdminCredentialTools.jsx';
 
 const PUBLIC_PAGES = [
   { key: 'home', number: '00', label: '首頁' },
@@ -125,6 +126,7 @@ export function AdminHomePage({ navigate }) {
           <AdminPanel title="活動與菜單" description="快速進入活動或菜單資料管理。"><div className="adminInlineActions"><AdminButton variant="secondary" onClick={() => navigate('/admin/events')}>活動設定</AdminButton><AdminButton variant="secondary" onClick={() => navigate('/admin/menu')}>菜單設定</AdminButton></div></AdminPanel>
         </> : <AdminPanel title="店員設定" description="維護自己的公開資料與服務內容。"><AdminButton onClick={() => navigate('/admin/staff')}>進入設定</AdminButton></AdminPanel>}
       </div>
+      {canManageAll ? <AdminCredentialTools /> : null}
       {canHideMenu ? <div className="adminDeveloperTools">
         <DeveloperDisclosure
           title="頁面顯示狀態"

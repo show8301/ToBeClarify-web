@@ -157,6 +157,12 @@ export const adminApi = {
   getSessionOrders: (id, signal) => request(`/order-sessions/${encodeURIComponent(id)}/orders`, { signal }),
   getOrderingSettings: (signal) => request('/ordering-settings', { signal }),
   getOrderingContext: (signal) => request('/ordering-context', { signal }),
+  openBusinessPeriod: (body, signal) => request('/business-period/open', {
+    method: 'POST', body: JSON.stringify(body), signal,
+  }),
+  applyBusinessPeriodAction: (body, signal) => request('/business-period/action', {
+    method: 'POST', body: JSON.stringify(body), signal,
+  }),
   getBusinessDayOverride: (signal) => request('/ordering-settings/business-day-override', { signal }),
   saveBusinessDayOverride: (body, signal) => request('/ordering-settings/business-day-override', {
     method: 'PUT', body: JSON.stringify(body), signal,
@@ -167,6 +173,9 @@ export const adminApi = {
   saveOrderingSettings: (body, signal) => request('/ordering-settings', { method: 'PUT', body: JSON.stringify(body), signal }),
   pauseNomination: (minutes, signal) => request('/ordering-settings/pause-nomination', { method: 'POST', body: JSON.stringify({ minutes }), signal }),
   confirmNominee: (orderId, signal) => request(`/orders/${encodeURIComponent(orderId)}/confirm-nominee`, { method: 'POST', signal }),
+  decideStoreConfirmation: (orderId, decision, reason, signal) => request(`/orders/${encodeURIComponent(orderId)}/store-confirmation`, {
+    method: 'POST', body: JSON.stringify({ decision, reason: reason || null }), signal,
+  }),
   getAddonOptions: (nomineeId, signal) => request(`/order-nominees/${encodeURIComponent(nomineeId)}/addon-options`, { signal }),
   submitAdminAddon: (nomineeId, body, signal) => request(`/order-nominees/${encodeURIComponent(nomineeId)}/addons`, { method: 'POST', body: JSON.stringify({ ...body, parentNomineeId: nomineeId }), signal }),
   confirmAddon: (orderId, signal) => request(`/orders/${encodeURIComponent(orderId)}/confirm-addon`, { method: 'POST', signal }),

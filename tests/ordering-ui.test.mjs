@@ -23,6 +23,10 @@ test('customer ordering implements meals, staff-first nomination, tips, dependen
   assert.match(source, /附掛加購服務單/);
   assert.match(source, /在此指名時段追加服務/);
   assert.match(source, /不再收基礎指名費，也不延長原結束時間/);
+  assert.match(source, /目前為協調接單/);
+  assert.match(source, /等待店員接受協調單/);
+  assert.match(source, /點餐碼仍可查看既有訂單/);
+  assert.match(source, /businessContext\?\.intakeMode === 'staff_only'/);
   assert.match(api, /X-Order-Token/);
   assert.match(api, /\/recover/);
   assert.match(api, /submitAddon/);
@@ -64,6 +68,16 @@ test('admin ordering workspace groups customers and exposes permission-gated ope
   assert.match(source, /代客加購服務/);
   assert.match(source, /選好並代客送單/);
   assert.match(source, /確認我的加購服務/);
+  assert.match(source, /現在開店/);
+  assert.match(source, /提早 30 分/);
+  assert.match(source, /延後 30 分/);
+  assert.match(source, /協調接單/);
+  assert.match(source, /僅店員接單/);
+  assert.match(source, /實際關店/);
+  assert.match(source, /誤關重開/);
+  assert.match(source, /完成結算/);
+  assert.match(source, /接受協調單/);
+  assert.match(source, /顧客離店／停止點餐/);
   assert.match(api, /confirmNominee/);
   assert.match(api, /pauseNomination/);
   assert.match(api, /reissueOrderSession/);
@@ -73,6 +87,9 @@ test('admin ordering workspace groups customers and exposes permission-gated ope
   assert.match(api, /getAddonOptions/);
   assert.match(api, /submitAdminAddon/);
   assert.match(api, /confirmAddon/);
+  assert.match(api, /openBusinessPeriod/);
+  assert.match(api, /applyBusinessPeriodAction/);
+  assert.match(api, /decideStoreConfirmation/);
 });
 
 test('ordering API client submits a service add-on against the parent nomination', async () => {

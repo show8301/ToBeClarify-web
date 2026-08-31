@@ -12,6 +12,7 @@ const normalizeTipPresetAmounts = (values) => {
 };
 const labels = { waiting: '等待確認', submitted: '等待確認', partially_confirmed: '部分確認', needs_reschedule: '需重新排程', confirmed: '已成立', in_service: '服務中', completed: '已完成', cancelled: '已取消', expired: '已失效', rejected: '已退回' };
 const transitionLabels = { start: '開始服務', complete: '完成訂單', cancel: '取消訂單', reject: '退回訂單', return_to_reschedule: '退回重新排程' };
+const intakeLabels = { normal: '一般接單', coordination: '協調接單', staff_only: '僅店員接單' };
 
 const minutesToTime = (value) => `${String(Math.floor(Number(value || 0) / 60)).padStart(2, '0')}:${String(Number(value || 0) % 60).padStart(2, '0')}`;
 const timeToMinutes = (value) => { const [hours, minutes] = value.split(':').map(Number); return hours * 60 + minutes; };
@@ -56,7 +57,13 @@ export function AdminOrdersPage() {
   };
 
   useEffect(() => { loadSessions(); }, [businessDate]);
-  useEffect(() => { adminApi.getOrderingContext().then((value) => { setBusinessContext(value); setBusinessDate(value.referenceBusinessDate); }).catch(() => {}); }, []);
+  const loadBusinessContext = async () => {
+    const value = await adminApi.getOrderingContext();
+    setBusinessContext(value);
+    setBusinessDate(value.referenceBusinessDate);
+    return value;
+  };
+  useEffect(() => { loadBusinessContext().catch(() => {}); }, []);
   useEffect(() => { if (canManage) adminApi.getOrderingSettings().then(setSettings).catch(() => {}); }, [canManage]);
 
   const selected = sessions.find((item) => item.session.id === selectedId);
@@ -87,6 +94,7 @@ export function AdminOrdersPage() {
   return <section className="adminPage adminOrdersPage">
     <header className="adminPageHeading"><div><p className="eyebrow">ORDER CONTROL</p><h1>點單管理</h1><p>左側以搜尋與待處理分組收納大量顧客；右側集中顯示該顧客今天的全部訂單。</p></div><div className="adminPageActions"><AdminButton variant="secondary" onClick={() => loadSessions(selectedId)}>重新整理</AdminButton>{canManage ? <AdminButton variant="ghost" onClick={() => setShowSettings(!showSettings)}>營運參數</AdminButton> : null}<AdminButton onClick={() => setShowCreate(!showCreate)}>＋ 開立點餐碼</AdminButton></div></header>
     {message.text ? <div className={message.error ? 'adminOrderMessage isError' : 'adminOrderMessage'} role="status">{message.text}<button onClick={() => setMessage({ text: '', error: false })}>×</button></div> : null}
+    {businessContext ? <BusinessOperationsBar context={businessContext} canManage={canManage} onChanged={(value, text) => { setBusinessContext(value); setBusinessDate(value.referenceBusinessDate); setMessage({ text, error: false }); }} onError={(error) => setMessage({ text: error.message, error: true })} /> : null}
     {showCreate ? <CreateSessionPanel onClose={() => setShowCreate(false)} onIssued={(result) => { setIssued(result); setShowCreate(false); loadSessions(result.session.id); }} /> : null}
     {issued ? <IssuedPanel issued={issued} onClose={() => setIssued(null)} /> : null}
     {canManage && showSettings && settings ? <SettingsPanel settings={settings} onSaved={(value) => { setSettings(value); setMessage({ text: '營運參數已更新。', error: false }); }} /> : null}
@@ -106,6 +114,40 @@ export function AdminOrdersPage() {
   </section>;
 }
 
+function BusinessOperationsBar({ context, canManage, onChanged, onError }) {
+  const [busy, setBusy] = useState(false);
+  const [reason, setReason] = useState('現場營運調整');
+  const [projectedClose, setProjectedClose] = useState(localDateTimeValue(context.projectedCloseAt || context.referenceEndsAt));
+  useEffect(() => setProjectedClose(localDateTimeValue(context.projectedCloseAt || context.referenceEndsAt)), [context.projectedCloseAt, context.referenceEndsAt]);
+  const run = async (request, success) => {
+    setBusy(true);
+    try { onChanged(await request(), success); }
+    catch (error) { onError(error); }
+    finally { setBusy(false); }
+  };
+  const adjustClose = (minutes) => {
+    const base = new Date(context.projectedCloseAt || context.referenceEndsAt);
+    base.setMinutes(base.getMinutes() + minutes);
+    const next = localDateTimeValue(base.toISOString());
+    setProjectedClose(next);
+    run(() => adminApi.applyBusinessPeriodAction({ action: 'set_projected_close', projectedCloseAt: next, reason }), `${minutes > 0 ? '延後' : '提早'} ${Math.abs(minutes)} 分鐘關店。`);
+  };
+  const openNow = () => run(() => adminApi.openBusinessPeriod({ businessDate: context.referenceBusinessDate, projectedCloseAt: projectedClose || null, reason }), '已執行現在開店，顧客點餐資格可開始使用。');
+  const applyAction = (action, extra, success) => run(() => adminApi.applyBusinessPeriodAction({ action, reason, ...extra }), success);
+  const periodLabel = context.periodStatus === 'open' ? '營業中' : context.periodStatus === 'closed' ? '已關店／待結算' : context.periodStatus === 'settled' ? '已結算' : '尚未開店';
+  const now = Date.now();
+  const untilOpen = Math.ceil((new Date(context.referenceStartsAt).getTime() - now) / 60000);
+  const untilClose = Math.ceil((new Date(context.projectedCloseAt || context.referenceEndsAt).getTime() - now) / 60000);
+  const reminder = context.periodStatus === 'scheduled'
+    ? untilOpen > 0 ? `距預定開店約 ${untilOpen} 分鐘；可提早開店或調整本日時間。` : '已到預定開店時間，尚未執行開店。'
+    : context.periodStatus === 'open' && untilClose > 0 ? `距預計關店約 ${untilClose} 分鐘。` : context.periodStatus === 'open' ? `已超過預計關店 ${Math.abs(untilClose)} 分鐘，系統採協調接單。` : '顧客仍可查看既有訂單；結算前店員可處理漏單。';
+  return <section className={`adminBusinessOperations mode-${context.intakeMode || 'staff_only'}`}>
+    <header><div><span>BUSINESS DAY / {context.referenceBusinessDate}</span><h2>{periodLabel} · {intakeLabels[context.intakeMode] || '尚未接單'}</h2><p>{reminder}</p></div><dl><div><dt>實際開店</dt><dd>{context.actualOpenedAt ? new Date(context.actualOpenedAt).toLocaleString('zh-TW') : '尚未執行'}</dd></div><div><dt>預計關店</dt><dd>{new Date(context.projectedCloseAt || context.referenceEndsAt).toLocaleString('zh-TW')}</dd></div><div><dt>待處理／未完成</dt><dd>{context.waitingOrderCount || 0}／{context.unfinishedOrderCount || 0} 張</dd></div></dl></header>
+    {context.latestCommittedBusyUntil ? <p className="adminBusinessCommitment">已成立服務最晚占用至 {new Date(context.latestCommittedBusyUntil).toLocaleString('zh-TW')}</p> : null}
+    {canManage ? <div className="adminBusinessOperationsControls"><label>本次操作原因<input value={reason} maxLength="500" onChange={(event) => setReason(event.target.value)} /></label>{context.periodStatus === 'scheduled' ? <><label>本日預計關店<input type="datetime-local" value={projectedClose} onChange={(event) => setProjectedClose(event.target.value)} /></label><AdminButton disabled={busy || !projectedClose} onClick={openNow}>現在開店</AdminButton></> : null}{context.periodStatus === 'open' ? <><div className="adminBusinessModeButtons" role="group" aria-label="接單模式">{['normal', 'coordination', 'staff_only'].map((mode) => <button type="button" key={mode} className={context.intakeMode === mode ? 'isActive' : ''} disabled={busy} onClick={() => applyAction('set_intake_mode', { intakeMode: mode }, `已切換為${intakeLabels[mode]}。`)}>{intakeLabels[mode]}</button>)}</div><div className="adminBusinessQuickClose"><button type="button" disabled={busy} onClick={() => adjustClose(-30)}>提早 30 分</button><button type="button" disabled={busy} onClick={() => adjustClose(30)}>延後 30 分</button><label>自訂時間<input type="datetime-local" value={projectedClose} onChange={(event) => setProjectedClose(event.target.value)} /></label><button type="button" disabled={busy || !projectedClose} onClick={() => applyAction('set_projected_close', { projectedCloseAt: projectedClose }, '本日預計關店時間已更新。')}>套用</button></div><AdminButton variant="danger" disabled={busy || context.unfinishedOrderCount > 0} onClick={() => applyAction('close', {}, '已執行實際關店；點餐碼保留查看功能。')}>實際關店</AdminButton>{context.unfinishedOrderCount > 0 ? <small>仍有未完成訂單，請先切換僅店員接單並完成處理。</small> : null}</> : null}{context.periodStatus === 'closed' ? <><AdminButton variant="secondary" disabled={busy} onClick={() => applyAction('reopen', {}, '營業日已重開，預設採協調接單。')}>誤關重開</AdminButton><AdminButton disabled={busy || context.unfinishedOrderCount > 0} onClick={() => applyAction('settle', {}, '營業日已完成結算。')}>完成結算</AdminButton></> : null}</div> : <p className="adminBusinessReadOnly">營業日時間與全店接單模式僅店經理／開發者可調整；所有店員仍可處理協調單。</p>}
+  </section>;
+}
+
 function CustomerGroup({ title, count, open, onToggle, children }) {
   return <section className="adminCustomerGroup"><button type="button" onClick={onToggle}><span>{open ? '−' : '+'} {title}</span><b>{count}</b></button>{open ? <div>{children.length ? children : <p>沒有顧客</p>}</div> : null}</section>;
 }
@@ -116,20 +158,21 @@ function CustomerRow({ item, active, onClick }) {
 function SessionHeader({ item, onUpdate, onReissue, loading }) {
   const [max, setMax] = useState(item.session.maxNominatedStaff);
   useEffect(() => setMax(item.session.maxNominatedStaff), [item.session.maxNominatedStaff]);
-  return <header className="adminSelectedCustomer"><div><span>SELECTED CUSTOMER</span><h2>{item.session.customerName}</h2><p>遊戲 ID：{item.session.gameId} · 今日共 {item.orderCount} 張訂單</p></div><dl><div><dt>信物餐點餘額</dt><dd>{money(item.session.remainingMealCredit)}</dd></div><div><dt>今日消費</dt><dd>{money(item.totalAmount)}</dd></div></dl><div className="adminSessionControls"><label>同時可指名人數<input type="number" min="0" max="100" value={max} onChange={(event) => setMax(Number(event.target.value))} /></label><AdminButton variant="secondary" disabled={loading} onClick={() => onUpdate({ maxNominatedStaff: max })}>儲存人數</AdminButton><AdminButton variant="ghost" disabled={loading} onClick={onReissue}>尋回／重發點餐碼</AdminButton></div></header>;
+  return <header className="adminSelectedCustomer"><div><span>SELECTED CUSTOMER</span><h2>{item.session.customerName}</h2><p>遊戲 ID：{item.session.gameId} · 今日共 {item.orderCount} 張訂單 · {item.session.status === 'active' ? '可點餐' : '僅可查看'}</p></div><dl><div><dt>信物餐點餘額</dt><dd>{money(item.session.remainingMealCredit)}</dd></div><div><dt>今日消費</dt><dd>{money(item.totalAmount)}</dd></div></dl><div className="adminSessionControls"><label>同時可指名人數<input type="number" min="0" max="100" value={max} onChange={(event) => setMax(Number(event.target.value))} /></label><AdminButton variant="secondary" disabled={loading} onClick={() => onUpdate({ maxNominatedStaff: max })}>儲存人數</AdminButton><AdminButton variant="ghost" disabled={loading} onClick={onReissue}>尋回／重發點餐碼</AdminButton><AdminButton variant={item.session.status === 'active' ? 'danger' : 'secondary'} disabled={loading} onClick={() => onUpdate({ status: item.session.status === 'active' ? 'readonly' : 'active' })}>{item.session.status === 'active' ? '顧客離店／停止點餐' : '重新開放點餐'}</AdminButton></div></header>;
 }
 
 function AdminOrderCard({ order, user, loading, act }) {
   const [open, setOpen] = useState(order.status === 'submitted' || order.status === 'needs_reschedule' || order.status === 'expired');
   const [note, setNote] = useState(order.internalNote || '');
   const [transitionReason, setTransitionReason] = useState('');
+  const [storeDecisionReason, setStoreDecisionReason] = useState('');
   const [startsAt, setStartsAt] = useState(localDateTimeValue(order.nominees?.[0]?.requestedStartsAt));
   const [backfillMode, setBackfillMode] = useState('');
   const [backfillStartsAt, setBackfillStartsAt] = useState(localDateTimeValue(order.startedAt) || localDateTimeValue(order.nominees?.[0]?.requestedStartsAt));
   const [backfillEndsAt, setBackfillEndsAt] = useState(localDateTimeValue(order.completedAt) || localDateTimeNow());
   const [backfillReason, setBackfillReason] = useState('');
-  const mineWaiting = order.nominees?.some((item) => item.staffId === user.staffMemberId && item.confirmationStatus === 'waiting');
-  const mineWaitingAddon = order.addons?.some((item) => item.staffId === user.staffMemberId && item.status === 'waiting');
+  const mineWaiting = order.storeConfirmationStatus !== 'pending' && order.nominees?.some((item) => item.staffId === user.staffMemberId && item.confirmationStatus === 'waiting');
+  const mineWaitingAddon = order.storeConfirmationStatus !== 'pending' && order.addons?.some((item) => item.staffId === user.staffMemberId && item.status === 'waiting');
   const canManageAddons = user.role === 'developer' || user.role === 'manager';
   const canBackfill = order.status === 'expired' && order.orderKind !== 'service_addon' && order.nominees?.length > 0 &&
     (canManageAddons || (order.nominees.length === 1 && order.nominees[0].staffId === user.staffMemberId));
@@ -137,6 +180,7 @@ function AdminOrderCard({ order, user, loading, act }) {
   const transitions = order.status === 'confirmed' ? (order.orderKind === 'service_addon' ? ['start', 'cancel'] : ['start', 'return_to_reschedule', 'cancel']) : order.status === 'in_service' ? ['complete'] : cancelable ? ['reject', 'cancel'] : [];
   const isEarlyCompletion = order.status === 'in_service' && order.nominees?.some((item) => new Date(item.requestedServiceEndsAt).getTime() > Date.now());
   return <article className={`adminOrderCard is-${order.status}`}><button type="button" className="adminOrderCardHead" onClick={() => setOpen(!open)}><div><span>{order.orderKind === 'service_addon' ? '附掛加購服務單' : order.orderNumber}</span><strong>{labels[order.status] || order.status}</strong><small>{order.queueStage}{order.queueMinutes ? ` · ${order.queueMinutes} 分鐘` : ''}</small></div><div><span>{new Date(order.submittedAt).toLocaleString('zh-TW')}</span><b>{money(order.totalAmount)}</b></div></button>{open ? <div className="adminOrderCardBody">
+     {order.storeConfirmationStatus === 'pending' ? <div className="adminStoreConfirmation"><div><strong>關店時段協調單</strong><p>顧客已送出，但尚未成立。接受後，餐點／小費直接成立；指名與加購仍需被指名店員確認。</p></div><label>拒絕原因<input value={storeDecisionReason} maxLength="500" placeholder="拒絕時必填" onChange={(event) => setStoreDecisionReason(event.target.value)} /></label><div><AdminButton disabled={loading} onClick={() => act(() => adminApi.decideStoreConfirmation(order.id, 'approved', '現場確認可承接'), '已接受協調單。')}>接受協調單</AdminButton><AdminButton variant="danger" disabled={loading || !storeDecisionReason.trim()} onClick={() => act(() => adminApi.decideStoreConfirmation(order.id, 'rejected', storeDecisionReason.trim()), '已拒絕協調單並退回本單餐點信物折抵。')}>拒絕協調單</AdminButton></div></div> : null}
      <div className="adminOrderItemList">{order.items.map((item) => <AdminOrderItemRow key={item.id} orderId={order.id} item={item} loading={loading} act={act} />)}</div>
      {order.addons?.length ? <div className="adminAddonSummary">{order.addons.map((item) => <article key={item.id}><span>ADD-ON · {labels[item.status] || item.status}</span><strong>{item.staffName}｜{item.serviceName}</strong><small>{item.serviceDurationMinutes} 分鐘 · {item.participantCount} 人 · 附掛於既有指名，不新增基礎費與忙碌區段</small></article>)}</div> : null}
       {order.nominees?.length ? <div className="adminNomineeGrid">{order.nominees.map((item) => <article key={item.id}><span>{item.confirmationStatus}</span><strong>{item.staffName}</strong><p>{item.serviceName} · {item.segmentCount} 節</p><small>{new Date(item.requestedStartsAt).toLocaleString('zh-TW')} ～ {new Date(item.busyUntil).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}</small><NominationShortenControl orderId={order.id} orderStatus={order.status} item={item} loading={loading} act={act} />{['confirmed', 'in_service'].includes(order.status) && new Date(item.requestedServiceEndsAt).getTime() > Date.now() && (item.staffId === user.staffMemberId || canManageAddons) ? <AdminAddonComposer nominee={item} loading={loading} act={act} /> : null}</article>)}</div> : null}

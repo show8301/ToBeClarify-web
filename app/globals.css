@@ -1895,3 +1895,39 @@ body.modal-open .site-parallax-bubbles i{animation-play-state:paused}
 .live-marquee .live-marquee-group>a>strong{font-size:clamp(16px,1.35vw,18px);letter-spacing:-.02em}
 .live-staff-empty{margin:45px 0 0;padding:28px;border:1px solid rgba(47,48,75,.28);background:rgba(255,255,255,.32);font-size:17px}
 @media(max-width:760px){.live-marquee-hint{margin-top:20px;text-align:left}.live-status>.live-marquee{margin:10px -22px 0;padding-inline:0!important;gap:13px}.live-marquee-group{gap:13px;padding:0 13px 10px 0}.live-marquee .live-marquee-group>a{width:172px;flex-basis:172px}}
+
+/* Staff-card content hierarchy, signature artwork, and backend-authored line breaks. */
+.dreamer-photo-statuses{
+  min-height:50px;padding:7px 14px;grid-template-columns:minmax(0,1fr) auto;gap:14px;
+  background:linear-gradient(90deg,rgba(234,237,248,.94),rgba(194,199,226,.91) 55%,rgba(164,220,215,.9));
+  box-shadow:0 -10px 28px rgba(49,51,74,.12)
+}
+.dreamer-photo-statuses .dreamer-duty{justify-self:start;padding:4px 7px 4px 2px}
+.dreamer-photo-statuses .dreamer-duty>i{width:8px;height:8px;flex-basis:8px}
+.dreamer-photo-statuses .dreamer-duty small{font-size:7px;font-weight:820;letter-spacing:.16em}
+.dreamer-photo-statuses .dreamer-duty b{font-size:11px;font-weight:800}
+.dreamer-nomination{
+  justify-self:end;min-height:30px;padding:0 10px;border:1px solid rgba(255,255,255,.82);border-radius:999px;
+  background:rgba(255,255,255,.42);box-shadow:inset 0 1px rgba(255,255,255,.58);
+  font-size:10px;font-weight:820
+}
+.dreamer-card-heading{min-height:104px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.dreamer-card-heading>strong{margin-top:0}
+.dreamer-card-heading.has-signature{min-height:126px}
+.dreamer-card-signature{display:block;width:min(190px,88%);aspect-ratio:3/2;object-fit:contain;filter:drop-shadow(0 4px 7px rgba(49,51,74,.12))}
+.dreamer-card-heading.has-signature>em{margin-top:4px}
+.dreamer-card-bio{white-space:pre-line}
+.dreamer-card-footer{width:100%;margin-top:auto;display:flex;flex-direction:column;gap:14px}
+.dreamer-card-footer .dreamer-services{margin-top:0}
+.dreamer-card-footer .dreamer-card-link{margin-top:0}
+@media(max-width:620px){
+  .dreamer-photo-statuses{min-height:48px;padding-inline:12px}
+  .dreamer-photo-statuses .dreamer-duty small{display:block}
+  .dreamer-photo-statuses .dreamer-duty b{font-size:10px}
+  .dreamer-nomination{min-height:28px;padding-inline:9px;font-size:9px}
+  .dreamer-card-heading{min-height:92px}
+  .dreamer-card-heading.has-signature{min-height:112px}
+  .dreamer-card-signature{width:min(170px,86%)}
+  .dreamer-card-footer{gap:12px}
+  .dreamer-card-footer .dreamer-services{margin:0}
+}

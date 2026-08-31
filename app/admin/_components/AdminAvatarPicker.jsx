@@ -20,6 +20,22 @@ const AVATAR_OUTPUT = Object.freeze({
   maxSizeMB: 1.2,
   maxWidthOrHeight: AVATAR_HEIGHT,
 });
+const SIGNATURE_WIDTH = 1200;
+const SIGNATURE_HEIGHT = 800;
+const SIGNATURE_CROP_CONFIG = Object.freeze({
+  width: SIGNATURE_WIDTH,
+  height: SIGNATURE_HEIGHT,
+  aspect: 3 / 2,
+  title: '調整簽名圖',
+  description: `拖曳圖片決定裁切位置，使用縮放滑桿調整大小；輸出固定為 ${SIGNATURE_WIDTH} × ${SIGNATURE_HEIGHT}px WebP。`,
+  hint: '裁切框比例為 3:2；WebP 會保留原圖透明區域，請使用帶透明背景的 PNG 或 WebP。',
+});
+const SIGNATURE_OUTPUT = Object.freeze({
+  fileType: 'image/webp',
+  quality: 0.9,
+  maxSizeMB: 1.2,
+  maxWidthOrHeight: SIGNATURE_WIDTH,
+});
 
 function originalImageUrl(value) {
   if (!value) return '';
@@ -34,12 +50,16 @@ function originalImageUrl(value) {
   }
 }
 
-export function AdminAvatarPicker({ label = '頭像', value, pendingFile, onChange, onClear, hint, className = '', disabled = false, required = false, cropOnUpload = true }) {
+export function AdminAvatarPicker({ label = '頭像', value, pendingFile, onChange, onClear, hint, className = '', disabled = false, required = false, cropOnUpload = true, kind = 'avatar' }) {
   const [preview, setPreview] = useState(value || '');
   const [processing, setProcessing] = useState('');
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
   const { processImage } = useAdminImageProcessing();
+  const isSignature = kind === 'signature';
+  const cropConfig = isSignature ? SIGNATURE_CROP_CONFIG : AVATAR_CROP_CONFIG;
+  const output = isSignature ? SIGNATURE_OUTPUT : AVATAR_OUTPUT;
+  const imageLabel = isSignature ? '簽名圖' : '頭像';
 
   useEffect(() => {
     if (!pendingFile) {
@@ -59,7 +79,7 @@ export function AdminAvatarPicker({ label = '頭像', value, pendingFile, onChan
       const processed = await processImage(request);
       onChange(processed);
       setStatus(request.crop
-        ? `已裁切為 ${AVATAR_WIDTH} × ${AVATAR_HEIGHT}px WebP，檔案大小 ${formatImageFileSize(processed.size)}。`
+        ? `已裁切為 ${cropConfig.width} × ${cropConfig.height}px WebP，檔案大小 ${formatImageFileSize(processed.size)}。`
         : `已轉為 WebP，檔案大小 ${formatImageFileSize(processed.size)}。`);
     } catch (processError) {
       if (processError instanceof ImageProcessingCanceledError) setStatus('');
@@ -74,25 +94,25 @@ export function AdminAvatarPicker({ label = '頭像', value, pendingFile, onChan
 
   const handleUpload = (file) => {
     if (!file) return;
-    return runProcess({ file, crop: cropOnUpload, cropConfig: AVATAR_CROP_CONFIG, output: AVATAR_OUTPUT }, cropOnUpload ? 'cropping' : 'compressing');
+    return runProcess({ file, crop: cropOnUpload, cropConfig, output }, cropOnUpload ? 'cropping' : 'compressing');
   };
 
   const adjustImage = () => runProcess({
     file: pendingFile || undefined,
     sourceUrl: pendingFile ? undefined : originalImageUrl(value),
-    sourceName: 'avatar',
+    sourceName: isSignature ? 'signature' : 'avatar',
     crop: true,
-    cropConfig: AVATAR_CROP_CONFIG,
-    output: AVATAR_OUTPUT,
+    cropConfig,
+    output,
   }, pendingFile ? 'cropping' : 'loading');
 
-  return <div className={`adminImagePicker adminAvatarPicker ${className}`.trim()}>
+  return <div className={`adminImagePicker adminAvatarPicker ${isSignature ? 'adminSignaturePicker' : ''} ${className}`.trim()}>
       <div className="adminImagePickerHeader">
         <span>{label}{required ? <b className="adminRequiredMark" aria-hidden="true">*</b> : null}</span>
         {pendingFile ? <small>已在本機處理，儲存時才會上傳</small> : null}
       </div>
-      <div className="adminImagePreview adminAvatarPreview">
-        {preview ? <img src={preview} alt="頭像預覽" /> : <span>尚無頭像</span>}
+      <div className={`adminImagePreview adminAvatarPreview ${isSignature ? 'adminSignaturePreview' : ''}`.trim()}>
+        {preview ? <img src={preview} alt={`${imageLabel}預覽`} /> : <span>尚無{imageLabel}</span>}
       </div>
       {!disabled ? <div className="adminImagePickerActions adminAvatarActions">
         <label className={`adminButton adminButton-secondary${processing ? ' isDisabled' : ''}`}>

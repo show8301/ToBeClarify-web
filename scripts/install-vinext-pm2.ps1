@@ -10,6 +10,8 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+. (Join-Path $PSScriptRoot 'native-command.ps1')
+
 $identity = [System.Security.Principal.WindowsIdentity]::GetCurrent()
 $principal = New-Object System.Security.Principal.WindowsPrincipal -ArgumentList $identity
 if (-not $principal.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)) {
@@ -38,13 +40,19 @@ $packageJson |
     ConvertTo-Json -Depth 4 |
     Set-Content -LiteralPath (Join-Path $cliRoot 'package.json') -Encoding UTF8
 
-& $npmPath install `
-    --prefix $cliRoot `
-    --omit=dev `
-    --no-audit `
-    --no-fund `
-    --save-exact
-if ($LASTEXITCODE -ne 0) {
+$npmResult = Invoke-NativeCommand `
+    -FilePath $npmPath `
+    -ArgumentList @(
+        'install',
+        '--prefix',
+        $cliRoot,
+        '--omit=dev',
+        '--no-audit',
+        '--no-fund',
+        '--save-exact'
+    )
+$npmResult.Output | ForEach-Object { Write-Host $_ }
+if ($npmResult.ExitCode -ne 0) {
     throw "Unable to install PM2 $Pm2Version into $cliRoot."
 }
 
@@ -53,9 +61,11 @@ if (-not (Test-Path -LiteralPath $pm2CommandPath -PathType Leaf)) {
 }
 
 $aclGrant = "${RunnerAccount}:(OI)(CI)M"
-$aclOutput = & icacls.exe $Pm2Root /inheritance:e /grant:r $aclGrant 2>&1
-if ($LASTEXITCODE -ne 0) {
-    throw "Unable to grant $RunnerAccount Modify permission on ${Pm2Root}: $aclOutput"
+$aclResult = Invoke-NativeCommand `
+    -FilePath 'icacls.exe' `
+    -ArgumentList @($Pm2Root, '/inheritance:e', '/grant:r', $aclGrant)
+if ($aclResult.ExitCode -ne 0) {
+    throw "Unable to grant $RunnerAccount Modify permission on ${Pm2Root}: $($aclResult.Output -join [Environment]::NewLine)"
 }
 
 $installedPackagePath = Join-Path $cliRoot 'node_modules\pm2\package.json'

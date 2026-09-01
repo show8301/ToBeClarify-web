@@ -25,7 +25,11 @@ test("the shared workflow deploys only dev and main to isolated targets", async 
   assert.match(workflow, /group: vinext-iis-deployment/);
   assert.match(workflow, /SIBLING_HEALTH_CHECK_URL/);
   assert.match(workflow, /deploy\/pm2\/ecosystem\.config\.cjs/);
+  assert.match(workflow, /scripts\/native-command\.ps1/);
+  assert.match(workflow, /scripts\/normalize-pm2-jlist\.cjs/);
   assert.match(workflow, /scripts\/resurrect-vinext-pm2\.ps1/);
+  assert.match(workflow, /Validate PM2 on Windows without deployment/);
+  assert.match(workflow, /test-vinext-pm2-runtime\.ps1/);
 });
 
 test("development deployment skips automated test suites", async () => {
@@ -89,11 +93,35 @@ test("the PM2 Vinext process survives GitHub runner cleanup", async () => {
 test("the PM2 process list is normalized before Windows PowerShell parses it", async () => {
   const deployScript = await readRepositoryFile("scripts/deploy-vinext-iis.ps1");
 
-  assert.match(deployScript, /JSON\.parse\(fs\.readFileSync\(0, "utf8"\)\)/);
-  assert.match(deployScript, /process\.stdout\.write\(JSON\.stringify\(matches\)\)/);
-  assert.match(deployScript, /\$script:JsonNodePath/);
+  assert.match(deployScript, /normalize-pm2-jlist\.cjs/);
+  assert.match(deployScript, /\$script:SystemNodePath/);
+  assert.match(deployScript, /Invoke-NativeCommand/);
   assert.doesNotMatch(
     deployScript,
     /\$text\.Substring\([^\r\n]+\)\s*\|\s*ConvertFrom-Json/,
   );
+});
+
+test("native stderr is captured before the caller's Stop preference is restored", async () => {
+  const nativeHelper = await readRepositoryFile("scripts/native-command.ps1");
+
+  assert.match(nativeHelper, /\$previousErrorActionPreference = \$ErrorActionPreference/);
+  assert.match(nativeHelper, /\$ErrorActionPreference = 'Continue'/);
+  assert.match(nativeHelper, /@\(& \$FilePath @ArgumentList 2>&1\)/);
+  assert.match(nativeHelper, /\$commandExitCode = \$LASTEXITCODE/);
+  assert.match(nativeHelper, /finally/);
+  assert.match(nativeHelper, /\$ErrorActionPreference = \$previousErrorActionPreference/);
+  assert.match(nativeHelper, /\$global:LASTEXITCODE = \$previousLastExitCode/);
+});
+
+test("deployment never targets every PM2 process and retains reversible migration", async () => {
+  const deployScript = await readRepositoryFile("scripts/deploy-vinext-iis.ps1");
+
+  assert.doesNotMatch(deployScript, /Invoke-Pm2[^\r\n]+@\([^\r\n]*['"]all['"]/i);
+  assert.match(deployScript, /Stop-Pm2App -Name \$Pm2AppName/);
+  assert.match(deployScript, /Protected sibling verified before deployment/);
+  assert.match(deployScript, /Protected sibling remained healthy/);
+  assert.match(deployScript, /Write-Warning 'Vinext deployment failed\. Restoring the previous site\.'/);
+  assert.match(deployScript, /Start-ScheduledTask -TaskName \$LegacyTaskName/);
+  assert.match(deployScript, /Save-Pm2ProcessList/);
 });

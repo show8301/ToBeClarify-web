@@ -31,6 +31,8 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+. (Join-Path $PSScriptRoot 'native-command.ps1')
+
 function Get-NormalizedPath {
     param([Parameter(Mandatory = $true)][string]$Path)
 
@@ -84,8 +86,9 @@ function Invoke-Pm2 {
         [switch]$Quiet
     )
 
-    $output = @(& $script:Pm2Command @Arguments 2>&1)
-    $exitCode = $LASTEXITCODE
+    $result = Invoke-NativeCommand -FilePath $script:Pm2Command -ArgumentList $Arguments
+    $output = @($result.Output)
+    $exitCode = $result.ExitCode
     if (-not $Quiet -and $output.Count -gt 0) {
         $output | ForEach-Object { Write-Host $_ }
     }
@@ -100,53 +103,35 @@ function Get-Pm2App {
     param([Parameter(Mandatory = $true)][string]$Name)
 
     $output = Invoke-Pm2 -Arguments @('jlist', '--silent') -Quiet
-    $text = ($output -join [Environment]::NewLine).Trim()
-    if ([string]::IsNullOrWhiteSpace($text)) {
+    if ($output.Count -eq 0 -or [string]::IsNullOrWhiteSpace(($output -join ''))) {
         throw 'PM2 returned an empty process list.'
     }
 
-    $jsonStart = $text.IndexOf('[{', [System.StringComparison]::Ordinal)
-    if ($jsonStart -lt 0 -and $text.Contains('[]')) {
-        return $null
+    $temporaryJsonPath = Join-Path ([System.IO.Path]::GetTempPath()) "tobeclarify-pm2-$([guid]::NewGuid().ToString('N')).json"
+    try {
+        [System.IO.File]::WriteAllText(
+            $temporaryJsonPath,
+            ($output -join [Environment]::NewLine),
+            (New-Object System.Text.UTF8Encoding($false)))
+        $projectionResult = Invoke-NativeCommand `
+            -FilePath $script:SystemNodePath `
+            -ArgumentList @($script:Pm2NormalizerPath, $temporaryJsonPath, $Name)
     }
-    $jsonEnd = $text.LastIndexOf(']', [System.StringComparison]::Ordinal)
-    if ($jsonStart -lt 0 -or $jsonEnd -lt $jsonStart) {
-        throw "PM2 returned an unreadable process list: $text"
-    }
-
-    $json = $text.Substring($jsonStart, $jsonEnd - $jsonStart + 1)
-    $projectionScript = @'
-const fs = require("node:fs");
-const name = process.argv[1];
-const apps = JSON.parse(fs.readFileSync(0, "utf8"));
-const matches = apps
-  .filter((app) => app && app.name === name)
-  .map((app) => ({
-    name: app.name,
-    pm2_env: {
-      pm_cwd: app.pm2_env?.pm_cwd ?? null,
-      pm_exec_path: app.pm2_env?.pm_exec_path ?? null,
-      args: Array.isArray(app.pm2_env?.args) ? app.pm2_env.args : [],
-      status: app.pm2_env?.status ?? null,
-    },
-  }));
-process.stdout.write(JSON.stringify(matches));
-'@
-    $projectedOutput = @($json | & $script:JsonNodePath -e $projectionScript $Name 2>&1)
-    if ($LASTEXITCODE -ne 0) {
-        throw "Node.js could not normalize the PM2 process list:`n$($projectedOutput -join [Environment]::NewLine)"
+    finally {
+        Remove-Item -LiteralPath $temporaryJsonPath -Force -ErrorAction SilentlyContinue
     }
 
-    $projectedText = ($projectedOutput -join [Environment]::NewLine).Trim()
-    $matches = @($projectedText | ConvertFrom-Json)
-    if ($matches.Count -gt 1) {
-        throw "PM2 contains more than one application named $Name."
+    if ($projectionResult.ExitCode -ne 0) {
+        throw "Node.js could not normalize the PM2 process list:`n$($projectionResult.Output -join [Environment]::NewLine)"
     }
-    if ($matches.Count -eq 0) {
+
+    $projectedText = ($projectionResult.Output -join [Environment]::NewLine).Trim()
+    $appProjection = $projectedText | ConvertFrom-Json
+    if ($null -eq $appProjection) {
         return $null
     }
 
-    return $matches[0]
+    return $appProjection
 }
 
 function Assert-Pm2AppIdentity {
@@ -296,7 +281,8 @@ function Get-PortListenerProcessId {
     }
     catch {
         $netstatPattern = "^\s*TCP\s+(127\.0\.0\.1|0\.0\.0\.0|\[::\]):$Port\s+.*\s+LISTENING\s+(\d+)\s*$"
-        $netstatLine = netstat -ano -p TCP | Select-String -Pattern $netstatPattern | Select-Object -First 1
+        $netstatResult = Invoke-NativeCommand -FilePath 'netstat.exe' -ArgumentList @('-ano', '-p', 'TCP')
+        $netstatLine = $netstatResult.Output | Select-String -Pattern $netstatPattern | Select-Object -First 1
         if ($null -ne $netstatLine) {
             $listenerPid = [int]$netstatLine.Matches[0].Groups[2].Value
         }
@@ -390,13 +376,15 @@ function Register-Pm2StartupTask {
     param(
         [Parameter(Mandatory = $true)][string]$Pm2Home,
         [Parameter(Mandatory = $true)][string]$Pm2Command,
-        [Parameter(Mandatory = $true)][string]$SourceScript
+        [Parameter(Mandatory = $true)][string]$SourceScript,
+        [Parameter(Mandatory = $true)][string]$SourceNativeCommand
     )
 
     $startupRoot = Join-Path $Pm2Home 'startup'
     New-Item -Path $startupRoot -ItemType Directory -Force | Out-Null
     $startupScript = Join-Path $startupRoot 'resurrect-vinext-pm2.ps1'
     Copy-Item -LiteralPath $SourceScript -Destination $startupScript -Force
+    Copy-Item -LiteralPath $SourceNativeCommand -Destination (Join-Path $startupRoot 'native-command.ps1') -Force
 
     $powershellPath = (Get-Command powershell.exe -ErrorAction Stop).Source
     $arguments = @(
@@ -654,6 +642,8 @@ $requiredFiles = @(
     'package-lock.json',
     'deploy\web.config.template',
     'deploy\pm2\ecosystem.config.cjs',
+    'scripts\native-command.ps1',
+    'scripts\normalize-pm2-jlist.cjs',
     'scripts\start-vinext.ps1',
     'scripts\resurrect-vinext-pm2.ps1'
 )
@@ -672,16 +662,28 @@ if (-not (Test-Path -LiteralPath $systemNodePath -PathType Leaf)) {
     $systemNodePath = $nodeCommand.Source
 }
 $script:Pm2Command = $pm2Command.FullName
-$script:JsonNodePath = $systemNodePath
+$script:SystemNodePath = $systemNodePath
+$script:Pm2NormalizerPath = Join-Path $PSScriptRoot 'normalize-pm2-jlist.cjs'
+if (-not (Test-Path -LiteralPath $script:Pm2NormalizerPath -PathType Leaf)) {
+    throw "The PM2 normalizer was not found: $($script:Pm2NormalizerPath)"
+}
 $env:PM2_HOME = $Pm2Home
 $env:NO_COLOR = '1'
 Remove-Item Env:RUNNER_TRACKING_ID -ErrorAction SilentlyContinue
-$nodeVersionText = (& $nodeCommand.Source --version).TrimStart('v')
+$nodeVersionResult = Invoke-NativeCommand -FilePath $nodeCommand.Source -ArgumentList @('--version')
+if ($nodeVersionResult.ExitCode -ne 0) {
+    throw "Unable to read the runner Node.js version: $($nodeVersionResult.Output -join [Environment]::NewLine)"
+}
+$nodeVersionText = ($nodeVersionResult.Output | Select-Object -Last 1).Trim().TrimStart('v')
 $nodeVersion = [version]$nodeVersionText
 if ($nodeVersion -lt [version]'22.13.0') {
     throw "Node.js 22.13.0 or newer is required; found $nodeVersionText"
 }
-$systemNodeVersionText = (& $systemNodePath --version).TrimStart('v')
+$systemNodeVersionResult = Invoke-NativeCommand -FilePath $systemNodePath -ArgumentList @('--version')
+if ($systemNodeVersionResult.ExitCode -ne 0) {
+    throw "Unable to read the persistent Node.js version: $($systemNodeVersionResult.Output -join [Environment]::NewLine)"
+}
+$systemNodeVersionText = ($systemNodeVersionResult.Output | Select-Object -Last 1).Trim().TrimStart('v')
 if ([version]$systemNodeVersionText -lt [version]'22.13.0') {
     throw "The persistent PM2 interpreter requires Node.js 22.13.0 or newer; found $systemNodeVersionText at $systemNodePath"
 }
@@ -753,9 +755,12 @@ foreach ($item in (Get-ChildItem -LiteralPath $artifactRoot -Force)) {
 
 Push-Location $stagingRoot
 try {
-    & $npmCommand.Source ci --omit=dev --no-audit --no-fund
-    if ($LASTEXITCODE -ne 0) {
-        throw "npm ci failed with exit code $LASTEXITCODE"
+    $npmResult = Invoke-NativeCommand `
+        -FilePath $npmCommand.Source `
+        -ArgumentList @('ci', '--omit=dev', '--no-audit', '--no-fund')
+    $npmResult.Output | ForEach-Object { Write-Host $_ }
+    if ($npmResult.ExitCode -ne 0) {
+        throw "npm ci failed with exit code $($npmResult.ExitCode)"
     }
 }
 finally {
@@ -829,9 +834,9 @@ try {
         '/reverseRewriteHostInResponseHeaders:false',
         '/commit:apphost'
     )
-    $proxyConfigurationOutput = & $appcmdPath $proxyArguments 2>&1
-    if ($LASTEXITCODE -ne 0) {
-        throw "Unable to enable IIS ARR proxy support: $proxyConfigurationOutput"
+    $proxyConfigurationResult = Invoke-NativeCommand -FilePath $appcmdPath -ArgumentList $proxyArguments
+    if ($proxyConfigurationResult.ExitCode -ne 0) {
+        throw "Unable to enable IIS ARR proxy support: $($proxyConfigurationResult.Output -join [Environment]::NewLine)"
     }
 
     Start-Pm2App `
@@ -882,7 +887,8 @@ try {
     Register-Pm2StartupTask `
         -Pm2Home $Pm2Home `
         -Pm2Command $script:Pm2Command `
-        -SourceScript (Join-Path $deployRoot 'scripts\resurrect-vinext-pm2.ps1')
+        -SourceScript (Join-Path $deployRoot 'scripts\resurrect-vinext-pm2.ps1') `
+        -SourceNativeCommand (Join-Path $deployRoot 'scripts\native-command.ps1')
 
     Write-Host "Vinext deployment completed: $deployRoot"
     Write-Host "Verified deployment SHA through IIS: $DeploymentSha"

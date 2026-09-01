@@ -93,6 +93,8 @@ jobs:
             package-lock.json
             deploy/web.config.template
             deploy/pm2/ecosystem.config.cjs
+            scripts/native-command.ps1
+            scripts/normalize-pm2-jlist.cjs
             scripts/start-vinext.ps1
             scripts/resurrect-vinext-pm2.ps1
           if-no-files-found: error
@@ -115,6 +117,29 @@ jobs:
             exit 1
           fi
           echo "Accepted production promotion: dev -> main."
+
+  validate-pm2-runtime:
+    name: Validate PM2 on Windows without deployment
+    if: github.event_name == 'workflow_dispatch' && inputs.preflight_only == true
+    needs: build
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 10
+    concurrency:
+      group: vinext-iis-deployment
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout validation scripts
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Validate Windows PowerShell, PM2 jlist, and JSON normalization
+        shell: powershell
+        run: .\scripts\test-vinext-pm2-runtime.ps1
 
   deploy:
     name: Preflight and deploy to IIS

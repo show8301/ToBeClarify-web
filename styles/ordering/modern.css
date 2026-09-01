@@ -166,3 +166,222 @@
   .orderMockCartLayout .cartSummary{margin-top:14px;padding:17px}
   .orderMockCartLayout .cartLine{grid-template-columns:52px minmax(0,1fr) 32px}
 }
+
+/* Cleaner ordering workspace: match the admin system's calm, operational hierarchy. */
+.orderShell,
+.orderGate {
+  background:#eef1f6;
+}
+.orderShell::before,
+.orderGate::before {
+  display:none;
+}
+.orderTopbar {
+  position:sticky;
+  min-height:72px;
+  border-bottom:1px solid #dfe3eb;
+  background:rgba(249,250,252,.96);
+  box-shadow:none;
+}
+.orderBrand img {
+  width:40px;
+  height:40px;
+  padding:0;
+  border:0;
+}
+.orderBrand strong { font-size:18px; }
+.orderSessionChip,
+.orderCredit {
+  border-color:#dfe3eb;
+  background:#f4f6f9;
+}
+.orderBusinessBanner {
+  min-height:38px;
+  padding:7px 18px;
+  border-bottom:1px solid #d8e4e5;
+  background:#e5f1f0;
+  color:#354c50;
+}
+.orderBusinessBanner.isCoordination { background:#f7f0df; color:#665737; }
+.orderBusinessBanner.isStaffOnly { background:#f5e8ea; color:#684750; }
+.orderBusinessBanner.isClosed { background:#444a61; color:#fff; }
+.orderTabs {
+  position:sticky;
+  top:72px;
+  gap:4px;
+  padding-block:8px;
+  border-bottom:1px solid #dfe3eb;
+  background:rgba(245,247,250,.97);
+}
+.orderTabs button {
+  min-height:40px;
+  padding:7px 14px;
+  border-color:transparent;
+  background:transparent;
+  font-size:12px;
+}
+.orderTabs button:hover {
+  border-color:#d8dde7;
+  background:#fff;
+  transform:none;
+}
+.orderTabs button.isActive {
+  border-color:#cbd5e5;
+  background:#e1e8f3;
+  box-shadow:none;
+}
+.orderWorkspace {
+  width:min(1380px,100%);
+  grid-template-columns:minmax(0,1fr) 290px;
+  gap:24px;
+  padding-top:28px;
+}
+.orderPageHeading {
+  min-height:0;
+  margin-bottom:20px;
+  padding:4px 0 20px;
+}
+.orderPageHeading::after { display:none; }
+.orderPageHeading h1 {
+  margin-top:8px;
+  font-size:clamp(34px,4vw,48px);
+  line-height:1.08;
+  letter-spacing:-.04em;
+}
+.orderPageHeading p {
+  max-width:720px;
+  margin-top:10px;
+  font-size:13px;
+  line-height:1.65;
+}
+.orderCategoryRail {
+  top:126px;
+  margin:0 0 18px;
+  padding:6px 0;
+  background:rgba(238,241,246,.96);
+}
+.orderCategoryRail button {
+  min-height:38px;
+  padding:7px 14px;
+  border-color:#dce1e9;
+  background:#f8f9fb;
+  font-size:12px;
+}
+.orderCategoryRail button.isActive {
+  border-color:#9fb1cf;
+  background:#dfe8f4;
+  box-shadow:none;
+}
+.orderProductGrid { gap:14px; }
+.orderProductCard {
+  grid-template-rows:175px minmax(0,1fr) auto;
+  border-color:#dfe3eb;
+  border-radius:13px;
+  background:#fbfcfd;
+  box-shadow:0 5px 18px rgba(82,87,120,.07);
+}
+.orderProductCard:hover {
+  border-color:#cfd7e4;
+  transform:translateY(-2px);
+  box-shadow:0 9px 24px rgba(82,87,120,.1);
+}
+.orderProductCard>div:nth-child(2) { padding:15px 16px 8px; }
+.orderProductCard h2 { font-size:18px; }
+.orderProductCard p { min-height:42px; font-size:12px; }
+.orderProductCard footer { padding:8px 16px 15px; }
+.orderProductCard footer strong { font-size:16px; }
+.orderProductCard footer button,
+.orderPrimaryAction,
+.cartSummary button,
+.orderGateCard form button,
+.helpCard form button {
+  border-color:#7186ad;
+  background:#7186ad;
+  color:#fff;
+  box-shadow:none;
+}
+.orderProductCard footer button:hover { transform:none; box-shadow:none; background:#6379a1; }
+.orderProductCard footer button span { color:#fff; }
+.orderAside {
+  top:136px;
+  border-color:#dfe3eb;
+  border-radius:14px;
+  background:#fbfcfd;
+  box-shadow:0 7px 22px rgba(82,87,120,.08);
+  backdrop-filter:none;
+}
+.orderAside::before {
+  border-bottom:1px solid #e2e5eb;
+  background:#f5f7fa;
+  color:#68728a;
+}
+.orderAside>button { border-color:#7186ad; background:#7186ad; color:#fff; box-shadow:none; }
+.orderAside>button.isSecondary { border-color:#dfe3eb; background:transparent; color:#4b5268; }
+.nominationSection,
+.tipComposer,
+.helpCard,
+.nominationComposer,
+.cartLine,
+.cartNominationGroup,
+.myOrderCard,
+.cartSummary,
+.orderGateCard {
+  border-color:#dfe3eb;
+  border-radius:14px;
+  background:#fbfcfd;
+  box-shadow:0 6px 20px rgba(82,87,120,.07);
+  backdrop-filter:none;
+}
+.nominationStaffGrid button,
+.nominationServiceGrid>button,
+.nominationModeGrid>button {
+  border-color:#dfe3eb;
+  background:#f7f8fa;
+  box-shadow:none;
+}
+.nominationStaffGrid button:hover:not(:disabled),
+.nominationServiceGrid>button:hover,
+.nominationModeGrid>button:hover { transform:none; }
+.cartNominationGroup>header { background:#454b63; }
+.orderNotice { border-color:#d7dce5; background:#f7f9fb; box-shadow:0 8px 24px rgba(82,87,120,.11); }
+
+@media(max-width:860px){
+  .orderWorkspace{grid-template-columns:1fr}
+  .orderAside{
+    position:fixed;
+    z-index:50;
+    inset:auto 14px 14px;
+    display:grid;
+    grid-template-columns:1fr auto;
+    width:auto;
+    padding:12px 12px 12px 16px;
+    border-radius:13px;
+    box-shadow:0 10px 30px rgba(82,87,120,.14);
+  }
+  .orderAside::before,
+  .orderAside>p,
+  .orderAside>dl,
+  .orderAside>button.isSecondary{display:none}
+  .orderAside>div{display:grid;margin:0;align-content:center}
+  .orderAside>div span{font-size:8px}
+  .orderAside>div strong{font-size:18px}
+  .orderAside>button{width:auto;min-width:150px;min-height:44px;margin:0;padding:9px 14px}
+}
+
+@media(max-width:620px){
+  .orderTopbar{position:relative;min-height:64px;background:#f9fafc}
+  .orderTopbar .orderBrand img{width:36px;height:36px}
+  .orderTabs{top:0;padding:7px 12px}.orderTabs button{min-height:38px;padding:6px 12px}
+  .orderWorkspace{padding:20px 14px 108px}
+  .orderPageHeading{min-height:0;margin-bottom:16px;padding-bottom:17px}
+  .orderPageHeading h1{font-size:36px}
+  .orderPageHeading p{font-size:12px}
+  .orderCategoryRail{top:0;margin-bottom:14px;padding:5px 0}
+  .orderProductGrid{gap:10px}
+  .orderProductCard{grid-template-columns:104px minmax(0,1fr);grid-template-rows:minmax(104px,auto) auto;border-radius:12px;box-shadow:0 4px 14px rgba(82,87,120,.06)}
+  .orderProductImage{min-height:144px}
+  .orderProductCard>div:nth-child(2){padding:12px 12px 5px}.orderProductCard h2{font-size:17px}.orderProductCard p{font-size:11px}
+  .orderProductCard footer{padding:5px 12px 12px}.orderProductCard footer button{min-width:78px;min-height:40px}
+  .orderAside{inset:auto 12px 12px;width:auto;border-radius:13px;box-shadow:0 8px 26px rgba(82,87,120,.13)}
+  .orderAside>button{min-width:142px}
+}

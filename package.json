@@ -13,13 +13,11 @@
     "snapshot:site": "node scripts/snapshot-site.mjs",
     "test": "npm run build && npm run test:non-e2e",
     "test:non-e2e": "node --experimental-strip-types --test tests/rendered-html.test.mjs tests/admin-api.test.mjs tests/admin-ui.test.mjs tests/ordering-ui.test.mjs tests/deployment-health.test.mjs tests/deployment-workflow.test.mjs",
-    "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
-    "db:generate": "drizzle-kit generate"
+    "lint": "eslint . --ignore-pattern dist --ignore-pattern .next"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
     "browser-image-compression": "^2.0.2",
-    "drizzle-orm": "0.45.2",
     "lucide-react": "^1.32.0",
     "motion": "^12.23.24",
     "react": "19.2.6",
@@ -37,7 +35,6 @@
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "6.0.2",
     "@vitejs/plugin-rsc": "0.5.26",
-    "drizzle-kit": "0.31.10",
     "eslint": "9.39.4",
     "eslint-plugin-jsx-a11y": "6.10.2",
     "eslint-plugin-react": "7.37.5",

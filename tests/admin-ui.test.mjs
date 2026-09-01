@@ -2,6 +2,26 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
+const readStyles = async (...paths) => (await Promise.all(
+  paths.map((path) => readFile(new URL(path, import.meta.url), 'utf8')),
+)).join('\n');
+const publicStyles = () => readStyles(
+  '../styles/public/site.css',
+  '../styles/public/layers/00-foundation.css',
+  '../styles/public/layers/10-page-layouts.css',
+  '../styles/public/layers/20-theme-history.css',
+  '../styles/public/layers/30-pearl-theme.css',
+  '../styles/public/layers/40-refinements.css',
+);
+const adminStyles = () => readStyles(
+  '../styles/admin/site.css',
+  '../styles/admin/layers/00-foundation.css',
+  '../styles/admin/layers/10-management.css',
+  '../styles/admin/layers/20-ordering.css',
+  '../styles/admin/layers/30-public-previews.css',
+  '../styles/admin/layers/40-dark-and-operational.css',
+);
+
 test('staff avatar editor keeps separate upload, crop, and delete actions', async () => {
   const source = await readFile(new URL('../features/admin/media/AdminAvatarPicker.jsx', import.meta.url), 'utf8');
   const processor = await readFile(new URL('../features/admin/media/AdminImageProcessingProvider.jsx', import.meta.url), 'utf8');
@@ -43,7 +63,7 @@ test('homepage slides expose an editable playback duration', async () => {
 test('developer can control each public menu page from the admin home', async () => {
   const dashboard = await readFile(new URL('../features/admin/dashboard/AdminHomePage.jsx', import.meta.url), 'utf8');
   const api = await readFile(new URL('../features/admin/api/client.js', import.meta.url), 'utf8');
-  const styles = await readFile(new URL('../styles/admin/site.css', import.meta.url), 'utf8');
+  const styles = await adminStyles();
   const data = await readFile(new URL('../features/site/server/data.ts', import.meta.url), 'utf8');
   const chrome = await readFile(new URL('../components/layout/SiteChrome.tsx', import.meta.url), 'utf8');
   const menu = await readFile(new URL('../app/menu/page.tsx', import.meta.url), 'utf8');
@@ -107,7 +127,7 @@ test('staff detail falls back to the live API when a character is absent from th
 
 test('the detached public action returns to the top on desktop and mobile', async () => {
   const source = await readFile(new URL('../components/layout/SiteChrome.tsx', import.meta.url), 'utf8');
-  const styles = await readFile(new URL('../styles/public/site.css', import.meta.url), 'utf8');
+  const styles = await publicStyles();
 
   assert.match(source, /aria-label="回到頁面頂端"/);
   assert.match(source, />TOP<\/b>/);
@@ -121,7 +141,7 @@ test('the detached public action returns to the top on desktop and mobile', asyn
 
 test('the LD signature opens admin login only after five clicks', async () => {
   const source = await readFile(new URL('../features/home/components/HomeLanding.tsx', import.meta.url), 'utf8');
-  const styles = await readFile(new URL('../styles/public/site.css', import.meta.url), 'utf8');
+  const styles = await publicStyles();
 
   assert.match(source, /adminTriggerClicks\.current\+=1/);
   assert.match(source, /adminTriggerClicks\.current<5/);

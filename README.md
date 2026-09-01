@@ -1,102 +1,42 @@
-# vinext-starter
+# ToBeClarify Web
 
-> **直接 SQL 維護帳號限制：** 提供給直接 SQL 操作的帳號沒有刪除資料或資料表的權限；這不等同於 API 執行帳號。後台前端可依 API 授權呼叫受控的 `DELETE` 業務端點。尚未送出的顧客購物車在瀏覽器內移除項目不會寫入資料庫，與資料庫刪除不同。
+清醒夢的公開網站、顧客點餐入口與管理後台。專案使用 React 19、Vinext App Router 與 Vite；正式執行需要 Node.js，不是純靜態網站。
 
-A clean full-stack starter running on
-[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
-Drizzle support.
+## 本機開發
 
-## Prerequisites
-
-- Node.js `>=22.13.0`
-
-## Quick Start
+需求：Node.js `>=22.13.0`。
 
 ```bash
 npm install
 npm run dev
+```
+
+常用檢查：
+
+```bash
 npm run build
+npm run lint
+npm run test:non-e2e
 ```
 
-This starter does not use `wrangler.jsonc`.
+## 目錄
 
-## Included Shape
+- `app/`：頁面與 API 路由入口；不要在這裡堆放大型功能元件。
+- `features/`：依產品功能分類的畫面、client API、server data 與型別。
+- `components/`：跨功能共用的版面及媒體元件。
+- `lib/server/`：只在伺服器端使用的共用設定。
+- `data/snapshots/`：公開頁面的容錯首屏快照。
+- `styles/`：公開站、後台與點餐入口各自的樣式入口及 cascade layers。
+- `public/`：網站實際使用的靜態素材。
+- `scripts/`、`deploy/`：IIS/Vinext 部署與維運腳本。
+- `tests/`：伺服器渲染、API client、UI 契約與部署腳本測試。
 
-- edit site code under `app/`
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/schema.ts` starts intentionally empty
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
+完整邊界與新增檔案規則請見 [`docs/architecture.md`](docs/architecture.md)。IIS 部署說明請見 [`docs/iis-dev-deployment.md`](docs/iis-dev-deployment.md)。
 
-## Workspace Auth Headers
+## 分支與部署
 
-Signed-in visitors receive both `oai-authenticated-user-id` and `oai-authenticated-user-email`. Private Sites require every visitor to sign in; public Sites may also have anonymous visitors, for whom neither header is present.
+- 功能分支先合併到 `dev`，由 GitHub Actions 部署到測試站。
+- 測試站確認完成後，才由 `dev` 發 PR 到 `main`。
+- `main` 是正式發布來源，不應直接拿來測試未確認變更。
 
-The user ID is stable for the same user on the same Site and different across Sites. Email and name are intended for display or contact purposes.
-
-SIWC-authenticated workspace sites may also receive
-`oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty
-`name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by
-`oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
-
-Treat the full name as optional and fall back to email when it is absent:
-
-```tsx
-import { headers } from "next/headers";
-
-export default async function Home() {
-  const requestHeaders = await headers();
-  const userId = requestHeaders.get("oai-authenticated-user-id");
-  const email = requestHeaders.get("oai-authenticated-user-email");
-  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
-      "percent-encoded-utf-8"
-      ? decodeURIComponent(encodedFullName)
-      : null;
-
-  const displayName = fullName ?? email;
-  // ...
-}
-```
-
-## Optional Dispatch-Owned ChatGPT Sign-In
-
-Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs
-optional or required ChatGPT sign-in:
-
-- Use `getChatGPTUser()` for optional signed-in UI.
-- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send
-  anonymous visitors through Sign in with ChatGPT.
-- Use `chatGPTSignInPath(returnTo)` and `chatGPTSignOutPath(returnTo)` for
-  browser links or actions.
-- Pass a same-origin relative `returnTo` path for the destination after sign-in
-  or sign-out. The helper validates and safely encodes it.
-- Mark protected pages with `export const dynamic = "force-dynamic"` because
-  they depend on per-request identity headers.
-
-Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the
-OAuth cookies, and identity header injection. Do not implement app routes for
-those reserved paths. Routes that do not import and call the helper remain
-anonymous-compatible.
-
-SIWC establishes identity only; it does not prove workspace membership. Use the
-Sites hosting platform's access policy controls for workspace-wide restrictions,
-or enforce explicit server-side membership or allowlist checks.
-
-Use SIWC for account pages, user-specific dashboards, saved records, and write
-actions tied to the current ChatGPT user. Leave public content anonymous.
-
-## Useful Commands
-
-- `npm run dev`: start local development
-- `npm run build`: verify the vinext build output
-- `npm test`: build the starter and verify its rendered loading skeleton
-- `npm run db:generate`: generate Drizzle migrations after schema changes
-
-## Learn More
-
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+部署環境透過 repository variables 提供路徑、health check 與可選的 API base URL；本機對應鍵值列在 [`.env.example`](.env.example)。

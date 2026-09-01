@@ -4,7 +4,7 @@ This file records the visual palette before and after the August 2026 dark-hotel
 
 ## Archived palette — editorial daylight
 
-Previously defined in `styles/public/site.css`:
+Preserved in `styles/public/layers/00-foundation.css`:
 
 | Role | Token | Value | Visual use |
 | --- | --- | --- | --- |
@@ -21,7 +21,7 @@ Supporting surfaces were mostly `#faf7ef`, `#f9f6ef`, `#f8f4eb`, `#f5efe6`, `#dc
 
 Recorded again on 2026-08-17 before exploring the next visual direction. Treat this section as a restorable snapshot even after the live theme changes.
 
-The live theme is defined by semantic tokens at the end of `styles/public/site.css`:
+The archived dark theme is preserved in `styles/public/layers/20-theme-history.css`:
 
 | Role | Token | Value | Visual use |
 | --- | --- | --- | --- |
@@ -62,6 +62,8 @@ Characteristic use: midnight-to-abyss page gradients, deep-ocean cards, peacock-
 ## Current palette — Shoko pearl bubble
 
 Introduced on 2026-08-17. This direction combines the supplied dreamy-ocean colours with the silver blue, periwinkle and lavender-grey range seen in Shoko's hair. Black surfaces are removed; deep colour is reserved for typography and necessary contrast.
+
+The base theme lives in `styles/public/layers/30-pearl-theme.css`; later production adjustments live in `styles/public/layers/40-refinements.css`.
 
 | Role | Token | Value | Visual use |
 | --- | --- | --- | --- |

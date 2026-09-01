@@ -1236,6 +1236,7 @@ body{background-image:radial-gradient(ellipse 75% 55% at 4% 4%,rgba(232,199,218,
 .staff-gallery{grid-template-columns:repeat(12,minmax(0,1fr));gap:34px 26px;align-items:stretch}
 .dreamer-card{
   grid-column:span 4;min-width:0;display:grid;grid-template-rows:auto 1fr;position:relative;overflow:hidden;
+  content-visibility:auto;contain-intrinsic-size:auto 720px;
   border:1px solid rgba(255,255,255,.9);border-radius:16px;
   background:linear-gradient(150deg,rgba(255,255,255,.72),rgba(245,240,248,.48) 54%,rgba(227,235,247,.5));
   box-shadow:0 20px 48px rgba(118,121,161,.13),inset 0 1px rgba(255,255,255,.94);

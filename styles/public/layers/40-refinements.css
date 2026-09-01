@@ -2,7 +2,6 @@
 .staff-gallery{grid-template-columns:repeat(12,minmax(0,1fr));gap:34px 26px;align-items:stretch}
 .dreamer-card{
   grid-column:span 4;min-width:0;display:grid;grid-template-rows:auto 1fr;position:relative;overflow:hidden;
-  content-visibility:auto;contain-intrinsic-size:auto 720px;
   border:1px solid rgba(255,255,255,.9);border-radius:16px;
   background:linear-gradient(150deg,rgba(255,255,255,.72),rgba(245,240,248,.48) 54%,rgba(227,235,247,.5));
   box-shadow:0 20px 48px rgba(118,121,161,.13),inset 0 1px rgba(255,255,255,.94);
@@ -195,7 +194,7 @@
 .dreamer-card-body{min-height:0;padding:28px 22px 20px;align-items:center;text-align:center;background:linear-gradient(150deg,rgba(193,185,223,.24),rgba(169,199,234,.28) 58%,rgba(232,199,218,.2))}
 .dreamer-card-heading{width:100%}.dreamer-card-heading>strong{font-size:clamp(22px,1.65vw,26px);font-weight:620;line-height:1.2}
 .dreamer-card-heading>em{margin-top:10px;color:rgba(49,51,74,.62);font:normal 10px/1.45 var(--font-geist-mono),monospace}
-.dreamer-card-bio{margin-top:20px;max-width:31ch;font-size:12px;line-height:1.8;-webkit-line-clamp:3}
+.dreamer-card-bio{margin-top:20px;max-width:35ch;font-size:12px;line-height:1.8;-webkit-line-clamp:3}
 .dreamer-card-bio::after{content:"";display:block;width:52px;margin:20px auto 0;border-top:1px solid rgba(255,255,255,.72)}
 .dreamer-services{width:100%;margin-top:20px;justify-content:center;flex-wrap:wrap;overflow:visible}
 .dreamer-services>b,.dreamer-services>i{background:rgba(255,255,255,.3);font-size:9px}
@@ -688,11 +687,12 @@ body.modal-open .site-parallax-bubbles i{animation-play-state:paused}
 .dreamer-card-footer .dreamer-services{margin-top:0}
 .dreamer-card-footer .dreamer-card-link{margin-top:0}
 .dreamer-card-main{
-  grid-column:1;grid-row:1/-1;min-width:0;min-height:0;display:grid;grid-template-rows:410px minmax(0,1fr);
+  grid-column:1;grid-row:1/-1;min-width:0;min-height:0;display:grid;grid-template-rows:inherit;
   color:inherit;text-decoration:none
 }
 .dreamer-card-signature-toggle{
-  position:absolute;z-index:5;top:calc(410px + 28px + 49px);right:11px;width:28px;height:28px;padding:0;
+  position:relative;z-index:5;grid-column:1;grid-row:2;justify-self:end;align-self:start;margin:77px 11px 0 0;
+  width:28px;height:28px;padding:0;
   display:grid;place-items:center;border:1px solid rgba(255,255,255,.9);border-radius:50%;
   background:rgba(247,247,251,.72);color:var(--ink);box-shadow:0 5px 14px rgba(49,51,74,.12);
   cursor:pointer;transition:background .2s ease,color .2s ease,transform .2s ease
@@ -701,7 +701,6 @@ body.modal-open .site-parallax-bubbles i{animation-play-state:paused}
 .dreamer-card-signature-toggle svg{width:13px;height:13px;stroke-width:1.8}
 .dreamer-card-signature-toggle[aria-pressed="true"] svg{transform:rotate(180deg)}
 .dreamer-card-main:focus-visible{outline:2px solid var(--hair-blue);outline-offset:4px}
-@media(max-width:1180px){.dreamer-card-main{grid-template-rows:390px minmax(0,1fr)}.dreamer-card-signature-toggle{top:calc(390px + 28px + 49px)}}
 @media(max-width:620px){
   .dreamer-photo-statuses{min-height:48px;padding-inline:12px}
   .dreamer-photo-statuses .dreamer-duty small{display:block}
@@ -712,8 +711,7 @@ body.modal-open .site-parallax-bubbles i{animation-play-state:paused}
   .dreamer-card-signature{width:min(170px,86%)}
   .dreamer-card-footer{gap:12px}
   .dreamer-card-footer .dreamer-services{margin:0}
-  .dreamer-card-main{grid-template-rows:350px minmax(0,1fr)}
-  .dreamer-card-signature-toggle{top:calc(350px + 24px + 42px);right:10px;width:27px;height:27px}
+  .dreamer-card-signature-toggle{margin:66px 10px 0 0;width:27px;height:27px}
 }
 
 /* Ordering modal embeds profile content without duplicate page navigation. */

@@ -24,6 +24,8 @@ test("the shared workflow deploys only dev and main to isolated targets", async 
   assert.doesNotMatch(workflow, /vars\.(?:DEV_NODE_TASK_NAME|WEB_NODE_TASK_NAME)/);
   assert.match(workflow, /group: vinext-iis-deployment/);
   assert.match(workflow, /SIBLING_HEALTH_CHECK_URL/);
+  assert.match(workflow, /deploy\/pm2\/ecosystem\.config\.cjs/);
+  assert.match(workflow, /scripts\/resurrect-vinext-pm2\.ps1/);
 });
 
 test("development deployment skips automated test suites", async () => {
@@ -48,15 +50,23 @@ test("the IIS deployer derives immutable identities for both environments", asyn
   assert.match(deployScript, /\[ValidateSet\('production', 'development'\)\]/);
   assert.match(deployScript, /DeployLeaf = 'ToBeClarify_web'/);
   assert.match(deployScript, /NodePort = 4300/);
-  assert.match(deployScript, /TaskName = 'ToBeClarify Vinext PROD'/);
+  assert.match(deployScript, /Pm2AppName = 'tobeclarify-web-prod'/);
   assert.match(deployScript, /DeployLeaf = 'ToBeClarify_web_dev'/);
   assert.match(deployScript, /NodePort = 4310/);
-  assert.match(deployScript, /TaskName = 'ToBeClarify Vinext DEV'/);
+  assert.match(deployScript, /Pm2AppName = 'tobeclarify-web-dev'/);
   assert.doesNotMatch(deployScript, /\[int\]\$NodePort/);
-  assert.doesNotMatch(deployScript, /\[string\]\$TaskName/);
+  assert.doesNotMatch(deployScript, /\[string\]\$Pm2AppName/);
   assert.match(deployScript, /function Rename-DirectoryWithRetry/);
-  assert.match(deployScript, /function Assert-VinextTaskIdentity/);
-  assert.match(deployScript, /-AllowMissing \| Out-Null/);
+  assert.match(deployScript, /function Assert-Pm2AppIdentity/);
+  assert.match(deployScript, /function Assert-LegacyVinextTaskIdentity/);
+  assert.match(deployScript, /\$Pm2Home = 'D:\\pm2\\ToBeClarify-web'/);
+  assert.match(
+    deployScript,
+    /cli\\node_modules\\\.bin\\pm2\.cmd/,
+  );
+  assert.match(deployScript, /startOrRestart/);
+  assert.match(deployScript, /Save-Pm2ProcessList/);
+  assert.match(deployScript, /Register-Pm2StartupTask/);
   assert.match(deployScript, /-ExpectedDeploymentSha \$DeploymentSha/);
   assert.match(deployScript, /Protected sibling verified before deployment/);
   assert.match(deployScript, /Protected sibling remained healthy/);
@@ -64,11 +74,14 @@ test("the IIS deployer derives immutable identities for both environments", asyn
   assert.match(deployScript, /\$runtimeConfig\.ORDERING_API_BASE_URL/);
 });
 
-test("the scheduled Vinext process survives GitHub runner cleanup", async () => {
-  const launcher = await readRepositoryFile("scripts/start-vinext.ps1");
+test("the PM2 Vinext process survives GitHub runner cleanup", async () => {
+  const deployScript = await readRepositoryFile("scripts/deploy-vinext-iis.ps1");
+  const ecosystem = await readRepositoryFile("deploy/pm2/ecosystem.config.cjs");
 
-  assert.match(
-    launcher,
-    /\$env:RUNNER_TRACKING_ID = "tobeclarify-vinext-\$Port"[\s\S]*Remove-Item Env:RUNNER_TRACKING_ID -ErrorAction SilentlyContinue/,
-  );
+  assert.match(deployScript, /Remove-Item Env:RUNNER_TRACKING_ID -ErrorAction SilentlyContinue/);
+  assert.match(ecosystem, /autorestart: true/);
+  assert.match(ecosystem, /watch: false/);
+  assert.match(ecosystem, /exp_backoff_restart_delay: 1000/);
+  assert.match(ecosystem, /instances: 1/);
+  assert.match(ecosystem, /exec_mode: "fork"/);
 });

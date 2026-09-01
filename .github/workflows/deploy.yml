@@ -51,15 +51,15 @@ jobs:
           $parseErrors = @()
           Get-ChildItem -Path scripts -Filter '*.ps1' | ForEach-Object {
             $tokens = $null
-            $errors = $null
+            $parseFileErrors = $null
             [System.Management.Automation.Language.Parser]::ParseFile(
               $_.FullName,
               [ref]$tokens,
-              [ref]$errors
+              [ref]$parseFileErrors
             ) | Out-Null
 
-            foreach ($error in $errors) {
-              $parseErrors += "$($_.Name):$($error.Extent.StartLineNumber): $($error.Message)"
+            foreach ($parseFileError in $parseFileErrors) {
+              $parseErrors += "$($_.Name):$($parseFileError.Extent.StartLineNumber): $($parseFileError.Message)"
             }
           }
 
@@ -92,7 +92,9 @@ jobs:
             package.json
             package-lock.json
             deploy/web.config.template
+            deploy/pm2/ecosystem.config.cjs
             scripts/start-vinext.ps1
+            scripts/resurrect-vinext-pm2.ps1
           if-no-files-found: error
           retention-days: 7
 

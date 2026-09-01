@@ -36,10 +36,10 @@ Production requires:
 
 Production optionally accepts:
 
-- `WEB_NODE_PORT` — defaults to `4300`
-- `WEB_NODE_TASK_NAME` — defaults to `ToBeClarify Vinext PROD`
 - `WEB_ADMIN_API_BASE_URL` — defaults in application code when omitted
 - `WEB_PUBLIC_MEDIA_BASE_URL` — defaults in application code when omitted
+- `WEB_PUBLIC_CLIENT_API_BASE_URL` — defaults in application code when omitted
+- `WEB_ORDERING_API_BASE_URL` — defaults in application code when omitted
 
 Development requires:
 
@@ -49,10 +49,15 @@ Development requires:
 
 Development optionally accepts:
 
-- `DEV_NODE_PORT` — defaults to `4310`
-- `DEV_NODE_TASK_NAME` — defaults to `ToBeClarify Vinext DEV`
 - `DEV_ADMIN_API_BASE_URL` — defaults in application code when omitted
 - `DEV_PUBLIC_MEDIA_BASE_URL` — defaults in application code when omitted
+- `DEV_PUBLIC_CLIENT_API_BASE_URL` — defaults in application code when omitted
+- `DEV_ORDERING_API_BASE_URL` — defaults in application code when omitted
+
+The deployment identity is intentionally not configurable through repository
+variables. Production always uses port `4300` and Scheduled Task
+`ToBeClarify Vinext PROD`; development always uses port `4310` and Scheduled
+Task `ToBeClarify Vinext DEV`.
 
 ## Workflow behavior
 
@@ -68,8 +73,12 @@ Development optionally accepts:
 - Only after the user confirms the DEV result should the tested `dev` commit be
   manually merged into `main`; that push then deploys to the production
   environment.
-- Production and DEV use different IIS directories, Node ports, Scheduled Task
-  names, deployment concurrency groups, and GitHub environments.
+- Production and DEV use different IIS directories, fixed Node ports, fixed
+  Scheduled Task names, and GitHub environments. A shared deployment
+  concurrency group serializes changes on the common IIS host.
+- Before stopping the target, deployment requires the sibling Scheduled Task,
+  localhost health endpoint, and public IIS health endpoint to agree on a live
+  deployment SHA. It verifies the same sibling SHA again after deployment.
 - A manual run with `preflight_only` checks the runner and IIS without changing
   the site selected by the workflow branch.
 - Deployment uses a staging directory, retains one rollback directory, starts

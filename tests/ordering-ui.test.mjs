@@ -3,8 +3,8 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 test('customer ordering implements meals, staff-first nomination, tips, dependent deletion, recovery, and order history', async () => {
-  const source = await readFile(new URL('../app/order/OrderClient.jsx', import.meta.url), 'utf8');
-  const api = await readFile(new URL('../app/order/ordering-api.js', import.meta.url), 'utf8');
+  const source = await readFile(new URL('../features/ordering/components/OrderClient.jsx', import.meta.url), 'utf8');
+  const api = await readFile(new URL('../features/ordering/api/client.js', import.meta.url), 'utf8');
 
   assert.match(source, /一般點餐/);
   assert.match(source, /先選店員，再查看該店員提供的服務/);
@@ -105,7 +105,7 @@ test('ordering API client submits a service add-on against the parent nomination
     });
   };
   try {
-    const moduleUrl = new URL('../app/order/ordering-api.js', import.meta.url);
+    const moduleUrl = new URL('../features/ordering/api/client.js', import.meta.url);
     moduleUrl.searchParams.set('addon-test', `${process.pid}-${Date.now()}`);
     const { orderingApi } = await import(moduleUrl.href);
     await orderingApi.submitAddon('secure-token', {
@@ -131,7 +131,7 @@ test('ordering API client sends cart snapshots to the customer endpoint', async 
     });
   };
   try {
-    const moduleUrl = new URL('../app/order/ordering-api.js', import.meta.url);
+    const moduleUrl = new URL('../features/ordering/api/client.js', import.meta.url);
     moduleUrl.searchParams.set('test', `${process.pid}-${Date.now()}`);
     const { orderingApi } = await import(moduleUrl.href);
     await orderingApi.submit('secure-token', { meals: [{ referenceId: 'meal-1', kind: 'item', quantity: 2 }] });

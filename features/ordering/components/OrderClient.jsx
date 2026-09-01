@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react';
-import { orderingApi } from './ordering-api.js';
+import { orderingApi } from '../api/client.js';
 
 const TOKEN_KEY = 'lucid-dream-order-token';
 const money = (value) => `${Number(value || 0).toLocaleString('zh-TW')} G`;

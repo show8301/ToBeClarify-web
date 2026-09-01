@@ -3,6 +3,10 @@ param(
 
     [string]$DeployPath,
 
+    [string]$Pm2Home = 'D:\pm2\ToBeClarify-web',
+
+    [string]$Pm2CommandPath = 'D:\pm2\ToBeClarify-web\cli\node_modules\.bin\pm2.cmd',
+
     [ValidatePattern('^\d+\.\d+\.\d+$')]
     [string]$MinimumNodeVersion = '22.13.0'
 )
@@ -61,13 +65,54 @@ else {
     $details.Add('npm is available on the runner PATH.')
 }
 
+$pm2Command = Get-Item -LiteralPath $Pm2CommandPath -ErrorAction SilentlyContinue
+if ($null -eq $pm2Command) {
+    $missing.Add("The shared PM2 command installed at $Pm2CommandPath")
+}
+else {
+    try {
+        $originalPm2Home = $env:PM2_HOME
+        $env:PM2_HOME = $Pm2Home
+        Remove-Item Env:RUNNER_TRACKING_ID -ErrorAction SilentlyContinue
+        $pm2VersionOutput = @(& $pm2Command.FullName --version 2>&1)
+        $pm2ExitCode = $LASTEXITCODE
+        $pm2VersionText = @(
+            $pm2VersionOutput |
+                ForEach-Object { ([string]$_).Trim() } |
+                Where-Object { $_ -match '^\d+\.\d+\.\d+$' }
+        ) | Select-Object -Last 1
+        if ($pm2ExitCode -ne 0 -or
+            [string]::IsNullOrWhiteSpace($pm2VersionText) -or
+            [version]$pm2VersionText -lt [version]'7.0.3') {
+            $missing.Add("PM2 7.0.3 or newer (found $pm2VersionText)")
+        }
+        else {
+            $details.Add("PM2 $pm2VersionText is available at $($pm2Command.FullName).")
+            $details.Add("The isolated Web PM2 home is $Pm2Home.")
+        }
+    }
+    catch {
+        $missing.Add('A working PM2 7.0.3 or newer installation for the runner service account')
+    }
+    finally {
+        if ([string]::IsNullOrWhiteSpace($originalPm2Home)) {
+            Remove-Item Env:PM2_HOME -ErrorAction SilentlyContinue
+        }
+        else {
+            $env:PM2_HOME = $originalPm2Home
+        }
+    }
+}
+
 $scheduledTaskCommands = @(
     'Get-ScheduledTask',
     'New-ScheduledTaskAction',
     'New-ScheduledTaskPrincipal',
     'Register-ScheduledTask',
     'Start-ScheduledTask',
-    'Stop-ScheduledTask'
+    'Stop-ScheduledTask',
+    'Enable-ScheduledTask',
+    'Disable-ScheduledTask'
 )
 $missingScheduledTaskCommands = @(
     $scheduledTaskCommands | Where-Object {

@@ -92,7 +92,9 @@ jobs:
             package.json
             package-lock.json
             deploy/web.config.template
+            deploy/pm2/ecosystem.config.cjs
             scripts/start-vinext.ps1
+            scripts/resurrect-vinext-pm2.ps1
           if-no-files-found: error
           retention-days: 7
 

@@ -78,7 +78,167 @@ function Rename-DirectoryWithRetry {
     }
 }
 
-function Stop-VinextTask {
+function Invoke-Pm2 {
+    param(
+        [Parameter(Mandatory = $true)][string[]]$Arguments,
+        [switch]$Quiet
+    )
+
+    $output = @(& $script:Pm2Command @Arguments 2>&1)
+    $exitCode = $LASTEXITCODE
+    if (-not $Quiet -and $output.Count -gt 0) {
+        $output | ForEach-Object { Write-Host $_ }
+    }
+    if ($exitCode -ne 0) {
+        throw "PM2 command failed with exit code $exitCode: pm2 $($Arguments -join ' ')`n$($output -join [Environment]::NewLine)"
+    }
+
+    return $output
+}
+
+function Get-Pm2App {
+    param([Parameter(Mandatory = $true)][string]$Name)
+
+    $output = Invoke-Pm2 -Arguments @('jlist', '--silent') -Quiet
+    $text = ($output -join [Environment]::NewLine).Trim()
+    if ([string]::IsNullOrWhiteSpace($text)) {
+        throw 'PM2 returned an empty process list.'
+    }
+
+    $jsonStart = $text.IndexOf('[{', [System.StringComparison]::Ordinal)
+    if ($jsonStart -lt 0 -and $text.Contains('[]')) {
+        return $null
+    }
+    $jsonEnd = $text.LastIndexOf(']', [System.StringComparison]::Ordinal)
+    if ($jsonStart -lt 0 -or $jsonEnd -lt $jsonStart) {
+        throw "PM2 returned an unreadable process list: $text"
+    }
+
+    $apps = @($text.Substring($jsonStart, $jsonEnd - $jsonStart + 1) | ConvertFrom-Json)
+    $matches = @($apps | Where-Object { $_.name -ceq $Name })
+    if ($matches.Count -gt 1) {
+        throw "PM2 contains more than one application named $Name."
+    }
+    if ($matches.Count -eq 0) {
+        return $null
+    }
+
+    return $matches[0]
+}
+
+function Assert-Pm2AppIdentity {
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [Parameter(Mandatory = $true)][string]$AppPath,
+        [Parameter(Mandatory = $true)][int]$Port,
+        [switch]$AllowMissing
+    )
+
+    $app = Get-Pm2App -Name $Name
+    if ($null -eq $app) {
+        if ($AllowMissing) {
+            return $false
+        }
+        throw "The protected PM2 application does not exist: $Name"
+    }
+
+    $expectedAppPath = Get-NormalizedPath -Path $AppPath
+    $expectedScriptPath = Get-NormalizedPath -Path (Join-Path $expectedAppPath 'node_modules\vinext\dist\cli.js')
+    $actualCwd = Get-NormalizedPath -Path ([string]$app.pm2_env.pm_cwd)
+    $actualScriptPath = Get-NormalizedPath -Path ([string]$app.pm2_env.pm_exec_path)
+    $arguments = @($app.pm2_env.args | ForEach-Object { [string]$_ })
+    $joinedArguments = $arguments -join ' '
+    $portPattern = '(?i)(?:^|\s)--port(?:\s+|=)"?{0}"?(?:\s|$)' -f $Port
+    $hasExpectedPort = $joinedArguments -match $portPattern
+
+    if ($actualCwd -ine $expectedAppPath -or
+        $actualScriptPath -ine $expectedScriptPath -or
+        -not $hasExpectedPort) {
+        throw "PM2 application $Name is not bound to the protected identity (path=$expectedAppPath, port=$Port)."
+    }
+
+    return $true
+}
+
+function Assert-Pm2AppRunning {
+    param([Parameter(Mandatory = $true)][string]$Name)
+
+    $app = Get-Pm2App -Name $Name
+    if ($null -eq $app) {
+        throw "The protected PM2 application does not exist: $Name"
+    }
+    if ([string]$app.pm2_env.status -ine 'online') {
+        throw "The protected PM2 application is not online: $Name (status=$($app.pm2_env.status))"
+    }
+}
+
+function Stop-Pm2App {
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [Parameter(Mandatory = $true)][string]$AppPath,
+        [Parameter(Mandatory = $true)][int]$Port
+    )
+
+    if (-not (Assert-Pm2AppIdentity -Name $Name -AppPath $AppPath -Port $Port -AllowMissing)) {
+        return $false
+    }
+
+    Invoke-Pm2 -Arguments @('stop', $Name, '--silent') | Out-Null
+    return $true
+}
+
+function Remove-Pm2App {
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [Parameter(Mandatory = $true)][string]$AppPath,
+        [Parameter(Mandatory = $true)][int]$Port
+    )
+
+    if (-not (Assert-Pm2AppIdentity -Name $Name -AppPath $AppPath -Port $Port -AllowMissing)) {
+        return
+    }
+    Invoke-Pm2 -Arguments @('delete', $Name, '--silent') | Out-Null
+}
+
+function Start-Pm2App {
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [Parameter(Mandatory = $true)][string]$AppPath,
+        [Parameter(Mandatory = $true)][int]$Port,
+        [Parameter(Mandatory = $true)][string]$NodePath,
+        [Parameter(Mandatory = $true)][string]$LogRoot
+    )
+
+    $ecosystemPath = Join-Path $AppPath 'deploy\pm2\ecosystem.config.cjs'
+    if (-not (Test-Path -LiteralPath $ecosystemPath -PathType Leaf)) {
+        throw "The PM2 ecosystem file was not found: $ecosystemPath"
+    }
+
+    $env:TOBECLARIFY_PM2_APP_NAME = $Name
+    $env:TOBECLARIFY_PM2_APP_ROOT = $AppPath
+    $env:TOBECLARIFY_PM2_APP_PORT = [string]$Port
+    $env:TOBECLARIFY_PM2_NODE_PATH = $NodePath
+    $env:TOBECLARIFY_PM2_LOG_ROOT = $LogRoot
+    Remove-Item Env:RUNNER_TRACKING_ID -ErrorAction SilentlyContinue
+
+    Invoke-Pm2 -Arguments @(
+        'startOrRestart',
+        $ecosystemPath,
+        '--only',
+        $Name,
+        '--update-env',
+        '--silent'
+    ) | Out-Null
+
+    Assert-Pm2AppIdentity -Name $Name -AppPath $AppPath -Port $Port | Out-Null
+    Assert-Pm2AppRunning -Name $Name
+}
+
+function Save-Pm2ProcessList {
+    Invoke-Pm2 -Arguments @('save', '--force', '--silent') | Out-Null
+}
+
+function Stop-LegacyVinextTask {
     param([Parameter(Mandatory = $true)][string]$Name)
 
     $task = Get-ScheduledTask -TaskName $Name -ErrorAction SilentlyContinue
@@ -161,7 +321,7 @@ function Stop-StaleVinextListener {
         -Filter "ProcessId = $listenerPid" `
         -ErrorAction SilentlyContinue
     if ($null -eq $listenerProcess) {
-        throw "Node port $Port is still in use after stopping the scheduled task (PID $listenerPid), but the listener process could not be inspected."
+        throw "Node port $Port is still in use after stopping its process manager (PID $listenerPid), but the listener process could not be inspected."
     }
 
     $normalizedAppPath = Get-NormalizedPath -Path $AppPath
@@ -176,7 +336,7 @@ function Stop-StaleVinextListener {
         throw "Port $Port is occupied by an unexpected process and will not be terminated (PID $listenerPid, name $($listenerProcess.Name))."
     }
 
-    Write-Warning "Scheduled Task stopped but its Vinext Node child process is still listening on port $Port (PID $listenerPid). Stopping the verified stale listener."
+    Write-Warning "The process manager stopped but its Vinext Node child is still listening on port $Port (PID $listenerPid). Stopping the verified stale listener."
     Stop-Process -Id $listenerPid -Force -ErrorAction Stop
 
     if (-not (Wait-PortAvailable -Port $Port -Attempts 20 -DelayMilliseconds 250)) {
@@ -185,18 +345,35 @@ function Stop-StaleVinextListener {
     }
 }
 
-function Register-VinextTask {
+function Disable-LegacyVinextTask {
+    param([Parameter(Mandatory = $true)][string]$Name)
+
+    $task = Get-ScheduledTask -TaskName $Name -ErrorAction SilentlyContinue
+    if ($null -ne $task -and $task.State -ne 'Disabled') {
+        Disable-ScheduledTask -TaskName $Name | Out-Null
+    }
+}
+
+function Enable-LegacyVinextTask {
+    param([Parameter(Mandatory = $true)][string]$Name)
+
+    $task = Get-ScheduledTask -TaskName $Name -ErrorAction SilentlyContinue
+    if ($null -ne $task -and $task.State -eq 'Disabled') {
+        Enable-ScheduledTask -TaskName $Name | Out-Null
+    }
+}
+
+function Register-Pm2StartupTask {
     param(
-        [Parameter(Mandatory = $true)][string]$Name,
-        [Parameter(Mandatory = $true)][string]$AppPath,
-        [Parameter(Mandatory = $true)][string]$NodePath,
-        [Parameter(Mandatory = $true)][int]$Port
+        [Parameter(Mandatory = $true)][string]$Pm2Home,
+        [Parameter(Mandatory = $true)][string]$Pm2Command,
+        [Parameter(Mandatory = $true)][string]$SourceScript
     )
 
-    $launcherPath = Join-Path $AppPath 'scripts\start-vinext.ps1'
-    if (-not (Test-Path -LiteralPath $launcherPath -PathType Leaf)) {
-        throw "Vinext launcher was not found: $launcherPath"
-    }
+    $startupRoot = Join-Path $Pm2Home 'startup'
+    New-Item -Path $startupRoot -ItemType Directory -Force | Out-Null
+    $startupScript = Join-Path $startupRoot 'resurrect-vinext-pm2.ps1'
+    Copy-Item -LiteralPath $SourceScript -Destination $startupScript -Force
 
     $powershellPath = (Get-Command powershell.exe -ErrorAction Stop).Source
     $arguments = @(
@@ -208,43 +385,32 @@ function Register-VinextTask {
         '-WindowStyle',
         'Hidden',
         '-File',
-        "`"$launcherPath`"",
-        '-AppPath',
-        "`"$AppPath`"",
-        '-NodePath',
-        "`"$NodePath`"",
-        '-Port',
-        [string]$Port
+        "`"$startupScript`"",
+        '-Pm2Home',
+        "`"$Pm2Home`"",
+        '-Pm2Command',
+        "`"$Pm2Command`""
     ) -join ' '
 
     $identity = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
-    $serviceAccounts = @(
-        'NT AUTHORITY\SYSTEM',
-        'NT AUTHORITY\LOCAL SERVICE',
-        'NT AUTHORITY\NETWORK SERVICE'
-    )
-    $logonType = if ($serviceAccounts -contains $identity.ToUpperInvariant()) { 'ServiceAccount' } else { 'S4U' }
-
-    $action = New-ScheduledTaskAction -Execute $powershellPath -Argument $arguments -WorkingDirectory $AppPath
+    $action = New-ScheduledTaskAction -Execute $powershellPath -Argument $arguments -WorkingDirectory $startupRoot
     $trigger = New-ScheduledTaskTrigger -AtStartup
-    $principal = New-ScheduledTaskPrincipal -UserId $identity -LogonType $logonType -RunLevel Highest
+    $principal = New-ScheduledTaskPrincipal -UserId $identity -LogonType S4U -RunLevel Highest
     $settings = New-ScheduledTaskSettingsSet `
         -StartWhenAvailable `
         -RestartCount 5 `
         -RestartInterval (New-TimeSpan -Minutes 1) `
-        -ExecutionTimeLimit (New-TimeSpan -Days 3650) `
+        -ExecutionTimeLimit (New-TimeSpan -Minutes 10) `
         -MultipleInstances IgnoreNew
 
     Register-ScheduledTask `
-        -TaskName $Name `
+        -TaskName 'ToBeClarify PM2 Web Resurrect' `
         -Action $action `
         -Trigger $trigger `
         -Principal $principal `
         -Settings $settings `
-        -Description "Runs the ToBeClarify Vinext server behind IIS on port $Port." `
+        -Description 'Restores the isolated ToBeClarify Web PM2 process list after Windows starts.' `
         -Force | Out-Null
-
-    Start-ScheduledTask -TaskName $Name
 }
 
 function Get-HealthCheckUrl {
@@ -344,7 +510,7 @@ function Wait-VinextAlive {
     throw "Health check did not report a live Vinext deployment for $Url. Last error: $lastError"
 }
 
-function Assert-VinextTaskRunning {
+function Assert-LegacyVinextTaskRunning {
     param([Parameter(Mandatory = $true)][string]$Name)
 
     $task = Get-ScheduledTask -TaskName $Name -ErrorAction SilentlyContinue
@@ -356,7 +522,7 @@ function Assert-VinextTaskRunning {
     }
 }
 
-function Assert-VinextTaskIdentity {
+function Assert-LegacyVinextTaskIdentity {
     param(
         [Parameter(Mandatory = $true)][string]$Name,
         [Parameter(Mandatory = $true)][string]$AppPath,
@@ -395,29 +561,38 @@ $environmentConfig = if ($TargetEnvironment -eq 'production') {
     [pscustomobject]@{
         DeployLeaf = 'ToBeClarify_web'
         NodePort = 4300
-        TaskName = 'ToBeClarify Vinext PROD'
+        Pm2AppName = 'tobeclarify-web-prod'
+        LegacyTaskName = 'ToBeClarify Vinext PROD'
         SiblingDeployLeaf = 'ToBeClarify_web_dev'
         SiblingNodePort = 4310
-        SiblingTaskName = 'ToBeClarify Vinext DEV'
+        SiblingPm2AppName = 'tobeclarify-web-dev'
+        SiblingLegacyTaskName = 'ToBeClarify Vinext DEV'
     }
 }
 else {
     [pscustomobject]@{
         DeployLeaf = 'ToBeClarify_web_dev'
         NodePort = 4310
-        TaskName = 'ToBeClarify Vinext DEV'
+        Pm2AppName = 'tobeclarify-web-dev'
+        LegacyTaskName = 'ToBeClarify Vinext DEV'
         SiblingDeployLeaf = 'ToBeClarify_web'
         SiblingNodePort = 4300
-        SiblingTaskName = 'ToBeClarify Vinext PROD'
+        SiblingPm2AppName = 'tobeclarify-web-prod'
+        SiblingLegacyTaskName = 'ToBeClarify Vinext PROD'
     }
 }
 
 $ExpectedDeployLeaf = $environmentConfig.DeployLeaf
 $NodePort = [int]$environmentConfig.NodePort
-$TaskName = [string]$environmentConfig.TaskName
+$Pm2AppName = [string]$environmentConfig.Pm2AppName
+$LegacyTaskName = [string]$environmentConfig.LegacyTaskName
 $SiblingDeployLeaf = [string]$environmentConfig.SiblingDeployLeaf
 $SiblingNodePort = [int]$environmentConfig.SiblingNodePort
-$SiblingTaskName = [string]$environmentConfig.SiblingTaskName
+$SiblingPm2AppName = [string]$environmentConfig.SiblingPm2AppName
+$SiblingLegacyTaskName = [string]$environmentConfig.SiblingLegacyTaskName
+$Pm2Home = 'D:\pm2\ToBeClarify-web'
+$Pm2LogRoot = Join-Path $Pm2Home 'logs'
+$Pm2CommandPath = Join-Path $Pm2Home 'cli\node_modules\.bin\pm2.cmd'
 
 $artifactRoot = Get-NormalizedPath -Path (Resolve-Path -LiteralPath $ArtifactPath).Path
 $deployRoot = Get-NormalizedPath -Path $DeployPath
@@ -455,7 +630,9 @@ $requiredFiles = @(
     'package.json',
     'package-lock.json',
     'deploy\web.config.template',
-    'scripts\start-vinext.ps1'
+    'deploy\pm2\ecosystem.config.cjs',
+    'scripts\start-vinext.ps1',
+    'scripts\resurrect-vinext-pm2.ps1'
 )
 foreach ($relativePath in $requiredFiles) {
     $requiredPath = Join-Path $artifactRoot $relativePath
@@ -466,10 +643,23 @@ foreach ($relativePath in $requiredFiles) {
 
 $nodeCommand = Get-Command node.exe -ErrorAction Stop
 $npmCommand = Get-Command npm.cmd -ErrorAction Stop
+$pm2Command = Get-Item -LiteralPath $Pm2CommandPath -ErrorAction Stop
+$systemNodePath = Join-Path $env:ProgramFiles 'nodejs\node.exe'
+if (-not (Test-Path -LiteralPath $systemNodePath -PathType Leaf)) {
+    $systemNodePath = $nodeCommand.Source
+}
+$script:Pm2Command = $pm2Command.FullName
+$env:PM2_HOME = $Pm2Home
+$env:NO_COLOR = '1'
+Remove-Item Env:RUNNER_TRACKING_ID -ErrorAction SilentlyContinue
 $nodeVersionText = (& $nodeCommand.Source --version).TrimStart('v')
 $nodeVersion = [version]$nodeVersionText
 if ($nodeVersion -lt [version]'22.13.0') {
     throw "Node.js 22.13.0 or newer is required; found $nodeVersionText"
+}
+$systemNodeVersionText = (& $systemNodePath --version).TrimStart('v')
+if ([version]$systemNodeVersionText -lt [version]'22.13.0') {
+    throw "The persistent PM2 interpreter requires Node.js 22.13.0 or newer; found $systemNodeVersionText at $systemNodePath"
 }
 
 $appcmdPath = Join-Path $env:windir 'System32\inetsrv\appcmd.exe'
@@ -481,19 +671,36 @@ $prerequisiteScript = Join-Path $PSScriptRoot 'test-iis-reverse-proxy-prerequisi
 & $prerequisiteScript `
     -AppCmdPath $appcmdPath `
     -DeployPath $deployRoot `
+    -Pm2Home $Pm2Home `
+    -Pm2CommandPath $Pm2CommandPath `
     -MinimumNodeVersion '22.13.0'
 
 if ($null -eq (Get-Command Register-ScheduledTask -ErrorAction SilentlyContinue)) {
     throw 'The Windows ScheduledTasks module is not available on the deployment runner.'
 }
 
+New-Item -Path $Pm2Home -ItemType Directory -Force | Out-Null
+New-Item -Path $Pm2LogRoot -ItemType Directory -Force | Out-Null
+
 # Refuse to touch the target when the other site is already unhealthy. This
 # distinguishes a pre-existing outage from any effect of the current deploy.
-Assert-VinextTaskIdentity `
-    -Name $SiblingTaskName `
+$siblingUsesPm2 = Assert-Pm2AppIdentity `
+    -Name $SiblingPm2AppName `
     -AppPath $siblingDeployRoot `
-    -Port $SiblingNodePort | Out-Null
-Assert-VinextTaskRunning -Name $SiblingTaskName
+    -Port $SiblingNodePort `
+    -AllowMissing
+if ($siblingUsesPm2) {
+    Assert-Pm2AppRunning -Name $SiblingPm2AppName
+    $siblingManagerLabel = "PM2 application $SiblingPm2AppName"
+}
+else {
+    Assert-LegacyVinextTaskIdentity `
+        -Name $SiblingLegacyTaskName `
+        -AppPath $siblingDeployRoot `
+        -Port $SiblingNodePort | Out-Null
+    Assert-LegacyVinextTaskRunning -Name $SiblingLegacyTaskName
+    $siblingManagerLabel = "legacy Scheduled Task $SiblingLegacyTaskName"
+}
 $siblingLocalHealthCheckUrl = "http://127.0.0.1:$SiblingNodePort/api/health"
 $siblingLocalSha = Wait-VinextAlive -Url $siblingLocalHealthCheckUrl -Attempts 3
 $siblingPublicSha = Wait-VinextAlive -Url $siblingPublicHealthCheckUrl -Attempts 3
@@ -501,7 +708,7 @@ if ($siblingLocalSha -ne $siblingPublicSha) {
     throw "The protected sibling reports different deployments locally and through IIS (local=$siblingLocalSha, public=$siblingPublicSha)."
 }
 $siblingDeploymentSha = $siblingLocalSha
-Write-Host "Protected sibling verified before deployment: $SiblingTaskName ($siblingDeploymentSha)"
+Write-Host "Protected sibling verified before deployment: $siblingManagerLabel ($siblingDeploymentSha)"
 
 $stagingRoot = Join-Path $deployParent "$ExpectedDeployLeaf.staging"
 $rollbackRoot = Join-Path $deployParent "$ExpectedDeployLeaf.rollback"
@@ -551,15 +758,29 @@ if (-not [string]::IsNullOrWhiteSpace($OrderingApiBaseUrl)) {
 }
 $runtimeConfig | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $stagingRoot 'runtime-config.json') -Encoding UTF8
 
-# Never stop a pre-existing target task unless its action is bound to this
-# environment's exact directory and port. A missing task is valid on first
-# deployment and will be created below.
-Assert-VinextTaskIdentity `
-    -Name $TaskName `
+# Never stop a pre-existing manager unless its identity is bound to this
+# environment's exact app name, directory, and port. Legacy Scheduled Tasks
+# are retained only for reversible migration to PM2.
+$hadExistingPm2App = Assert-Pm2AppIdentity `
+    -Name $Pm2AppName `
     -AppPath $deployRoot `
     -Port $NodePort `
-    -AllowMissing | Out-Null
-$hadExistingTask = Stop-VinextTask -Name $TaskName
+    -AllowMissing
+$hadLegacyTask = Assert-LegacyVinextTaskIdentity `
+    -Name $LegacyTaskName `
+    -AppPath $deployRoot `
+    -Port $NodePort `
+    -AllowMissing
+$legacyTaskWasEnabled = $false
+if ($hadLegacyTask) {
+    $legacyTaskWasEnabled = (Get-ScheduledTask -TaskName $LegacyTaskName).State -ne 'Disabled'
+}
+if ($hadExistingPm2App) {
+    Stop-Pm2App -Name $Pm2AppName -AppPath $deployRoot -Port $NodePort | Out-Null
+}
+if ($hadLegacyTask) {
+    Stop-LegacyVinextTask -Name $LegacyTaskName | Out-Null
+}
 Stop-StaleVinextListener -Port $NodePort -AppPath $deployRoot
 
 $hadExistingDeployment = Test-Path -LiteralPath $deployRoot -PathType Container
@@ -589,7 +810,12 @@ try {
         throw "Unable to enable IIS ARR proxy support: $proxyConfigurationOutput"
     }
 
-    Register-VinextTask -Name $TaskName -AppPath $deployRoot -NodePath $nodeCommand.Source -Port $NodePort
+    Start-Pm2App `
+        -Name $Pm2AppName `
+        -AppPath $deployRoot `
+        -Port $NodePort `
+        -NodePath $systemNodePath `
+        -LogRoot $Pm2LogRoot
 
     Wait-VinextHealth `
         -Url "http://127.0.0.1:$NodePort/api/health" `
@@ -600,9 +826,22 @@ try {
         -Attempts 15 `
         -ExpectedDeploymentSha $DeploymentSha | Out-Null
 
-    # The deploy may only restart its own environment. Verify the sibling task,
-    # localhost listener, IIS route, and deployment SHA are unchanged.
-    Assert-VinextTaskRunning -Name $SiblingTaskName
+    # The deploy may only restart its own environment. Verify the sibling
+    # manager, localhost listener, IIS route, and deployment SHA are unchanged.
+    if ($siblingUsesPm2) {
+        Assert-Pm2AppIdentity `
+            -Name $SiblingPm2AppName `
+            -AppPath $siblingDeployRoot `
+            -Port $SiblingNodePort | Out-Null
+        Assert-Pm2AppRunning -Name $SiblingPm2AppName
+    }
+    else {
+        Assert-LegacyVinextTaskIdentity `
+            -Name $SiblingLegacyTaskName `
+            -AppPath $siblingDeployRoot `
+            -Port $SiblingNodePort | Out-Null
+        Assert-LegacyVinextTaskRunning -Name $SiblingLegacyTaskName
+    }
     Wait-VinextHealth `
         -Url $siblingLocalHealthCheckUrl `
         -Attempts 3 `
@@ -612,9 +851,18 @@ try {
         -Attempts 3 `
         -ExpectedDeploymentSha $siblingDeploymentSha | Out-Null
 
+    if ($hadLegacyTask) {
+        Disable-LegacyVinextTask -Name $LegacyTaskName
+    }
+    Save-Pm2ProcessList
+    Register-Pm2StartupTask `
+        -Pm2Home $Pm2Home `
+        -Pm2Command $script:Pm2Command `
+        -SourceScript (Join-Path $deployRoot 'scripts\resurrect-vinext-pm2.ps1')
+
     Write-Host "Vinext deployment completed: $deployRoot"
     Write-Host "Verified deployment SHA through IIS: $DeploymentSha"
-    Write-Host "Protected sibling remained healthy: $SiblingTaskName ($siblingDeploymentSha)"
+    Write-Host "Protected sibling remained healthy: $siblingManagerLabel ($siblingDeploymentSha)"
     if ($hadExistingDeployment) {
         Write-Host "Rollback copy retained at: $rollbackRoot"
     }
@@ -623,7 +871,7 @@ catch {
     $deploymentError = $_
     Write-Warning 'Vinext deployment failed. Restoring the previous site.'
 
-    Stop-VinextTask -Name $TaskName | Out-Null
+    Stop-Pm2App -Name $Pm2AppName -AppPath $deployRoot -Port $NodePort | Out-Null
 
     if ($swapped) {
         if (Test-Path -LiteralPath $deployRoot) {
@@ -636,13 +884,27 @@ catch {
         }
     }
 
-    $previousLauncher = Join-Path $deployRoot 'scripts\start-vinext.ps1'
-    if ($hadExistingTask -and (Test-Path -LiteralPath $previousLauncher -PathType Leaf)) {
-        Register-VinextTask -Name $TaskName -AppPath $deployRoot -NodePath $nodeCommand.Source -Port $NodePort
+    if ($hadExistingPm2App -and (Test-Path -LiteralPath $deployRoot -PathType Container)) {
+        Start-Pm2App `
+            -Name $Pm2AppName `
+            -AppPath $deployRoot `
+            -Port $NodePort `
+            -NodePath $systemNodePath `
+            -LogRoot $Pm2LogRoot
     }
-    elseif (-not $hadExistingTask) {
-        Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
+    else {
+        Remove-Pm2App -Name $Pm2AppName -AppPath $deployRoot -Port $NodePort
     }
+
+    if ($hadLegacyTask -and $legacyTaskWasEnabled) {
+        Enable-LegacyVinextTask -Name $LegacyTaskName
+        Start-ScheduledTask -TaskName $LegacyTaskName
+    }
+    elseif ($hadLegacyTask) {
+        Disable-LegacyVinextTask -Name $LegacyTaskName
+    }
+
+    Save-Pm2ProcessList
 
     throw $deploymentError
 }

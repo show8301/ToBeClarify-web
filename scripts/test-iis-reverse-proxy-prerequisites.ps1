@@ -14,6 +14,8 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+. (Join-Path $PSScriptRoot 'native-command.ps1')
+
 $missing = New-Object System.Collections.Generic.List[string]
 $details = New-Object System.Collections.Generic.List[string]
 
@@ -21,16 +23,16 @@ if (-not (Test-Path -LiteralPath $AppCmdPath -PathType Leaf)) {
     $missing.Add('IIS Web Server management tools (appcmd.exe)')
 }
 else {
-    $rewriteOutput = & $AppCmdPath list module RewriteModule 2>&1
-    if ($LASTEXITCODE -ne 0 -or -not ($rewriteOutput -match 'RewriteModule')) {
+    $rewriteResult = Invoke-NativeCommand -FilePath $AppCmdPath -ArgumentList @('list', 'module', 'RewriteModule')
+    if ($rewriteResult.ExitCode -ne 0 -or -not ($rewriteResult.Output -match 'RewriteModule')) {
         $missing.Add('Microsoft IIS URL Rewrite 2.1 (x64)')
     }
     else {
         $details.Add('Microsoft IIS URL Rewrite is available.')
     }
 
-    $proxyOutput = & $AppCmdPath list config /section:system.webServer/proxy 2>&1
-    if ($LASTEXITCODE -ne 0) {
+    $proxyResult = Invoke-NativeCommand -FilePath $AppCmdPath -ArgumentList @('list', 'config', '/section:system.webServer/proxy')
+    if ($proxyResult.ExitCode -ne 0) {
         $missing.Add('Microsoft Application Request Routing (ARR) 3.0')
     }
     else {
@@ -44,7 +46,11 @@ if ($null -eq $nodeCommand) {
 }
 else {
     try {
-        $nodeVersionText = (& $nodeCommand.Source --version).TrimStart('v')
+        $nodeVersionResult = Invoke-NativeCommand -FilePath $nodeCommand.Source -ArgumentList @('--version')
+        if ($nodeVersionResult.ExitCode -ne 0) {
+            throw "node --version failed with exit code $($nodeVersionResult.ExitCode)"
+        }
+        $nodeVersionText = ($nodeVersionResult.Output | Select-Object -Last 1).Trim().TrimStart('v')
         $nodeVersion = [version]$nodeVersionText
         if ($nodeVersion -lt [version]$MinimumNodeVersion) {
             $missing.Add("Node.js $MinimumNodeVersion or newer (found $nodeVersionText)")
@@ -74,14 +80,13 @@ else {
         $originalPm2Home = $env:PM2_HOME
         $env:PM2_HOME = $Pm2Home
         Remove-Item Env:RUNNER_TRACKING_ID -ErrorAction SilentlyContinue
-        $pm2VersionOutput = @(& $pm2Command.FullName --version 2>&1)
-        $pm2ExitCode = $LASTEXITCODE
+        $pm2VersionResult = Invoke-NativeCommand -FilePath $pm2Command.FullName -ArgumentList @('--version')
         $pm2VersionText = @(
-            $pm2VersionOutput |
+            $pm2VersionResult.Output |
                 ForEach-Object { ([string]$_).Trim() } |
                 Where-Object { $_ -match '^\d+\.\d+\.\d+$' }
         ) | Select-Object -Last 1
-        if ($pm2ExitCode -ne 0 -or
+        if ($pm2VersionResult.ExitCode -ne 0 -or
             [string]::IsNullOrWhiteSpace($pm2VersionText) -or
             [version]$pm2VersionText -lt [version]'7.0.3') {
             $missing.Add("PM2 7.0.3 or newer (found $pm2VersionText)")

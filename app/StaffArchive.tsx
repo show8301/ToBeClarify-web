@@ -156,7 +156,7 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
                     {person.signatureUrl
                       ? <img className="dreamer-card-signature" src={person.signatureUrl} alt={`${person.displayName} 的簽名`}/>
                       : <strong>{person.displayName}</strong>}
-                    {person.nickname && <em>✦　暱稱｜{person.nickname}　✦</em>}
+                    {person.nickname && <em>✦ 暱稱｜{person.nickname} ✦</em>}
                   </span>
                   <span className="dreamer-card-bio">{person.shortBio || "這位夢境成員正在準備自己的介紹。"}</span>
                   <span className="dreamer-card-footer">

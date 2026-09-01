@@ -133,7 +133,8 @@ test('the LD signature opens admin login only after five clicks', async () => {
 test('password recovery is linked from login and reset keys are permission-gated', async () => {
   const login = await readFile(new URL('../app/admin/_components/AdminLoginPage.jsx', import.meta.url), 'utf8');
   const recovery = await readFile(new URL('../app/admin/_components/AdminForgotPasswordPage.jsx', import.meta.url), 'utf8');
-  const layout = await readFile(new URL('../app/admin/_components/AdminLayout.jsx', import.meta.url), 'utf8');
+  const credentials = await readFile(new URL('../app/admin/_components/AdminCredentialTools.jsx', import.meta.url), 'utf8');
+  const dashboard = await readFile(new URL('../app/admin/_components/AdminHomePage.jsx', import.meta.url), 'utf8');
   const router = await readFile(new URL('../app/admin/_components/AdminRouter.jsx', import.meta.url), 'utf8');
   const api = await readFile(new URL('../app/admin/admin-api.js', import.meta.url), 'utf8');
 
@@ -143,10 +144,11 @@ test('password recovery is linked from login and reset keys are permission-gated
   assert.match(recovery, /adminApi\.resetPassword/);
   assert.match(recovery, /newPassword\.length < 8/);
   assert.match(recovery, /form\.newPassword !== form\.confirmPassword/);
-  assert.match(layout, /user\.role === 'developer' \|\| user\.role === 'manager'/);
-  assert.match(layout, /取得重設驗證碼/);
-  assert.match(layout, /adminApi\.getPasswordResetKey/);
-  assert.match(layout, /經理只能協助店員/);
+  assert.match(credentials, /user\.role === 'developer' \|\| user\.role === 'manager'/);
+  assert.match(credentials, /取得重設驗證碼/);
+  assert.match(credentials, /adminApi\.getPasswordResetKey/);
+  assert.match(credentials, /經理只能協助店員/);
+  assert.match(dashboard, /canManageAll \? <AdminCredentialTools \/>/);
   assert.match(router, /isPasswordRecoveryRoute/);
   assert.match(api, /\/auth\/password-reset-key/);
   assert.match(api, /\/auth\/forgot-password\/reset/);

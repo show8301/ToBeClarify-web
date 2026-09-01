@@ -23,7 +23,7 @@ async function request<T>(path:string):Promise<T>{
   return payload.data;
 }
 
-function useCache<T>(entry:CacheEntry<T>,loader:()=>Promise<T>):T{
+function readCache<T>(entry:CacheEntry<T>,loader:()=>Promise<T>):T{
   if(Date.now()>=entry.expiresAt&&!entry.refresh){
     entry.refresh=loader().then((value)=>{entry.value=value}).catch(()=>{}).finally(()=>{
       entry.expiresAt=Date.now()+CACHE_TTL;
@@ -59,18 +59,18 @@ function normalizeHome(raw:{siteSettings:{settingKey:string;settingValue:unknown
 }
 
 export function getSiteHome():HomeData{
-  return useCache(homeCache,()=>request<Parameters<typeof normalizeHome>[0]>("/home").then(normalizeHome));
+  return readCache(homeCache,()=>request<Parameters<typeof normalizeHome>[0]>("/home").then(normalizeHome));
 }
-export function getMenuData():MenuData{return useCache(menuCache,()=>request<MenuData>("/menu"))}
-export function getGalleryAlbums():GalleryAlbumSummary[]{return useCache(albumsCache,()=>request<GalleryAlbumSummary[]>("/gallery-albums"))}
+export function getMenuData():MenuData{return readCache(menuCache,()=>request<MenuData>("/menu"))}
+export function getGalleryAlbums():GalleryAlbumSummary[]{return readCache(albumsCache,()=>request<GalleryAlbumSummary[]>("/gallery-albums"))}
 export function getGalleryAlbum(id:string):GalleryAlbum|null{
   const entry=albumCaches.get(id);
   if(!entry)return null;
-  return useCache(entry,()=>request<GalleryAlbum>(`/gallery-albums/${encodeURIComponent(id)}`));
+  return readCache(entry,()=>request<GalleryAlbum>(`/gallery-albums/${encodeURIComponent(id)}`));
 }
 export function getRankings(type:"staffRanking"|"monetaryRanking"):RankingItem[]{
   const entry=type==="staffRanking"?staffRankingCache:monetaryRankingCache;
-  return useCache(entry,()=>request<RankingItem[]>(`/rankings?type=${type}`));
+  return readCache(entry,()=>request<RankingItem[]>(`/rankings?type=${type}`));
 }
-export function getGuestbookComments():GuestbookPage{return useCache(guestbookCache,()=>request<GuestbookPage>("/guestbook/comments"))}
+export function getGuestbookComments():GuestbookPage{return readCache(guestbookCache,()=>request<GuestbookPage>("/guestbook/comments"))}
 export const siteSnapshotGeneratedAt=snapshot.generatedAt;

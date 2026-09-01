@@ -7,22 +7,29 @@
   --o-mint: #bdf1df;
   --o-lilac: #b9aaff;
   --o-line: rgba(24,32,29,.14);
+  --o-display: var(--font-geist-sans), var(--font-noto-sans-tc), "PingFang TC", sans-serif;
+  --o-body: var(--font-noto-sans-tc), "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --o-mono: var(--font-geist-mono), "SFMono-Regular", Consolas, monospace;
+  font-family:var(--o-body);
+  font-size:15px;
+  line-height:1.6;
   background: radial-gradient(circle at 96% 4%,rgba(185,170,255,.36),transparent 27rem),radial-gradient(circle at 5% 78%,rgba(189,241,223,.5),transparent 28rem),#f3eee4;
 }
+.orderShell button,.orderShell input,.orderShell select,.orderGate button,.orderGate input{font-family:var(--o-body)}
 .orderShell::before,.orderGate::before { position:fixed; inset:0; z-index:0; opacity:.12; pointer-events:none; content:""; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.2'/%3E%3C/svg%3E"); mix-blend-mode:multiply; }
 .orderShell>* ,.orderGate>* { position:relative; z-index:1; }
 
 .orderTopbar { min-height:78px; border-color:var(--o-line); background:rgba(247,243,234,.84); box-shadow:0 8px 30px rgba(40,45,43,.045); }
 .orderBrand img { width:46px; height:46px; padding:6px; border:1px solid var(--o-ink); border-radius:50%; }
-.orderBrand strong { font-size:20px; letter-spacing:-.05em; }
+.orderBrand strong { font:850 20px/1.1 var(--o-display); letter-spacing:-.045em; }
 .orderSessionChip { padding:7px 18px; border:1px solid var(--o-line); border-radius:999px; background:rgba(255,255,255,.48); }
 .orderCredit { min-width:150px; padding-left:18px; border-left:1px solid var(--o-line); }
-.orderCredit strong { color:var(--o-coral-dark); font-size:20px; }
+.orderCredit strong { color:var(--o-coral-dark); font:820 20px/1.1 var(--o-display); }
 
 .orderTabs { top:78px; justify-content:flex-start; gap:6px; padding:10px clamp(18px,4vw,62px); background:rgba(247,243,234,.9); scrollbar-width:none; }
 .orderTabs::-webkit-scrollbar { display:none; }
-.orderTabs button { display:flex; align-items:center; gap:7px; min-height:40px; padding:8px 13px; border-color:var(--o-line); background:rgba(255,255,255,.45); transition:transform .18s ease,background .18s ease,border-color .18s ease; }
-.orderTabs button span { color:rgba(24,32,29,.45); font:800 8px/1 monospace; }
+.orderTabs button { display:flex; align-items:center; gap:8px; min-height:44px; padding:9px 15px; border-color:var(--o-line); background:rgba(255,255,255,.45); font-size:13px; font-weight:700; transition:transform .18s ease,background .18s ease,border-color .18s ease; }
+.orderTabs button span { color:rgba(24,32,29,.45); font:750 9px/1 var(--o-mono); }
 .orderTabs button:hover { border-color:rgba(24,32,29,.35); transform:translateY(-1px); }
 .orderTabs button.isActive { border-color:var(--o-ink); background:var(--o-ink); box-shadow:3px 4px 0 var(--o-coral); }
 .orderTabs button.isActive span { color:var(--o-mint); }
@@ -30,8 +37,8 @@
 .orderWorkspace { max-width:1540px; grid-template-columns:minmax(0,1fr) 310px; gap:34px; padding-top:38px; }
 .orderPageHeading { position:relative; min-height:150px; margin-top:0; padding:12px 0 26px; border-color:rgba(24,32,29,.28); }
 .orderPageHeading::after { position:absolute; right:0; bottom:26px; color:transparent; content:"LD"; -webkit-text-stroke:1px rgba(24,32,29,.13); font:900 clamp(58px,9vw,118px)/.7 Arial; letter-spacing:-.1em; }
-.orderPageHeading h1 { position:relative; z-index:1; font-size:clamp(52px,7vw,92px); }
-.orderPageHeading p { position:relative; z-index:1; max-width:650px; }
+.orderPageHeading h1 { position:relative; z-index:1; font:850 clamp(48px,6.5vw,82px)/.96 var(--o-display); letter-spacing:-.06em; }
+.orderPageHeading p { position:relative; z-index:1; max-width:650px; font-size:14px; line-height:1.75; }
 
 .orderAside { top:154px; overflow:hidden; padding:0; border-radius:18px; background:rgba(252,249,242,.9); box-shadow:9px 10px 0 var(--o-lilac),0 22px 50px rgba(38,43,41,.1); backdrop-filter:blur(14px); }
 .orderAside::before { display:block; padding:10px 17px; background:var(--o-ink); color:#fff; content:"ORDER SUMMARY"; font:800 8px/1 monospace; letter-spacing:.17em; }
@@ -40,12 +47,12 @@
 .orderAside>div strong { font-size:28px; }
 .orderAside>p { color:rgba(24,32,29,.64); line-height:1.65; }
 .orderAside dl { padding:12px 0; }
-.orderAside>button { width:calc(100% - 36px); min-height:46px; margin:0 18px 18px; border-radius:11px; background:var(--o-ink); color:#fff; box-shadow:4px 5px 0 var(--o-coral); }
+.orderAside>button { width:calc(100% - 36px); min-height:48px; margin:0 18px 18px; padding:11px 15px; border-radius:11px; background:var(--o-ink); color:#fff; box-shadow:4px 5px 0 var(--o-coral); font-size:14px; font-weight:750; }
 .orderAside>button.isSecondary { margin-top:-8px; background:transparent; color:var(--o-ink); box-shadow:none; }
 
 .orderCategoryRail { position:sticky; z-index:10; top:139px; margin:0 -6px 24px; padding:8px 6px; background:linear-gradient(180deg,rgba(243,238,228,.98) 72%,transparent); scrollbar-width:none; }
 .orderCategoryRail::-webkit-scrollbar { display:none; }
-.orderCategoryRail button { min-height:42px; padding:9px 16px; border-radius:999px; background:rgba(255,255,255,.62); font-weight:750; }
+.orderCategoryRail button { min-height:44px; padding:9px 18px; border-radius:999px; background:rgba(255,255,255,.62); font-size:13px; font-weight:720; }
 .orderCategoryRail button.isActive { border-color:var(--o-ink); background:var(--o-mint); box-shadow:3px 4px 0 var(--o-ink); }
 
 .orderProductGrid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
@@ -55,11 +62,11 @@
 .orderProductImage img { transition:transform .45s cubic-bezier(.22,1,.36,1); }
 .orderProductCard:hover .orderProductImage img { transform:scale(1.035); }
 .orderProductCard>div:nth-child(2) { padding:18px 18px 14px; }
-.orderProductCard h2 { font-size:21px; letter-spacing:-.025em; }
-.orderProductCard p { min-height:48px; }
+.orderProductCard h2 { font:780 21px/1.28 var(--o-display); letter-spacing:-.025em; }
+.orderProductCard p { min-height:48px; font-size:13px; line-height:1.65; }
 .orderProductCard footer { padding:13px 18px 17px; border-top:0; }
-.orderProductCard footer strong { font-size:18px; }
-.orderProductCard footer button { min-width:88px; min-height:40px; border:1px solid var(--o-ink); border-radius:10px; background:var(--o-ink); color:#fff; box-shadow:3px 4px 0 var(--o-coral); font-weight:800; transition:transform .18s ease,box-shadow .18s ease; }
+.orderProductCard footer strong { font:820 18px/1 var(--o-display); }
+.orderProductCard footer button { min-width:94px; min-height:44px; padding:9px 13px; border:1px solid var(--o-ink); border-radius:10px; background:var(--o-ink); color:#fff; box-shadow:3px 4px 0 var(--o-coral); font-size:14px; font-weight:750; transition:transform .18s ease,box-shadow .18s ease; }
 .orderProductCard footer button:hover { transform:translate(1px,1px); box-shadow:1px 2px 0 var(--o-coral); }
 .orderProductCard footer button span { margin-right:2px; color:var(--o-mint); font-size:16px; }
 
@@ -69,7 +76,12 @@
 .nominationStaffGrid button,.nominationServiceGrid>button,.nominationModeGrid>button { border-color:var(--o-line); border-radius:13px; background:rgba(255,255,255,.66); transition:transform .18s ease,border-color .18s ease,background .18s ease; }
 .nominationStaffGrid button:hover:not(:disabled),.nominationServiceGrid>button:hover,.nominationModeGrid>button:hover { border-color:rgba(24,32,29,.35); transform:translateY(-2px); }
 .nominationComposer { overflow:hidden; border-radius:18px; box-shadow:8px 9px 0 var(--o-lilac); }
-.orderPrimaryAction { min-height:50px; border-radius:11px; box-shadow:4px 5px 0 var(--o-coral); font-size:13px; }
+.orderPrimaryAction { min-height:52px; padding:12px 18px; border-radius:11px; box-shadow:4px 5px 0 var(--o-coral); font-size:15px; font-weight:780; }
+.nominationSection h2,.tipComposer h2,.helpCard h2{font-family:var(--o-display);font-weight:780;letter-spacing:-.025em}
+.nominationSection header p,.nominationServiceGrid p,.nominationModeGrid p{font-size:13px;line-height:1.65}
+.nominationStaffGrid button{min-height:116px;padding:11px 8px}.nominationStaffGrid strong{font-size:13px}.nominationStaffGrid small{font-size:10px}
+.nominationServiceGrid>button,.nominationModeGrid>button{min-height:132px;padding:16px}.nominationServiceGrid>button>strong,.nominationModeGrid>button>strong{font:750 16px/1.35 var(--o-display)}
+.stepper button{min-width:44px;min-height:44px;font-size:18px}.stepper strong{font-size:15px}
 .stepper { overflow:hidden; border-radius:11px; }
 
 .cartLine,.cartNominationGroup,.myOrderCard { border-color:var(--o-line); border-radius:15px; background:rgba(252,249,242,.82); box-shadow:0 9px 25px rgba(45,49,48,.055); }
@@ -77,8 +89,24 @@
 .myOrderHead { min-height:76px; }
 .orderEmpty { border-radius:18px; background:rgba(255,255,255,.35); }
 .orderGateCard { border-radius:22px; background:rgba(252,249,242,.9); box-shadow:12px 13px 0 var(--o-lilac),0 30px 80px rgba(45,49,48,.14); backdrop-filter:blur(18px); }
-.orderGateCard form input,.helpCard form input { min-height:46px; border-radius:11px; background:rgba(255,255,255,.8); }
-.orderGateCard form button,.helpCard form button { min-height:48px; border-radius:11px; background:var(--o-ink); color:#fff; box-shadow:4px 5px 0 var(--o-coral); }
+.orderGateCard h1{font-family:var(--o-display);font-weight:850;letter-spacing:-.055em}
+.orderGateCard label,.helpCard label,.tipComposer label,.nominationControls label{font-size:13px;font-weight:650}
+.orderGateCard form input,.helpCard form input,.tipComposer input,.tipComposer select,.nominationControls input { min-height:48px; padding:11px 13px; border-radius:11px; background:rgba(255,255,255,.8); font-size:15px; }
+.orderGateCard form button,.helpCard form button { min-height:50px; padding:11px 16px; border-radius:11px; background:var(--o-ink); color:#fff; box-shadow:4px 5px 0 var(--o-coral); font-size:15px; font-weight:760; }
+.orderTextButton{min-height:44px;font-size:13px;font-weight:650}
+.cartLine strong,.myOrderHead strong,.myOrderNominee strong{font-family:var(--o-display);font-weight:750}
+.cartLine>button{min-width:40px;min-height:40px;font-size:20px}
+.myOrderHead{font-size:13px}.myOrderHead strong{font-size:16px}.myOrderHead b{font-size:16px}
+.tipAmountButtons button{min-height:48px;padding:11px 14px;font-size:14px;font-weight:750}
+.tipAmountButtons label{min-height:48px;padding:7px 11px;font-size:12px;font-weight:650}
+.tipResult strong{font:780 19px/1.35 var(--o-display)}
+.cartSummary h2{font:780 21px/1.25 var(--o-display)}
+.cartSummary dl div{font-size:13px}.cartSummary .isTotal{font-size:17px}.cartSummary p{font-size:12px;line-height:1.65}
+.cartSummary button{min-height:50px;padding:11px 15px;border-radius:10px;font-size:15px;font-weight:780}
+.customerAddonComposer>button{min-height:42px;padding:9px 12px;border-radius:9px;font-size:12px}
+.customerAddonComposer label{font-size:11px}.customerAddonComposer select,.customerAddonComposer input{min-height:42px;padding:9px 10px;border-radius:8px;font-size:13px}
+.customerAddonComposer footer button{min-height:42px;padding:9px 12px;border-radius:9px;font-size:12px}
+.orderNotice{font-size:14px;line-height:1.5}.orderNotice button{min-width:36px;min-height:36px}
 .orderBusinessBanner { min-height:40px; border-color:var(--o-line); }
 
 @media(max-width:1180px){
@@ -96,7 +124,7 @@
 
 @media(max-width:620px){
   .orderTopbar{min-height:66px}.orderTopbar .orderBrand img{width:38px;height:38px}.orderBrand strong{font-size:17px}.orderCredit{min-width:0;padding-left:10px}.orderCredit span{display:none}
-  .orderTabs{top:66px;padding:8px 12px}.orderTabs button{min-height:38px;padding:7px 11px}.orderTabs button span{display:none}
+  .orderTabs{top:66px;padding:8px 12px}.orderTabs button{min-height:44px;padding:8px 13px}.orderTabs button span{display:none}
   .orderWorkspace{padding:24px 14px 112px}
   .orderPageHeading{min-height:128px;margin-bottom:22px}.orderPageHeading::after{bottom:22px}.orderPageHeading h1{font-size:48px}.orderPageHeading p{font-size:12px;line-height:1.65}
   .orderCategoryRail{top:120px;margin-inline:-2px}
@@ -104,7 +132,7 @@
   .orderProductCard{grid-template-columns:112px minmax(0,1fr);grid-template-rows:minmax(110px,auto) auto}
   .orderProductImage{grid-row:1/3;height:auto;min-height:154px}
   .orderProductCard>div:nth-child(2){padding:14px 14px 7px}.orderProductCard h2{font-size:18px}.orderProductCard p{min-height:0;margin-top:7px;-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
-  .orderProductCard footer{padding:7px 14px 14px}.orderProductCard footer button{min-width:76px;min-height:38px}
+  .orderProductCard footer{padding:7px 14px 14px}.orderProductCard footer button{min-width:82px;min-height:44px}
   .nominationSection{padding:16px}.nominationStaffGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
   .orderAside{inset:auto 12px 12px}.orderAside>button{min-width:142px}
   .orderGateCard{box-shadow:7px 8px 0 var(--o-lilac)}

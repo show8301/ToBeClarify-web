@@ -44,8 +44,8 @@ export default function AdminPreviewPage() {
           <nav className="adminNav" aria-label="Mock 後台功能選單">
             <p className="adminNavLabel">工作區</p>
             {[
-              ["00", "後台首頁"], ["01", "首頁設定"], ["02", "點單管理"],
-              ["03", "店員設定"], ["04", "活動設定"], ["05", "菜單設定"],
+              ["00", "點單管理"], ["01", "訂單列表"], ["02", "後台首頁"],
+              ["03", "店員設定"], ["04", "菜單設定"], ["05", "活動設定"], ["06", "首頁設定"],
             ].map(([index, label]) => (
               <button className={label === "點單管理" ? "isActive" : ""} key={index} type="button">
                 <span>{index}</span>{label}

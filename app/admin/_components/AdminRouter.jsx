@@ -9,6 +9,7 @@ import { AdminStaffSettingsPage } from './AdminStaffSettingsPage.jsx';
 import { AdminEventsPage } from './AdminEventsPage.jsx';
 import { AdminMenuPage } from './AdminMenuPage.jsx';
 import { AdminOrdersPage } from './AdminOrdersPage.jsx';
+import { AdminOrderListPage } from './AdminOrderListPage.jsx';
 
 export function AdminRouter({ route, navigate }) {
   return (
@@ -23,7 +24,7 @@ function AdminRouteView({ route, navigate }) {
   const canManageAll = user?.role === 'developer' || user?.role === 'manager';
   const isPasswordRecoveryRoute = route === '/admin/forgot-password';
   const isAnonymousAuthRoute = route === '/admin/login' || isPasswordRecoveryRoute;
-  const routeAllowed = route === '/admin' || route === '/admin/staff' || route === '/admin/orders'
+  const routeAllowed = route === '/admin' || route === '/admin/staff' || route === '/admin/orders' || route === '/admin/order-list'
     || (canManageAll && ['/admin/home', '/admin/events', '/admin/menu'].includes(route));
 
   useEffect(() => {
@@ -46,6 +47,7 @@ function AdminRouteView({ route, navigate }) {
   if (route === '/admin/events') page = <AdminEventsPage />;
   if (route === '/admin/menu') page = <AdminMenuPage />;
   if (route === '/admin/orders') page = <AdminOrdersPage />;
+  if (route === '/admin/order-list') page = <AdminOrderListPage />;
   return <AdminLayout route={route} navigate={navigate}>{page}</AdminLayout>;
 }
 

@@ -3,11 +3,13 @@ import { useAdminAuth } from './AdminAuthContext.jsx';
 import { AdminButton } from './AdminShared.jsx';
 
 const allItems = [
-  { route: '/admin/home', label: '首頁設定', index: '01', roles: ['developer', 'manager'] },
-  { route: '/admin/orders', label: '點單管理', index: '02', roles: ['developer', 'manager', 'clerk'] },
+  { route: '/admin/orders', label: '點單管理', index: '00', roles: ['developer', 'manager', 'clerk'] },
+  { route: '/admin/order-list', label: '訂單列表', index: '01', roles: ['developer', 'manager', 'clerk'] },
+  { route: '/admin', label: '後台首頁', index: '02', roles: ['developer', 'manager', 'clerk'] },
   { route: '/admin/staff', label: '店員設定', index: '03', roles: ['developer', 'manager', 'clerk'] },
-  { route: '/admin/events', label: '活動設定', index: '04', roles: ['developer', 'manager'] },
-  { route: '/admin/menu', label: '菜單設定', index: '05', roles: ['developer', 'manager'] },
+  { route: '/admin/menu', label: '菜單設定', index: '04', roles: ['developer', 'manager'] },
+  { route: '/admin/events', label: '活動設定', index: '05', roles: ['developer', 'manager'] },
+  { route: '/admin/home', label: '首頁設定', index: '06', roles: ['developer', 'manager'] },
 ];
 
 export function AdminLayout({ route, navigate, children }) {
@@ -67,9 +69,6 @@ export function AdminLayout({ route, navigate, children }) {
         </button>
         <nav className={`adminNav ${isMenuOpen ? 'isOpen' : ''}`} aria-label="後台功能選單">
           <p className="adminNavLabel">工作區</p>
-          <button className={route === '/admin' ? 'isActive' : ''} aria-current={route === '/admin' ? 'page' : undefined} type="button" onClick={() => handleNavigate('/admin')}>
-            <span>00</span>後台首頁
-          </button>
           {items.map((item) => (
             <button key={item.route} className={route === item.route ? 'isActive' : ''} aria-current={route === item.route ? 'page' : undefined} type="button" onClick={() => handleNavigate(item.route)}>
               <span>{item.index}</span>{item.label}

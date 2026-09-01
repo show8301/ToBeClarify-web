@@ -47,7 +47,7 @@ test("server-renders every addressable admin route", async () => {
 });
 
 test("renders route-addressable gallery content over the archive", async () => {
-  const snapshot = JSON.parse(await readFile(new URL("../app/data/site-snapshot.json", import.meta.url), "utf8"));
+  const snapshot = JSON.parse(await readFile(new URL("../data/snapshots/site.json", import.meta.url), "utf8"));
   const album = snapshot.albums[0];
   assert.ok(album?.id);
   const response = await render(`/gallery/${album.id}`);
@@ -61,7 +61,7 @@ test("renders route-addressable gallery content over the archive", async () => {
 });
 
 test("keeps a current API snapshot for resilient first paint", async () => {
-  const snapshot = JSON.parse(await readFile(new URL("../app/data/site-snapshot.json", import.meta.url), "utf8"));
+  const snapshot = JSON.parse(await readFile(new URL("../data/snapshots/site.json", import.meta.url), "utf8"));
   assert.ok(Date.parse(snapshot.generatedAt));
   assert.equal(snapshot.home.shopInfo.name, "清醒夢");
   assert.ok(snapshot.albums.length > 0);

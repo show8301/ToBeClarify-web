@@ -1,7 +1,7 @@
-import AdminClient from "../AdminClient";
+import { AdminForgotPasswordRoute } from "@/features/admin/shell/AdminRoutes.jsx";
 
 export const dynamic = "force-dynamic";
 
-export default function AdminForgotPasswordRoute() {
-  return <AdminClient />;
+export default function AdminForgotPasswordPageRoute() {
+  return <AdminForgotPasswordRoute />;
 }

@@ -1,7 +1,7 @@
-import AdminClient from "../AdminClient";
+import { AdminLoginRoute } from "@/features/admin/shell/AdminRoutes.jsx";
 
 export const dynamic = "force-dynamic";
 
 export default function AdminPage() {
-  return <AdminClient />;
+  return <AdminLoginRoute />;
 }

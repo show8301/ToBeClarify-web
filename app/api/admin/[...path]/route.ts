@@ -1,12 +1,9 @@
-const DEFAULT_ADMIN_API_BASE_URL = "https://api.marchgroup.net/api/admin";
+import { getAdminApiBaseUrl } from "../../../../lib/server/upstream-config.ts";
+
 const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 const BODYLESS_RESPONSE_STATUSES = new Set([204, 205, 304]);
 
 type RouteContext = { params: Promise<{ path: string[] }> };
-
-function adminApiBaseUrl() {
-  return (process.env.ADMIN_API_BASE_URL?.trim() || DEFAULT_ADMIN_API_BASE_URL).replace(/\/$/, "");
-}
 
 export function isSameOriginRequest(request: Request) {
   if (!MUTATING_METHODS.has(request.method.toUpperCase())) return true;
@@ -51,7 +48,7 @@ async function proxy(request: Request, { params }: RouteContext) {
   }
 
   const { path } = await params;
-  const upstreamUrl = new URL(`${adminApiBaseUrl()}/${path.map(encodeURIComponent).join("/")}`);
+  const upstreamUrl = new URL(`${getAdminApiBaseUrl()}/${path.map(encodeURIComponent).join("/")}`);
   upstreamUrl.search = new URL(request.url).search;
 
   const headers = new Headers({ Accept: request.headers.get("accept") || "application/json" });

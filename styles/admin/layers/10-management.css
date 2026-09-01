@@ -1,0 +1,484 @@
+/* Admin management workspace */
+.adminWorkspace {
+  width: min(1380px, 100%);
+  margin: 0 auto;
+  padding-top: 28px;
+}
+
+.adminNav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.adminNav button,
+.adminBackToSite {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: auto;
+  padding: 8px 13px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-fg-soft);
+  text-align: center;
+  white-space: nowrap;
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+.adminNav button span { color: var(--color-fg-mute); font-family: var(--font-mono); font-size: 11px; }
+.adminNav button:hover,
+.adminNav button.isActive { border-color: rgba(var(--color-accent-rgb), .24); background: rgba(var(--color-accent-rgb), .08); color: var(--color-fg); }
+.adminNav button.isActive span { color: var(--color-accent); }
+.adminBackToSite { color: var(--color-fg-mute); font-size: 13px; }
+.adminBackToSite:hover { color: var(--color-accent); }
+.adminContent { min-width: 0; padding-bottom: 60px; }
+.adminPage { width: 100%; }
+.adminPageHeading { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin: 28px 0 24px; }
+.adminPageHeading h1 { margin: 0; font-family: var(--font-display); font-size: clamp(32px, 5vw, 56px); line-height: 1.1; }
+.adminPageHeading p:not(.eyebrow) { max-width: 680px; margin: 10px 0 0; color: var(--color-fg-soft); }
+.adminPageActions, .adminPanelActions, .adminInlineActions, .adminRowActions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.adminPageLoginStatus { display: inline-flex; align-items: center; gap: 7px; padding: 8px 12px; border: 1px solid rgba(var(--color-accent-2-rgb), .28); border-radius: 999px; background: rgba(var(--color-accent-2-rgb), .08); color: var(--color-accent-2); font-size: 12px; font-weight: 700; white-space: nowrap; }
+.adminPageLoginStatus::before { width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 4px rgba(var(--color-accent-2-rgb), .12); content: ''; }
+.adminButton { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 9px 15px; border: 1px solid transparent; border-radius: 10px; color: var(--color-fg); font-weight: 600; transition: transform .2s ease, background .2s ease, border-color .2s ease; }
+.adminButton:hover:not(:disabled) { transform: translateY(-1px); }
+.adminButton:disabled { cursor: wait; opacity: .55; }
+.adminButton-primary { background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark)); box-shadow: 0 8px 24px rgba(var(--color-accent-rgb), .18); }
+.adminButton-secondary { border-color: rgba(var(--color-accent-rgb), .28); background: rgba(var(--color-accent-rgb), .1); }
+.adminButton-ghost { border-color: var(--color-border-strong); background: var(--color-surface); }
+.adminButton-danger { border-color: rgba(255, 107, 107, .3); background: rgba(255, 107, 107, .08); color: #ffabab; }
+.adminPanel { margin-bottom: 18px; padding: 20px; border: 1px solid var(--color-border); border-radius: 18px; background: rgba(13, 34, 50, .68); box-shadow: 0 12px 34px rgba(0,0,0,.14); }
+.adminPanelHeader { display: flex; justify-content: space-between; gap: 18px; margin-bottom: 18px; }
+.adminPanelHeader h2 { margin: 0; font-family: var(--font-display); font-size: 22px; }
+.adminPanelHeader p { margin: 5px 0 0; color: var(--color-fg-mute); font-size: 13px; }
+.adminFormGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.adminField { display: grid; gap: 7px; color: var(--color-fg-soft); font-size: 13px; }
+.adminField > span { color: var(--color-fg-soft); }
+.adminField small, .adminFieldHint { color: var(--color-fg-mute); font-size: 11px; }
+.adminField input, .adminField textarea, .adminField select, .adminSetItemRow input, .adminSetItemRow select { width: 100%; padding: 10px 12px; border: 1px solid var(--color-border-strong); border-radius: 10px; outline: 0; background: var(--color-surface-input); color: var(--color-fg); }
+.adminField textarea { min-height: 44px; resize: vertical; }
+.adminField input:focus, .adminField textarea:focus, .adminField select:focus, .adminSetItemRow input:focus, .adminSetItemRow select:focus { border-color: rgba(var(--color-accent-rgb), .72); box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), .1); }
+.adminField.span-2, .adminFormWide { grid-column: 1 / -1; }
+.adminToggle { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; color: var(--color-fg-soft); font-size: 13px; }
+.adminToggle input { accent-color: var(--color-accent); }
+.adminImagePicker { display: grid; grid-column: span 1; gap: 9px; min-width: 0; }
+.adminImagePickerHeader { display: flex; justify-content: space-between; gap: 12px; color: var(--color-fg-soft); font-size: 13px; }
+.adminImagePickerHeader small { color: var(--color-gold); font-size: 11px; }
+.adminImagePreview { position: relative; display: grid; min-height: 0; aspect-ratio: 16 / 9; place-items: center; overflow: hidden; border: 1px dashed var(--color-border-strong); border-radius: 12px; background: rgba(0,0,0,.16); color: var(--color-fg-mute); }
+.adminImagePreview img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: center; }
+.adminImagePickerActions { display: flex; align-items: center; gap: 8px; }
+.adminImagePickerActions input { display: none; }
+.adminEditableList { display: grid; gap: 12px; }
+.adminEditableRow, .adminCarouselRow { padding: 14px; border: 1px solid var(--color-border); border-radius: 13px; background: rgba(7, 19, 31, .3); }
+.adminEditableRow { display: grid; grid-template-columns: minmax(160px, 2fr) minmax(130px, 1.5fr) 90px auto auto; gap: 12px; align-items: end; }
+.adminServiceRow { grid-template-columns: 110px minmax(130px, 1fr) 150px minmax(220px, 2fr) auto auto; }
+.adminCarouselRow .adminFormGrid { margin: 0; }
+.adminSelectorRow { display: flex; align-items: end; gap: 18px; }
+.adminSelectorRow .adminField { width: min(420px, 100%); }
+.adminSelectionHint { padding-bottom: 10px; color: var(--color-accent-soft); font-size: 13px; }
+.adminNotice { margin-bottom: 16px; padding: 11px 14px; border: 1px solid rgba(var(--color-accent-2-rgb), .3); border-radius: 10px; background: rgba(var(--color-accent-2-rgb), .08); color: var(--color-accent-2); }
+.adminToastViewport { position: fixed; z-index: 2400; top: max(18px,env(safe-area-inset-top)); right: max(18px,env(safe-area-inset-right)); width: min(390px,calc(100vw - 36px)); pointer-events: none; }
+.adminToast { display: grid; grid-template-columns: 38px minmax(0,1fr) 32px; align-items: center; gap: 11px; padding: 13px 12px 13px 14px; overflow: hidden; border: 1px solid rgba(255,255,255,.92); border-radius: 16px; background: linear-gradient(135deg,rgba(250,247,252,.98),rgba(228,239,247,.98)); color: #31334a; box-shadow: 0 18px 50px rgba(49,51,74,.24),inset 0 1px rgba(255,255,255,.96); pointer-events: auto; }
+.adminToastIcon { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 50%; background: linear-gradient(145deg,#a0d9d6,#bdf1df); color: #285f58; font-size: 19px; font-weight: 800; box-shadow: 0 5px 14px rgba(86,143,139,.2); }
+.adminToastCopy { display: grid; min-width: 0; gap: 3px; }
+.adminToastTitle { margin: 0; color: #65789f; font: 700 9px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; }
+.adminToastDescription { margin: 0; overflow-wrap: anywhere; font-size: 14px; font-weight: 700; line-height: 1.45; }
+.adminToastClose { display: grid; width: 32px; height: 32px; place-items: center; border: 0; border-radius: 50%; background: transparent; color: rgba(49,51,74,.56); font-size: 21px; line-height: 1; }
+.adminToastClose:hover { background: rgba(101,120,159,.1); color: #31334a; }
+.adminToast-error .adminToastIcon { background: linear-gradient(145deg,#efc8d7,#e8b9c9); color: #884c63; }
+.adminDeleteConfirmDialog { width: min(480px,100%); }
+.adminDeleteConfirmContent { display: grid; grid-template-columns: 48px minmax(0,1fr); align-items: start; gap: 14px; padding: 16px; border: 1px solid rgba(175,91,115,.22); border-radius: 14px; background: rgba(232,199,218,.22); color: #31334a; }
+.adminDeleteConfirmContent > span { display: grid; width: 48px; height: 48px; place-items: center; border-radius: 50%; background: rgba(232,199,218,.72); color: #884c63; font-size: 24px; font-weight: 800; }
+.adminDeleteConfirmContent strong { display: block; font-size: 17px; }
+.adminDeleteConfirmContent p { margin: 7px 0 0; color: rgba(49,51,74,.68); font-size: 13px; line-height: 1.65; }
+.adminInlineState { display: grid; justify-items: start; gap: 10px; margin-bottom: 18px; padding: 16px; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface); color: var(--color-fg-soft); }
+.adminInlineState p { margin: 0; }
+.adminInlineStateError { border-color: rgba(255,107,107,.28); color: #ffabab; }
+.adminSplitView { display: grid; grid-template-columns: minmax(220px, .34fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.adminListPanel { position: sticky; top: 18px; }
+.adminSelectList { display: grid; gap: 6px; max-height: 650px; overflow: auto; }
+.adminSelectList button { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 12px; border: 1px solid transparent; border-radius: 10px; background: transparent; color: var(--color-fg-soft); text-align: left; }
+.adminSelectList button:hover, .adminSelectList button.isActive { border-color: rgba(var(--color-accent-rgb), .28); background: rgba(var(--color-accent-rgb), .08); color: var(--color-fg); }
+.adminSelectList button span { display: grid; gap: 2px; min-width: 0; }
+.adminSelectList button strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adminSelectList button small { overflow: hidden; color: var(--color-fg-mute); text-overflow: ellipsis; white-space: nowrap; }
+.adminSelectList button em { flex: 0 0 auto; color: var(--color-accent-2); font-size: 11px; font-style: normal; }
+.adminEmptyText { color: var(--color-fg-mute); }
+.adminGalleryEditor { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.adminGalleryEditorItem { display: grid; align-content: start; gap: 10px; padding: 12px; border: 1px solid var(--color-border); border-radius: 12px; }
+.adminTabs { display: flex; gap: 7px; overflow-x: auto; margin-bottom: 16px; padding-bottom: 3px; }
+.adminTabs button { padding: 9px 14px; border: 1px solid var(--color-border); border-radius: 999px; background: transparent; color: var(--color-fg-soft); white-space: nowrap; }
+.adminTabs button.isActive { border-color: rgba(var(--color-accent-rgb), .42); background: rgba(var(--color-accent-rgb), .12); color: var(--color-accent-soft); }
+.adminSetItems { display: grid; gap: 10px; padding-top: 10px; border-top: 1px solid var(--color-border); }
+.adminSubheading { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--color-fg-soft); }
+.adminSetItemRow { display: grid; grid-template-columns: minmax(0, 1fr) 130px 80px auto; gap: 8px; align-items: center; }
+.adminDangerZone { display: flex; justify-content: flex-end; margin: 22px 0; }
+.adminDashboardCards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.adminDashboardCards .adminPanel { margin: 0; }
+.adminModuleStatus.isReady { display: inline-flex; margin: 0; background: rgba(var(--color-accent-2-rgb), .1); color: var(--color-accent-2); }
+.adminDeveloperTools { margin-top: 18px; }
+.adminDeveloperTools .adminPanel { margin: 0; border-color: rgba(var(--color-accent-rgb), .32); }
+.adminDeveloperDisclosure { overflow: hidden; border: 1px solid rgba(var(--color-accent-rgb), .32); border-radius: 22px; background: linear-gradient(145deg,rgba(250,250,253,.9),rgba(226,229,242,.74)); box-shadow: 0 18px 48px rgba(101,120,159,.15),inset 0 1px rgba(255,255,255,.96); }
+.adminDeveloperDisclosure + .adminDeveloperDisclosure { margin-top: 14px; }
+.adminDeveloperDisclosureSummary { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 22px; color: var(--color-fg); cursor: pointer; list-style: none; }
+.adminDeveloperDisclosureSummary::-webkit-details-marker { display: none; }
+.adminDeveloperDisclosureSummary:focus-visible { outline: 3px solid rgba(var(--color-accent-rgb), .32); outline-offset: -3px; }
+.adminDeveloperDisclosureSummary > span { display: grid; gap: 6px; min-width: 0; }
+.adminDeveloperDisclosureSummary b { font-size: 18px; }
+.adminDeveloperDisclosureSummary small { color: var(--color-fg-mute); font-size: 12px; line-height: 1.5; }
+.adminDeveloperDisclosureSummary > i { display: grid; flex: 0 0 34px; width: 34px; height: 34px; place-items: center; border: 1px solid rgba(var(--color-accent-rgb), .35); border-radius: 50%; color: var(--color-accent-dark); font-size: 21px; font-style: normal; line-height: 1; transform: rotate(0deg); transition: transform .2s ease, background .2s ease; }
+.adminDeveloperDisclosure[open] .adminDeveloperDisclosureSummary > i { transform: rotate(180deg); background: rgba(var(--color-accent-rgb), .12); }
+.adminDeveloperDisclosureBody { padding: 0 22px 22px; }
+.adminDeveloperDisclosureBody::before { content: ''; display: block; margin-bottom: 18px; border-top: 1px solid var(--color-border); }
+.adminDeveloperToolState { display: block; margin-top: 8px; color: var(--color-fg-mute); font-size: 12px; }
+.adminDeveloperToolState.isError { color: #ffabab; }
+.adminPageVisibilityList { display: grid; gap: 9px; }
+.adminPageVisibilityRow { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 12px; border: 1px solid var(--color-border); border-radius: 12px; background: rgba(7, 19, 31, .28); }
+.adminPageVisibilityRow > span { display: flex; align-items: center; gap: 10px; color: var(--color-fg-soft); }
+.adminPageVisibilityRow > span b { min-width: 24px; color: var(--color-accent); font: 700 11px var(--font-mono); }
+.adminStaffDirectoryTableWrap { overflow-x: auto; border: 1px solid var(--color-border); border-radius: 14px; background: rgba(255,255,255,.28); }
+.adminStaffDirectoryTable { width: 100%; min-width: 560px; border-collapse: collapse; color: var(--color-fg-soft); font-size: 13px; }
+.adminStaffDirectoryTable th { padding: 12px 14px; border-bottom: 1px solid var(--color-border); color: var(--color-fg-mute); font: 700 9px/1.2 var(--font-mono); letter-spacing: .1em; text-align: left; white-space: nowrap; }
+.adminStaffDirectoryTable td { padding: 13px 14px; border-bottom: 1px solid rgba(101,120,159,.12); vertical-align: middle; }
+.adminStaffDirectoryTable tbody tr:last-child td { border-bottom: 0; }
+.adminStaffDirectoryTable tbody tr:hover { background: rgba(var(--color-accent-rgb), .08); }
+.adminStaffDirectoryTable td code { color: var(--color-accent-dark); font: 700 11px/1.4 var(--font-mono); overflow-wrap: anywhere; }
+.adminStaffDirectoryFooter { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-top: 14px; }
+.adminStaffDirectoryFooter > small { color: var(--color-fg-mute); font-size: 11px; }
+.adminStaffDirectoryPagination { display: flex; align-items: center; justify-content: flex-end; gap: 9px; }
+.adminStaffDirectoryPagination > span { min-width: 88px; color: var(--color-fg-soft); font: 700 10px/1.2 var(--font-mono); text-align: center; }
+.adminStaffDirectoryPagination .adminButton { min-height: 34px; padding: 7px 11px; font-size: 11px; }
+
+.adminDragList { display: grid; gap: 10px; }
+.adminDragCard { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 13px 14px; border: 1px solid var(--color-border); border-radius: 13px; background: rgba(7, 19, 31, .34); cursor: grab; transition: border-color .18s ease, background .18s ease, opacity .18s ease, transform .18s ease; }
+.adminDragCard:hover, .adminDragCard.isDragOver { border-color: rgba(var(--color-accent-rgb), .55); background: rgba(var(--color-accent-rgb), .08); }
+.adminDragCard.isDragging { opacity: .45; transform: scale(.99); }
+.adminDragHandle { flex: 0 0 20px; color: var(--color-accent); font-family: var(--font-mono); font-size: 16px; letter-spacing: -4px; user-select: none; }
+.adminDragHandle.isDisabled { color: var(--color-fg-mute); font-size: 12px; letter-spacing: 0; }
+.adminDragCardContent { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; min-width: 0; }
+.adminDragCardContent > div:first-child { min-width: 0; }
+.adminDragCardContent strong, .adminDragCardContent small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adminDragCardContent strong { color: var(--color-fg); }
+.adminDragCardContent small { margin-top: 4px; color: var(--color-fg-mute); font-size: 12px; }
+.adminDragCardMeta { display: flex; align-items: center; flex: 0 0 auto; gap: 10px; }
+.adminDragCardMeta em { color: var(--color-accent-2); font-size: 11px; font-style: normal; white-space: nowrap; }
+.adminDragCardWithImage { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.adminDragCardWithImage > img { flex: 0 0 52px; width: 52px; height: 42px; object-fit: cover; border-radius: 8px; background: rgba(0,0,0,.18); }
+.adminMenuGroupedList { display: grid; gap: 14px; }
+.adminMenuGroupedList .adminPanel { margin: 0; padding: 14px; background: rgba(7, 19, 31, .26); }
+.adminMenuGroupedList .adminPanelHeader { margin-bottom: 12px; }
+.adminDialogPortalTheme { position: fixed; z-index: 1000; inset: 0; min-height: 0; pointer-events: none; }
+.adminDialogBackdrop { position: fixed; z-index: 1000; inset: 0; background: rgba(0, 0, 0, .68); pointer-events: auto; }
+.adminDialogPopup { position: fixed; z-index: 1001; inset: 0; display: grid; place-items: center; padding: 22px; pointer-events: none; }
+.adminDialogPopup > div { display: contents; }
+.adminDialog { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; width: min(780px, 100%); max-height: min(90vh, 900px); overflow: hidden; border: 1px solid var(--color-border-strong); border-radius: 18px; background: var(--color-surface); box-shadow: 0 26px 80px rgba(0,0,0,.42); }
+.adminDialog { pointer-events: auto; }
+.adminDialogHeader, .adminDialogFooter { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 20px; border-bottom: 1px solid var(--color-border); }
+.adminDialogTitle { margin: 0; font-family: var(--font-display); font-size: 25px; }
+.adminDialogDescription { margin: 5px 0 0; color: var(--color-fg-mute); font-size: 12px; }
+.adminDialogHeader .adminButton { flex: 0 0 auto; }
+.adminDialogBody { overflow: auto; padding: 20px; }
+.adminDialogFooter { justify-content: flex-start; border-top: 1px solid var(--color-border); border-bottom: 0; }
+.adminDialogActionSpacer { flex: 1; }
+.adminDialog .adminFormGrid { align-items: start; }
+.adminVisuallyHidden { position: absolute!important; width: 1px!important; height: 1px!important; padding: 0!important; margin: -1px!important; overflow: hidden!important; clip: rect(0,0,0,0)!important; white-space: nowrap!important; border: 0!important; }
+
+/* Staff editor: list-first workflow, reliable switches and live public preview. */
+.adminRequiredMark { margin-left: 4px; color: #b92d2d; font-weight: 800; }
+.adminDialogNotice { margin-bottom: 16px; }
+.adminIconButton { min-width: 38px; padding: 7px 10px; font-size: 17px; }
+
+.adminToggleSwitch {
+  appearance: none;
+  position: relative;
+  flex: 0 0 auto;
+  width: 42px;
+  height: 24px;
+  margin: 0;
+  border: 1px solid rgba(24, 32, 29, .46);
+  border-radius: 999px;
+  background: rgba(24, 32, 29, .18);
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.adminToggleSwitch::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fffdf8;
+  box-shadow: 0 1px 4px rgba(24, 32, 29, .28);
+  transition: transform .18s ease;
+}
+.adminToggleSwitch[aria-checked="true"] { border-color: #7d77ad; background: linear-gradient(110deg, #a9c7ea, #b9b6df); box-shadow: 0 0 0 2px rgba(125, 119, 173, .14); }
+.adminToggleSwitch[aria-checked="true"]::after { transform: translateX(18px); }
+.adminToggleSwitch:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+.adminToggleSwitch:disabled { cursor: not-allowed; opacity: .5; }
+.adminDragHandle:not(.isDisabled) { cursor: grab; }
+.adminDragHandle:not(.isDisabled):active { cursor: grabbing; }
+
+.adminStaffEditDialog { width: min(1320px, 100%); }
+.adminStaffMobilePreviewAction { display: none; }
+.adminStaffEditDialog .adminDialogBody { display: flex; min-height: 0; overflow: hidden; }
+.adminStaffEditorLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(360px, .95fr);
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  gap: 20px;
+  align-items: stretch;
+}
+.adminStaffEditorForm,
+.adminStaffPreview { min-width: 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+.adminStaffEditorForm { padding-right: 6px; }
+.adminStaffEditorForm .adminPanel { margin-bottom: 14px; padding: 16px; }
+.adminStaffPreview {
+  padding: 18px;
+  border: 1px solid rgba(24, 32, 29, .24);
+  border-radius: 18px;
+  background: linear-gradient(150deg, rgba(246, 242, 252, .96), rgba(226, 235, 247, .94));
+  color: #31334a;
+}
+.adminStaffPreviewHeader { margin-bottom: 12px; }
+.adminStaffPreviewHeader h2 { margin: 0; color: #31334a; font-family: var(--font-display); font-size: 25px; }
+.adminStaffPreviewHeader small { display: block; margin-top: 4px; color: rgba(49, 51, 74, .66); font-size: 12px; }
+.adminStaffPreviewControls { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.adminPreviewModeButton { flex: 1 1 0; min-width: 0; padding: 8px 10px; font-size: 12px; }
+.adminPreviewExpandButton { flex: 0 0 auto; padding: 8px 10px; font-size: 12px; }
+.adminStaffPreviewViewport { display: grid; min-width: 0; place-items: start center; }
+.adminStaffPreviewViewport.isDialogMode { display: block; }
+.adminPreviewImageFallback { display: grid; width: 100%; min-height: 220px; place-items: center; background: #8a8caa; color: #fff; }
+
+.adminPreviewStaffCard {
+  position: relative;
+  width: min(310px, 100%);
+  margin: 0 auto;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .92);
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(235, 229, 246, .98), rgba(169, 190, 226, .9));
+  color: #31334a;
+  box-shadow: 0 22px 54px rgba(101, 120, 159, .2);
+}
+.adminPreviewStaffCard.isHidden { opacity: .58; }
+.adminPreviewStaffCard.isExpanded { width: min(420px, 100%); }
+.adminPreviewStaffCard .staffPortrait { position: relative; overflow: hidden; background: #b8bbd8; }
+.adminPreviewStaffCard .staffPortrait > img,
+.adminPreviewStaffCard .staffPortrait > .adminPreviewImageFallback { display: block; width: 100%; min-height: 0; aspect-ratio: 4 / 5; object-fit: cover; object-position: center 30%; }
+.adminPreviewStaffCard .staffCardRole {
+  position: absolute;
+  z-index: 2;
+  right: 16px;
+  bottom: 14px;
+  left: 16px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, .75);
+  border-radius: 999px;
+  background: rgba(247, 247, 251, .78);
+  color: #31334a;
+  font-size: 11px;
+  backdrop-filter: blur(10px);
+}
+.adminPreviewStatusBadge {
+  position: absolute;
+  z-index: 3;
+  top: 14px;
+  right: 14px;
+  padding: 6px 9px;
+  border: 1px solid rgba(255, 255, 255, .85);
+  border-radius: 9px;
+  background: rgba(247, 247, 251, .82);
+  color: #6e6e77;
+  font-size: 10px;
+  font-weight: 750;
+}
+.adminPreviewStatusBadge.success { color: #147258; }
+.adminPreviewStaffCard .staffCardBody { padding: 25px 22px 20px; text-align: center; }
+.adminPreviewStaffCard .staffCardNameWrap { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.adminPreviewStaffCard .staffCardOrbit { width: 24px; height: 24px; opacity: .55; }
+.adminPreviewStaffCard h2 { margin: 0; color: #31334a; font-size: 25px; }
+.adminPreviewStaffCard .staffNickname { margin: 9px 0 0; color: rgba(49, 51, 74, .62); font-size: 11px; }
+.adminPreviewStaffCard .staffCardIntro { min-height: 62px; margin: 18px 0; color: rgba(49, 51, 74, .72); font-size: 13px; line-height: 1.75; }
+.adminPreviewStaffCard .staffCardDivider { display: flex; align-items: center; gap: 8px; color: #7779a5; }
+.adminPreviewStaffCard .staffCardDivider span { flex: 1; border-top: 1px solid rgba(49, 51, 74, .18); }
+.adminPreviewStaffCard .staffCardDivider i { font-style: normal; }
+.adminPreviewStaffCard .chipList { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; margin-top: 16px; }
+.adminPreviewStaffCard .staffCardChip { display: inline-flex; align-items: center; gap: 5px; padding: 6px 9px; border: 1px solid rgba(255,255,255,.9); border-radius: 9px; background: rgba(255,255,255,.4); font-size: 10px; }
+.adminPreviewStaffCard .staffCardChip img { width: 14px; height: 14px; object-fit: contain; }
+
+.adminPreviewStaffDialog {
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  width: 100%;
+  height: min(62vh, 620px);
+  min-height: 420px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .82);
+  border-radius: 18px;
+  background: linear-gradient(145deg, #787dae, #555b8d);
+  color: #fff;
+  box-shadow: 0 22px 50px rgba(53, 59, 104, .24);
+}
+.adminPreviewStaffDialog .dialogGallery { position: relative; min-width: 0; min-height: 0; overflow: hidden; background: #797d9f; }
+.adminPreviewStaffDialog .dialogGallery > img { width: 100%; height: 100%; object-fit: cover; }
+.adminPreviewStaffDialog .dialogGallery .adminPreviewImageFallback { position: absolute; inset: 0; min-height: 0; }
+.adminPreviewStaffDialog .galleryControls { position: absolute; right: 12px; bottom: 12px; left: 12px; display: flex; justify-content: center; gap: 7px; }
+.adminPreviewStaffDialog .galleryControls .dot { width: 8px; height: 8px; padding: 0; border: 1px solid #fff; border-radius: 50%; background: transparent; }
+.adminPreviewStaffDialog .galleryControls .dot.active { background: #fff; }
+.adminPreviewStaffDialog .dialogContent { min-width: 0; padding: 22px; overflow: auto; }
+.adminPreviewStaffDialog .staffDialogRole { display: flex; align-items: center; justify-content: center; gap: 8px; color: #f0e7ff; font-size: 11px; }
+.adminPreviewStaffDialog .staffDialogNameWrap { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px; }
+.adminPreviewStaffDialog .staffDialogNameWrap h2 { margin: 0; color: #fff; font-size: 28px; }
+.adminPreviewStaffDialog .staffDialogOrbit { width: 25px; height: 25px; filter: brightness(0) invert(1); opacity: .7; }
+.adminPreviewStaffDialog .staffNickname { margin: 8px 0; color: #eee8ff; text-align: center; font-size: 11px; }
+.adminPreviewStaffDialog .staffCardDivider { display: flex; align-items: center; gap: 8px; color: #e1d3ff; }
+.adminPreviewStaffDialog .staffCardDivider span { flex: 1; border-top: 1px solid rgba(255,255,255,.3); }
+.adminPreviewStaffDialog .staffCardDivider i { font-style: normal; }
+.adminPreviewStaffDialog .staffDetailText { color: #fff; font-size: 13px; line-height: 1.75; white-space: pre-line; }
+.adminPreviewStaffDialog .serviceTable { margin-top: 16px; }
+.adminPreviewStaffDialog .serviceTableHeading { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+.adminPreviewStaffDialog .serviceTableHeading img { width: 23px; height: 23px; }
+.adminPreviewStaffDialog .serviceTableHeading h3 { margin: 0; color: #fff; font-size: 15px; }
+.adminPreviewStaffDialog .serviceRow { display: flex; justify-content: space-between; gap: 12px; margin-top: 7px; padding: 9px 10px; border: 1px solid rgba(223, 209, 255, .4); border-radius: 10px; background: rgba(85, 91, 141, .46); color: #fff; }
+.adminPreviewStaffDialog .serviceRow span { min-width: 0; font-size: 12px; }
+.adminPreviewStaffDialog .serviceRow small { display: block; margin-top: 3px; color: rgba(255,255,255,.78); font-size: 10px; line-height: 1.45; }
+.adminPreviewStaffDialog .serviceRow strong { flex: 0 0 auto; color: #fff; font-size: 11px; }
+
+.adminStaffPreviewExpandedDialog { width: min(1180px, 100%); }
+.adminStaffPreviewExpandedDialog .adminDialogBody { padding: 20px; }
+.adminStaffPreviewExpandedCanvas { min-width: 0; }
+.adminStaffPreviewExpandedCanvas .adminPreviewStaffDialog { height: min(68vh, 680px); }
+.adminStaffListPanel .adminPanelHeader { margin-bottom: 18px; }
+.adminStaffListPanel .adminDragList { gap: 12px; }
+.adminStaffListPanel .adminDragCard { min-height: 88px; padding: 9px 12px; border-radius: 16px; cursor: pointer; }
+.adminStaffListPanel .adminDragHandle { align-self: stretch; display: grid; width: 24px; place-items: center; border-right: 1px solid rgba(101,120,159,.16); }
+.adminStaffListPanel .adminDragCardContent { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: stretch; gap: 18px; }
+.adminStaffListIdentity { display: flex; align-items: center; gap: 13px; min-width: 0; }
+.adminStaffListPortrait { position: relative; flex: 0 0 70px; width: 70px; aspect-ratio: 4 / 5; overflow: hidden; border: 1px solid rgba(255,255,255,.94); border-radius: 11px; background: linear-gradient(145deg,#c9cce2,#9ab8d7); box-shadow: 0 6px 14px rgba(101,120,159,.15); }
+.adminStaffListPortrait img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 30%; }
+.adminStaffListPortrait > span { display: grid; width: 100%; height: 100%; place-items: center; color: rgba(255,255,255,.9); font-family: var(--font-display); font-size: 19px; }
+.adminStaffListPortrait > i { position: absolute; right: 5px; bottom: 5px; width: 8px; height: 8px; border: 2px solid #eef1f8; border-radius: 50%; background: #9ba0af; box-shadow: 0 2px 6px rgba(49,51,74,.24); }
+.adminStaffListPortrait > i.isWorking { background: #43c993; }
+.adminStaffListCopy { display: grid; align-content: center; min-width: 0; }
+.adminStaffListHeading { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.adminStaffListHeading strong { overflow: hidden; color: #31334a; font-size: 16px; text-overflow: ellipsis; white-space: nowrap; }
+.adminStaffListHeading > span { flex: 0 0 auto; padding: 4px 7px; border: 1px solid rgba(101,120,159,.18); border-radius: 999px; background: rgba(255,255,255,.52); color: #69708d; font-size: 9px; font-weight: 750; }
+.adminStaffListHeading > span.isPublic { background: rgba(160,217,214,.36); color: #366b68; }
+.adminStaffListHeading > span.isHidden { background: rgba(232,199,218,.34); color: #884c63; }
+.adminStaffListRole { margin-top: 7px !important; color: rgba(49,51,74,.62) !important; }
+.adminStaffListSummary { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.adminStaffListSummary > span { padding: 5px 8px; border-radius: 7px; background: rgba(184,187,216,.26); color: #666d88; font-size: 9px !important; font-weight: 700; }
+.adminStaffListSummary > span.isWorking { background: rgba(160,217,214,.32); color: #366b68; }
+.adminStaffListSummary .adminStaffBufferLine { color: #74709c; }
+.adminStaffListControls { position: relative; display: grid; grid-template-columns: repeat(2,minmax(112px,1fr)) auto; align-items: center; gap: 12px; min-width: 382px; padding-left: 18px; border-left: 1px solid rgba(101,120,159,.16); }
+.adminStaffListControl { display: grid; align-content: center; gap: 7px; min-width: 0; }
+.adminStaffListControlLabel { color: rgba(49,51,74,.48); font: 700 9px/1 var(--font-mono); letter-spacing: .08em; }
+.adminStaffListControl .adminToggle { color: #4f5575; font-size: 11px; font-weight: 700; }
+.adminStaffListEditButton { min-width: 82px; min-height: 40px; }
+.adminStaffListControls > small { position: absolute; right: 0; bottom: -3px; color: #477077; font-size: 9px; }
+.adminStaffListControls.isSaving { opacity: .72; }
+.adminStaffBasicToggle { display: grid; align-content: center; gap: 6px; min-width: 0; }
+.adminStaffBasicToggle > small { color: var(--color-fg-mute); font-size: 11px; line-height: 1.5; }
+.adminStaffGalleryCard > img { flex: 0 0 96px; width: 96px; height: auto; aspect-ratio: 16 / 9; object-fit: contain; border-radius: 9px; background: rgba(255,255,255,.38); }
+
+@media (max-width: 980px) {
+  .adminTopbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'brand menu'
+      'nav nav'
+      'utilities utilities';
+    border-radius: 20px;
+  }
+
+  .adminMenuButton { display: flex; }
+
+  .adminNav {
+    display: none;
+    align-items: stretch;
+    flex-direction: column;
+    padding-top: 10px;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .adminNav.isOpen { display: flex; }
+  .adminNav button { justify-content: flex-start; width: 100%; text-align: left; }
+  .adminTopbarUtilities { display: none; padding-top: 4px; }
+  .adminTopbar.isMenuOpen .adminTopbarUtilities { display: block; }
+  .adminAccount { justify-content: flex-end; }
+  .adminListPanel { position: static; }
+  .adminStaffEditorLayout { grid-template-columns: 1fr; }
+  .adminStaffPreview { position: static; }
+  .adminStaffListPanel .adminDragCardContent { grid-template-columns: 1fr; gap: 10px; }
+  .adminStaffListControls { grid-template-columns: repeat(2,minmax(110px,1fr)) auto; min-width: 0; padding: 12px 0 0; border-top: 1px solid rgba(101,120,159,.14); border-left: 0; }
+  .adminStaffEditDialog .adminDialogBody { display: block; overflow: auto; }
+  .adminStaffEditorLayout { flex: none; min-height: auto; }
+  .adminStaffEditorForm, .adminStaffPreview { overflow: visible; padding-right: 0; scrollbar-gutter: auto; }
+}
+
+@media (max-width: 720px) {
+  .adminPageHeading, .adminPanelHeader, .adminSelectorRow { align-items: stretch; flex-direction: column; }
+  .adminPageActions, .adminPanelActions { align-self: stretch; }
+  .adminPageActions .adminButton { flex: 1; }
+  .adminFormGrid, .adminSplitView, .adminDashboardCards, .adminGalleryEditor { grid-template-columns: 1fr; }
+  .adminField.span-2, .adminFormWide { grid-column: auto; }
+  .adminImagePicker { grid-column: auto; }
+  .adminDeveloperDisclosureSummary { align-items: flex-start; padding: 15px 16px; }
+  .adminDeveloperDisclosureBody { padding: 0 16px 16px; }
+  .adminStaffDirectoryFooter { align-items: stretch; flex-direction: column; }
+  .adminStaffDirectoryPagination { justify-content: space-between; }
+  .adminEditableRow, .adminServiceRow, .adminSetItemRow { grid-template-columns: 1fr; align-items: stretch; }
+  .adminRowActions { justify-content: space-between; }
+  .adminShell { padding-right: 14px; padding-left: 14px; }
+  .adminTopbar { align-items: center; gap: 10px; padding: 9px 10px; }
+  .adminTopbarBrand { min-width: 0; }
+  .adminTopbarMark { width: 42px; height: 42px; border-radius: 12px; }
+  .adminTopbarBrand strong { font-size: 16px; }
+  .adminTopbarBrand small { font-size: 9px; }
+  .adminTopbar.isMenuOpen { align-items: start; }
+  .adminTopbar.isMenuOpen .adminNav { gap: 6px; padding-top: 9px; }
+  .adminTopbar.isMenuOpen .adminTopbarUtilities { padding-top: 10px; border-top: 1px solid rgba(101,120,159,.14); }
+  .adminTopbar.isMenuOpen .adminAccount { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 8px 10px; text-align: left; }
+  .adminTopbar.isMenuOpen .adminAccountIdentity { min-width: 0; }
+  .adminTopbar.isMenuOpen .adminRegisterKeyAction { justify-items: end; }
+  .adminTopbar.isMenuOpen .adminBackToSite { justify-content: flex-start; padding-left: 0; }
+  .adminDialogBackdrop { padding: 10px; }
+  .adminDialog { max-height: 94vh; }
+  .adminDialogHeader, .adminDialogFooter { padding: 14px; }
+  .adminDialogBody { padding: 14px; }
+  .adminDragCardContent { align-items: flex-start; flex-direction: column; gap: 9px; }
+  .adminDragCardMeta { align-self: flex-end; }
+  .adminStaffListPanel { padding: 12px; }
+  .adminStaffListPanel .adminDragCard { align-items: stretch; min-height: 0; padding: 10px; }
+  .adminStaffListPanel .adminDragHandle { flex: 0 0 17px; width: 17px; }
+  .adminStaffListPanel .adminDragCardContent { width: calc(100% - 1px); gap: 12px; }
+  .adminStaffListIdentity { align-items: flex-start; gap: 12px; }
+  .adminStaffListPortrait { flex-basis: 56px; width: 56px; border-radius: 10px; }
+  .adminStaffListHeading { align-items: center; flex-direction: row; gap: 7px; }
+  .adminStaffListHeading strong { width: 100%; font-size: 15px; }
+  .adminStaffListRole { white-space: normal !important; line-height: 1.4; }
+  .adminStaffListSummary { margin-top: 8px; }
+  .adminStaffListControls { grid-template-columns: max-content max-content max-content; align-items: center; justify-content: space-between; gap: 12px; padding-top: 9px; }
+  .adminStaffListControl { display: flex; align-items: center; min-width: 0; padding: 0; background: transparent; }
+  .adminStaffListControlLabel { display: none; }
+  .adminStaffListControl .adminToggle { min-height: 44px; }
+  .adminStaffListEditButton { grid-column: auto; width: auto; min-width: 70px; min-height: 40px; padding: 7px 11px; gap: 6px; }
+  .adminStaffListEditButton > span { font-size: 18px; line-height: 1; }
+  .adminStaffListControls > small { position: static; grid-column: 1 / -1; }
+}
+
+@media (max-width: 360px) {
+  .adminStaffListHeading { align-items: flex-start; flex-direction: column; gap: 5px; }
+  .adminStaffListControls { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .adminStaffListEditButton { grid-column: 1 / -1; width: max-content; }
+}
+

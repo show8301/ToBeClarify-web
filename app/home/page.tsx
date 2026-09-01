@@ -1,5 +1,5 @@
-import HomeLanding from "../HomeLanding";
-import SiteChrome from "../SiteChrome";
+import HomeLanding from "@/features/home/components/HomeLanding";
+import SiteChrome from "@/components/layout/SiteChrome";
 import { getMenuData, getSiteHome } from "@/features/site/server/data";
 
 export default function HomeAliasPage(){

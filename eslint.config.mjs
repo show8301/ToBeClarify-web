@@ -41,10 +41,10 @@ const eslintConfig = defineConfig([
     // existing animated transitions. Remove each exemption when that feature is
     // migrated into its own module and the state model can be revised safely.
     files: [
-      "app/GalleryArchive.tsx",
-      "app/SiteChrome.tsx",
-      "app/StaffArchive.tsx",
-      "app/StaffProfile.tsx",
+      "features/gallery/components/GalleryArchive.tsx",
+      "components/layout/SiteChrome.tsx",
+      "features/staff/components/StaffArchive.tsx",
+      "features/staff/components/StaffProfile.tsx",
     ],
     rules: {
       "react-hooks/set-state-in-effect": "off",
@@ -52,7 +52,7 @@ const eslintConfig = defineConfig([
   },
   {
     // These links deliberately drive custom route-transition animations.
-    files: ["app/HomeLanding.tsx", "app/SiteChrome.tsx"],
+    files: ["features/home/components/HomeLanding.tsx", "components/layout/SiteChrome.tsx"],
     rules: {
       "@next/next/no-html-link-for-pages": "off",
     },

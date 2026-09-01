@@ -1,5 +1,5 @@
-import MenuCatalog from "../MenuCatalog";
-import SiteChrome from "../SiteChrome";
+import MenuCatalog from "@/features/menu/components/MenuCatalog";
+import SiteChrome from "@/components/layout/SiteChrome";
 import { getMenuData, getSiteHome } from "@/features/site/server/data";
 import { notFound } from "next/navigation";
 

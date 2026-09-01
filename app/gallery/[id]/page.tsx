@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import GalleryArchive from "../../GalleryArchive";
-import SiteChrome from "../../SiteChrome";
+import GalleryArchive from "@/features/gallery/components/GalleryArchive";
+import SiteChrome from "@/components/layout/SiteChrome";
 import { getGalleryAlbum, getGalleryAlbums, getSiteHome } from "@/features/site/server/data";
 
 export async function generateMetadata({params}:{params:Promise<{id:string}>}):Promise<Metadata>{

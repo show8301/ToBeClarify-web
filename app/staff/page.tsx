@@ -1,5 +1,5 @@
-import StaffArchive from "../StaffArchive";
-import SiteChrome from "../SiteChrome";
+import StaffArchive from "@/features/staff/components/StaffArchive";
+import SiteChrome from "@/components/layout/SiteChrome";
 import { getSiteHome } from "@/features/site/server/data";
 import { getStaffList } from "@/features/staff/server/data";
 

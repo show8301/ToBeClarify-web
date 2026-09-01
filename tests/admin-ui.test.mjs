@@ -31,7 +31,7 @@ test('staff avatar editor keeps separate upload, crop, and delete actions', asyn
 
 test('homepage slides expose an editable playback duration', async () => {
   const source = await readFile(new URL('../app/admin/_components/AdminHomeSettingsPage.jsx', import.meta.url), 'utf8');
-  const landing = await readFile(new URL('../app/HomeLanding.tsx', import.meta.url), 'utf8');
+  const landing = await readFile(new URL('../features/home/components/HomeLanding.tsx', import.meta.url), 'utf8');
 
   assert.match(source, /label="播放秒數"><input type="number"/);
   assert.match(source, /displaySeconds: Math\.min\(60, Math\.max\(1/);
@@ -45,7 +45,7 @@ test('developer can control each public menu page from the admin home', async ()
   const api = await readFile(new URL('../app/admin/admin-api.js', import.meta.url), 'utf8');
   const styles = await readFile(new URL('../styles/admin/site.css', import.meta.url), 'utf8');
   const data = await readFile(new URL('../features/site/server/data.ts', import.meta.url), 'utf8');
-  const chrome = await readFile(new URL('../app/SiteChrome.tsx', import.meta.url), 'utf8');
+  const chrome = await readFile(new URL('../components/layout/SiteChrome.tsx', import.meta.url), 'utf8');
   const menu = await readFile(new URL('../app/menu/page.tsx', import.meta.url), 'utf8');
 
   assert.match(dashboard, /user\.role === 'developer'/);
@@ -70,8 +70,8 @@ test('developer can control each public menu page from the admin home', async ()
 
 test('staff ordering settings expose buffer, staff nomination, and public service prices', async () => {
   const source = await readFile(new URL('../app/admin/_components/AdminStaffSettingsPage.jsx', import.meta.url), 'utf8');
-  const archive = await readFile(new URL('../app/StaffArchive.tsx', import.meta.url), 'utf8');
-  const profile = await readFile(new URL('../app/StaffProfile.tsx', import.meta.url), 'utf8');
+  const archive = await readFile(new URL('../features/staff/components/StaffArchive.tsx', import.meta.url), 'utf8');
+  const profile = await readFile(new URL('../features/staff/components/StaffProfile.tsx', import.meta.url), 'utf8');
 
   assert.match(source, /label="中間休息時間"><input type="number"/);
   assert.match(source, /label="開放指名"/);
@@ -106,7 +106,7 @@ test('staff detail falls back to the live API when a character is absent from th
 });
 
 test('the detached public action returns to the top on desktop and mobile', async () => {
-  const source = await readFile(new URL('../app/SiteChrome.tsx', import.meta.url), 'utf8');
+  const source = await readFile(new URL('../components/layout/SiteChrome.tsx', import.meta.url), 'utf8');
   const styles = await readFile(new URL('../styles/public/site.css', import.meta.url), 'utf8');
 
   assert.match(source, /aria-label="回到頁面頂端"/);
@@ -120,7 +120,7 @@ test('the detached public action returns to the top on desktop and mobile', asyn
 });
 
 test('the LD signature opens admin login only after five clicks', async () => {
-  const source = await readFile(new URL('../app/HomeLanding.tsx', import.meta.url), 'utf8');
+  const source = await readFile(new URL('../features/home/components/HomeLanding.tsx', import.meta.url), 'utf8');
   const styles = await readFile(new URL('../styles/public/site.css', import.meta.url), 'utf8');
 
   assert.match(source, /adminTriggerClicks\.current\+=1/);

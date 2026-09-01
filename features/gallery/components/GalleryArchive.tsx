@@ -3,7 +3,7 @@
 import { AnimatePresence, motion, useDragControls, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { GalleryAlbum } from "@/features/site/types";
-import ZoomablePhoto from "./ZoomablePhoto";
+import ZoomablePhoto from "@/components/media/ZoomablePhoto";
 
 type GalleryPhoto = GalleryAlbum["items"][number];
 const PHOTO_BATCH_SIZE = 4;

@@ -11,7 +11,6 @@
       "address": "海霧村 2 - 32",
       "entryNote": "入場前請先閱讀店內規則",
       "footerText": "燭火、杯影與低聲的故事，為每位來訪者保留一席安靜的夜晚。",
-      "pricingNote": "第一版價格為 demo mock data，正式營運前可由後台或 API 維護。",
       "heroImage": "https://api.marchgroup.net/api/client/media/site-info-hero?variant=hero",
       "about": [
         "清醒夢是一間以深夜貴賓廳為主題的 FF14 RP 店，提供陪談、指名陪伴、活動企劃與角色沉浸式互動。",
@@ -440,6 +439,7 @@
         ]
       }
     ],
+    "showSets": true,
     "sets": [
       {
         "id": "31d7f141-1790-50e3-b683-8e9261fbf961",

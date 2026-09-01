@@ -17,7 +17,6 @@ export type ShopInfo = {
   address:string;
   entryNote:string;
   footerText:string;
-  pricingNote:string;
   heroImage:string;
   about:string[];
   pricing:{name:string;price:string}[];
@@ -69,7 +68,7 @@ export type MenuSetItem = {
 export type MenuSet = {
   id:string; setName:string; setDescription:string; setPrice:number; imageUrl:string|null; items:MenuSetItem[];
 };
-export type MenuData = { categories:MenuCategory[]; pricingRules:PricingRule[]; sets:MenuSet[] };
+export type MenuData = { categories:MenuCategory[]; pricingRules:PricingRule[]; sets:MenuSet[]; showSets?:boolean };
 
 export type GalleryAlbumSummary = {
   id:string; albumTitle:string; albumDescription:string; coverImageUrl:string;

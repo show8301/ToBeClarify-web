@@ -2,7 +2,7 @@ import { writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
 const API = "https://api.marchgroup.net/api/client";
-const output = fileURLToPath(new URL("../app/data/site-snapshot.json", import.meta.url));
+const output = fileURLToPath(new URL("../data/snapshots/site.json", import.meta.url));
 
 async function get(path) {
   const response = await fetch(`${API}${path}`, { headers:{ Accept:"application/json" } });

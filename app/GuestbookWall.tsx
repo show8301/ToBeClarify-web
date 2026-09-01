@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from "motion/react";
 import { useMemo, useState } from "react";
-import type { GuestbookComment, GuestbookPage } from "./site-types";
+import type { GuestbookComment, GuestbookPage } from "@/features/site/types";
 
 const dateLabel=(value:string)=>new Intl.DateTimeFormat("zh-TW",{month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hour12:false,timeZone:"Asia/Taipei"}).format(new Date(value));
 

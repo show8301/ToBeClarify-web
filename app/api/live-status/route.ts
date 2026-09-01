@@ -1,5 +1,5 @@
-import type { StaffReservation } from "../../site-types";
-import type { StaffSummary } from "../../staff-types";
+import type { StaffReservation } from "@/features/site/types";
+import type { StaffSummary } from "@/features/staff/types";
 
 const STAFF_API="https://api.marchgroup.net/api/client/staff-members";
 const RESERVATION_API="https://api.marchgroup.net/api/client/staff-reservations";

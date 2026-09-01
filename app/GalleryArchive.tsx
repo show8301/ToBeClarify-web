@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion, useDragControls, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { GalleryAlbum } from "./site-types";
+import type { GalleryAlbum } from "@/features/site/types";
 import ZoomablePhoto from "./ZoomablePhoto";
 
 type GalleryPhoto = GalleryAlbum["items"][number];

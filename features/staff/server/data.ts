@@ -1,5 +1,5 @@
-import snapshotJson from "./data/staff-snapshot.json";
-import type { StaffDetail, StaffSummary } from "./staff-types";
+import snapshotJson from "../../../data/snapshots/staff.json";
+import type { StaffDetail, StaffSummary } from "../types";
 
 const API = "https://api.marchgroup.net/api/client/staff-members";
 const CACHE_TTL = 10 * 60 * 1000;

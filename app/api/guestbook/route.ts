@@ -1,4 +1,4 @@
-import type { GuestbookPage } from "../../site-types";
+import type { GuestbookPage } from "@/features/site/types";
 
 const API="https://api.marchgroup.net/api/client/guestbook/comments";
 

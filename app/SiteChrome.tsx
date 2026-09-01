@@ -3,7 +3,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { HomePageVisibility, NavigationItem, ShopInfo } from "./site-types";
+import type { HomePageVisibility, NavigationItem, ShopInfo } from "@/features/site/types";
 
 const pathAliases:Record<string,string> = { "/home":"/", "/event":"/gallery" };
 const resolvePath = (path:string) => pathAliases[path] ?? path;

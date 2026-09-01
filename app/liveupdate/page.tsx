@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import LiveUpdateBoard from "../LiveUpdateBoard";
 import SiteChrome from "../SiteChrome";
-import { getSiteHome } from "../site-data";
-import { getStaffList } from "../staff-data";
+import { getSiteHome } from "@/features/site/server/data";
+import { getStaffList } from "@/features/staff/server/data";
 
 export const metadata:Metadata={
   title:"即時動態｜清醒夢 Lucid Dream",

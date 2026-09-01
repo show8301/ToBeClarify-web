@@ -1,7 +1,7 @@
 import StaffArchive from "../StaffArchive";
 import SiteChrome from "../SiteChrome";
-import { getSiteHome } from "../site-data";
-import { getStaffList } from "../staff-data";
+import { getSiteHome } from "@/features/site/server/data";
+import { getStaffList } from "@/features/staff/server/data";
 
 export default function StaffIndexPage(){
   const staff=getStaffList();

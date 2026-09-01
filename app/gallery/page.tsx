@@ -1,6 +1,6 @@
 import GalleryArchive from "../GalleryArchive";
 import SiteChrome from "../SiteChrome";
-import { getGalleryAlbum, getGalleryAlbums, getSiteHome } from "../site-data";
+import { getGalleryAlbum, getGalleryAlbums, getSiteHome } from "@/features/site/server/data";
 
 export default function GalleryPage(){
   const home=getSiteHome();

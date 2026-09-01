@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
-import type { RankingItem } from "./site-types";
+import type { RankingItem } from "@/features/site/types";
 
 export default function HallOfHonor({items,variant}:{items:RankingItem[];variant:"staff"|"monetary"}){
   const reduceMotion=useReducedMotion();

@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useState } from "react";
-import type { MenuData } from "./site-types";
+import type { MenuData } from "@/features/site/types";
 
 const gil=(value:number)=>`${new Intl.NumberFormat("zh-TW").format(value)} Gil`;
 const isInternalCopy=(value:string)=>/(demo|mock|測試|api\s*(提供|維護)|後台.*維護)/i.test(value);

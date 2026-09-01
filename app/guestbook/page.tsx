@@ -1,6 +1,6 @@
 import GuestbookWall from "../GuestbookWall";
 import SiteChrome from "../SiteChrome";
-import { getGuestbookComments, getSiteHome } from "../site-data";
+import { getGuestbookComments, getSiteHome } from "@/features/site/server/data";
 
 export default function GuestbookPage(){
   const home=getSiteHome();

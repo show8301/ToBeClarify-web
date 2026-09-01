@@ -1,5 +1,5 @@
-import snapshotJson from "./data/site-snapshot.json";
-import type { GalleryAlbum, GalleryAlbumSummary, GuestbookPage, HomeData, HomePageVisibility, MenuData, RankingItem, SiteSnapshot } from "./site-types";
+import snapshotJson from "../../../data/snapshots/site.json";
+import type { GalleryAlbum, GalleryAlbumSummary, GuestbookPage, HomeData, HomePageVisibility, MenuData, RankingItem, SiteSnapshot } from "../types";
 
 const API="https://api.marchgroup.net/api/client";
 const CACHE_TTL=10*60*1000;

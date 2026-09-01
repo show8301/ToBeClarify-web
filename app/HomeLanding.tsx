@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
-import type { HomeData, PricingRule } from "./site-types";
+import type { HomeData, PricingRule } from "@/features/site/types";
 
 type HomeLandingProps = { home:HomeData; pricingRules?:PricingRule[] };
 

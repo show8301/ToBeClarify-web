@@ -1,6 +1,6 @@
 import MenuCatalog from "../MenuCatalog";
 import SiteChrome from "../SiteChrome";
-import { getMenuData, getSiteHome } from "../site-data";
+import { getMenuData, getSiteHome } from "@/features/site/server/data";
 import { notFound } from "next/navigation";
 
 export default function MenuPage(){

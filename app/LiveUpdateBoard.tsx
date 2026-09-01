@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import type { LiveUpdateConfig, StaffReservation } from "./site-types";
-import type { StaffSummary } from "./staff-types";
+import type { LiveUpdateConfig, StaffReservation } from "@/features/site/types";
+import type { StaffSummary } from "@/features/staff/types";
 
 function tonightRange(){
   const from=new Date();

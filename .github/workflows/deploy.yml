@@ -51,14 +51,14 @@ jobs:
           $parseErrors = @()
           Get-ChildItem -Path scripts -Filter '*.ps1' | ForEach-Object {
             $tokens = $null
-            $errors = $null
+            $parseFileErrors = $null
             [System.Management.Automation.Language.Parser]::ParseFile(
               $_.FullName,
               [ref]$tokens,
-              [ref]$errors
+              [ref]$parseFileErrors
             ) | Out-Null
 
-            foreach ($error in $errors) {
+            foreach ($error in $parseFileErrors) {
               $parseErrors += "$($_.Name):$($error.Extent.StartLineNumber): $($error.Message)"
             }
           }

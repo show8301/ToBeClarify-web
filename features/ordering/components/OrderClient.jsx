@@ -191,7 +191,8 @@ function OrderAccess({ notice, onAccess, onRecover, loading }) {
 }
 
 function MealPage({ menu, cart, setCart }) {
-  const [category, setCategory] = useState(menu.categories?.[0]?.id || 'sets');
+  const showSets = menu.showSets !== false && (menu.sets || []).length > 0;
+  const [category, setCategory] = useState(menu.categories?.[0]?.id || (showSets ? 'sets' : ''));
   const products = category === 'sets' ? (menu.sets || []).map((item) => ({ ...item, id: item.id, name: item.setName, description: item.setDescription, price: item.setPrice, kind: 'set' }))
     : (menu.categories?.find((item) => item.id === category)?.items || []).map((item) => ({ ...item, name: item.itemName, description: item.itemDescription, kind: 'item' }));
   const add = (product) => setCart((current) => {
@@ -201,7 +202,7 @@ function MealPage({ menu, cart, setCart }) {
     return { ...current, meals };
   });
   return <div className="orderPage"><PageHeading kicker="FOOD & DRINK" title="一般點餐" text="信物餘額只會折抵餐點；未使用完的餘額保留到今天後續加點。" />
-    <div className="orderCategoryRail"><button className={category === 'sets' ? 'isActive' : ''} onClick={() => setCategory('sets')}>套餐</button>{(menu.categories || []).map((item) => <button className={category === item.id ? 'isActive' : ''} key={item.id} onClick={() => setCategory(item.id)}>{item.categoryName}</button>)}</div>
+    <div className="orderCategoryRail">{showSets ? <button className={category === 'sets' ? 'isActive' : ''} onClick={() => setCategory('sets')}>套餐</button> : null}{(menu.categories || []).map((item) => <button className={category === item.id ? 'isActive' : ''} key={item.id} onClick={() => setCategory(item.id)}>{item.categoryName}</button>)}</div>
     <div className="orderProductGrid">{products.map((item) => <article key={item.id} className="orderProductCard"><div className="orderProductImage">{item.imageUrl ? <img src={item.imageUrl} alt="" /> : <span>LD</span>}</div><div><small>{item.kind === 'set' ? 'SET' : 'MENU'}</small><h2>{item.name}</h2><p>{item.description || '現場供應品項'}</p></div><footer><strong>{money(item.price)}</strong><button type="button" onClick={() => add(item)}>加入</button></footer></article>)}</div>
   </div>;
 }

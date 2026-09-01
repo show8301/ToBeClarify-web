@@ -60,6 +60,25 @@ test('homepage slides expose an editable playback duration', async () => {
   assert.match(landing, /fetch\("\/api\/public\/home"/);
 });
 
+test('homepage and menu settings control the intended public content', async () => {
+  const homeSettings = await readFile(new URL('../features/admin/home/AdminHomeSettingsPage.jsx', import.meta.url), 'utf8');
+  const menuSettings = await readFile(new URL('../features/admin/menu/AdminMenuPage.jsx', import.meta.url), 'utf8');
+  const menuCatalog = await readFile(new URL('../features/menu/components/MenuCatalog.tsx', import.meta.url), 'utf8');
+  const ordering = await readFile(new URL('../features/ordering/components/OrderClient.jsx', import.meta.url), 'utf8');
+
+  assert.match(homeSettings, /label="關於區塊圖片"/);
+  assert.match(homeSettings, /value=\{site\.heroImage\}/);
+  assert.match(homeSettings, /pendingFile=\{site\.heroFile\}/);
+  assert.doesNotMatch(homeSettings, /label="價格備註"/);
+  assert.match(homeSettings, /delete settingValue\.pricingNote/);
+  assert.match(menuSettings, /settingKey === 'menuSettings'/);
+  assert.match(menuSettings, /label="客戶端顯示套餐區塊"/);
+  assert.match(menuSettings, /saveSiteSetting\('menuSettings'/);
+  assert.match(menuCatalog, /menu\.showSets!==false/);
+  assert.match(ordering, /menu\.showSets !== false/);
+  assert.match(ordering, /showSets \? <button/);
+});
+
 test('developer can control each public menu page from the admin home', async () => {
   const dashboard = await readFile(new URL('../features/admin/dashboard/AdminHomePage.jsx', import.meta.url), 'utf8');
   const api = await readFile(new URL('../features/admin/api/client.js', import.meta.url), 'utf8');

@@ -21,13 +21,13 @@ export default function MenuCatalog({menu}:{menu:MenuData}){
       {menu.pricingRules.map((rule,index)=><article key={rule.id}><span>{String(index+1).padStart(2,"0")}</span><div><small>HOUSE CHARGE</small><h2>{rule.title}</h2>{rule.description&&!isInternalCopy(rule.description)&&<p>{rule.description}</p>}</div><b>{rule.priceText}</b></article>)}
     </section>
 
-    <section className="menu-sets">
+    {menu.showSets!==false&&<section className="menu-sets">
       <header><div><span>CURATED SETS</span><h2>今夜套餐</h2></div><p>主餐、甜點與飲品已為不同的相遇節奏搭配成席。</p></header>
       <div>{menu.sets.map((set,index)=><motion.article key={set.id} initial={reduceMotion?false:{opacity:0,y:30}} whileInView={{opacity:1,y:0}} viewport={{once:true,amount:.15}} transition={{delay:index*.07}}>
         <span className="menu-set-photo">{set.imageUrl?<img src={set.imageUrl} alt={set.setName} loading="lazy" decoding="async"/>:<i>LD</i>}<small>SET / {String(index+1).padStart(2,"0")}</small></span>
         <div><h3>{set.setName}</h3><p>{set.setDescription}</p><ul>{set.items.map(item=><li key={item.id}><span>{item.itemRole.toUpperCase()}</span><b>{item.itemName}</b></li>)}</ul><strong>{gil(set.setPrice)}</strong></div>
       </motion.article>)}</div>
-    </section>
+    </section>}
 
     <section className="menu-catalog">
       <header><div><span>À LA CARTE</span><h2>單點選集</h2></div><nav aria-label="菜單分類">{menu.categories.map(item=><button key={item.id} className={item.id===active?.id?"active":""} onClick={()=>setCategory(item.id)}>{item.categoryName}<i>{String(item.items.length).padStart(2,"0")}</i></button>)}</nav></header>

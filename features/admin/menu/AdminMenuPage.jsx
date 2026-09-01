@@ -12,11 +12,13 @@ const emptyItem = { id: '', categoryId: '', itemName: '', itemDescription: '', p
 const emptySet = { id: '', setName: '', setDescription: '', setPrice: 0, mediaId: null, imageUrl: '', imageFile: null, sortOrder: 0, isAvailable: true, items: [] };
 
 export function AdminMenuPage() {
-  const [menu, setMenu] = useState({ pricingRules: [], categories: [], sets: [] });
+  const [menu, setMenu] = useState({ pricingRules: [], categories: [], sets: [], showSets: true });
+  const [menuSettings, setMenuSettings] = useState({ showSets: true });
   const [tab, setTab] = useState('pricing');
   const [editing, setEditing] = useState(null);
   const [state, setState] = useState({ loading: true, error: null });
   const [saving, setSaving] = useState(false);
+  const [setsVisibilitySaving, setSetsVisibilitySaving] = useState(false);
   const [orderDirty, setOrderDirty] = useState(false);
   const [message, setMessage] = useState('');
   const allItems = useMemo(() => menu.categories.flatMap((category) => category.items || []), [menu.categories]);
@@ -24,7 +26,11 @@ export function AdminMenuPage() {
   const load = async () => {
     setState({ loading: true, error: null });
     try {
-      setMenu(await adminApi.getMenu());
+      const [nextMenu, settings] = await Promise.all([adminApi.getMenu(), adminApi.getSiteSettings()]);
+      const nextMenuSettings = settings.find((item) => item.settingKey === 'menuSettings')?.settingValue || {};
+      const showSets = nextMenuSettings.showSets !== false;
+      setMenu({ ...nextMenu, showSets });
+      setMenuSettings({ ...nextMenuSettings, showSets });
       setOrderDirty(false);
       setState({ loading: false, error: null });
     } catch (error) {
@@ -49,6 +55,25 @@ export function AdminMenuPage() {
   const updateCategoryItems = (categoryId, items) => {
     setMenu((current) => ({ ...current, categories: current.categories.map((category) => category.id === categoryId ? { ...category, items } : category) }));
     setOrderDirty(true);
+  };
+
+  const saveSetsVisibility = async (showSets) => {
+    if (setsVisibilitySaving) return;
+    const previous = menu.showSets !== false;
+    const nextSettings = { ...menuSettings, showSets };
+    setMenu((current) => ({ ...current, showSets }));
+    setSetsVisibilitySaving(true);
+    setMessage('');
+    try {
+      await adminApi.saveSiteSetting('menuSettings', { settingValue: nextSettings, description: '客戶端菜單顯示設定', isActive: true });
+      setMenuSettings(nextSettings);
+      setMessage(showSets ? '客戶端套餐區塊已開啟。' : '客戶端套餐區塊已隱藏。');
+    } catch (error) {
+      setMenu((current) => ({ ...current, showSets: previous }));
+      setMessage(error.message);
+    } finally {
+      setSetsVisibilitySaving(false);
+    }
   };
 
   const saveEditing = async () => {
@@ -152,7 +177,11 @@ export function AdminMenuPage() {
       {message ? <div className="adminNotice">{message}</div> : null}
       <div className="adminTabs">{tabs.map(([id, label]) => <button type="button" key={id} className={tab === id ? 'isActive' : ''} onClick={() => setTab(id)}>{label}</button>)}</div>
       <AdminState loading={state.loading} error={state.error} onRetry={load} />
-      {!state.loading && !state.error ? <AdminPanel title={currentLabel}>{renderCards()}</AdminPanel> : null}
+      {!state.loading && !state.error ? <AdminPanel
+        title={currentLabel}
+        description={tab === 'sets' ? '總開關只控制客戶端是否顯示套餐；關閉後不會刪除套餐資料。' : undefined}
+        actions={tab === 'sets' ? <AdminToggle checked={menu.showSets !== false} onChange={saveSetsVisibility} disabled={setsVisibilitySaving} label="客戶端顯示套餐區塊" /> : null}
+      >{renderCards()}</AdminPanel> : null}
 
       <AdminDialog open={Boolean(editing)} title={editing ? `${editing.form.id.startsWith('local-') ? '新增' : '編輯'}${tabs.find(([id]) => id === editing.type)?.[1]}` : ''} description="排序請回到卡片清單拖曳調整。" onClose={() => setEditing(null)} actions={<><AdminButton variant="danger" onClick={remove}>刪除</AdminButton><span className="adminDialogActionSpacer" /><AdminButton variant="ghost" onClick={() => setEditing(null)}>取消</AdminButton><AdminButton onClick={saveEditing} disabled={saving}>{saving ? '儲存中…' : '儲存資料'}</AdminButton></>}>
         {editing?.type === 'pricing' ? <PricingForm form={editing.form} update={updateEditing} /> : null}

@@ -7,7 +7,7 @@ import {
 
 const emptySite = {
   name: '', shortName: '', subtitle: '', businessStatus: '', openHours: '', server: '', address: '',
-  entryNote: '', aboutText: '', footerText: '', pricingNote: '', heroImage: '', heroImageMediaId: '', heroFile: null,
+  entryNote: '', aboutText: '', footerText: '', heroImage: '', heroImageMediaId: '', heroFile: null,
 };
 
 export function AdminHomeSettingsPage() {
@@ -88,6 +88,7 @@ export function AdminHomeSettingsPage() {
       const settingValue = { ...site, about: splitParagraphs(site.aboutText), heroImage, heroImageMediaId };
       delete settingValue.aboutText;
       delete settingValue.heroFile;
+      delete settingValue.pricingNote;
       await adminApi.saveSiteSetting('shopInfo', { settingValue, description: '現行 Web 首頁店舖資訊', isActive: true });
 
       for (const rule of rules) {
@@ -193,7 +194,15 @@ export function AdminHomeSettingsPage() {
             <AdminField label="地址"><input value={site.address} onChange={(event) => updateSite('address', event.target.value)} /></AdminField>
             <AdminField label="入場說明" className="span-2"><input value={site.entryNote} onChange={(event) => updateSite('entryNote', event.target.value)} /></AdminField>
             <AdminField label="關於我們（段落之間空一行）" className="span-2"><textarea rows="7" value={site.aboutText} onChange={(event) => updateSite('aboutText', event.target.value)} /></AdminField>
-            <AdminField label="價格備註" className="span-2"><textarea rows="3" value={site.pricingNote} onChange={(event) => updateSite('pricingNote', event.target.value)} /></AdminField>
+            <AdminImagePicker
+              className="span-2"
+              label="關於區塊圖片"
+              value={site.heroImage}
+              pendingFile={site.heroFile}
+              onChange={(file) => updateSite('heroFile', file)}
+              onClear={() => { updateSite('heroFile', null); updateSite('heroImage', ''); updateSite('heroImageMediaId', null); }}
+              hint="顯示於首頁關於我們區塊；沒有首頁幻燈片時，也會作為首頁主視覺備用圖。"
+            />
           </div>
         </AdminPanel>
 

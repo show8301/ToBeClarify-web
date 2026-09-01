@@ -1,8 +1,9 @@
+import Link from "next/link";
 import "../../../../styles/ordering/site.css";
 
 export default function OrderCartPreviewPage() {
   return <main className="orderShell orderMockShell">
-    <header className="orderTopbar"><a href="#" className="orderBrand"><img src="/favicon.ico" alt="" /><span><strong>清醒夢</strong><small>LUCID DREAM / ORDER</small></span></a><div className="orderSessionChip"><span>今日點餐</span><strong>Mizuki Yoru</strong><small>ID MIZUKI-021</small></div><div className="orderCredit"><span>信物餐點餘額</span><strong>1,200 G</strong></div></header>
+    <header className="orderTopbar"><Link href="/" className="orderBrand"><img src="/favicon.ico" alt="" /><span><strong>清醒夢</strong><small>LUCID DREAM / ORDER</small></span></Link><div className="orderSessionChip"><span>今日點餐</span><strong>Mizuki Yoru</strong><small>ID MIZUKI-021</small></div><div className="orderCredit"><span>信物餐點餘額</span><strong>1,200 G</strong></div></header>
     <div className="orderBusinessBanner isOpen"><strong>目前可正常點餐</strong><span>預計接單至 01:30</span></div>
     <nav className="orderTabs" aria-label="點餐功能">{[["01", "一般點餐"], ["02", "指名服務"], ["03", "小費"], ["04", "本次點餐 3"], ["05", "我的訂單"]].map(([index, label], itemIndex) => <button className={itemIndex === 3 ? "isActive" : ""} key={label} type="button"><span>{index}</span>{label}</button>)}</nav>
     <section className="orderWorkspace"><div className="orderMain"><div className="orderPage"><header className="orderPageHeading"><span>ORDER REVIEW</span><h1>本次點餐</h1><p>送出前再確認品項與金額。餐點會優先使用今日信物餘額折抵。</p></header>

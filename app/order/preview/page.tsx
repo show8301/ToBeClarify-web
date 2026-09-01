@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import "../../../styles/ordering/site.css";
 
 const products = [
@@ -77,7 +78,7 @@ export default function OrderPreviewPage() {
   }, [profileStaff]);
 
   return <main className="orderShell orderMockShell">
-    <header className="orderTopbar"><a href="/" className="orderBrand"><img src="/favicon.ico" alt="" /><span><strong>清醒夢</strong><small>LUCID DREAM / ORDER</small></span></a><div className="orderSessionChip"><span>今日點餐</span><strong>Mizuki Yoru</strong><small>ID MIZUKI-021</small></div><div className="orderCredit"><span>信物餐點餘額</span><strong>1,200 G</strong></div></header>
+    <header className="orderTopbar"><Link href="/" className="orderBrand"><img src="/favicon.ico" alt="" /><span><strong>清醒夢</strong><small>LUCID DREAM / ORDER</small></span></Link><div className="orderSessionChip"><span>今日點餐</span><strong>Mizuki Yoru</strong><small>ID MIZUKI-021</small></div><div className="orderCredit"><span>信物餐點餘額</span><strong>1,200 G</strong></div></header>
     <div className="orderBusinessBanner isOpen"><strong>目前可正常點餐</strong><span>預計接單至 01:30</span></div>
     {notice ? <div className="orderNotice" role="status">{notice}<button type="button" onClick={() => setNotice("")}>×</button></div> : null}
     <nav className="orderTabs" aria-label="點餐功能">{tabs.map(([key, label], index) => <button className={tab === key ? "isActive" : ""} key={key} type="button" onClick={() => setTab(key)}><span>{String(index + 1).padStart(2, "0")}</span>{label}{key === "cart" && cartCount ? ` ${cartCount}` : ""}</button>)}</nav>

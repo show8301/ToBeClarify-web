@@ -114,8 +114,31 @@ function Get-Pm2App {
         throw "PM2 returned an unreadable process list: $text"
     }
 
-    $apps = @($text.Substring($jsonStart, $jsonEnd - $jsonStart + 1) | ConvertFrom-Json)
-    $matches = @($apps | Where-Object { $_.name -ceq $Name })
+    $json = $text.Substring($jsonStart, $jsonEnd - $jsonStart + 1)
+    $projectionScript = @'
+const fs = require("node:fs");
+const name = process.argv[1];
+const apps = JSON.parse(fs.readFileSync(0, "utf8"));
+const matches = apps
+  .filter((app) => app && app.name === name)
+  .map((app) => ({
+    name: app.name,
+    pm2_env: {
+      pm_cwd: app.pm2_env?.pm_cwd ?? null,
+      pm_exec_path: app.pm2_env?.pm_exec_path ?? null,
+      args: Array.isArray(app.pm2_env?.args) ? app.pm2_env.args : [],
+      status: app.pm2_env?.status ?? null,
+    },
+  }));
+process.stdout.write(JSON.stringify(matches));
+'@
+    $projectedOutput = @($json | & $script:JsonNodePath -e $projectionScript $Name 2>&1)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Node.js could not normalize the PM2 process list:`n$($projectedOutput -join [Environment]::NewLine)"
+    }
+
+    $projectedText = ($projectedOutput -join [Environment]::NewLine).Trim()
+    $matches = @($projectedText | ConvertFrom-Json)
     if ($matches.Count -gt 1) {
         throw "PM2 contains more than one application named $Name."
     }
@@ -649,6 +672,7 @@ if (-not (Test-Path -LiteralPath $systemNodePath -PathType Leaf)) {
     $systemNodePath = $nodeCommand.Source
 }
 $script:Pm2Command = $pm2Command.FullName
+$script:JsonNodePath = $systemNodePath
 $env:PM2_HOME = $Pm2Home
 $env:NO_COLOR = '1'
 Remove-Item Env:RUNNER_TRACKING_ID -ErrorAction SilentlyContinue

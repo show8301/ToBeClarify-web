@@ -85,3 +85,15 @@ test("the PM2 Vinext process survives GitHub runner cleanup", async () => {
   assert.match(ecosystem, /instances: 1/);
   assert.match(ecosystem, /exec_mode: "fork"/);
 });
+
+test("the PM2 process list is normalized before Windows PowerShell parses it", async () => {
+  const deployScript = await readRepositoryFile("scripts/deploy-vinext-iis.ps1");
+
+  assert.match(deployScript, /JSON\.parse\(fs\.readFileSync\(0, "utf8"\)\)/);
+  assert.match(deployScript, /process\.stdout\.write\(JSON\.stringify\(matches\)\)/);
+  assert.match(deployScript, /\$script:JsonNodePath/);
+  assert.doesNotMatch(
+    deployScript,
+    /\$text\.Substring\([^\r\n]+\)\s*\|\s*ConvertFrom-Json/,
+  );
+});

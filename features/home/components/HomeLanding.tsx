@@ -33,6 +33,7 @@ function normalizePricingRules(value:unknown):PricingRule[]{
 export default function HomeLanding({home,pricingRules:initialPricingRules=[]}:HomeLandingProps){
   const [slide,setSlide]=useState(0);
   const [slides,setSlides]=useState(home.slides);
+  const [shopInfo,setShopInfo]=useState(home.shopInfo);
   const [livePageVisibility,setLivePageVisibility]=useState(home.pageVisibility);
   const [pricingRules,setPricingRules]=useState<PricingRule[]>(initialPricingRules.length?initialPricingRules:legacyPricingRules(home));
   const [heroLoaded,setHeroLoaded]=useState(false);
@@ -40,7 +41,7 @@ export default function HomeLanding({home,pricingRules:initialPricingRules=[]}:H
   const [loadedEvents,setLoadedEvents]=useState<Record<string,boolean>>({});
   const adminTriggerClicks=useRef(0);
   const reduceMotion=useReducedMotion();
-  const images=slides.length?slides:home.shopInfo.heroImage?[{id:"hero",imageUrl:home.shopInfo.heroImage,displaySeconds:10}]:[];
+  const images=slides.length?slides:shopInfo.heroImage?[{id:"hero",imageUrl:shopInfo.heroImage,displaySeconds:10}]:[];
   const current=images[slide%Math.max(images.length,1)];
 
   useEffect(()=>{
@@ -48,8 +49,10 @@ export default function HomeLanding({home,pricingRules:initialPricingRules=[]}:H
     const homeRequest=fetch("/api/public/home",{cache:"no-store",headers:{Accept:"application/json"},signal:controller.signal})
       .then((response)=>response.ok?response.json():null)
       .then((payload:unknown)=>{
-        const data=payload as {success?:boolean;data?:{slides?:HomeData["slides"];pageVisibility?:Partial<HomeData["pageVisibility"]>}}|null;
+        const data=payload as {success?:boolean;data?:{siteSettings?:{settingKey?:string;settingValue?:unknown}[];slides?:HomeData["slides"];pageVisibility?:Partial<HomeData["pageVisibility"]>}}|null;
         if(!data?.success)return;
+        const liveShopInfo=data.data?.siteSettings?.find((item)=>item.settingKey==="shopInfo")?.settingValue;
+        if(liveShopInfo&&typeof liveShopInfo==="object")setShopInfo((current)=>({...current,...liveShopInfo as HomeData["shopInfo"]}));
         if(Array.isArray(data.data?.slides))setSlides(data.data.slides);
         if(data.data?.pageVisibility)setLivePageVisibility({...home.pageVisibility,...data.data.pageVisibility});
       });
@@ -105,23 +108,23 @@ export default function HomeLanding({home,pricingRules:initialPricingRules=[]}:H
       <motion.div className="home-hero-copy" initial={reduceMotion?false:{opacity:0,y:28,filter:"blur(8px)"}} animate={{opacity:1,y:0,filter:"blur(0px)"}} transition={{delay:reduceMotion ? 0 : .72,duration:reduceMotion ? .2 : 1.15,ease:[.22,1,.36,1]}}>
         <span>WELCOME TO THE WAKING DREAM</span>
         <h1><i>LUCID</i><br/>DREAM</h1>
-        <p>{home.shopInfo.subtitle}</p>
-        <div className="home-business-status"><b><i aria-hidden="true"/><span><small>LIVE STATUS</small>{home.shopInfo.businessStatus}</span></b><span>{home.shopInfo.openHours}</span></div>
+        <p>{shopInfo.subtitle}</p>
+        <div className="home-business-status"><b><i aria-hidden="true"/><span><small>LIVE STATUS</small>{shopInfo.businessStatus}</span></b><span>{shopInfo.openHours}</span></div>
         {livePageVisibility.staff&&<a href="/staff">MEET THE DREAMERS <i>↗</i></a>}
       </motion.div>
-      <div className="home-hero-ticket"><span>SERVER</span><b>{home.shopInfo.server}</b><span>ADDRESS</span><b>{home.shopInfo.address}</b><em><a className="home-admin-trigger" href="/admin/login" onClick={openAdminAfterFiveClicks} aria-label="開啟後台登入頁">LD</a> · 2026</em></div>
+      <div className="home-hero-ticket"><span>SERVER</span><b>{shopInfo.server}</b><span>ADDRESS</span><b>{shopInfo.address}</b><em><a className="home-admin-trigger" href="/admin/login" onClick={openAdminAfterFiveClicks} aria-label="開啟後台登入頁">LD</a> · 2026</em></div>
     </section>
 
     <section className="home-marquee" aria-label="店舖特色"><span>ROLE PLAY SALON</span><i>✦</i><span>DEEP NIGHT STORIES</span><i>✦</i><span>PHOTO & COMPANY</span><i>✦</i><span>EORZEA WEEKEND</span></section>
 
     <section className="home-about">
       <div className="home-about-title"><span>ABOUT THE DREAM</span><h2>在清醒與夢境<br/>交界的深夜沙龍</h2></div>
-      <div className={`home-about-photo${aboutLoaded?" is-image-loaded":""}`}><img src={home.shopInfo.heroImage||current?.imageUrl} alt="清醒夢空間" loading="lazy" decoding="async" onLoad={()=>setAboutLoaded(true)} onError={()=>setAboutLoaded(true)}/><span>PLACE / 001</span></div>
-      <div className="home-about-copy">{home.shopInfo.about.map((paragraph,index)=><p key={index}>{paragraph}</p>)}<div><b>OPEN</b><span>{home.shopInfo.openHours}</span><b>WHERE</b><span>{home.shopInfo.server} · {home.shopInfo.address}</span></div></div>
+      <div className={`home-about-photo${aboutLoaded?" is-image-loaded":""}`}><img src={shopInfo.heroImage||current?.imageUrl} alt="清醒夢空間" loading="lazy" decoding="async" onLoad={()=>setAboutLoaded(true)} onError={()=>setAboutLoaded(true)}/><span>PLACE / 001</span></div>
+      <div className="home-about-copy">{shopInfo.about.map((paragraph,index)=><p key={index}>{paragraph}</p>)}<div><b>OPEN</b><span>{shopInfo.openHours}</span><b>WHERE</b><span>{shopInfo.server} · {shopInfo.address}</span></div></div>
     </section>
 
     <section className="home-pricing">
-      <header><div><span>FIRST VISIT GUIDE</span><h2>入夢指南</h2></div><p>{home.shopInfo.entryNote}</p></header>
+      <header><div><span>FIRST VISIT GUIDE</span><h2>入夢指南</h2></div><p>{shopInfo.entryNote}</p></header>
       <div>{pricingRules.map((item,index)=><motion.article key={item.id||`${item.title}-${index}`} initial={reduceMotion?false:{opacity:0,y:24}} whileInView={{opacity:1,y:0}} viewport={{once:true,amount:.25}} transition={{delay:index*.08}}><span>{String(index+1).padStart(2,"0")}</span><h3>{item.title}</h3><b>{item.priceText}</b><i>{index===0?"ENTRY":index===1?"COMPANY":"PRIVATE"}</i></motion.article>)}</div>
     </section>
 

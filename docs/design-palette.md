@@ -4,7 +4,7 @@ This file records the visual palette before and after the August 2026 dark-hotel
 
 ## Archived palette — editorial daylight
 
-Previously defined in `app/globals.css`:
+Previously defined in `styles/public/site.css`:
 
 | Role | Token | Value | Visual use |
 | --- | --- | --- | --- |
@@ -21,7 +21,7 @@ Supporting surfaces were mostly `#faf7ef`, `#f9f6ef`, `#f8f4eb`, `#f5efe6`, `#dc
 
 Recorded again on 2026-08-17 before exploring the next visual direction. Treat this section as a restorable snapshot even after the live theme changes.
 
-The live theme is defined by semantic tokens at the end of `app/globals.css`:
+The live theme is defined by semantic tokens at the end of `styles/public/site.css`:
 
 | Role | Token | Value | Visual use |
 | --- | --- | --- | --- |

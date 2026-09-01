@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import "./admin.css";
+import "../../styles/admin/site.css";
 
 export const metadata: Metadata = {
   title: "清醒夢｜後台管理",

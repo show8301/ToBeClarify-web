@@ -43,7 +43,7 @@ test('homepage slides expose an editable playback duration', async () => {
 test('developer can control each public menu page from the admin home', async () => {
   const dashboard = await readFile(new URL('../app/admin/_components/AdminHomePage.jsx', import.meta.url), 'utf8');
   const api = await readFile(new URL('../app/admin/admin-api.js', import.meta.url), 'utf8');
-  const styles = await readFile(new URL('../app/admin/admin.css', import.meta.url), 'utf8');
+  const styles = await readFile(new URL('../styles/admin/site.css', import.meta.url), 'utf8');
   const data = await readFile(new URL('../features/site/server/data.ts', import.meta.url), 'utf8');
   const chrome = await readFile(new URL('../app/SiteChrome.tsx', import.meta.url), 'utf8');
   const menu = await readFile(new URL('../app/menu/page.tsx', import.meta.url), 'utf8');
@@ -107,7 +107,7 @@ test('staff detail falls back to the live API when a character is absent from th
 
 test('the detached public action returns to the top on desktop and mobile', async () => {
   const source = await readFile(new URL('../app/SiteChrome.tsx', import.meta.url), 'utf8');
-  const styles = await readFile(new URL('../app/globals.css', import.meta.url), 'utf8');
+  const styles = await readFile(new URL('../styles/public/site.css', import.meta.url), 'utf8');
 
   assert.match(source, /aria-label="回到頁面頂端"/);
   assert.match(source, />TOP<\/b>/);
@@ -121,7 +121,7 @@ test('the detached public action returns to the top on desktop and mobile', asyn
 
 test('the LD signature opens admin login only after five clicks', async () => {
   const source = await readFile(new URL('../app/HomeLanding.tsx', import.meta.url), 'utf8');
-  const styles = await readFile(new URL('../app/globals.css', import.meta.url), 'utf8');
+  const styles = await readFile(new URL('../styles/public/site.css', import.meta.url), 'utf8');
 
   assert.match(source, /adminTriggerClicks\.current\+=1/);
   assert.match(source, /adminTriggerClicks\.current<5/);

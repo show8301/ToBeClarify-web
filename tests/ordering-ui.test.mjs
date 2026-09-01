@@ -16,7 +16,7 @@ test('customer ordering implements meals, staff-first nomination, tips, dependen
   assert.match(source, /店員小費比例/);
   assert.match(source, /tipPresetAmounts/);
   assert.match(source, /tipMoney/);
-  assert.match(await readFile(new URL('../app/order/ordering.css', import.meta.url), 'utf8'), /\.tipRange input\{direction:rtl\}/);
+  assert.match(await readFile(new URL('../styles/ordering/site.css', import.meta.url), 'utf8'), /\.tipRange input\{direction:rtl\}/);
   assert.match(source, /找回並刷新點餐 UI/);
   assert.match(source, /我的訂單/);
   assert.match(source, /純陪伴/);

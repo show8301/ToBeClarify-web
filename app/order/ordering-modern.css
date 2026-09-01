@@ -13,9 +13,11 @@
   font-family:var(--o-body);
   font-size:15px;
   line-height:1.6;
+  overflow-x:hidden;
   background:radial-gradient(ellipse at 5% 8%,rgba(232,199,218,.66),transparent 34rem),radial-gradient(ellipse at 94% 12%,rgba(169,199,234,.62),transparent 34rem),radial-gradient(ellipse at 54% 92%,rgba(193,185,223,.54),transparent 38rem),linear-gradient(145deg,#f7f2f7,#e6e9f4);
 }
 .orderShell button,.orderShell input,.orderShell select,.orderGate button,.orderGate input{font-family:var(--o-body)}
+.orderShell button,.orderGate button{white-space:nowrap}
 .orderShell::before,.orderGate::before { position:fixed; inset:0; z-index:0; opacity:.12; pointer-events:none; content:""; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.2'/%3E%3C/svg%3E"); mix-blend-mode:multiply; }
 .orderShell>* ,.orderGate>* { position:relative; z-index:1; }
 
@@ -132,8 +134,8 @@
 }
 
 @media(max-width:620px){
-  .orderTopbar{min-height:66px}.orderTopbar .orderBrand img{width:38px;height:38px}.orderBrand strong{font-size:17px}.orderCredit{min-width:0;padding-left:10px}.orderCredit span{display:none}
-  .orderTabs{top:66px;padding:8px 12px}.orderTabs button{min-height:44px;padding:8px 13px}.orderTabs button span{display:none}
+  .orderTopbar{position:relative;grid-template-columns:minmax(0,1fr) auto;gap:8px;min-height:66px;overflow:hidden}.orderTopbar .orderBrand{min-width:0;gap:8px}.orderTopbar .orderBrand>span{min-width:0}.orderTopbar .orderBrand img{width:38px;height:38px}.orderBrand strong{font-size:17px}.orderBrand small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.orderCredit{min-width:0;max-width:112px;padding:7px 9px}.orderCredit span{display:none}.orderCredit strong{white-space:nowrap}
+  .orderTabs{top:0;padding:8px 12px}.orderTabs button{min-height:44px;padding:8px 13px}.orderTabs button span{display:none}
   .orderWorkspace{padding:24px 14px 112px}
   .orderPageHeading{min-height:128px;margin-bottom:22px}.orderPageHeading::after{bottom:22px}.orderPageHeading h1{font-size:48px}.orderPageHeading p{font-size:12px;line-height:1.65}
   .orderCategoryRail{top:120px;margin-inline:-2px}
@@ -153,3 +155,14 @@
 }
 
 @media(prefers-reduced-motion:reduce){.orderShell *,.orderGate *{scroll-behavior:auto!important;transition-duration:.01ms!important}}
+
+.orderMockShell .orderProductImage.isBlue{background:linear-gradient(145deg,#dce7f4,#b9d7ea)}
+.orderMockShell .orderProductImage.isPink{background:linear-gradient(145deg,#f1dfe9,#e7c8dc)}
+.orderMockShell .orderProductImage.isMint{background:linear-gradient(145deg,#dcebea,#b9dedc)}
+.orderMockShell .orderProductImage span{display:grid;place-items:center;width:52px;height:52px;border:1px solid rgba(49,51,74,.18);border-radius:50%;background:rgba(255,255,255,.45);color:rgba(49,51,74,.45);font:800 14px/1 var(--o-mono)}
+.orderMockCartLayout .cartLine{background:rgba(255,255,255,.72)}
+@media(max-width:620px){
+  .orderMockCartLayout{display:block}
+  .orderMockCartLayout .cartSummary{margin-top:14px;padding:17px}
+  .orderMockCartLayout .cartLine{grid-template-columns:52px minmax(0,1fr) 32px}
+}

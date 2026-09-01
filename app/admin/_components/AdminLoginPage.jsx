@@ -72,7 +72,7 @@ export function AdminLoginPage({ navigate }) {
     <main className="adminLoginShell">
       <section className="adminLoginCard" aria-labelledby="admin-login-title">
         <div className="adminLoginBrand">
-          <span className="adminLoginMark"><img src="/favicon.svg" alt="" /></span>
+          <span className="adminLoginMark"><img src="/favicon.ico" alt="" /></span>
           <span>
             <strong>清醒夢</strong>
             <small>LUCID DREAM / ADMIN</small>

@@ -3,7 +3,7 @@ import { adminApi } from '../admin-api.js';
 import { useAdminAuth } from './AdminAuthContext.jsx';
 import { AdminButton, AdminDialog, AdminPanel } from './AdminShared.jsx';
 
-export function AdminCredentialTools() {
+export function AdminCredentialTools({ embedded = false }) {
   const { user } = useAdminAuth();
   const canManage = user.role === 'developer' || user.role === 'manager';
   const [registerKeyState, setRegisterKeyState] = useState({ loading: false, message: '', error: false });
@@ -69,10 +69,8 @@ export function AdminCredentialTools() {
     return Number.isNaN(date.getTime()) ? '' : date.toLocaleString('zh-TW', { dateStyle: 'medium', timeStyle: 'short' });
   };
 
-  return (
-    <>
-      <AdminPanel className="adminCredentialTools" title="帳號安全工具" description="開發者與店經理可在此取得註冊金鑰，或協助重設後台帳號。">
-        <div className="adminCredentialToolsBody">
+  const tools = (
+    <div className="adminCredentialToolsBody">
           <div className="adminCredentialActions">
             <AdminButton variant="secondary" onClick={handleGetRegisterKey} disabled={registerKeyState.loading}>
               {registerKeyState.loading ? '取得中…' : '取得註冊金鑰'}
@@ -80,8 +78,15 @@ export function AdminCredentialTools() {
             <AdminButton variant="secondary" onClick={openPasswordResetKey} disabled={registerKeyState.loading}>取得重設驗證碼</AdminButton>
           </div>
           {registerKeyState.message ? <span className={`adminCredentialMessage ${registerKeyState.error ? 'isError' : ''}`} role="status">{registerKeyState.message}</span> : null}
-        </div>
+    </div>
+  );
+
+  return (
+    <>
+      {embedded ? tools : <AdminPanel className="adminCredentialTools" title="帳號安全工具" description="開發者與店經理可在此取得註冊金鑰，或協助重設後台帳號。">
+        {tools}
       </AdminPanel>
+      }
 
       <AdminDialog
         open={isPasswordResetKeyOpen}

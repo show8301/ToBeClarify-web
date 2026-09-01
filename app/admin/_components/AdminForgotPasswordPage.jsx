@@ -54,7 +54,7 @@ export function AdminForgotPasswordPage({ navigate }) {
     <main className="adminLoginShell">
       <section className="adminLoginCard" aria-labelledby="admin-forgot-password-title">
         <div className="adminLoginBrand">
-          <span className="adminLoginMark"><img src="/favicon.svg" alt="" /></span>
+          <span className="adminLoginMark"><img src="/favicon.ico" alt="" /></span>
           <span>
             <strong>清醒夢</strong>
             <small>LUCID DREAM / ADMIN</small>

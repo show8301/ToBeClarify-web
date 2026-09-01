@@ -6,10 +6,10 @@ const allGroups = [
   { label: '營運操作', items: [
     { route: '/admin/orders', label: '點單管理', index: '00', roles: ['developer', 'manager', 'clerk'] },
     { route: '/admin/order-list', label: '訂單列表', index: '01', roles: ['developer', 'manager', 'clerk'] },
-    { route: '/admin', label: '後台首頁', index: '02', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin', label: '營運總覽', index: '02', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin/staff', label: '店員管理', index: '03', roles: ['developer', 'manager', 'clerk'] },
   ] },
   { label: '內容與設定', items: [
-    { route: '/admin/staff', label: '店員設定', index: '03', roles: ['developer', 'manager', 'clerk'] },
     { route: '/admin/menu', label: '菜單設定', index: '04', roles: ['developer', 'manager'] },
     { route: '/admin/events', label: '活動設定', index: '05', roles: ['developer', 'manager'] },
     { route: '/admin/home', label: '首頁設定', index: '06', roles: ['developer', 'manager'] },
@@ -56,7 +56,7 @@ export function AdminLayout({ route, navigate, children }) {
     <main className="adminShell">
       <header className={`adminTopbar ${isMenuOpen ? 'isMenuOpen' : ''}`.trim()}>
         <div className="adminTopbarBrand">
-          <span className="adminTopbarMark"><img src="/favicon.svg" alt="" /></span>
+          <span className="adminTopbarMark"><img src="/favicon.ico" alt="" /></span>
           <span className="adminTopbarBrandCopy"><strong>清醒夢</strong><small>LUCID DREAM</small></span>
           <button className="adminBackToSite adminBrandSiteLink" type="button" onClick={() => handleNavigate('/home')}>↗ 公開網站</button>
         </div>

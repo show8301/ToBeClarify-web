@@ -37,12 +37,12 @@ export default function AdminPreviewPage() {
       <main className="adminShell adminMockShell">
         <aside className="adminTopbar">
           <div className="adminTopbarBrand">
-            <span className="adminTopbarMark"><img src="/favicon.svg" alt="" /></span>
+            <span className="adminTopbarMark"><img src="/favicon.ico" alt="" /></span>
             <span className="adminTopbarBrandCopy"><strong>清醒夢</strong><small>LUCID DREAM</small></span>
             <button className="adminBackToSite adminBrandSiteLink" type="button">↗ 公開網站</button>
           </div>
           <nav className="adminNav" aria-label="Mock 後台功能選單">
-            {[["營運操作", [["00", "點單管理"], ["01", "訂單列表"], ["02", "後台首頁"]]], ["內容與設定", [["03", "店員設定"], ["04", "菜單設定"], ["05", "活動設定"], ["06", "首頁設定"]]]].map(([group, items]) => <section className="adminNavGroup" key={group as string}><p className="adminNavLabel">{group as string}</p>{(items as string[][]).map(([index, label]) => <button className={label === "點單管理" ? "isActive" : ""} key={index} type="button"><span>{index}</span>{label}</button>)}</section>)}
+            {[["營運操作", [["00", "點單管理"], ["01", "訂單列表"], ["02", "營運總覽"], ["03", "店員管理"]]], ["內容與設定", [["04", "菜單設定"], ["05", "活動設定"], ["06", "首頁設定"]]]].map(([group, items]) => <section className="adminNavGroup" key={group as string}><p className="adminNavLabel">{group as string}</p>{(items as string[][]).map(([index, label]) => <button className={label === "點單管理" ? "isActive" : ""} key={index} type="button"><span>{index}</span>{label}</button>)}</section>)}
           </nav>
           <div className="adminTopbarUtilities">
             <div className="adminAccount">

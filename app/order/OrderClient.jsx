@@ -123,7 +123,7 @@ export default function OrderClient() {
   return (
     <main className="orderShell">
       <header className="orderTopbar">
-        <a href="/" className="orderBrand"><img src="/favicon.svg" alt="" /><span><strong>清醒夢</strong><small>LUCID DREAM / ORDER</small></span></a>
+        <a href="/" className="orderBrand"><img src="/favicon.ico" alt="" /><span><strong>清醒夢</strong><small>LUCID DREAM / ORDER</small></span></a>
         <div className="orderSessionChip"><span>今日點餐</span><strong>{session.customerName}</strong><small>ID {session.gameId}</small></div>
         <div className="orderCredit"><span>信物餐點餘額</span><strong>{money(session.remainingMealCredit)}</strong></div>
       </header>
@@ -173,7 +173,7 @@ function OrderAccess({ notice, onAccess, onRecover, loading }) {
   const [form, setForm] = useState({ gameId: '', recoveryCode: '' });
   return (
     <main className="orderGate"><section className="orderGateCard">
-      <a href="/" className="orderBrand"><img src="/favicon.svg" alt="" /><span><strong>清醒夢</strong><small>LUCID DREAM / ORDER</small></span></a>
+      <a href="/" className="orderBrand"><img src="/favicon.ico" alt="" /><span><strong>清醒夢</strong><small>LUCID DREAM / ORDER</small></span></a>
       <p className="orderEyebrow">TODAY&apos;S ORDER PASS</p><h1>{showRecover ? '請洽店員' : '輸入今日點餐碼'}</h1>
       <p>{showRecover ? '向店員取得六位數協助碼，與遊戲 ID 一起輸入即可找回今天的點餐網址。' : '若由店員提供專屬網址，頁面會自動帶入；也可手動貼上點餐碼。'}</p>
       {notice.message ? <div className={`orderNotice ${notice.error ? 'isError' : ''}`}>{notice.message}</div> : null}

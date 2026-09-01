@@ -11,7 +11,7 @@ import {
 
 const emptyStaff = {
   id: '', displayName: '', nickname: '', avatarMediaId: null, avatarUrl: '', avatarFile: null, avatarPreviewUrl: '',
-  signatureMediaId: null, signatureUrl: '', signatureFile: null, signaturePreviewUrl: '',
+  signatureSupported: false, signatureMediaId: null, signatureUrl: '', signatureFile: null, signaturePreviewUrl: '',
   roleTitle: '', shortBio: '', profileBio: '', isWorkingToday: true,
   bufferMinutes: '', isNominatable: false,
   sortOrder: 0, isActive: true, services: [], gallery: [],
@@ -76,6 +76,7 @@ function toEditor(value) {
   return {
     ...emptyStaff,
     ...value,
+    signatureSupported: Object.prototype.hasOwnProperty.call(value || {}, 'signatureMediaId') || Object.prototype.hasOwnProperty.call(value || {}, 'signatureUrl'),
     avatarFile: null,
     avatarPreviewUrl: '',
     signatureFile: null,
@@ -300,9 +301,9 @@ export function AdminStaffSettingsPage() {
         avatarMediaId = uploaded.id;
         avatarUrl = uploaded.url;
       }
-      let signatureMediaId = form.signatureMediaId || null;
-      let signatureUrl = form.signatureUrl || null;
-      if (form.signatureFile) {
+      let signatureMediaId = form.signatureSupported ? (form.signatureMediaId || null) : null;
+      let signatureUrl = form.signatureSupported ? (form.signatureUrl || null) : null;
+      if (form.signatureSupported && form.signatureFile) {
         const uploaded = await adminApi.uploadMedia(form.signatureFile, 'staff');
         uploadedMediaIds.push(uploaded.id);
         signatureMediaId = uploaded.id;
@@ -512,7 +513,7 @@ export function AdminStaffSettingsPage() {
                 <AdminField label="卡片簡介" className="span-2" required><textarea required disabled={isReadOnly} rows="3" value={form.shortBio || ''} onChange={(event) => update('shortBio', event.target.value)} /></AdminField>
                 <AdminField label="詳細介紹" className="span-2"><textarea disabled={isReadOnly} rows="7" value={form.profileBio || ''} onChange={(event) => update('profileBio', event.target.value)} /></AdminField>
                 <AdminAvatarPicker label="頭像" value={form.avatarUrl} pendingFile={form.avatarFile} hint="選擇圖片後會開啟 4:5 裁切框，輸出固定為 1200 × 1500px WebP；既有頭像也能重新調整。儲存店員資料後才會正式上傳。" disabled={isReadOnly} onChange={updateAvatarFile} onClear={() => { update('avatarFile', null); update('avatarPreviewUrl', ''); update('avatarUrl', ''); update('avatarMediaId', null); }} />
-                <AdminAvatarPicker kind="signature" label="顯示名稱簽名圖" value={form.signatureUrl} pendingFile={form.signatureFile} hint="選擇帶透明背景的 PNG 或 WebP 後會開啟 3:2 裁切框，輸出為保留透明通道的 1200 × 800px WebP。上傳後公開卡片會用簽名圖取代文字顯示名稱；未上傳時仍顯示文字。" disabled={isReadOnly} onChange={updateSignatureFile} onClear={() => { update('signatureFile', null); update('signaturePreviewUrl', ''); update('signatureUrl', ''); update('signatureMediaId', null); }} />
+                <AdminAvatarPicker kind="signature" label="顯示名稱簽名圖" value={form.signatureUrl} pendingFile={form.signatureFile} hint={form.signatureSupported ? "選擇帶透明背景的 PNG 或 WebP 後會開啟 3:2 裁切框，輸出為保留透明通道的 1200 × 800px WebP。上傳後公開卡片會用簽名圖取代文字顯示名稱；未上傳時仍顯示文字。" : "目前 API 尚未提供簽名圖欄位；待 API 更新後此功能會自動啟用。"} disabled={isReadOnly || !form.signatureSupported} onChange={updateSignatureFile} onClear={() => { update('signatureFile', null); update('signaturePreviewUrl', ''); update('signatureUrl', ''); update('signatureMediaId', null); }} />
               </div>
             </AdminPanel>
 

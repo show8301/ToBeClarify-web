@@ -90,7 +90,7 @@ function Invoke-Pm2 {
         $output | ForEach-Object { Write-Host $_ }
     }
     if ($exitCode -ne 0) {
-        throw "PM2 command failed with exit code $exitCode: pm2 $($Arguments -join ' ')`n$($output -join [Environment]::NewLine)"
+        throw "PM2 command failed with exit code ${exitCode}: pm2 $($Arguments -join ' ')`n$($output -join [Environment]::NewLine)"
     }
 
     return $output

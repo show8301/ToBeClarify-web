@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, RotateCcw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { StaffSummary } from "@/features/staff/types";
@@ -14,6 +14,7 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
   const [leaving, setLeaving] = useState(false);
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const [featuredPaused, setFeaturedPaused] = useState(false);
+  const [textNameIds, setTextNameIds] = useState<Set<string>>(() => new Set());
   const deferredQuery = useDeferredValue(query);
   const navigationTimer = useRef<ReturnType<typeof window.setTimeout>|null>(null);
   const navigationWatchdog = useRef<ReturnType<typeof window.setTimeout>|null>(null);
@@ -25,6 +26,14 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
   const featuredPool = useMemo(() => initialStaff.filter((person) => Boolean(person.avatarUrl)), [initialStaff]);
   const featured = featuredPool[featuredIndex] ?? initialStaff[0];
   const featuredServices = featured ? [...(featured.commonServices ?? []), ...(featured.specialServices ?? [])] : [];
+  const toggleNameDisplay = useCallback((staffId:string) => {
+    setTextNameIds((current) => {
+      const next = new Set(current);
+      if (next.has(staffId)) next.delete(staffId);
+      else next.add(staffId);
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
     if (featuredPool.length > 1) setFeaturedIndex(Math.floor(Math.random() * featuredPool.length));
@@ -137,8 +146,10 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
             const services = [...(person.commonServices ?? []), ...(person.specialServices ?? [])];
             const canBeNominated = person.isNominatable === true;
             const fileNumber = String(index + 1).padStart(2,"0");
+            const showTextName = textNameIds.has(person.id);
             return (
-              <a href={`/staff/${person.id}`} onClick={(event) => openProfile(event, `/staff/${person.id}`)} key={person.id} className="dreamer-card" aria-label={`查看 ${person.displayName} 的完整介紹`}>
+              <article key={person.id} className="dreamer-card">
+                <a href={`/staff/${person.id}`} onClick={(event) => openProfile(event, `/staff/${person.id}`)} className="dreamer-card-main" aria-label={`查看 ${person.displayName} 的完整介紹`}>
                 <span className="dreamer-card-photo">
                   <img src={person.avatarUrl || fallbackPortrait} alt={`${person.displayName} 的店員照片`} loading={index < 2 ? "eager" : "lazy"} decoding="async"/>
                   <span className="dreamer-role-ribbon" title={person.roleTitle || "DREAM STAFF"}>
@@ -154,7 +165,7 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
                 </span>
                 <span className="dreamer-card-body">
                   <span className={`dreamer-card-heading${person.signatureUrl ? " has-signature" : ""}`}>
-                    {person.signatureUrl
+                    {person.signatureUrl && !showTextName
                       ? <img className="dreamer-card-signature" src={person.signatureUrl} alt={`${person.displayName} 的簽名`}/>
                       : <strong>{person.displayName}</strong>}
                     {person.nickname && <em>✦ 暱稱｜{person.nickname} ✦</em>}
@@ -168,7 +179,9 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
                     <span className="dreamer-card-link"><small>FILE · {fileNumber}</small><b>VIEW PROFILE <ArrowUpRight aria-hidden="true"/></b></span>
                   </span>
                 </span>
-              </a>
+                </a>
+                {person.signatureUrl && <button type="button" className="dreamer-card-signature-toggle" aria-label={showTextName ? `顯示${person.displayName}簽名圖` : `顯示${person.displayName}文字名稱`} aria-pressed={showTextName} title={showTextName ? "顯示簽名圖" : "顯示文字名稱"} onClick={() => toggleNameDisplay(person.id)}><RotateCcw aria-hidden="true" /></button>}
+              </article>
             );
         })}
         {!filtered.length && <div className="empty-state"><b>NO MATCHES</b><p>換一個關鍵字，再找找看。</p></div>}

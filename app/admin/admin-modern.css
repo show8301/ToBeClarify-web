@@ -368,6 +368,7 @@
 }
 .adminButton-ghost { background:transparent; }
 .adminButton:hover:not(:disabled) { box-shadow:none; }
+.adminTheme button { white-space:nowrap; }
 
 .adminBusinessOperations,
 .adminBusinessOperations.mode-coordination,
@@ -481,7 +482,9 @@
 .adminOrderListTable td strong { display:block; font-size:13px; }
 .adminOrderListTable td small { display:block; margin-top:4px; color:var(--color-fg-mute); font-size:10px; }
 .adminOrderListTable td:last-child { width:56px; }
-.adminOrderListTable td button { min-height:34px; padding:0 10px; border:1px solid rgba(101,120,159,.25); border-radius:8px; background:#fff; color:#536588; font-weight:700; cursor:pointer; }
+.adminOrderListTable td button { display:grid; place-items:center; width:34px; height:34px; padding:0; border:1px solid rgba(101,120,159,.2); border-radius:50%; background:transparent; color:#536588; cursor:pointer; }
+.adminOrderListTable td button span { transform:translateY(-1px); font:500 24px/1 var(--font-sans); }
+.adminOrderListTable td button:hover { border-color:rgba(101,120,159,.38); background:#fff; }
 .adminOrderStatus { display:inline-flex; align-items:center; min-height:26px; padding:0 9px; border-radius:999px; background:#edf0f5; color:#555b6c; font-size:11px; font-weight:800; white-space:nowrap; }
 .adminOrderStatus.is-submitted,
 .adminOrderStatus.is-partially_confirmed,

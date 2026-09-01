@@ -9,20 +9,42 @@ const products = [
   { id: "night", category: "宵夜", tag: "LIGHT MEAL", name: "旅人宵夜盤", description: "適合深夜分享的店舖小食。", price: 900, tone: "isMint" },
 ];
 
+const scenarios = [
+  { id: "unwind", title: "先放鬆一下", detail: "清爽特調，適合慢慢進入今晚。", category: "特調" },
+  { id: "sweet", title: "想吃點甜的", detail: "用一份甜點替今晚加點儀式感。", category: "甜點" },
+  { id: "hungry", title: "深夜有點餓", detail: "先找份能分享、也有飽足感的小食。", category: "宵夜" },
+  { id: "company", title: "想找人陪伴", detail: "看看今晚可預約的店員與服務。", category: "服務" },
+] as const;
+
+const services = [
+  { id: "talk", name: "星夜陪伴", description: "一起聊天、小酌，讓今晚有人陪你慢慢度過。", duration: "2 節 · 約 40 分鐘", price: 3000 },
+  { id: "game", name: "桌遊同樂", description: "由店員依人數與氣氛推薦適合的桌遊。", duration: "2 節 · 約 40 分鐘", price: 2600 },
+  { id: "drink", name: "專屬特調推薦", description: "聊聊今天的心情，由店員替你挑選一杯酒。", duration: "1 節 · 約 20 分鐘", price: 1600 },
+] as const;
+
 const tabs = [["meal", "一般點餐"], ["nomination", "指名服務"], ["tip", "小費"], ["cart", "本次點餐"], ["orders", "我的訂單"]] as const;
 const money = (value: number) => `${value.toLocaleString("zh-TW")} G`;
 
 export default function OrderPreviewPage() {
   const [tab, setTab] = useState<(typeof tabs)[number][0]>("meal");
   const [category, setCategory] = useState("推薦");
+  const [scenario, setScenario] = useState<(typeof scenarios)[number]["id"]>("unwind");
   const [cart, setCart] = useState<Record<string, number>>({ moon: 1, panna: 1 });
   const [nominee, setNominee] = useState("凜 RIN");
+  const [serviceId, setServiceId] = useState<(typeof services)[number]["id"]>("talk");
+  const [serviceTime, setServiceTime] = useState("23:20");
+  const [serviceAdded, setServiceAdded] = useState(false);
   const [tip, setTip] = useState(500);
+  const [tipAdded, setTipAdded] = useState(false);
   const [notice, setNotice] = useState("");
-  const cartCount = Object.values(cart).reduce((sum, quantity) => sum + quantity, 0);
-  const subtotal = products.reduce((sum, product) => sum + product.price * (cart[product.id] || 0), 0);
-  const credit = Math.min(1200, subtotal);
-  const visibleProducts = category === "推薦" ? products : products.filter((product) => product.category === category);
+  const mealCount = Object.values(cart).reduce((sum, quantity) => sum + quantity, 0);
+  const mealSubtotal = products.reduce((sum, product) => sum + product.price * (cart[product.id] || 0), 0);
+  const selectedService = services.find((service) => service.id === serviceId) || services[0];
+  const subtotal = mealSubtotal + (serviceAdded ? selectedService.price : 0) + (tipAdded ? tip : 0);
+  const cartCount = mealCount + Number(serviceAdded) + Number(tipAdded);
+  const credit = Math.min(1200, mealSubtotal);
+  const selectedScenario = scenarios.find((item) => item.id === scenario) || scenarios[0];
+  const visibleProducts = category === "推薦" ? products.filter((product) => product.category === selectedScenario.category) : products.filter((product) => product.category === category);
 
   const addProduct = (id: string) => {
     setCart((current) => ({ ...current, [id]: (current[id] || 0) + 1 }));
@@ -41,10 +63,28 @@ export default function OrderPreviewPage() {
     {notice ? <div className="orderNotice" role="status">{notice}<button type="button" onClick={() => setNotice("")}>×</button></div> : null}
     <nav className="orderTabs" aria-label="點餐功能">{tabs.map(([key, label], index) => <button className={tab === key ? "isActive" : ""} key={key} type="button" onClick={() => setTab(key)}><span>{String(index + 1).padStart(2, "0")}</span>{label}{key === "cart" && cartCount ? ` ${cartCount}` : ""}</button>)}</nav>
     <section className="orderWorkspace"><div className="orderMain"><div className="orderPage">
-      {tab === "meal" ? <><PageHeading eyebrow="FOOD & DRINK" title="一般點餐">挑選今晚想享用的餐點。信物餘額只折抵餐點，剩餘額度可留到今天後續加點。</PageHeading><div className="orderCategoryRail">{["推薦", "特調", "甜點", "宵夜"].map((item) => <button className={category === item ? "isActive" : ""} type="button" key={item} onClick={() => setCategory(item)}>{item}</button>)}</div><div className="orderProductGrid">{visibleProducts.map((product) => <article className="orderProductCard" key={product.id}><div className={`orderProductImage ${product.tone}`}><span>LD</span></div><div><small>{product.tag}</small><h2>{product.name}</h2><p>{product.description}</p></div><footer><strong>{money(product.price)}</strong><button type="button" onClick={() => addProduct(product.id)}><span aria-hidden="true">＋</span>加入{cart[product.id] ? ` ${cart[product.id]}` : ""}</button></footer></article>)}</div></> : null}
-      {tab === "nomination" ? <><PageHeading eyebrow="NOMINATION" title="指名服務">選擇今晚希望陪伴你的店員，送出後仍需由店員確認。</PageHeading><section className="nominationSection"><header><span>01</span><div><h2>選擇店員</h2><p>點擊卡片即可切換人選。</p></div></header><div className="nominationStaffGrid">{["凜 RIN", "菲菜", "Mika"].map((name) => <button type="button" className={nominee === name ? "isActive" : ""} key={name} onClick={() => setNominee(name)}><span>{name.slice(0, 1)}</span><strong>{name}</strong><small>可接受指名</small></button>)}</div></section><section className="nominationComposer"><div><span>SELECTED STAFF</span><h2>{nominee}</h2></div><p>星夜陪伴 · 2 節，預估費用 3,000 G。</p><button className="orderPrimaryAction" type="button" onClick={() => { setNotice("指名服務已加入本次點餐"); setTab("cart"); }}>加入本次點餐</button></section></> : null}
-      {tab === "tip" ? <><PageHeading eyebrow="GRATUITY" title="小費">選擇想交給店員的小費金額。</PageHeading><section className="tipComposer"><h2>給 {nominee} 的小費</h2><div className="tipAmountButtons">{[200, 500, 1000, 2000].map((amount) => <button type="button" className={tip === amount ? "isActive" : ""} key={amount} onClick={() => setTip(amount)}>{money(amount)}</button>)}</div><div className="tipResult"><span>本次小費</span><strong>{money(tip)}</strong></div><button className="orderPrimaryAction" type="button" onClick={() => { setNotice(`已加入 ${money(tip)} 小費`); setTab("cart"); }}>加入本次點餐</button></section></> : null}
-      {tab === "cart" ? <><PageHeading eyebrow="ORDER REVIEW" title="本次點餐">送出前再確認品項與金額。餐點會優先使用今日信物餘額折抵。</PageHeading><div className="cartLayout orderMockCartLayout"><div className="cartLines">{products.filter((product) => cart[product.id]).map((product) => <article className="cartLine" key={product.id}><span>餐點</span><div><strong>{product.name}</strong><small>{money(product.price)} × {cart[product.id]}</small></div><b>{money(product.price * cart[product.id])}</b><button type="button" aria-label={`移除${product.name}`} onClick={() => removeProduct(product.id)}>×</button></article>)}{cartCount === 0 ? <div className="orderEmpty"><span>LD</span><h2>尚未加入餐點</h2><p>回到一般點餐挑選餐點。</p></div> : null}</div><aside className="cartSummary"><h2>金額確認</h2><dl><div><dt>餐點</dt><dd>{money(subtotal)}</dd></div><div className="isCredit"><dt>信物餐點折抵</dt><dd>−{money(credit)}</dd></div><div className="isTotal"><dt>應付金額</dt><dd>{money(subtotal - credit)}</dd></div></dl><p>這是操作預覽，不會建立真實訂單。</p><button type="button" disabled={!cartCount} onClick={() => setNotice("預覽完成：訂單已模擬送出")}>確認並送出訂單</button></aside></div></> : null}
+      {tab === "meal" ? <>
+        <PageHeading eyebrow="TONIGHT'S MOOD" title="今晚想怎麼度過？">先選一個最接近現在心情的情境，我們再替你整理適合的餐點與服務。</PageHeading>
+        <section className="orderScenarioGuide" aria-label="選擇今晚的情境">
+          {scenarios.map((item, index) => <button className={scenario === item.id ? "isActive" : ""} type="button" key={item.id} onClick={() => { setScenario(item.id); if (item.category === "服務") setTab("nomination"); else setCategory("推薦"); }}><span>0{index + 1}</span><strong>{item.title}</strong><small>{item.detail}</small><b aria-hidden="true">→</b></button>)}
+        </section>
+        <div className="orderRecommendationHead"><div><span>RECOMMENDED</span><h2>{selectedScenario.title}，可以從這裡開始</h2></div><p>也可以直接切換分類查看全部餐點。</p></div>
+        <div className="orderCategoryRail">{["推薦", "特調", "甜點", "宵夜"].map((item) => <button className={category === item ? "isActive" : ""} type="button" key={item} onClick={() => setCategory(item)}>{item}</button>)}</div>
+        <div className="orderProductGrid">{visibleProducts.map((product) => <article className="orderProductCard" key={product.id}><div className={`orderProductImage ${product.tone}`}><span>LD</span></div><div><small>{product.tag}</small><h2>{product.name}</h2><p>{product.description}</p></div><footer><strong>{money(product.price)}</strong><button type="button" onClick={() => addProduct(product.id)}><span aria-hidden="true">＋</span>加入{cart[product.id] ? ` ${cart[product.id]}` : ""}</button></footer></article>)}</div>
+      </> : null}
+      {tab === "nomination" ? <>
+        <PageHeading eyebrow="STAFF SERVICE" title="今晚想要誰陪你？">依序選擇店員、服務內容與開始時間。送出後仍需由店員確認。</PageHeading>
+        <section className="nominationSection"><header><span>01</span><div><h2>選擇店員</h2><p>只顯示目前可接受指名的店員。</p></div></header><div className="nominationStaffGrid">{["凜 RIN", "菲菜", "Mika"].map((name) => <button type="button" className={nominee === name ? "isActive" : ""} key={name} onClick={() => setNominee(name)}><span>{name.slice(0, 1)}</span><strong>{name}</strong><small>可接受指名</small></button>)}</div></section>
+        <section className="nominationSection"><header><span>02</span><div><h2>{nominee} 提供的服務</h2><p>選擇你今晚需要的陪伴方式。</p></div></header><div className="nominationServiceGrid">{services.map((service) => <button type="button" className={serviceId === service.id ? "isActive" : ""} key={service.id} onClick={() => setServiceId(service.id)}><span>SERVICE</span><strong>{service.name}</strong><p>{service.description}</p><footer><b>{money(service.price)}</b><small>{service.duration}</small></footer></button>)}</div></section>
+        <section className="nominationComposer"><div><span>03 · CONFIRM</span><h2>{nominee} · {selectedService.name}</h2></div><div className="nominationControls"><label>希望開始時間<select value={serviceTime} onChange={(event) => setServiceTime(event.target.value)}><option>23:20</option><option>23:40</option><option>00:00</option></select></label><label>服務時間<strong>{selectedService.duration}</strong></label><label>預估費用<strong>{money(selectedService.price)}</strong></label></div><button className="orderPrimaryAction" type="button" onClick={() => { setServiceAdded(true); setNotice("指名服務已加入本次點餐"); setTab("cart"); }}>加入本次點餐</button></section>
+      </> : null}
+      {tab === "tip" ? <><PageHeading eyebrow="GRATUITY" title="小費">選擇想交給店員的小費金額。</PageHeading><section className="tipComposer"><h2>給 {nominee} 的小費</h2><div className="tipAmountButtons">{[200, 500, 1000, 2000].map((amount) => <button type="button" className={tip === amount ? "isActive" : ""} key={amount} onClick={() => setTip(amount)}>{money(amount)}</button>)}</div><div className="tipResult"><span>本次小費</span><strong>{money(tip)}</strong></div><button className="orderPrimaryAction" type="button" onClick={() => { setTipAdded(true); setNotice(`已加入 ${money(tip)} 小費`); setTab("cart"); }}>加入本次點餐</button></section></> : null}
+      {tab === "cart" ? <><PageHeading eyebrow="ORDER REVIEW" title="本次點餐">送出前再確認餐點、店員服務與小費。餐點會優先使用今日信物餘額折抵。</PageHeading><div className="cartLayout orderMockCartLayout"><div className="cartLines">
+        {products.filter((product) => cart[product.id]).map((product) => <article className="cartLine" key={product.id}><span>餐點</span><div><strong>{product.name}</strong><small>{money(product.price)} × {cart[product.id]}</small></div><b>{money(product.price * cart[product.id])}</b><button type="button" aria-label={`移除${product.name}`} onClick={() => removeProduct(product.id)}>×</button></article>)}
+        {serviceAdded ? <article className="cartNominationGroup"><header><span>{selectedService.name}</span><small>{nominee}</small></header><div className="cartLine"><span>服務</span><div><strong>{selectedService.duration}</strong><small>預計 {serviceTime} 開始</small></div><b>{money(selectedService.price)}</b><button type="button" aria-label="移除指名服務" onClick={() => setServiceAdded(false)}>×</button></div></article> : null}
+        {tipAdded ? <article className="cartLine"><span>小費</span><div><strong>給 {nominee}</strong><small>感謝今晚的服務</small></div><b>{money(tip)}</b><button type="button" aria-label="移除小費" onClick={() => setTipAdded(false)}>×</button></article> : null}
+        {cartCount === 0 ? <div className="orderEmpty"><span>LD</span><h2>尚未加入內容</h2><p>回到情境引導挑選餐點或店員服務。</p></div> : null}
+      </div><aside className="cartSummary"><h2>金額確認</h2><dl><div><dt>餐點、服務與小費</dt><dd>{money(subtotal)}</dd></div><div className="isCredit"><dt>信物餐點折抵</dt><dd>−{money(credit)}</dd></div><div className="isTotal"><dt>應付金額</dt><dd>{money(subtotal - credit)}</dd></div></dl><p>這是操作預覽，不會建立真實訂單。</p><button type="button" disabled={!cartCount} onClick={() => setNotice("預覽完成：訂單已模擬送出")}>確認並送出訂單</button></aside></div></> : null}
       {tab === "orders" ? <><PageHeading eyebrow="ORDER HISTORY" title="我的訂單">查看今天送出的訂單與目前處理狀態。</PageHeading><div className="myOrderList"><article className="myOrderCard"><button className="myOrderHead" type="button"><div><span>#LD-0921</span><strong>餐點訂單</strong><small>今晚 22:48 送出</small></div><div><b>1,050 G</b><small>準備中</small></div></button></article></div></> : null}
     </div></div><aside className="orderAside"><div><span>本次點餐</span><strong>{cartCount} 項</strong></div><p>餐點與服務會在送出前集中確認。</p><dl><div><dt>小計</dt><dd>{money(subtotal)}</dd></div><div><dt>可折抵餐點</dt><dd>{money(credit)}</dd></div></dl><button type="button" onClick={() => setTab("cart")}>查看明細與送出</button><button className="isSecondary" type="button" onClick={() => setTab("orders")}>查看我的訂單</button></aside></section>
   </main>;

@@ -58,6 +58,9 @@ test('homepage slides expose an editable playback duration', async () => {
   assert.match(source, /播放 \{Number\(item\.displaySeconds\) \|\| 10\} 秒/);
   assert.match(landing, /const seconds=Math\.min\(60,Math\.max\(1,Number\(current\?\.displaySeconds\)\|\|10\)\)/);
   assert.match(landing, /fetch\("\/api\/public\/home"/);
+  assert.match(landing, /const \[shopInfo,setShopInfo\]=useState\(home\.shopInfo\)/);
+  assert.match(landing, /item\.settingKey==="shopInfo"/);
+  assert.match(landing, /setShopInfo/);
 });
 
 test('homepage and menu settings control the intended public content', async () => {

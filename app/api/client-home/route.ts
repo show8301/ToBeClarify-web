@@ -1,10 +1,10 @@
-const API_HOME = "https://api.marchgroup.net/api/client/home";
+import { publicClientApiUrl } from "@/lib/server/upstream-config";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const upstream = await fetch(API_HOME, {
+    const upstream = await fetch(publicClientApiUrl("/home"), {
       cache: "no-store",
       headers: { Accept: "application/json" },
       signal: AbortSignal.timeout(3500),

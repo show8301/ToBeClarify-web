@@ -22,6 +22,10 @@ test("the shared workflow deploys only dev and main to isolated targets", async 
   assert.match(workflow, /DEV_NODE_PORT[\s\S]*?'4310'/);
   assert.match(workflow, /DEV_NODE_TASK_NAME[\s\S]*?'ToBeClarify Vinext DEV'/);
   assert.match(workflow, /\$expectedDeployLeaf = 'ToBeClarify_web_dev'/);
+  assert.match(workflow, /DEV_PUBLIC_CLIENT_API_BASE_URL: \$\{\{ vars\.DEV_PUBLIC_CLIENT_API_BASE_URL \}\}/);
+  assert.match(workflow, /DEV_ORDERING_API_BASE_URL: \$\{\{ vars\.DEV_ORDERING_API_BASE_URL \}\}/);
+  assert.match(workflow, /PROD_PUBLIC_CLIENT_API_BASE_URL: \$\{\{ vars\.WEB_PUBLIC_CLIENT_API_BASE_URL \}\}/);
+  assert.match(workflow, /PROD_ORDERING_API_BASE_URL: \$\{\{ vars\.WEB_ORDERING_API_BASE_URL \}\}/);
 
   assert.match(workflow, /group: vinext-\$\{\{ github\.ref_name \}\}-iis-deployment/);
 });
@@ -51,6 +55,8 @@ test("the IIS deployer accepts both protected deployment directories", async () 
   );
   assert.match(deployScript, /function Rename-DirectoryWithRetry/);
   assert.match(deployScript, /-ExpectedDeploymentSha \$DeploymentSha/);
+  assert.match(deployScript, /\$runtimeConfig\.PUBLIC_CLIENT_API_BASE_URL/);
+  assert.match(deployScript, /\$runtimeConfig\.ORDERING_API_BASE_URL/);
 });
 
 test("the scheduled Vinext process survives GitHub runner cleanup", async () => {

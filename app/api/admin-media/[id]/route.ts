@@ -1,10 +1,6 @@
-const DEFAULT_PUBLIC_MEDIA_BASE_URL = "https://api.marchgroup.net/api/client/media";
+import { getPublicMediaBaseUrl } from "@/lib/server/upstream-config";
 
 type RouteContext = { params: Promise<{ id: string }> };
-
-function publicMediaBaseUrl() {
-  return (process.env.PUBLIC_MEDIA_BASE_URL?.trim() || DEFAULT_PUBLIC_MEDIA_BASE_URL).replace(/\/$/, "");
-}
 
 export async function GET(_request: Request, { params }: RouteContext) {
   const { id } = await params;
@@ -13,7 +9,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
   }
 
   try {
-    const upstream = await fetch(`${publicMediaBaseUrl()}/${encodeURIComponent(id)}?variant=original`, {
+    const upstream = await fetch(`${getPublicMediaBaseUrl()}/${encodeURIComponent(id)}?variant=original`, {
       cache: "no-store",
       signal: AbortSignal.timeout(20_000),
     });

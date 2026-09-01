@@ -1,6 +1,7 @@
 import type { StaffReservation } from "@/features/site/types";
+import { publicClientApiUrl } from "@/lib/server/upstream-config";
 
-const API="https://api.marchgroup.net/api/client/staff-reservations";
+const RESERVATION_API_PATH="/staff-reservations";
 
 export async function GET(request:Request){
   const url=new URL(request.url);
@@ -8,7 +9,7 @@ export async function GET(request:Request){
   const to=url.searchParams.get("to");
   if(!from||!to||Number.isNaN(Date.parse(from))||Number.isNaN(Date.parse(to)))return Response.json({error:"Valid from and to are required"},{status:400});
   try{
-    const upstream=new URL(API);
+    const upstream=new URL(publicClientApiUrl(RESERVATION_API_PATH));
     upstream.searchParams.set("from",from);
     upstream.searchParams.set("to",to);
     const response=await fetch(upstream,{cache:"no-store",headers:{Accept:"application/json"},signal:AbortSignal.timeout(3500)});

@@ -1,7 +1,8 @@
 import snapshotJson from "../../../data/snapshots/staff.json";
 import type { StaffDetail, StaffSummary } from "../types";
+import { publicClientApiUrl } from "@/lib/server/upstream-config";
 
-const API = "https://api.marchgroup.net/api/client/staff-members";
+const STAFF_API_PATH = "/staff-members";
 const CACHE_TTL = 10 * 60 * 1000;
 const REQUEST_TIMEOUT = 3500;
 
@@ -36,7 +37,7 @@ async function request<T>(url:string):Promise<T> {
 
 function refreshList() {
   if (listRefresh) return;
-  listRefresh = request<{data:StaffSummary[]}>(API)
+  listRefresh = request<{data:StaffSummary[]}>(publicClientApiUrl(STAFF_API_PATH))
     .then(({data}) => { if (data?.length) listCache = { value:data, expiresAt:Date.now()+CACHE_TTL }; })
     .catch(() => { listCache.expiresAt = Date.now()+CACHE_TTL; })
     .finally(() => { listRefresh = null; });
@@ -57,7 +58,7 @@ export async function getStaffDetail(id:string):Promise<StaffDetail|null> {
   const fallback = cached?.value ?? snapshot.details[id] ?? null;
   const refresh = (async()=>{
     try {
-      const { data } = await request<{data:StaffDetail|null}>(`${API}/${encodeURIComponent(id)}`);
+      const { data } = await request<{data:StaffDetail|null}>(publicClientApiUrl(`${STAFF_API_PATH}/${encodeURIComponent(id)}`));
       if (!data) return fallback;
       detailCache.set(id,{ value:data, expiresAt:Date.now()+CACHE_TTL });
       return data;

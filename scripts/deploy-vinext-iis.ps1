@@ -26,7 +26,11 @@ param(
 
     [string]$AdminApiBaseUrl,
 
-    [string]$PublicMediaBaseUrl
+    [string]$PublicMediaBaseUrl,
+
+    [string]$PublicClientApiBaseUrl,
+
+    [string]$OrderingApiBaseUrl
 )
 
 Set-StrictMode -Version Latest
@@ -406,6 +410,12 @@ if (-not [string]::IsNullOrWhiteSpace($AdminApiBaseUrl)) {
 }
 if (-not [string]::IsNullOrWhiteSpace($PublicMediaBaseUrl)) {
     $runtimeConfig.PUBLIC_MEDIA_BASE_URL = $PublicMediaBaseUrl.TrimEnd('/')
+}
+if (-not [string]::IsNullOrWhiteSpace($PublicClientApiBaseUrl)) {
+    $runtimeConfig.PUBLIC_CLIENT_API_BASE_URL = $PublicClientApiBaseUrl.TrimEnd('/')
+}
+if (-not [string]::IsNullOrWhiteSpace($OrderingApiBaseUrl)) {
+    $runtimeConfig.ORDERING_API_BASE_URL = $OrderingApiBaseUrl.TrimEnd('/')
 }
 $runtimeConfig | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $stagingRoot 'runtime-config.json') -Encoding UTF8
 

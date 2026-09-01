@@ -123,7 +123,7 @@ export default function OrderClient() {
   return (
     <main className="orderShell">
       <header className="orderTopbar">
-        <a href="/" className="orderBrand"><img src="/favicon.svg" alt="" /><span><strong>清醒夢</strong><small>LUCID DREAM / ORDER</small></span></a>
+        <a href="/" className="orderBrand"><img src="/favicon.ico" alt="" /><span><strong>清醒夢</strong><small>LUCID DREAM / ORDER</small></span></a>
         <div className="orderSessionChip"><span>今日點餐</span><strong>{session.customerName}</strong><small>ID {session.gameId}</small></div>
         <div className="orderCredit"><span>信物餐點餘額</span><strong>{money(session.remainingMealCredit)}</strong></div>
       </header>
@@ -131,7 +131,7 @@ export default function OrderClient() {
       {catalog.settings.nominationPaused ? <div className="orderPauseBanner">目前暫停受理指名服務；一般餐點與小費仍可正常加點。</div> : null}
       {notice.message ? <div className={`orderNotice ${notice.error ? 'isError' : ''}`} role="status">{notice.message}<button type="button" onClick={() => setNotice({ message: '', error: false })}>×</button></div> : null}
       <nav className="orderTabs" aria-label="點餐功能">
-        {tabs.map(([key, label]) => <button key={key} type="button" className={tab === key ? 'isActive' : ''} onClick={() => setTab(key)}>{label}</button>)}
+        {tabs.map(([key, label], index) => <button key={key} type="button" aria-current={tab === key ? 'page' : undefined} className={tab === key ? 'isActive' : ''} onClick={() => setTab(key)}><span>{String(index + 1).padStart(2, '0')}</span>{label}</button>)}
       </nav>
       <section className="orderWorkspace">
         <div className="orderMain">
@@ -173,7 +173,7 @@ function OrderAccess({ notice, onAccess, onRecover, loading }) {
   const [form, setForm] = useState({ gameId: '', recoveryCode: '' });
   return (
     <main className="orderGate"><section className="orderGateCard">
-      <a href="/" className="orderBrand"><img src="/favicon.svg" alt="" /><span><strong>清醒夢</strong><small>LUCID DREAM / ORDER</small></span></a>
+      <a href="/" className="orderBrand"><img src="/favicon.ico" alt="" /><span><strong>清醒夢</strong><small>LUCID DREAM / ORDER</small></span></a>
       <p className="orderEyebrow">TODAY&apos;S ORDER PASS</p><h1>{showRecover ? '請洽店員' : '輸入今日點餐碼'}</h1>
       <p>{showRecover ? '向店員取得六位數協助碼，與遊戲 ID 一起輸入即可找回今天的點餐網址。' : '若由店員提供專屬網址，頁面會自動帶入；也可手動貼上點餐碼。'}</p>
       {notice.message ? <div className={`orderNotice ${notice.error ? 'isError' : ''}`}>{notice.message}</div> : null}
@@ -203,7 +203,7 @@ function MealPage({ menu, cart, setCart }) {
   });
   return <div className="orderPage"><PageHeading kicker="FOOD & DRINK" title="一般點餐" text="信物餘額只會折抵餐點；未使用完的餘額保留到今天後續加點。" />
     <div className="orderCategoryRail">{showSets ? <button className={category === 'sets' ? 'isActive' : ''} onClick={() => setCategory('sets')}>套餐</button> : null}{(menu.categories || []).map((item) => <button className={category === item.id ? 'isActive' : ''} key={item.id} onClick={() => setCategory(item.id)}>{item.categoryName}</button>)}</div>
-    <div className="orderProductGrid">{products.map((item) => <article key={item.id} className="orderProductCard"><div className="orderProductImage">{item.imageUrl ? <img src={item.imageUrl} alt="" /> : <span>LD</span>}</div><div><small>{item.kind === 'set' ? 'SET' : 'MENU'}</small><h2>{item.name}</h2><p>{item.description || '現場供應品項'}</p></div><footer><strong>{money(item.price)}</strong><button type="button" onClick={() => add(item)}>加入</button></footer></article>)}</div>
+    <div className="orderProductGrid">{products.map((item) => <article key={item.id} className="orderProductCard"><div className="orderProductImage">{item.imageUrl ? <img src={item.imageUrl} alt="" /> : <span>LD</span>}</div><div><small>{item.kind === 'set' ? 'SET' : 'MENU'}</small><h2>{item.name}</h2><p>{item.description || '現場供應品項'}</p></div><footer><strong>{money(item.price)}</strong><button type="button" aria-label={`加入 ${item.name}`} onClick={() => add(item)}><span aria-hidden="true">＋</span> 加入</button></footer></article>)}</div>
   </div>;
 }
 

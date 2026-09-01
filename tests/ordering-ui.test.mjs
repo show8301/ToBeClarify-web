@@ -34,11 +34,11 @@ test('customer ordering implements meals, staff-first nomination, tips, dependen
 
 test('admin ordering workspace groups customers and exposes permission-gated operating settings', async () => {
   const source = await readFile(new URL('../features/admin/orders/AdminOrdersPage.jsx', import.meta.url), 'utf8');
-  const router = await readFile(new URL('../features/admin/shell/AdminRouter.jsx', import.meta.url), 'utf8');
+  const routes = await readFile(new URL('../features/admin/shell/AdminRoutes.jsx', import.meta.url), 'utf8');
   const layout = await readFile(new URL('../features/admin/layout/AdminLayout.jsx', import.meta.url), 'utf8');
   const api = await readFile(new URL('../features/admin/api/client.js', import.meta.url), 'utf8');
 
-  assert.match(router, /\/admin\/orders/);
+  assert.match(routes, /AdminOrdersRoute/);
   assert.match(layout, /點單管理/);
   assert.match(source, /待處理/);
   assert.match(source, /其他顧客/);

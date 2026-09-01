@@ -5,7 +5,7 @@ import test from 'node:test';
 test('staff avatar editor keeps separate upload, crop, and delete actions', async () => {
   const source = await readFile(new URL('../features/admin/media/AdminAvatarPicker.jsx', import.meta.url), 'utf8');
   const processor = await readFile(new URL('../features/admin/media/AdminImageProcessingProvider.jsx', import.meta.url), 'utf8');
-  const client = await readFile(new URL('../features/admin/shell/AdminClient.tsx', import.meta.url), 'utf8');
+  const providers = await readFile(new URL('../features/admin/shell/AdminProviders.tsx', import.meta.url), 'utf8');
   const shared = await readFile(new URL('../features/admin/shared/AdminShared.jsx', import.meta.url), 'utf8');
   const imageProcessing = await readFile(new URL('../features/admin/media/adminImageProcessing.js', import.meta.url), 'utf8');
   const proxy = await readFile(new URL('../app/api/admin-media/[id]/route.ts', import.meta.url), 'utf8');
@@ -24,7 +24,7 @@ test('staff avatar editor keeps separate upload, crop, and delete actions', asyn
   assert.match(imageProcessing, /canvas\.width = options\.width/);
   assert.match(imageProcessing, /canvas\.height = options\.height/);
   assert.match(processor, /crop: shouldCrop = false/);
-  assert.match(client, /<AdminImageProcessingProvider>/);
+  assert.match(providers, /<AdminImageProcessingProvider>/);
   assert.match(source, /useAdminImageProcessing/);
   assert.match(shared, /processImage\(\{ file, crop: false \}\)/);
 });
@@ -135,7 +135,7 @@ test('password recovery is linked from login and reset keys are permission-gated
   const recovery = await readFile(new URL('../features/admin/auth/AdminForgotPasswordPage.jsx', import.meta.url), 'utf8');
   const credentials = await readFile(new URL('../features/admin/dashboard/AdminCredentialTools.jsx', import.meta.url), 'utf8');
   const dashboard = await readFile(new URL('../features/admin/dashboard/AdminHomePage.jsx', import.meta.url), 'utf8');
-  const router = await readFile(new URL('../features/admin/shell/AdminRouter.jsx', import.meta.url), 'utf8');
+  const routes = await readFile(new URL('../features/admin/shell/AdminRoutes.jsx', import.meta.url), 'utf8');
   const api = await readFile(new URL('../features/admin/api/client.js', import.meta.url), 'utf8');
 
   assert.match(login, /href="\/admin\/forgot-password"/);
@@ -149,7 +149,8 @@ test('password recovery is linked from login and reset keys are permission-gated
   assert.match(credentials, /adminApi\.getPasswordResetKey/);
   assert.match(credentials, /經理只能協助店員/);
   assert.match(dashboard, /canManageAll \? <AdminCredentialTools \/>/);
-  assert.match(router, /isPasswordRecoveryRoute/);
+  assert.match(routes, /AdminForgotPasswordRoute/);
+  assert.match(routes, /<AdminAnonymousRoute><AdminForgotPasswordPage/);
   assert.match(api, /\/auth\/password-reset-key/);
   assert.match(api, /\/auth\/forgot-password\/reset/);
 });

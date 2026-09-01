@@ -1,16 +1,11 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
-import { usePathname, useRouter } from "next/navigation";
-import { AdminRouter } from "@/features/admin/shell/AdminRouter.jsx";
+import { useEffect } from "react";
+import { AdminAuthProvider } from "@/features/admin/auth/AdminAuthContext.jsx";
 import { AdminImageProcessingProvider } from "@/features/admin/media/AdminImageProcessingProvider.jsx";
 import { AdminToastProvider } from "@/features/admin/shared/AdminToastProvider.jsx";
 
-export default function AdminClient() {
-  const pathname = usePathname();
-  const router = useRouter();
-  const navigate = useCallback((route: string) => router.push(route), [router]);
-
+export default function AdminProviders({ children }: Readonly<{ children: React.ReactNode }>) {
   useEffect(() => {
     let savedTheme = "";
     try {
@@ -25,7 +20,7 @@ export default function AdminClient() {
     <div className="adminTheme">
       <AdminToastProvider>
         <AdminImageProcessingProvider>
-          <AdminRouter route={pathname} navigate={navigate} />
+          <AdminAuthProvider>{children}</AdminAuthProvider>
         </AdminImageProcessingProvider>
       </AdminToastProvider>
     </div>

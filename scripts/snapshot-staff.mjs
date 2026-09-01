@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 
 const API = "https://api.marchgroup.net/api/client/staff-members";
-const output = new URL("../app/data/staff-snapshot.json", import.meta.url);
+const output = new URL("../data/snapshots/staff.json", import.meta.url);
 
 async function request(url) {
   const response = await fetch(url, { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(12000) });
@@ -30,6 +30,6 @@ const detailEntries = await mapWithConcurrency(list, 5, async (person) => {
 });
 
 const snapshot = { generatedAt: new Date().toISOString(), list, details: Object.fromEntries(detailEntries) };
-await mkdir(new URL("../app/data/", import.meta.url), { recursive: true });
+await mkdir(new URL("../data/snapshots/", import.meta.url), { recursive: true });
 await writeFile(output, `${JSON.stringify(snapshot, null, 2)}\n`, "utf8");
 console.log(`Saved ${list.length} staff records to ${output.pathname}`);

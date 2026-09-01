@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import StaffProfile from "../../StaffProfile";
-import { getStaffDetail, getStaffList } from "../../staff-data";
+import StaffProfile from "@/features/staff/components/StaffProfile";
+import { getStaffDetail, getStaffList } from "@/features/staff/server/data";
 
 export async function generateMetadata({params}:{params:Promise<{id:string}>}):Promise<Metadata>{
   const {id}=await params;

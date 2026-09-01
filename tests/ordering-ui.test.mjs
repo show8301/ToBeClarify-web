@@ -3,8 +3,8 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 test('customer ordering implements meals, staff-first nomination, tips, dependent deletion, recovery, and order history', async () => {
-  const source = await readFile(new URL('../app/order/OrderClient.jsx', import.meta.url), 'utf8');
-  const api = await readFile(new URL('../app/order/ordering-api.js', import.meta.url), 'utf8');
+  const source = await readFile(new URL('../features/ordering/components/OrderClient.jsx', import.meta.url), 'utf8');
+  const api = await readFile(new URL('../features/ordering/api/client.js', import.meta.url), 'utf8');
 
   assert.match(source, /一般點餐/);
   assert.match(source, /先選店員，再查看該店員提供的服務/);
@@ -16,7 +16,7 @@ test('customer ordering implements meals, staff-first nomination, tips, dependen
   assert.match(source, /店員小費比例/);
   assert.match(source, /tipPresetAmounts/);
   assert.match(source, /tipMoney/);
-  assert.match(await readFile(new URL('../app/order/ordering.css', import.meta.url), 'utf8'), /\.tipRange input\{direction:rtl\}/);
+  assert.match(await readFile(new URL('../styles/ordering/site.css', import.meta.url), 'utf8'), /\.tipRange input\{direction:rtl\}/);
   assert.match(source, /找回並刷新點餐 UI/);
   assert.match(source, /我的訂單/);
   assert.match(source, /純陪伴/);
@@ -33,12 +33,12 @@ test('customer ordering implements meals, staff-first nomination, tips, dependen
 });
 
 test('admin ordering workspace groups customers and exposes permission-gated operating settings', async () => {
-  const source = await readFile(new URL('../app/admin/_components/AdminOrdersPage.jsx', import.meta.url), 'utf8');
-  const router = await readFile(new URL('../app/admin/_components/AdminRouter.jsx', import.meta.url), 'utf8');
-  const layout = await readFile(new URL('../app/admin/_components/AdminLayout.jsx', import.meta.url), 'utf8');
-  const api = await readFile(new URL('../app/admin/admin-api.js', import.meta.url), 'utf8');
+  const source = await readFile(new URL('../features/admin/orders/AdminOrdersPage.jsx', import.meta.url), 'utf8');
+  const routes = await readFile(new URL('../features/admin/shell/AdminRoutes.jsx', import.meta.url), 'utf8');
+  const layout = await readFile(new URL('../features/admin/layout/AdminLayout.jsx', import.meta.url), 'utf8');
+  const api = await readFile(new URL('../features/admin/api/client.js', import.meta.url), 'utf8');
 
-  assert.match(router, /\/admin\/orders/);
+  assert.match(routes, /AdminOrdersRoute/);
   assert.match(layout, /點單管理/);
   assert.match(source, /待處理/);
   assert.match(source, /其他顧客/);
@@ -105,7 +105,7 @@ test('ordering API client submits a service add-on against the parent nomination
     });
   };
   try {
-    const moduleUrl = new URL('../app/order/ordering-api.js', import.meta.url);
+    const moduleUrl = new URL('../features/ordering/api/client.js', import.meta.url);
     moduleUrl.searchParams.set('addon-test', `${process.pid}-${Date.now()}`);
     const { orderingApi } = await import(moduleUrl.href);
     await orderingApi.submitAddon('secure-token', {
@@ -131,7 +131,7 @@ test('ordering API client sends cart snapshots to the customer endpoint', async 
     });
   };
   try {
-    const moduleUrl = new URL('../app/order/ordering-api.js', import.meta.url);
+    const moduleUrl = new URL('../features/ordering/api/client.js', import.meta.url);
     moduleUrl.searchParams.set('test', `${process.pid}-${Date.now()}`);
     const { orderingApi } = await import(moduleUrl.href);
     await orderingApi.submit('secure-token', { meals: [{ referenceId: 'meal-1', kind: 'item', quantity: 2 }] });

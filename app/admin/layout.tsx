@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import "./admin.css";
+import AdminProviders from "@/features/admin/shell/AdminProviders";
+import "../../styles/admin/site.css";
 
 export const metadata: Metadata = {
   title: "清醒夢｜後台管理",
@@ -8,5 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function AdminRouteLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return children;
+  return <AdminProviders>{children}</AdminProviders>;
 }

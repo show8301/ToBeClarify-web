@@ -6,19 +6,14 @@ param(
     [string]$DeployPath,
 
     [Parameter(Mandatory = $true)]
+    [ValidateSet('production', 'development')]
+    [string]$TargetEnvironment,
+
+    [Parameter(Mandatory = $true)]
     [string]$HealthCheckUrl,
 
     [Parameter(Mandatory = $true)]
-    [ValidateSet('ToBeClarify_web', 'ToBeClarify_web_dev')]
-    [string]$ExpectedDeployLeaf,
-
-    [Parameter(Mandatory = $true)]
-    [ValidateRange(1024, 65535)]
-    [int]$NodePort,
-
-    [Parameter(Mandatory = $true)]
-    [ValidateNotNullOrEmpty()]
-    [string]$TaskName,
+    [string]$SiblingHealthCheckUrl,
 
     [Parameter(Mandatory = $true)]
     [ValidatePattern('^[0-9A-Fa-f]{7,64}$')]
@@ -26,7 +21,11 @@ param(
 
     [string]$AdminApiBaseUrl,
 
-    [string]$PublicMediaBaseUrl
+    [string]$PublicMediaBaseUrl,
+
+    [string]$PublicClientApiBaseUrl,
+
+    [string]$OrderingApiBaseUrl
 )
 
 Set-StrictMode -Version Latest
@@ -311,6 +310,115 @@ function Wait-VinextHealth {
     throw "Health check did not succeed for $Url. Last error: $lastError"
 }
 
+function Wait-VinextAlive {
+    param(
+        [Parameter(Mandatory = $true)][string]$Url,
+        [Parameter(Mandatory = $true)][int]$Attempts
+    )
+
+    $lastError = $null
+    for ($attempt = 1; $attempt -le $Attempts; $attempt++) {
+        try {
+            $separator = if ($Url.Contains('?')) { '&' } else { '?' }
+            $cacheBuster = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
+            $response = Invoke-WebRequest -Uri "$Url${separator}deploymentCheck=$cacheBuster" -UseBasicParsing -TimeoutSec 15
+            if ($response.StatusCode -ge 200 -and $response.StatusCode -lt 400) {
+                $payload = $response.Content | ConvertFrom-Json
+                $deploymentSha = [string]$payload.deploymentSha
+                if ($payload.status -eq 'ok' -and $deploymentSha -match '^[0-9A-Fa-f]{7,64}$') {
+                    return $deploymentSha
+                }
+                $lastError = "Unexpected health payload (status=$($payload.status), deploymentSha=$deploymentSha)"
+            }
+            else {
+                $lastError = "HTTP $($response.StatusCode)"
+            }
+        }
+        catch {
+            $lastError = $_.Exception.Message
+        }
+
+        Start-Sleep -Seconds 2
+    }
+
+    throw "Health check did not report a live Vinext deployment for $Url. Last error: $lastError"
+}
+
+function Assert-VinextTaskRunning {
+    param([Parameter(Mandatory = $true)][string]$Name)
+
+    $task = Get-ScheduledTask -TaskName $Name -ErrorAction SilentlyContinue
+    if ($null -eq $task) {
+        throw "The protected sibling Scheduled Task does not exist: $Name"
+    }
+    if ($task.State -ne 'Running') {
+        throw "The protected sibling Scheduled Task is not running: $Name (state=$($task.State))"
+    }
+}
+
+function Assert-VinextTaskIdentity {
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [Parameter(Mandatory = $true)][string]$AppPath,
+        [Parameter(Mandatory = $true)][int]$Port,
+        [switch]$AllowMissing
+    )
+
+    $task = Get-ScheduledTask -TaskName $Name -ErrorAction SilentlyContinue
+    if ($null -eq $task) {
+        if ($AllowMissing) {
+            return $false
+        }
+        throw "The protected Scheduled Task does not exist: $Name"
+    }
+
+    $actions = @($task.Actions)
+    if ($actions.Count -ne 1) {
+        throw "Scheduled Task $Name has an unexpected number of actions: $($actions.Count)"
+    }
+
+    $expectedAppPath = Get-NormalizedPath -Path $AppPath
+    $workingDirectory = Get-NormalizedPath -Path ([string]$actions[0].WorkingDirectory)
+    $arguments = [string]$actions[0].Arguments
+    $hasExpectedAppPath = $arguments.IndexOf($expectedAppPath, [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+    $portPattern = '(?i)(?:^|\s)-Port(?:\s+|=)"?{0}"?(?:\s|$)' -f $Port
+    $hasExpectedPort = $arguments -match $portPattern
+
+    if ($workingDirectory -ine $expectedAppPath -or -not $hasExpectedAppPath -or -not $hasExpectedPort) {
+        throw "Scheduled Task $Name is not bound to the protected identity (path=$expectedAppPath, port=$Port)."
+    }
+
+    return $true
+}
+
+$environmentConfig = if ($TargetEnvironment -eq 'production') {
+    [pscustomobject]@{
+        DeployLeaf = 'ToBeClarify_web'
+        NodePort = 4300
+        TaskName = 'ToBeClarify Vinext PROD'
+        SiblingDeployLeaf = 'ToBeClarify_web_dev'
+        SiblingNodePort = 4310
+        SiblingTaskName = 'ToBeClarify Vinext DEV'
+    }
+}
+else {
+    [pscustomobject]@{
+        DeployLeaf = 'ToBeClarify_web_dev'
+        NodePort = 4310
+        TaskName = 'ToBeClarify Vinext DEV'
+        SiblingDeployLeaf = 'ToBeClarify_web'
+        SiblingNodePort = 4300
+        SiblingTaskName = 'ToBeClarify Vinext PROD'
+    }
+}
+
+$ExpectedDeployLeaf = $environmentConfig.DeployLeaf
+$NodePort = [int]$environmentConfig.NodePort
+$TaskName = [string]$environmentConfig.TaskName
+$SiblingDeployLeaf = [string]$environmentConfig.SiblingDeployLeaf
+$SiblingNodePort = [int]$environmentConfig.SiblingNodePort
+$SiblingTaskName = [string]$environmentConfig.SiblingTaskName
+
 $artifactRoot = Get-NormalizedPath -Path (Resolve-Path -LiteralPath $ArtifactPath).Path
 $deployRoot = Get-NormalizedPath -Path $DeployPath
 $deployParent = Get-NormalizedPath -Path (Split-Path -Parent $deployRoot)
@@ -323,12 +431,24 @@ if ($deployLeaf -ine $ExpectedDeployLeaf) {
 if ([string]::IsNullOrWhiteSpace($HealthCheckUrl)) {
     throw 'The deployment health check URL is not configured.'
 }
+if ([string]::IsNullOrWhiteSpace($SiblingHealthCheckUrl)) {
+    throw 'The sibling deployment health check URL is not configured.'
+}
 
 if (-not (Test-Path -LiteralPath $deployParent -PathType Container)) {
     throw "The deployment parent directory does not exist: $deployParent"
 }
 
 $publicHealthCheckUrl = Get-HealthCheckUrl -BaseUrl $HealthCheckUrl
+$siblingPublicHealthCheckUrl = Get-HealthCheckUrl -BaseUrl $SiblingHealthCheckUrl
+if ($publicHealthCheckUrl -ieq $siblingPublicHealthCheckUrl) {
+    throw 'The target and sibling health check URLs must be different.'
+}
+
+$siblingDeployRoot = Get-NormalizedPath -Path (Join-Path $deployParent $SiblingDeployLeaf)
+if ($deployRoot -ieq $siblingDeployRoot) {
+    throw 'The target and sibling deployment directories must be different.'
+}
 
 $requiredFiles = @(
     'dist\server\index.js',
@@ -366,6 +486,22 @@ $prerequisiteScript = Join-Path $PSScriptRoot 'test-iis-reverse-proxy-prerequisi
 if ($null -eq (Get-Command Register-ScheduledTask -ErrorAction SilentlyContinue)) {
     throw 'The Windows ScheduledTasks module is not available on the deployment runner.'
 }
+
+# Refuse to touch the target when the other site is already unhealthy. This
+# distinguishes a pre-existing outage from any effect of the current deploy.
+Assert-VinextTaskIdentity `
+    -Name $SiblingTaskName `
+    -AppPath $siblingDeployRoot `
+    -Port $SiblingNodePort | Out-Null
+Assert-VinextTaskRunning -Name $SiblingTaskName
+$siblingLocalHealthCheckUrl = "http://127.0.0.1:$SiblingNodePort/api/health"
+$siblingLocalSha = Wait-VinextAlive -Url $siblingLocalHealthCheckUrl -Attempts 3
+$siblingPublicSha = Wait-VinextAlive -Url $siblingPublicHealthCheckUrl -Attempts 3
+if ($siblingLocalSha -ne $siblingPublicSha) {
+    throw "The protected sibling reports different deployments locally and through IIS (local=$siblingLocalSha, public=$siblingPublicSha)."
+}
+$siblingDeploymentSha = $siblingLocalSha
+Write-Host "Protected sibling verified before deployment: $SiblingTaskName ($siblingDeploymentSha)"
 
 $stagingRoot = Join-Path $deployParent "$ExpectedDeployLeaf.staging"
 $rollbackRoot = Join-Path $deployParent "$ExpectedDeployLeaf.rollback"
@@ -407,8 +543,22 @@ if (-not [string]::IsNullOrWhiteSpace($AdminApiBaseUrl)) {
 if (-not [string]::IsNullOrWhiteSpace($PublicMediaBaseUrl)) {
     $runtimeConfig.PUBLIC_MEDIA_BASE_URL = $PublicMediaBaseUrl.TrimEnd('/')
 }
+if (-not [string]::IsNullOrWhiteSpace($PublicClientApiBaseUrl)) {
+    $runtimeConfig.PUBLIC_CLIENT_API_BASE_URL = $PublicClientApiBaseUrl.TrimEnd('/')
+}
+if (-not [string]::IsNullOrWhiteSpace($OrderingApiBaseUrl)) {
+    $runtimeConfig.ORDERING_API_BASE_URL = $OrderingApiBaseUrl.TrimEnd('/')
+}
 $runtimeConfig | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $stagingRoot 'runtime-config.json') -Encoding UTF8
 
+# Never stop a pre-existing target task unless its action is bound to this
+# environment's exact directory and port. A missing task is valid on first
+# deployment and will be created below.
+Assert-VinextTaskIdentity `
+    -Name $TaskName `
+    -AppPath $deployRoot `
+    -Port $NodePort `
+    -AllowMissing | Out-Null
 $hadExistingTask = Stop-VinextTask -Name $TaskName
 Stop-StaleVinextListener -Port $NodePort -AppPath $deployRoot
 
@@ -450,8 +600,21 @@ try {
         -Attempts 15 `
         -ExpectedDeploymentSha $DeploymentSha | Out-Null
 
+    # The deploy may only restart its own environment. Verify the sibling task,
+    # localhost listener, IIS route, and deployment SHA are unchanged.
+    Assert-VinextTaskRunning -Name $SiblingTaskName
+    Wait-VinextHealth `
+        -Url $siblingLocalHealthCheckUrl `
+        -Attempts 3 `
+        -ExpectedDeploymentSha $siblingDeploymentSha | Out-Null
+    Wait-VinextHealth `
+        -Url $siblingPublicHealthCheckUrl `
+        -Attempts 3 `
+        -ExpectedDeploymentSha $siblingDeploymentSha | Out-Null
+
     Write-Host "Vinext deployment completed: $deployRoot"
     Write-Host "Verified deployment SHA through IIS: $DeploymentSha"
+    Write-Host "Protected sibling remained healthy: $SiblingTaskName ($siblingDeploymentSha)"
     if ($hadExistingDeployment) {
         Write-Host "Rollback copy retained at: $rollbackRoot"
     }

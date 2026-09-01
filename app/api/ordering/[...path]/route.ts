@@ -1,11 +1,8 @@
-const DEFAULT_ORDERING_API_BASE_URL = "https://api.marchgroup.net/api/client/ordering";
+import { getOrderingApiBaseUrl } from "@/lib/server/upstream-config";
+
 const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
 type RouteContext = { params: Promise<{ path: string[] }> };
-
-function apiBaseUrl() {
-  return (process.env.ORDERING_API_BASE_URL?.trim() || DEFAULT_ORDERING_API_BASE_URL).replace(/\/$/, "");
-}
 
 function isSameOriginRequest(request: Request) {
   if (!MUTATING_METHODS.has(request.method.toUpperCase())) return true;
@@ -24,7 +21,7 @@ async function proxy(request: Request, { params }: RouteContext) {
     return Response.json({ success: false, message: "拒絕跨站點餐請求。", errorCode: "ORDER_ORIGIN_MISMATCH" }, { status: 403 });
   }
   const { path } = await params;
-  const upstreamUrl = new URL(`${apiBaseUrl()}/${path.map(encodeURIComponent).join("/")}`);
+  const upstreamUrl = new URL(`${getOrderingApiBaseUrl()}/${path.map(encodeURIComponent).join("/")}`);
   upstreamUrl.search = new URL(request.url).search;
   const headers = new Headers({ Accept: "application/json" });
   for (const name of ["content-type", "x-order-token"]) {

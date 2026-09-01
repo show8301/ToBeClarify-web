@@ -178,26 +178,29 @@
 }
 .orderTopbar {
   position:sticky;
-  min-height:72px;
+  min-height:58px;
+  padding-block:6px;
   border-bottom:1px solid #dfe3eb;
   background:rgba(249,250,252,.96);
   box-shadow:none;
 }
 .orderBrand img {
-  width:40px;
-  height:40px;
+  width:34px;
+  height:34px;
   padding:0;
   border:0;
 }
-.orderBrand strong { font-size:18px; }
+.orderBrand { gap:9px; }
+.orderBrand strong { font-size:16px; }
+.orderBrand small { margin-top:3px; font-size:7px; }
 .orderSessionChip,
 .orderCredit {
   border-color:#dfe3eb;
   background:#f4f6f9;
 }
 .orderBusinessBanner {
-  min-height:38px;
-  padding:7px 18px;
+  min-height:30px;
+  padding:4px 18px;
   border-bottom:1px solid #d8e4e5;
   background:#e5f1f0;
   color:#354c50;
@@ -207,15 +210,15 @@
 .orderBusinessBanner.isClosed { background:#444a61; color:#fff; }
 .orderTabs {
   position:sticky;
-  top:72px;
+  top:58px;
   gap:4px;
-  padding-block:8px;
+  padding-block:5px;
   border-bottom:1px solid #dfe3eb;
   background:rgba(245,247,250,.97);
 }
 .orderTabs button {
-  min-height:40px;
-  padding:7px 14px;
+  min-height:34px;
+  padding:5px 13px;
   border-color:transparent;
   background:transparent;
   font-size:12px;
@@ -255,7 +258,7 @@
   line-height:1.65;
 }
 .orderCategoryRail {
-  top:126px;
+  top:104px;
   margin:0 0 18px;
   padding:6px 0;
   background:rgba(238,241,246,.96);
@@ -303,7 +306,7 @@
 .orderProductCard footer button:hover { transform:none; box-shadow:none; background:#6379a1; }
 .orderProductCard footer button span { color:#fff; }
 .orderAside {
-  top:136px;
+  top:114px;
   border-color:#dfe3eb;
   border-radius:14px;
   background:#fbfcfd;
@@ -369,9 +372,9 @@
 }
 
 @media(max-width:620px){
-  .orderTopbar{position:relative;min-height:64px;background:#f9fafc}
-  .orderTopbar .orderBrand img{width:36px;height:36px}
-  .orderTabs{top:0;padding:7px 12px}.orderTabs button{min-height:38px;padding:6px 12px}
+  .orderTopbar{position:relative;min-height:56px;background:#f9fafc}
+  .orderTopbar .orderBrand img{width:32px;height:32px}
+  .orderTabs{top:0;padding:5px 12px}.orderTabs button{min-height:34px;padding:5px 11px}
   .orderWorkspace{padding:20px 14px 108px}
   .orderPageHeading{min-height:0;margin-bottom:16px;padding-bottom:17px}
   .orderPageHeading h1{font-size:36px}
@@ -388,17 +391,17 @@
 
 /* Guided ordering preview. */
 .orderSessionChip {
-  min-width:168px;
-  padding:9px 14px;
+  min-width:154px;
+  padding:6px 12px;
   border:1px solid #dfe3eb;
   border-radius:12px;
   background:#fff;
-  text-align:left;
+  text-align:center;
   box-shadow:0 3px 12px rgba(82,87,120,.05);
 }
-.orderSessionChip span { color:#7b8396; letter-spacing:.08em; }
-.orderSessionChip strong { margin:4px 0 3px; font-size:15px; line-height:1.2; }
-.orderSessionChip small { color:#65718b; letter-spacing:.08em; }
+.orderSessionChip span { color:#7b8396; font-size:7px; letter-spacing:.08em; }
+.orderSessionChip strong { margin:2px 0 0; font-size:14px; line-height:1.2; }
+.orderSessionChip small { display:none; }
 .orderPageHeading {
   margin-bottom:18px;
   padding-bottom:18px;

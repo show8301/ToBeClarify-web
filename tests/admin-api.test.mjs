@@ -13,7 +13,7 @@ test('staff status changes use the dedicated immediate-save endpoint', async () 
   };
 
   try {
-    const moduleUrl = new URL('../app/admin/admin-api.js', import.meta.url);
+    const moduleUrl = new URL('../features/admin/api/client.js', import.meta.url);
     moduleUrl.searchParams.set('test', `${process.pid}-${Date.now()}`);
     const { adminApi } = await import(moduleUrl.href);
     const result = await adminApi.updateStaffMemberStatus('staff/with space', { isWorkingToday: false });
@@ -101,7 +101,7 @@ test('password reset API methods use the admin auth endpoints', async () => {
   };
 
   try {
-    const moduleUrl = new URL('../app/admin/admin-api.js', import.meta.url);
+    const moduleUrl = new URL('../features/admin/api/client.js', import.meta.url);
     moduleUrl.searchParams.set('test', `${process.pid}-${Date.now()}`);
     const { adminApi } = await import(moduleUrl.href);
     const key = await adminApi.getPasswordResetKey({ loginName: 'clerk-demo' });
@@ -131,7 +131,7 @@ test('all staff list uses the dedicated developer endpoint', async () => {
   };
 
   try {
-    const moduleUrl = new URL('../app/admin/admin-api.js', import.meta.url);
+    const moduleUrl = new URL('../features/admin/api/client.js', import.meta.url);
     moduleUrl.searchParams.set('test', `${process.pid}-${Date.now()}-all-staff-list`);
     const { adminApi } = await import(moduleUrl.href);
     const result = await adminApi.getAllStaffList();
@@ -159,7 +159,7 @@ test('business-day override uses manager-only read/write endpoints', async () =>
   };
 
   try {
-    const moduleUrl = new URL('../app/admin/admin-api.js', import.meta.url);
+    const moduleUrl = new URL('../features/admin/api/client.js', import.meta.url);
     moduleUrl.searchParams.set('test', `${process.pid}-${Date.now()}-business-day-override`);
     const { adminApi } = await import(moduleUrl.href);
     await adminApi.getBusinessDayOverride();
@@ -202,7 +202,7 @@ test('operational business-day actions and coordination decisions use explicit e
   };
 
   try {
-    const moduleUrl = new URL('../app/admin/admin-api.js', import.meta.url);
+    const moduleUrl = new URL('../features/admin/api/client.js', import.meta.url);
     moduleUrl.searchParams.set('test', `${process.pid}-${Date.now()}-operational-day`);
     const { adminApi } = await import(moduleUrl.href);
     await adminApi.openBusinessPeriod({ businessDate: '2026-08-31', projectedCloseAt: '2026-09-01T02:00' });

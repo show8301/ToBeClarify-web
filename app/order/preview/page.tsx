@@ -1,5 +1,4 @@
-import "../ordering.css";
-import "../ordering-modern.css";
+import "../../../styles/ordering/site.css";
 
 const products = [
   { tag: "SIGNATURE", name: "月下特調", description: "藍柑橘、蝶豆花與清爽氣泡。", price: "600 G", tone: "isBlue" },

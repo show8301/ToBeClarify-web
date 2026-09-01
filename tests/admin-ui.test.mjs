@@ -2,12 +2,32 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
+const readStyles = async (...paths) => (await Promise.all(
+  paths.map((path) => readFile(new URL(path, import.meta.url), 'utf8')),
+)).join('\n');
+const publicStyles = () => readStyles(
+  '../styles/public/site.css',
+  '../styles/public/layers/00-foundation.css',
+  '../styles/public/layers/10-page-layouts.css',
+  '../styles/public/layers/20-theme-history.css',
+  '../styles/public/layers/30-pearl-theme.css',
+  '../styles/public/layers/40-refinements.css',
+);
+const adminStyles = () => readStyles(
+  '../styles/admin/site.css',
+  '../styles/admin/layers/00-foundation.css',
+  '../styles/admin/layers/10-management.css',
+  '../styles/admin/layers/20-ordering.css',
+  '../styles/admin/layers/30-public-previews.css',
+  '../styles/admin/layers/40-dark-and-operational.css',
+);
+
 test('staff avatar editor keeps separate upload, crop, and delete actions', async () => {
-  const source = await readFile(new URL('../app/admin/_components/AdminAvatarPicker.jsx', import.meta.url), 'utf8');
-  const processor = await readFile(new URL('../app/admin/_components/AdminImageProcessingProvider.jsx', import.meta.url), 'utf8');
-  const client = await readFile(new URL('../app/admin/AdminClient.tsx', import.meta.url), 'utf8');
-  const shared = await readFile(new URL('../app/admin/_components/AdminShared.jsx', import.meta.url), 'utf8');
-  const imageProcessing = await readFile(new URL('../app/admin/_components/adminImageProcessing.js', import.meta.url), 'utf8');
+  const source = await readFile(new URL('../features/admin/media/AdminAvatarPicker.jsx', import.meta.url), 'utf8');
+  const processor = await readFile(new URL('../features/admin/media/AdminImageProcessingProvider.jsx', import.meta.url), 'utf8');
+  const providers = await readFile(new URL('../features/admin/shell/AdminProviders.tsx', import.meta.url), 'utf8');
+  const shared = await readFile(new URL('../features/admin/shared/AdminShared.jsx', import.meta.url), 'utf8');
+  const imageProcessing = await readFile(new URL('../features/admin/media/adminImageProcessing.js', import.meta.url), 'utf8');
   const proxy = await readFile(new URL('../app/api/admin-media/[id]/route.ts', import.meta.url), 'utf8');
 
   assert.match(source, /上傳圖片/);
@@ -24,28 +44,50 @@ test('staff avatar editor keeps separate upload, crop, and delete actions', asyn
   assert.match(imageProcessing, /canvas\.width = options\.width/);
   assert.match(imageProcessing, /canvas\.height = options\.height/);
   assert.match(processor, /crop: shouldCrop = false/);
-  assert.match(client, /<AdminImageProcessingProvider>/);
+  assert.match(providers, /<AdminImageProcessingProvider>/);
   assert.match(source, /useAdminImageProcessing/);
   assert.match(shared, /processImage\(\{ file, crop: false \}\)/);
 });
 
 test('homepage slides expose an editable playback duration', async () => {
-  const source = await readFile(new URL('../app/admin/_components/AdminHomeSettingsPage.jsx', import.meta.url), 'utf8');
-  const landing = await readFile(new URL('../app/HomeLanding.tsx', import.meta.url), 'utf8');
+  const source = await readFile(new URL('../features/admin/home/AdminHomeSettingsPage.jsx', import.meta.url), 'utf8');
+  const landing = await readFile(new URL('../features/home/components/HomeLanding.tsx', import.meta.url), 'utf8');
 
   assert.match(source, /label="播放秒數"><input type="number"/);
   assert.match(source, /displaySeconds: Math\.min\(60, Math\.max\(1/);
   assert.match(source, /播放 \{Number\(item\.displaySeconds\) \|\| 10\} 秒/);
   assert.match(landing, /const seconds=Math\.min\(60,Math\.max\(1,Number\(current\?\.displaySeconds\)\|\|10\)\)/);
-  assert.match(landing, /fetch\("https:\/\/api\.marchgroup\.net\/api\/client\/home"/);
+  assert.match(landing, /fetch\("\/api\/public\/home"/);
+  assert.match(landing, /const \[shopInfo,setShopInfo\]=useState\(home\.shopInfo\)/);
+  assert.match(landing, /item\.settingKey==="shopInfo"/);
+  assert.match(landing, /setShopInfo/);
+});
+
+test('homepage and menu settings control the intended public content', async () => {
+  const homeSettings = await readFile(new URL('../features/admin/home/AdminHomeSettingsPage.jsx', import.meta.url), 'utf8');
+  const menuSettings = await readFile(new URL('../features/admin/menu/AdminMenuPage.jsx', import.meta.url), 'utf8');
+  const menuCatalog = await readFile(new URL('../features/menu/components/MenuCatalog.tsx', import.meta.url), 'utf8');
+  const ordering = await readFile(new URL('../features/ordering/components/OrderClient.jsx', import.meta.url), 'utf8');
+
+  assert.match(homeSettings, /label="關於區塊圖片"/);
+  assert.match(homeSettings, /value=\{site\.heroImage\}/);
+  assert.match(homeSettings, /pendingFile=\{site\.heroFile\}/);
+  assert.doesNotMatch(homeSettings, /label="價格備註"/);
+  assert.match(homeSettings, /delete settingValue\.pricingNote/);
+  assert.match(menuSettings, /settingKey === 'menuSettings'/);
+  assert.match(menuSettings, /label="客戶端顯示套餐區塊"/);
+  assert.match(menuSettings, /saveSiteSetting\('menuSettings'/);
+  assert.match(menuCatalog, /menu\.showSets!==false/);
+  assert.match(ordering, /menu\.showSets !== false/);
+  assert.match(ordering, /showSets \? <button/);
 });
 
 test('developer can control each public menu page from the admin home', async () => {
-  const dashboard = await readFile(new URL('../app/admin/_components/AdminHomePage.jsx', import.meta.url), 'utf8');
-  const api = await readFile(new URL('../app/admin/admin-api.js', import.meta.url), 'utf8');
-  const styles = await readFile(new URL('../app/admin/admin.css', import.meta.url), 'utf8');
-  const data = await readFile(new URL('../app/site-data.ts', import.meta.url), 'utf8');
-  const chrome = await readFile(new URL('../app/SiteChrome.tsx', import.meta.url), 'utf8');
+  const dashboard = await readFile(new URL('../features/admin/dashboard/AdminHomePage.jsx', import.meta.url), 'utf8');
+  const api = await readFile(new URL('../features/admin/api/client.js', import.meta.url), 'utf8');
+  const styles = await adminStyles();
+  const data = await readFile(new URL('../features/site/server/data.ts', import.meta.url), 'utf8');
+  const chrome = await readFile(new URL('../components/layout/SiteChrome.tsx', import.meta.url), 'utf8');
   const menu = await readFile(new URL('../app/menu/page.tsx', import.meta.url), 'utf8');
 
   assert.match(dashboard, /user\.role === 'developer'/);
@@ -69,9 +111,9 @@ test('developer can control each public menu page from the admin home', async ()
 });
 
 test('staff ordering settings expose buffer, staff nomination, and public service prices', async () => {
-  const source = await readFile(new URL('../app/admin/_components/AdminStaffSettingsPage.jsx', import.meta.url), 'utf8');
-  const archive = await readFile(new URL('../app/StaffArchive.tsx', import.meta.url), 'utf8');
-  const profile = await readFile(new URL('../app/StaffProfile.tsx', import.meta.url), 'utf8');
+  const source = await readFile(new URL('../features/admin/staff/AdminStaffSettingsPage.jsx', import.meta.url), 'utf8');
+  const archive = await readFile(new URL('../features/staff/components/StaffArchive.tsx', import.meta.url), 'utf8');
+  const profile = await readFile(new URL('../features/staff/components/StaffProfile.tsx', import.meta.url), 'utf8');
 
   assert.match(source, /label="中間休息時間"><input type="number"/);
   assert.match(source, /label="開放指名"/);
@@ -92,7 +134,7 @@ test('staff ordering settings expose buffer, staff nomination, and public servic
 });
 
 test('staff detail falls back to the live API when a character is absent from the snapshot', async () => {
-  const source = await readFile(new URL('../app/staff-data.ts', import.meta.url), 'utf8');
+  const source = await readFile(new URL('../features/staff/server/data.ts', import.meta.url), 'utf8');
   const page = await readFile(new URL('../app/staff/[id]/page.tsx', import.meta.url), 'utf8');
   const route = await readFile(new URL('../app/api/staff/[id]/route.ts', import.meta.url), 'utf8');
 
@@ -106,8 +148,8 @@ test('staff detail falls back to the live API when a character is absent from th
 });
 
 test('the detached public action returns to the top on desktop and mobile', async () => {
-  const source = await readFile(new URL('../app/SiteChrome.tsx', import.meta.url), 'utf8');
-  const styles = await readFile(new URL('../app/globals.css', import.meta.url), 'utf8');
+  const source = await readFile(new URL('../components/layout/SiteChrome.tsx', import.meta.url), 'utf8');
+  const styles = await publicStyles();
 
   assert.match(source, /aria-label="回到頁面頂端"/);
   assert.match(source, />TOP<\/b>/);
@@ -120,8 +162,8 @@ test('the detached public action returns to the top on desktop and mobile', asyn
 });
 
 test('the LD signature opens admin login only after five clicks', async () => {
-  const source = await readFile(new URL('../app/HomeLanding.tsx', import.meta.url), 'utf8');
-  const styles = await readFile(new URL('../app/globals.css', import.meta.url), 'utf8');
+  const source = await readFile(new URL('../features/home/components/HomeLanding.tsx', import.meta.url), 'utf8');
+  const styles = await publicStyles();
 
   assert.match(source, /adminTriggerClicks\.current\+=1/);
   assert.match(source, /adminTriggerClicks\.current<5/);
@@ -131,11 +173,12 @@ test('the LD signature opens admin login only after five clicks', async () => {
 });
 
 test('password recovery is linked from login and reset keys are permission-gated', async () => {
-  const login = await readFile(new URL('../app/admin/_components/AdminLoginPage.jsx', import.meta.url), 'utf8');
-  const recovery = await readFile(new URL('../app/admin/_components/AdminForgotPasswordPage.jsx', import.meta.url), 'utf8');
-  const layout = await readFile(new URL('../app/admin/_components/AdminLayout.jsx', import.meta.url), 'utf8');
-  const router = await readFile(new URL('../app/admin/_components/AdminRouter.jsx', import.meta.url), 'utf8');
-  const api = await readFile(new URL('../app/admin/admin-api.js', import.meta.url), 'utf8');
+  const login = await readFile(new URL('../features/admin/auth/AdminLoginPage.jsx', import.meta.url), 'utf8');
+  const recovery = await readFile(new URL('../features/admin/auth/AdminForgotPasswordPage.jsx', import.meta.url), 'utf8');
+  const credentials = await readFile(new URL('../features/admin/dashboard/AdminCredentialTools.jsx', import.meta.url), 'utf8');
+  const dashboard = await readFile(new URL('../features/admin/dashboard/AdminHomePage.jsx', import.meta.url), 'utf8');
+  const routes = await readFile(new URL('../features/admin/shell/AdminRoutes.jsx', import.meta.url), 'utf8');
+  const api = await readFile(new URL('../features/admin/api/client.js', import.meta.url), 'utf8');
 
   assert.match(login, /href="\/admin\/forgot-password"/);
   assert.match(login, /忘記密碼/);
@@ -143,11 +186,13 @@ test('password recovery is linked from login and reset keys are permission-gated
   assert.match(recovery, /adminApi\.resetPassword/);
   assert.match(recovery, /newPassword\.length < 8/);
   assert.match(recovery, /form\.newPassword !== form\.confirmPassword/);
-  assert.match(layout, /user\.role === 'developer' \|\| user\.role === 'manager'/);
-  assert.match(layout, /取得重設驗證碼/);
-  assert.match(layout, /adminApi\.getPasswordResetKey/);
-  assert.match(layout, /經理只能協助店員/);
-  assert.match(router, /isPasswordRecoveryRoute/);
+  assert.match(credentials, /user\.role === 'developer' \|\| user\.role === 'manager'/);
+  assert.match(credentials, /取得重設驗證碼/);
+  assert.match(credentials, /adminApi\.getPasswordResetKey/);
+  assert.match(credentials, /經理只能協助店員/);
+  assert.match(dashboard, /canManageAll \? <AdminCredentialTools \/>/);
+  assert.match(routes, /AdminForgotPasswordRoute/);
+  assert.match(routes, /<AdminAnonymousRoute><AdminForgotPasswordPage/);
   assert.match(api, /\/auth\/password-reset-key/);
   assert.match(api, /\/auth\/forgot-password\/reset/);
 });

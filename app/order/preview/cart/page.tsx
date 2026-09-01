@@ -1,5 +1,4 @@
-import "../../ordering.css";
-import "../../ordering-modern.css";
+import "../../../../styles/ordering/site.css";
 
 export default function OrderCartPreviewPage() {
   return <main className="orderShell orderMockShell">

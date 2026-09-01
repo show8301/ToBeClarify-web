@@ -1,7 +1,7 @@
-import AdminClient from "../AdminClient";
+import { AdminOrderListRoute } from "@/features/admin/shell/AdminRoutes.jsx";
 
 export const dynamic = "force-dynamic";
 
-export default function AdminOrderListRoute() {
-  return <AdminClient />;
+export default function AdminOrderListPageRoute() {
+  return <AdminOrderListRoute />;
 }

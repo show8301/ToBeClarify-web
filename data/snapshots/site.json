@@ -1,0 +1,1060 @@
+{
+  "generatedAt": "2026-08-17T03:15:23.014Z",
+  "home": {
+    "shopInfo": {
+      "name": "清醒夢",
+      "shortName": "Lucid Dream",
+      "subtitle": "《清醒夢》—— 一處為旅人留燈的夢境空間。在這裡，你可以沉浸於一場只屬於你的 RP 相遇。願每一場相遇，都成為值得珍藏的夢。",
+      "businessStatus": "今日營業 21:30 開席",
+      "openHours": "每週五、六 21:30 - 24:00",
+      "server": "鳳凰 ",
+      "address": "海霧村 2 - 32",
+      "entryNote": "入場前請先閱讀店內規則",
+      "footerText": "燭火、杯影與低聲的故事，為每位來訪者保留一席安靜的夜晚。",
+      "heroImage": "https://api.marchgroup.net/api/client/media/site-info-hero?variant=hero",
+      "about": [
+        "清醒夢是一間以深夜貴賓廳為主題的 FF14 RP 店，提供陪談、指名陪伴、活動企劃與角色沉浸式互動。",
+        "我們位於 鳳凰｜海霧村 第 2 區 第 32 號 海景別墅，歡迎想放慢腳步的冒險者入席。",
+        "店內重視彼此尊重與舒適節奏，第一次來訪也可以由店員協助說明入場、指名與拍照流程。"
+      ],
+      "pricing": [
+        {
+          "name": "入場席費",
+          "price": "30,000 Gil"
+        },
+        {
+          "name": "指名陪伴",
+          "price": "50,000 Gil / 30min"
+        },
+        {
+          "name": "包廂預約",
+          "price": "120,000 Gil / 場"
+        }
+      ]
+    },
+    "liveUpdateConfig": {
+      "lastUpdatedAt": "2026-07-01T22:18:36+08:00",
+      "scheduleStart": "20:00",
+      "scheduleEnd": "25:00",
+      "timeSlots": [
+        "20:00",
+        "20:30",
+        "21:00",
+        "21:30",
+        "22:00",
+        "22:30",
+        "23:00",
+        "23:30",
+        "24:00",
+        "24:30",
+        "25:00"
+      ]
+    },
+    "pageVisibility": {
+      "home": true,
+      "staff": true,
+      "gallery": true,
+      "menu": true,
+      "guestbook": true,
+      "liveUpdate": true,
+      "staffRanking": true,
+      "monetaryRanking": true
+    },
+    "menuHidden": false,
+    "navigation": [
+      {
+        "id": "8b70ffd3-a08a-59a2-9117-b637669c91f0",
+        "label": "首頁",
+        "routePath": "/home",
+        "placement": "both",
+        "isDropdown": false,
+        "children": []
+      },
+      {
+        "id": "d6d3a211-c5e5-5c0a-a8b8-fcdb3dd7a625",
+        "label": "店員珍藏",
+        "routePath": "/staff",
+        "placement": "both",
+        "isDropdown": false,
+        "children": []
+      },
+      {
+        "id": "872649de-9cf0-5a35-9d95-dda81bb4fda2",
+        "label": "艾歐澤亞週報",
+        "routePath": "/gallery",
+        "placement": "both",
+        "isDropdown": false,
+        "children": []
+      },
+      {
+        "id": "ee878c56-e538-5f2f-9e66-28dd20e0e107",
+        "label": "佳餚名錄",
+        "routePath": "/menu",
+        "placement": "both",
+        "isDropdown": false,
+        "children": []
+      },
+      {
+        "id": "a2a060d2-c715-5bcf-bc20-d460e374825f",
+        "label": "留聲機",
+        "routePath": "/guestbook",
+        "placement": "both",
+        "isDropdown": false,
+        "children": []
+      },
+      {
+        "id": "9db9f915-80a4-593c-8d3d-f1a5cb540dd2",
+        "label": "店舖動態",
+        "routePath": "/liveupdate",
+        "placement": "both",
+        "isDropdown": false,
+        "children": []
+      },
+      {
+        "id": "a62f1adf-c51a-5595-9056-032511f8154a",
+        "label": "榮譽殿堂",
+        "routePath": "/staffRanking",
+        "placement": "both",
+        "isDropdown": true,
+        "children": [
+          {
+            "id": "d915b0c5-1734-5740-8ac1-223467a77765",
+            "label": "店員榜",
+            "routePath": "/staffRanking",
+            "placement": "both",
+            "isDropdown": false,
+            "children": []
+          },
+          {
+            "id": "c6f74266-4877-511d-a8c2-950afa8354cb",
+            "label": "消費榜",
+            "routePath": "/monetaryRanking",
+            "placement": "both",
+            "isDropdown": false,
+            "children": []
+          }
+        ]
+      }
+    ],
+    "shopRules": [
+      {
+        "id": "63bd4f24-a374-5de5-b9fa-1fe1625d2280",
+        "ruleText": "請尊重所有店員與其他客人，禁止任何形式的人身攻擊、歧視或騷擾",
+        "ruleNote": null
+      },
+      {
+        "id": "2593413d-8a83-5cc8-aa3a-cdcc074ea71c",
+        "ruleText": "店內提供沉浸式 RP，角色言行不代表玩家本人，請尊重彼此設定，不強迫他人配合劇情",
+        "ruleNote": null
+      },
+      {
+        "id": "bd8b7282-4fae-5bb0-aa34-8892e771c89f",
+        "ruleText": "RP 中的衝突、毒舌或角色互動，皆建立於雙方同意的前提下，若對 RP 劇情或服務內容感到不適，可隨時告知店員調整或停止",
+        "ruleNote": null
+      },
+      {
+        "id": "3fba98f3-d067-5022-82a3-2aea89ac4b73",
+        "ruleText": "店內服務請依店員引導進行，部分服務需要等待，敬請耐心等候",
+        "ruleNote": null
+      },
+      {
+        "id": "f1199c4e-f984-4901-8ad8-e6e4dda9251d",
+        "ruleText": "若拍立得、照片、繪圖等需後製，將提供領取方式",
+        "ruleNote": "每位店員工作時常皆不一，詳細等待時間請詢問委託的店員"
+      }
+    ],
+    "slides": [
+      {
+        "id": "dcb8be6a-b6c3-4748-829a-ccd23c5a9422",
+        "imageUrl": "https://api.marchgroup.net/api/client/media/000a8c50-d71a-415b-ac2f-7f3164ffa7a3?variant=hero",
+        "displaySeconds": 10
+      },
+      {
+        "id": "941e41be-9555-4af5-8649-39bcd90bdbfa",
+        "imageUrl": "https://api.marchgroup.net/api/client/media/db20470c-57dc-44f2-b864-7ba33d26cc2f?variant=hero",
+        "displaySeconds": 10
+      },
+      {
+        "id": "f623f993-8ca0-480a-9709-6fa0a4c66939",
+        "imageUrl": "https://api.marchgroup.net/api/client/media/96d67340-dabd-4449-8e74-6f3c33454b14?variant=hero",
+        "displaySeconds": 10
+      },
+      {
+        "id": "68ca2676-ed9e-407e-87f6-bb2dc0c70a10",
+        "imageUrl": "https://api.marchgroup.net/api/client/media/8d72a915-bb34-4aed-bcd1-df109e4d406d?variant=hero",
+        "displaySeconds": 10
+      },
+      {
+        "id": "69c81b23-f0aa-46d3-b72f-11c5a36d2b0e",
+        "imageUrl": "https://api.marchgroup.net/api/client/media/5d7e6041-4127-4c89-8796-d2623c8ed30d?variant=hero",
+        "displaySeconds": 10
+      }
+    ],
+    "carousels": [
+      {
+        "id": "449e76c8-571c-5ad8-ae6c-c447d59ed0c9",
+        "albumId": "bdd7aa67-fc7b-5cd1-8737-1209f89fa9e0",
+        "title": "月下祝杯夜",
+        "summary": "以月光、低酒精調飲與雙人短談為主題的週末限定場。",
+        "eventTime": "2026/07/03 - 2026/07/04",
+        "ctaLabel": "查看完整活動",
+        "imageUrl": "https://api.marchgroup.net/api/client/media/bdd7aa67-fc7b-5cd1-8737-1209f89fa9e0?variant=hero",
+        "albumExists": true
+      },
+      {
+        "id": "e816695a-5ffa-533a-8f56-105f57a82147",
+        "albumId": "d53be2ec-cae8-50ec-9c67-629f7da473cb",
+        "title": "水晶留信企劃",
+        "summary": "替指定角色留下一封匿名短箋，活動結束後由店員朗讀或轉交。",
+        "eventTime": "2026/06/21 - 2026/07/12",
+        "ctaLabel": "查看完整活動",
+        "imageUrl": "https://api.marchgroup.net/api/client/media/d53be2ec-cae8-50ec-9c67-629f7da473cb?variant=hero",
+        "albumExists": true
+      },
+      {
+        "id": "2d6562d6-2fda-56f9-8cc7-4d0a9d0ae444",
+        "albumId": "9cb9b9a0-9bfa-5819-89ee-9234d0d293b3",
+        "title": "女王花園茶會",
+        "summary": "以雙人茶席、輕量角色訪談與庭園拍照為主軸的午後系夜場。",
+        "eventTime": "2026/07/18 - 2026/07/19",
+        "ctaLabel": "查看完整活動",
+        "imageUrl": "https://api.marchgroup.net/api/client/media/9cb9b9a0-9bfa-5819-89ee-9234d0d293b3?variant=hero",
+        "albumExists": true
+      },
+      {
+        "id": "1e447f7e-9cb3-58be-b95b-3ca0faedd790",
+        "albumId": "4a885c62-61b3-5111-a5e4-c23c7afdb4d5",
+        "title": "午夜神諭占卜夜",
+        "summary": "由當班店員以籤詩與角色提問延伸一段沉浸式占卜互動。",
+        "eventTime": "2026/07/25 - 2026/07/26",
+        "ctaLabel": "查看完整活動",
+        "imageUrl": "https://api.marchgroup.net/api/client/media/4a885c62-61b3-5111-a5e4-c23c7afdb4d5?variant=hero",
+        "albumExists": true
+      }
+    ]
+  },
+  "menu": {
+    "pricingRules": [
+      {
+        "id": "30d82316-469c-59fc-b200-2641ec4ff292",
+        "title": "入場席費",
+        "description": "第一版價格為 demo mock data，正式營運前可由後台或 API 維護。",
+        "priceText": "30,000 Gil"
+      },
+      {
+        "id": "38ea71a8-6629-5d72-b7fb-4e4af0ab5040",
+        "title": "指名陪伴",
+        "description": "第一版價格為 demo mock data，正式營運前可由後台或 API 維護。",
+        "priceText": "50,000 Gil / 30min"
+      },
+      {
+        "id": "d105de8b-abe9-5f5b-b9a0-9e4594bd51b7",
+        "title": "包廂預約",
+        "description": "第一版價格為 demo mock data，正式營運前可由後台或 API 維護。",
+        "priceText": "120,000 Gil / 場"
+      }
+    ],
+    "categories": [
+      {
+        "id": "fc787e1d-d302-5371-9586-96a6fd074a8e",
+        "categoryName": "主餐",
+        "categoryDescription": "以 RP 情境命名的主餐，適合搭配陪談、導覽或活動席次。",
+        "items": [
+          {
+            "id": "ac9556d5-bd0d-5b8a-a67d-95fec599ac55",
+            "categoryId": "fc787e1d-d302-5371-9586-96a6fd074a8e",
+            "itemName": "古殿香草烤肉盤",
+            "itemDescription": "香草、焦糖洋蔥與熱湯搭配的經典主餐。",
+            "price": 45000,
+            "imageUrl": "https://api.marchgroup.net/api/client/media/ac9556d5-bd0d-5b8a-a67d-95fec599ac55?variant=card",
+            "tags": null
+          },
+          {
+            "id": "e0783df5-714a-5221-8256-916b4ac041fc",
+            "categoryId": "fc787e1d-d302-5371-9586-96a6fd074a8e",
+            "itemName": "星燈奶油鮮魚",
+            "itemDescription": "以低光餐席為靈感的柔和奶油魚排。",
+            "price": 42000,
+            "imageUrl": "https://api.marchgroup.net/api/client/media/e0783df5-714a-5221-8256-916b4ac041fc?variant=card",
+            "tags": null
+          },
+          {
+            "id": "8cdcc8ca-d633-5e35-80c7-c07b9631a206",
+            "categoryId": "fc787e1d-d302-5371-9586-96a6fd074a8e",
+            "itemName": "薰衣草庭園燉飯",
+            "itemDescription": "花香蔬菜與白醬燉飯，適合安靜夜談。",
+            "price": 38000,
+            "imageUrl": "https://api.marchgroup.net/api/client/media/8cdcc8ca-d633-5e35-80c7-c07b9631a206?variant=card",
+            "tags": null
+          },
+          {
+            "id": "068c55d3-6553-5251-b24e-23930d8d782d",
+            "categoryId": "fc787e1d-d302-5371-9586-96a6fd074a8e",
+            "itemName": "星砂燉牛頰",
+            "itemDescription": "慢燉牛頰、根莖蔬菜與微辛香料，適合完整晚席。",
+            "price": 52000,
+            "imageUrl": "https://api.marchgroup.net/api/client/media/068c55d3-6553-5251-b24e-23930d8d782d?variant=card",
+            "tags": null
+          },
+          {
+            "id": "5777df96-2478-5519-8c62-2feb20f10136",
+            "categoryId": "fc787e1d-d302-5371-9586-96a6fd074a8e",
+            "itemName": "玫瑰鹽烤雞",
+            "itemDescription": "以玫瑰鹽與香草烘烤，外皮微脆、肉汁溫潤。",
+            "price": 40000,
+            "imageUrl": "https://api.marchgroup.net/api/client/media/5777df96-2478-5519-8c62-2feb20f10136?variant=card",
+            "tags": null
+          },
+          {
+            "id": "fea4ffc4-2a57-5727-b74b-4fec2c18d204",
+            "categoryId": "fc787e1d-d302-5371-9586-96a6fd074a8e",
+            "itemName": "午夜黑松露麵",
+            "itemDescription": "黑松露奶油醬與細麵，適合搭配吧台短談。",
+            "price": 46000,
+            "imageUrl": "https://api.marchgroup.net/api/client/media/fea4ffc4-2a57-5727-b74b-4fec2c18d204?variant=card",
+            "tags": null
+          }
+        ]
+      },
+      {
+        "id": "4d24bc38-975d-50f0-9066-3e8fa6b1158c",
+        "categoryName": "甜點",
+        "categoryDescription": "收尾用的小份甜點，偏向拍照、祝福與留言情境。",
+        "items": [
+          {
+            "id": "8d28909f-85d9-580a-9957-f486eb2ee59c",
+            "categoryId": "4d24bc38-975d-50f0-9066-3e8fa6b1158c",
+            "itemName": "玫瑰王冠小蛋糕",
+            "itemDescription": "粉紅玫瑰奶霜與金箔點綴的紀念甜點。",
+            "price": 28000,
+            "imageUrl": "https://api.marchgroup.net/api/client/media/8d28909f-85d9-580a-9957-f486eb2ee59c?variant=card",
+            "tags": null
+          },
+          {
+            "id": "947e1851-fb12-5712-b978-61d7e453c78c",
+            "categoryId": "4d24bc38-975d-50f0-9066-3e8fa6b1158c",
+            "itemName": "水晶焦糖布丁",
+            "itemDescription": "透明糖片與深色焦糖，適合搭配留影。",
+            "price": 24000,
+            "imageUrl": "https://api.marchgroup.net/api/client/media/947e1851-fb12-5712-b978-61d7e453c78c?variant=card",
+            "tags": null
+          },
+          {
+            "id": "bf9534fa-f472-594d-bc44-db5089353401",
+            "categoryId": "4d24bc38-975d-50f0-9066-3e8fa6b1158c",
+            "itemName": "午夜莓果聖代",
+            "itemDescription": "莓果、奶霜與黑巧碎片堆疊的深夜甜品。",
+            "price": 32000,
+            "imageUrl": "https://api.marchgroup.net/api/client/media/bf9534fa-f472-594d-bc44-db5089353401?variant=card",
+            "tags": null
+          },
+          {
+            "id": "eef5470e-e8b1-5d96-9309-43d89df6c563",
+            "categoryId": "4d24bc38-975d-50f0-9066-3e8fa6b1158c",
+            "itemName": "月露奶酪",
+            "itemDescription": "柔滑奶酪搭配透明糖露，口感清淡適合收尾。",
+            "price": 26000,
+            "imageUrl": "https://api.marchgroup.net/api/client/media/eef5470e-e8b1-5d96-9309-43d89df6c563?variant=card",
+            "tags": null
+          },
+          {
+            "id": "63db23b4-f3de-5926-b7f1-d77a4aef155e",
+            "categoryId": "4d24bc38-975d-50f0-9066-3e8fa6b1158c",
+            "itemName": "絲絨巧克力塔",
+            "itemDescription": "濃厚巧克力餡與薄脆塔皮，適合深夜甜食客。",
+            "price": 30000,
+            "imageUrl": "https://api.marchgroup.net/api/client/media/63db23b4-f3de-5926-b7f1-d77a4aef155e?variant=card",
+            "tags": null
+          },
+          {
+            "id": "19e728b9-4fbe-5a69-8996-11932c78e7ba",
+            "categoryId": "4d24bc38-975d-50f0-9066-3e8fa6b1158c",
+            "itemName": "花廳馬卡龍組",
+            "itemDescription": "三色馬卡龍與花香糖霜，適合拍照留念。",
+            "price": 25000,
+            "imageUrl": "https://api.marchgroup.net/api/client/media/19e728b9-4fbe-5a69-8996-11932c78e7ba?variant=card",
+            "tags": null
+          }
+        ]
+      },
+      {
+        "id": "e344e6a9-5fe9-5922-b434-9cec394c3556",
+        "categoryName": "飲品",
+        "categoryDescription": "吧台供應的無酒精與低酒精風味飲，作為陪談開場最穩定。",
+        "items": [
+          {
+            "id": "08b47776-fd11-541e-a34a-b908625bbf4c",
+            "categoryId": "e344e6a9-5fe9-5922-b434-9cec394c3556",
+            "itemName": "女王夜茶",
+            "itemDescription": "黑茶、莓果與淡淡花香，適合初次入席。",
+            "price": 18000,
+            "imageUrl": "https://api.marchgroup.net/api/client/media/08b47776-fd11-541e-a34a-b908625bbf4c?variant=card",
+            "tags": null
+          },
+          {
+            "id": "d3331269-6e05-5ca5-b328-53377d4495fa",
+            "categoryId": "e344e6a9-5fe9-5922-b434-9cec394c3556",
+            "itemName": "月下氣泡飲",
+            "itemDescription": "柑橘、蘇打與月色糖片，口感清爽。",
+            "price": 20000,
+            "imageUrl": "https://api.marchgroup.net/api/client/media/d3331269-6e05-5ca5-b328-53377d4495fa?variant=card",
+            "tags": null
+          },
+          {
+            "id": "787e0587-607b-51e9-8a48-b93c821342ca",
+            "categoryId": "e344e6a9-5fe9-5922-b434-9cec394c3556",
+            "itemName": "絲絨熱可可",
+            "itemDescription": "厚奶泡與可可香氣，適合安靜收尾。",
+            "price": 22000,
+            "imageUrl": "https://api.marchgroup.net/api/client/media/787e0587-607b-51e9-8a48-b93c821342ca?variant=card",
+            "tags": null
+          },
+          {
+            "id": "e3151f90-5e0f-57e6-a085-a2a0badd0353",
+            "categoryId": "e344e6a9-5fe9-5922-b434-9cec394c3556",
+            "itemName": "薰衣草冷泡茶",
+            "itemDescription": "清爽茶底與淡淡花香，適合搭配長時間陪談。",
+            "price": 19000,
+            "imageUrl": "https://api.marchgroup.net/api/client/media/e3151f90-5e0f-57e6-a085-a2a0badd0353?variant=card",
+            "tags": null
+          },
+          {
+            "id": "12a4697d-f184-53d8-a819-845ce3a3d6cb",
+            "categoryId": "e344e6a9-5fe9-5922-b434-9cec394c3556",
+            "itemName": "水晶檸檬露",
+            "itemDescription": "檸檬、蜂蜜與透明糖晶，酸甜明亮。",
+            "price": 21000,
+            "imageUrl": "https://api.marchgroup.net/api/client/media/12a4697d-f184-53d8-a819-845ce3a3d6cb?variant=card",
+            "tags": null
+          },
+          {
+            "id": "3d878939-8642-5126-bccb-997e58292307",
+            "categoryId": "e344e6a9-5fe9-5922-b434-9cec394c3556",
+            "itemName": "玫瑰雲朵拿鐵",
+            "itemDescription": "玫瑰糖漿、綿密奶泡與低咖啡因基底。",
+            "price": 23000,
+            "imageUrl": "https://api.marchgroup.net/api/client/media/3d878939-8642-5126-bccb-997e58292307?variant=card",
+            "tags": null
+          }
+        ]
+      }
+    ],
+    "showSets": true,
+    "sets": [
+      {
+        "id": "31d7f141-1790-50e3-b683-8e9261fbf961",
+        "setName": "月影迎賓套餐",
+        "setDescription": "薰衣草庭園燉飯、玫瑰王冠小蛋糕與女王夜茶，適合初訪入席。",
+        "setPrice": 78000,
+        "imageUrl": "https://api.marchgroup.net/api/client/media/31d7f141-1790-50e3-b683-8e9261fbf961?variant=card",
+        "items": [
+          {
+            "id": "37e3b253-0185-54ca-8f17-f26cec267c06",
+            "menuItemId": "8cdcc8ca-d633-5e35-80c7-c07b9631a206",
+            "itemName": "薰衣草庭園燉飯",
+            "itemRole": "main",
+            "quantity": 1
+          },
+          {
+            "id": "7afe8c5e-77c8-5b8c-ad9b-8a6ba05bc1a3",
+            "menuItemId": "8d28909f-85d9-580a-9957-f486eb2ee59c",
+            "itemName": "玫瑰王冠小蛋糕",
+            "itemRole": "dessert",
+            "quantity": 1
+          },
+          {
+            "id": "702b2ceb-b2f6-5dd0-8dc1-991d71db8050",
+            "menuItemId": "08b47776-fd11-541e-a34a-b908625bbf4c",
+            "itemName": "女王夜茶",
+            "itemRole": "drink",
+            "quantity": 1
+          }
+        ]
+      },
+      {
+        "id": "e8dca304-1a22-59b8-b025-08b316c46b1f",
+        "setName": "女王古殿雙人席",
+        "setDescription": "古殿香草烤肉盤、午夜莓果聖代與月下氣泡飲，適合雙人共享。",
+        "setPrice": 95000,
+        "imageUrl": "https://api.marchgroup.net/api/client/media/e8dca304-1a22-59b8-b025-08b316c46b1f?variant=card",
+        "items": [
+          {
+            "id": "fdbe0204-8316-593a-a4b9-226291dca068",
+            "menuItemId": "ac9556d5-bd0d-5b8a-a67d-95fec599ac55",
+            "itemName": "古殿香草烤肉盤",
+            "itemRole": "main",
+            "quantity": 1
+          },
+          {
+            "id": "fe3ac4b7-200c-540e-b695-6938e9cd2008",
+            "menuItemId": "bf9534fa-f472-594d-bc44-db5089353401",
+            "itemName": "午夜莓果聖代",
+            "itemRole": "dessert",
+            "quantity": 1
+          },
+          {
+            "id": "2ffbfa18-70b3-585c-800d-2e1a06f0ccea",
+            "menuItemId": "d3331269-6e05-5ca5-b328-53377d4495fa",
+            "itemName": "月下氣泡飲",
+            "itemRole": "drink",
+            "quantity": 1
+          }
+        ]
+      },
+      {
+        "id": "586f285b-8cc3-5e68-82bb-f9c8858be134",
+        "setName": "水晶祕語包廂",
+        "setDescription": "星燈奶油鮮魚、水晶焦糖布丁與絲絨熱可可，適合安靜夜談。",
+        "setPrice": 88000,
+        "imageUrl": "https://api.marchgroup.net/api/client/media/586f285b-8cc3-5e68-82bb-f9c8858be134?variant=card",
+        "items": [
+          {
+            "id": "d517c9f0-8bfb-58a0-be1c-fa5f3ba35b35",
+            "menuItemId": "e0783df5-714a-5221-8256-916b4ac041fc",
+            "itemName": "星燈奶油鮮魚",
+            "itemRole": "main",
+            "quantity": 1
+          },
+          {
+            "id": "e2509cd8-f11c-529e-97d1-04fc720e871e",
+            "menuItemId": "947e1851-fb12-5712-b978-61d7e453c78c",
+            "itemName": "水晶焦糖布丁",
+            "itemRole": "dessert",
+            "quantity": 1
+          },
+          {
+            "id": "5295e8a8-99bd-526a-a57f-e357711967d8",
+            "menuItemId": "787e0587-607b-51e9-8a48-b93c821342ca",
+            "itemName": "絲絨熱可可",
+            "itemRole": "drink",
+            "quantity": 1
+          }
+        ]
+      },
+      {
+        "id": "2ff773f4-86cb-5128-b64b-18df1261455b",
+        "setName": "夜曲巡禮套餐",
+        "setDescription": "星砂燉牛頰、月露奶酪與薰衣草冷泡茶，適合完整夜間巡禮。",
+        "setPrice": 102000,
+        "imageUrl": "https://api.marchgroup.net/api/client/media/2ff773f4-86cb-5128-b64b-18df1261455b?variant=card",
+        "items": [
+          {
+            "id": "f7620c23-bc04-5bb1-80af-231b83ae6f6d",
+            "menuItemId": "068c55d3-6553-5251-b24e-23930d8d782d",
+            "itemName": "星砂燉牛頰",
+            "itemRole": "main",
+            "quantity": 1
+          },
+          {
+            "id": "049a3030-853c-5e2b-824c-97d994fc5b8b",
+            "menuItemId": "eef5470e-e8b1-5d96-9309-43d89df6c563",
+            "itemName": "月露奶酪",
+            "itemRole": "dessert",
+            "quantity": 1
+          },
+          {
+            "id": "facf6616-d873-546e-807e-9cbfc61045ff",
+            "menuItemId": "e3151f90-5e0f-57e6-a085-a2a0badd0353",
+            "itemName": "薰衣草冷泡茶",
+            "itemRole": "drink",
+            "quantity": 1
+          }
+        ]
+      }
+    ]
+  },
+  "albums": [
+    {
+      "id": "bdd7aa67-fc7b-5cd1-8737-1209f89fa9e0",
+      "albumTitle": "月下祝杯夜",
+      "albumDescription": "以月光、低酒精調飲與雙人短談為主題的週末限定花絮。",
+      "coverImageUrl": "https://api.marchgroup.net/api/client/media/bdd7aa67-fc7b-5cd1-8737-1209f89fa9e0?variant=card",
+      "periodText": "2026/07/03 - 2026/07/04",
+      "endsAt": "2026-07-04T23:59:59+08:00"
+    },
+    {
+      "id": "d53be2ec-cae8-50ec-9c67-629f7da473cb",
+      "albumTitle": "水晶留信企劃",
+      "albumDescription": "匿名短箋、朗讀席與水晶燈影構成的活動紀錄。",
+      "coverImageUrl": "https://api.marchgroup.net/api/client/media/d53be2ec-cae8-50ec-9c67-629f7da473cb?variant=card",
+      "periodText": "2026/06/21 - 2026/07/12",
+      "endsAt": "2026-07-12T23:59:59+08:00"
+    },
+    {
+      "id": "9cb9b9a0-9bfa-5819-89ee-9234d0d293b3",
+      "albumTitle": "女王花園茶會",
+      "albumDescription": "以雙人茶席、輕量角色訪談與庭園拍照為主軸的午後系夜場。",
+      "coverImageUrl": "https://api.marchgroup.net/api/client/media/9cb9b9a0-9bfa-5819-89ee-9234d0d293b3?variant=card",
+      "periodText": "2026/07/18 - 2026/07/19",
+      "endsAt": "2026-07-19T23:59:59+08:00"
+    },
+    {
+      "id": "4a885c62-61b3-5111-a5e4-c23c7afdb4d5",
+      "albumTitle": "午夜神諭占卜夜",
+      "albumDescription": "由當班店員以籤詩與角色提問延伸一段沉浸式占卜互動。",
+      "coverImageUrl": "https://api.marchgroup.net/api/client/media/4a885c62-61b3-5111-a5e4-c23c7afdb4d5?variant=card",
+      "periodText": "2026/07/25 - 2026/07/26",
+      "endsAt": "2026-07-26T23:59:59+08:00"
+    }
+  ],
+  "albumDetails": {
+    "bdd7aa67-fc7b-5cd1-8737-1209f89fa9e0": {
+      "id": "bdd7aa67-fc7b-5cd1-8737-1209f89fa9e0",
+      "albumTitle": "月下祝杯夜",
+      "albumDescription": "以月光、低酒精調飲與雙人短談為主題的週末限定花絮。",
+      "coverImageUrl": "https://api.marchgroup.net/api/client/media/bdd7aa67-fc7b-5cd1-8737-1209f89fa9e0?variant=card",
+      "periodText": "2026/07/03 - 2026/07/04",
+      "endsAt": "2026-07-04T23:59:59+08:00",
+      "details": [
+        "本輯收錄月下祝杯夜的吧台佈置、座席燭光、店員互動與客人紀念照。",
+        "照片以活動氛圍展示為主，正式上線後可接後台審核與公開狀態。"
+      ],
+      "items": [
+        {
+          "id": "28c761c1-4784-52a8-869e-db4d26748db2",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/28c761c1-4784-52a8-869e-db4d26748db2?variant=full",
+          "thumbnailUrl": "https://api.marchgroup.net/api/client/media/28c761c1-4784-52a8-869e-db4d26748db2?variant=thumbnail",
+          "title": "月下祝杯夜 01",
+          "caption": null,
+          "shotAt": "2026-07-04T23:59:59+08:00"
+        },
+        {
+          "id": "5fd166b7-29d0-516b-8ba6-df30cf1d8e19",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/5fd166b7-29d0-516b-8ba6-df30cf1d8e19?variant=full",
+          "thumbnailUrl": "https://api.marchgroup.net/api/client/media/5fd166b7-29d0-516b-8ba6-df30cf1d8e19?variant=thumbnail",
+          "title": "月下祝杯夜 02",
+          "caption": null,
+          "shotAt": "2026-07-04T23:59:59+08:00"
+        },
+        {
+          "id": "ae29da27-c9aa-5976-b27a-098ba3294061",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/ae29da27-c9aa-5976-b27a-098ba3294061?variant=full",
+          "thumbnailUrl": "https://api.marchgroup.net/api/client/media/ae29da27-c9aa-5976-b27a-098ba3294061?variant=thumbnail",
+          "title": "月下祝杯夜 03",
+          "caption": null,
+          "shotAt": "2026-07-04T23:59:59+08:00"
+        },
+        {
+          "id": "49c15750-ce68-53e8-b377-d7f4dac6826d",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/49c15750-ce68-53e8-b377-d7f4dac6826d?variant=full",
+          "thumbnailUrl": "https://api.marchgroup.net/api/client/media/49c15750-ce68-53e8-b377-d7f4dac6826d?variant=thumbnail",
+          "title": "月下祝杯夜 04",
+          "caption": null,
+          "shotAt": "2026-07-04T23:59:59+08:00"
+        },
+        {
+          "id": "4f1ef896-ea3e-5027-a222-88addd21554c",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/4f1ef896-ea3e-5027-a222-88addd21554c?variant=full",
+          "thumbnailUrl": "https://api.marchgroup.net/api/client/media/4f1ef896-ea3e-5027-a222-88addd21554c?variant=thumbnail",
+          "title": "月下祝杯夜 05",
+          "caption": null,
+          "shotAt": "2026-07-04T23:59:59+08:00"
+        },
+        {
+          "id": "3d479e80-9d2a-5372-8974-f49fa8aa1b9b",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/3d479e80-9d2a-5372-8974-f49fa8aa1b9b?variant=full",
+          "thumbnailUrl": "https://api.marchgroup.net/api/client/media/3d479e80-9d2a-5372-8974-f49fa8aa1b9b?variant=thumbnail",
+          "title": "月下祝杯夜 06",
+          "caption": null,
+          "shotAt": "2026-07-04T23:59:59+08:00"
+        },
+        {
+          "id": "41734867-0939-5ba9-b6d4-8a721e1e71e8",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/41734867-0939-5ba9-b6d4-8a721e1e71e8?variant=full",
+          "thumbnailUrl": "https://api.marchgroup.net/api/client/media/41734867-0939-5ba9-b6d4-8a721e1e71e8?variant=thumbnail",
+          "title": "月下祝杯夜 07",
+          "caption": null,
+          "shotAt": "2026-07-04T23:59:59+08:00"
+        },
+        {
+          "id": "ad5e3387-2de9-5c04-bb44-f68d5390b3c3",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/ad5e3387-2de9-5c04-bb44-f68d5390b3c3?variant=full",
+          "thumbnailUrl": "https://api.marchgroup.net/api/client/media/ad5e3387-2de9-5c04-bb44-f68d5390b3c3?variant=thumbnail",
+          "title": "月下祝杯夜 08",
+          "caption": null,
+          "shotAt": "2026-07-04T23:59:59+08:00"
+        }
+      ]
+    },
+    "d53be2ec-cae8-50ec-9c67-629f7da473cb": {
+      "id": "d53be2ec-cae8-50ec-9c67-629f7da473cb",
+      "albumTitle": "水晶留信企劃",
+      "albumDescription": "匿名短箋、朗讀席與水晶燈影構成的活動紀錄。",
+      "coverImageUrl": "https://api.marchgroup.net/api/client/media/d53be2ec-cae8-50ec-9c67-629f7da473cb?variant=card",
+      "periodText": "2026/06/21 - 2026/07/12",
+      "endsAt": "2026-07-12T23:59:59+08:00",
+      "details": [
+        "花絮聚焦留言卡、朗讀桌、店內水晶裝飾與活動期間的安靜角落。",
+        "為避免暴露客人資訊，正式資料應只展示已審核的公開投稿。"
+      ],
+      "items": [
+        {
+          "id": "5f0c1eb7-5f06-5ed2-8b37-262e38627853",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/5f0c1eb7-5f06-5ed2-8b37-262e38627853?variant=full",
+          "thumbnailUrl": "https://api.marchgroup.net/api/client/media/5f0c1eb7-5f06-5ed2-8b37-262e38627853?variant=thumbnail",
+          "title": "水晶留信企劃 01",
+          "caption": null,
+          "shotAt": "2026-07-12T23:59:59+08:00"
+        },
+        {
+          "id": "7df11e4f-f0a4-5c25-96b1-c121763b844f",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/7df11e4f-f0a4-5c25-96b1-c121763b844f?variant=full",
+          "thumbnailUrl": "https://api.marchgroup.net/api/client/media/7df11e4f-f0a4-5c25-96b1-c121763b844f?variant=thumbnail",
+          "title": "水晶留信企劃 02",
+          "caption": null,
+          "shotAt": "2026-07-12T23:59:59+08:00"
+        },
+        {
+          "id": "17369757-b8b4-52a9-a2ef-7452952756e7",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/17369757-b8b4-52a9-a2ef-7452952756e7?variant=full",
+          "thumbnailUrl": "https://api.marchgroup.net/api/client/media/17369757-b8b4-52a9-a2ef-7452952756e7?variant=thumbnail",
+          "title": "水晶留信企劃 03",
+          "caption": null,
+          "shotAt": "2026-07-12T23:59:59+08:00"
+        },
+        {
+          "id": "1708f044-d39a-53cb-9397-a2fafdead084",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/1708f044-d39a-53cb-9397-a2fafdead084?variant=full",
+          "thumbnailUrl": "https://api.marchgroup.net/api/client/media/1708f044-d39a-53cb-9397-a2fafdead084?variant=thumbnail",
+          "title": "水晶留信企劃 04",
+          "caption": null,
+          "shotAt": "2026-07-12T23:59:59+08:00"
+        },
+        {
+          "id": "ae8c8d00-847d-5f20-8dc2-08dda0b288f8",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/ae8c8d00-847d-5f20-8dc2-08dda0b288f8?variant=full",
+          "thumbnailUrl": "https://api.marchgroup.net/api/client/media/ae8c8d00-847d-5f20-8dc2-08dda0b288f8?variant=thumbnail",
+          "title": "水晶留信企劃 05",
+          "caption": null,
+          "shotAt": "2026-07-12T23:59:59+08:00"
+        },
+        {
+          "id": "301295dc-8beb-5682-a15d-765c2b7e7516",
+          "imageUrl": "https://api.marchgroup.net/api/client/media/301295dc-8beb-5682-a15d-765c2b7e7516?variant=full",
+          "thumbnailUrl": "https://api.marchgroup.net/api/client/media/301295dc-8beb-5682-a15d-765c2b7e7516?variant=thumbnail",
+          "title": "水晶留信企劃 06",
+          "caption": null,
+          "shotAt": "2026-07-12T23:59:59+08:00"
+        }
+      ]
+    },
+    "9cb9b9a0-9bfa-5819-89ee-9234d0d293b3": {
+      "id": "9cb9b9a0-9bfa-5819-89ee-9234d0d293b3",
+      "albumTitle": "女王花園茶會",
+      "albumDescription": "以雙人茶席、輕量角色訪談與庭園拍照為主軸的午後系夜場。",
+      "coverImageUrl": "https://api.marchgroup.net/api/client/media/9cb9b9a0-9bfa-5819-89ee-9234d0d293b3?variant=card",
+      "periodText": "2026/07/18 - 2026/07/19",
+      "endsAt": "2026-07-19T23:59:59+08:00",
+      "details": [
+        "活動期間會開放花園主題茶席，店員會依來客角色設定安排一段短篇迎賓對話。",
+        "本場適合想拍攝紀念照、體驗低壓互動，或與朋友一起入席的客人。",
+        "茶席名額依當日店員人力調整，正式預約請以店舖動態公告為準。"
+      ],
+      "items": []
+    },
+    "4a885c62-61b3-5111-a5e4-c23c7afdb4d5": {
+      "id": "4a885c62-61b3-5111-a5e4-c23c7afdb4d5",
+      "albumTitle": "午夜神諭占卜夜",
+      "albumDescription": "由當班店員以籤詩與角色提問延伸一段沉浸式占卜互動。",
+      "coverImageUrl": "https://api.marchgroup.net/api/client/media/4a885c62-61b3-5111-a5e4-c23c7afdb4d5?variant=card",
+      "periodText": "2026/07/25 - 2026/07/26",
+      "endsAt": "2026-07-26T23:59:59+08:00",
+      "details": [
+        "來客可準備一個角色內問題，由店員抽取神諭籤並給予一段可延伸 RP 的回應。",
+        "占卜內容以角色敘事與氣氛演出為主，不涉及現實人生、健康或財務判斷。",
+        "若客人希望保留結果，可於活動後至留聲機留下角色回饋。"
+      ],
+      "items": []
+    }
+  },
+  "staffRanking": [
+    {
+      "id": "3fa41881-79f0-5527-a684-02da130702d1",
+      "rankingType": "staffRanking",
+      "targetId": "2cbb90df-84ee-5bd1-a8d8-f73de4f7df76",
+      "displayName": "賽琳",
+      "avatar": "https://api.marchgroup.net/api/client/media/2cbb90df-84ee-5bd1-a8d8-f73de4f7df76?variant=thumbnail",
+      "titleBadge": "願每一位旅人都能在夜裡找到被溫柔接住的位置。",
+      "rankPosition": 1,
+      "scoreValue": 86,
+      "scoreLabel": "86 次指名",
+      "periodLabel": "2026-07"
+    }
+  ],
+  "monetaryRanking": [
+    {
+      "id": "f21ae043-f1c9-5ae3-a1f4-39e4eb03ac53",
+      "rankingType": "monetaryRanking",
+      "targetId": "Moonlit-042",
+      "displayName": "Moonlit-042",
+      "avatar": null,
+      "titleBadge": "月冠貴賓",
+      "rankPosition": 1,
+      "scoreValue": 1860000,
+      "scoreLabel": "1,860,000 Gil",
+      "periodLabel": "2026-07"
+    },
+    {
+      "id": "950a8cb0-a7dd-5da4-ab48-16ad42bb9c9b",
+      "rankingType": "monetaryRanking",
+      "targetId": "Aegis-Tea-17",
+      "displayName": "Aegis-Tea-17",
+      "avatar": null,
+      "titleBadge": "水晶贊助者",
+      "rankPosition": 2,
+      "scoreValue": 1520000,
+      "scoreLabel": "1,520,000 Gil",
+      "periodLabel": "2026-07"
+    },
+    {
+      "id": "cd7e0021-df19-5ec1-907b-0d91cc9d7f39",
+      "rankingType": "monetaryRanking",
+      "targetId": "Lavender-09",
+      "displayName": "Lavender-09",
+      "avatar": null,
+      "titleBadge": "燭光守望者",
+      "rankPosition": 3,
+      "scoreValue": 1285000,
+      "scoreLabel": "1,285,000 Gil",
+      "periodLabel": "2026-07"
+    },
+    {
+      "id": "8e6b03a9-c452-5405-9113-fbdfb4085311",
+      "rankingType": "monetaryRanking",
+      "targetId": "Silent-Guest-31",
+      "displayName": "Silent-Guest-31",
+      "avatar": null,
+      "titleBadge": null,
+      "rankPosition": 4,
+      "scoreValue": 940000,
+      "scoreLabel": "940,000 Gil",
+      "periodLabel": "2026-07"
+    },
+    {
+      "id": "cd4d9691-beeb-545e-8de6-c03c7440c11b",
+      "rankingType": "monetaryRanking",
+      "targetId": "SilverBell-22",
+      "displayName": "SilverBell-22",
+      "avatar": null,
+      "titleBadge": null,
+      "rankPosition": 5,
+      "scoreValue": 810000,
+      "scoreLabel": "810,000 Gil",
+      "periodLabel": "2026-07"
+    },
+    {
+      "id": "8cc8e3c2-979e-5e38-abbb-471305661806",
+      "rankingType": "monetaryRanking",
+      "targetId": "Nocturne-58",
+      "displayName": "Nocturne-58",
+      "avatar": null,
+      "titleBadge": null,
+      "rankPosition": 6,
+      "scoreValue": 680000,
+      "scoreLabel": "680,000 Gil",
+      "periodLabel": "2026-07"
+    }
+  ],
+  "guestbook": {
+    "page": 1,
+    "pageSize": 20,
+    "totalCount": 21,
+    "items": [
+      {
+        "id": "07386012-1859-57fe-bedb-3bfed967f13a",
+        "displayName": "暮光櫃台",
+        "content": "歡迎留下不含現實個資的 RP 感想。正式版會接審核流程，第一版僅作畫面展示。",
+        "isPinned": true,
+        "createdAt": "2026-07-01T20:40:00+08:00",
+        "replies": [
+          {
+            "id": "f4127237-e173-50b4-b2b0-ce2fc1774140",
+            "displayName": "水晶櫃檯",
+            "content": "正式版會再加入審核與隱藏流程，demo 先保留公開展示。",
+            "createdAt": "2026-07-01T20:48:00+08:00"
+          }
+        ]
+      },
+      {
+        "id": "7cc6384f-d971-54d1-b9e0-fab054ccb31b",
+        "displayName": "店內公告",
+        "content": "留言請保持角色內禮儀，避免攻擊性文字、過度越界內容或破壞他人沉浸體驗。",
+        "isPinned": true,
+        "createdAt": "2026-07-01T20:30:00+08:00",
+        "replies": []
+      },
+      {
+        "id": "b1b382da-8e53-452e-9446-adbdcfe8646f",
+        "displayName": "dev",
+        "content": "DB留言測試",
+        "isPinned": false,
+        "createdAt": "2026-07-15T21:35:28+08:00",
+        "replies": []
+      },
+      {
+        "id": "67934862-ee2d-56dd-b291-608c5014625f",
+        "displayName": "匿名旅人",
+        "content": "第一次來也不會緊張，店員把流程說得很清楚，整晚節奏很舒服。",
+        "isPinned": false,
+        "createdAt": "2026-06-30T23:00:00+08:00",
+        "replies": [
+          {
+            "id": "9c5904a2-18af-5904-9c5c-336f21e7088c",
+            "displayName": "櫃檯回覆",
+            "content": "謝謝你的留言，期待下次再一起補完角色故事。",
+            "createdAt": "2026-06-30T23:08:00+08:00"
+          }
+        ]
+      },
+      {
+        "id": "14c016df-02d3-57fd-bb6f-b83f4f5c6760",
+        "displayName": "白銀鄉常客",
+        "content": "喜歡這裡的低光佈置，適合把角色故事慢慢講完。",
+        "isPinned": false,
+        "createdAt": "2026-06-29T22:07:00+08:00",
+        "replies": []
+      },
+      {
+        "id": "50343e6b-e524-55c4-8f72-c109065c6582",
+        "displayName": "月下來客",
+        "content": "月下祝杯的氣氛很漂亮，短籤詩讓角色有了新的靈感。",
+        "isPinned": false,
+        "createdAt": "2026-06-28T21:14:00+08:00",
+        "replies": []
+      },
+      {
+        "id": "a18a638f-3845-5cda-b748-829d09388ab4",
+        "displayName": "初訪冒險者",
+        "content": "包廂陪談節奏剛好，適合想安靜聊天的晚上。",
+        "isPinned": false,
+        "createdAt": "2026-06-27T20:21:00+08:00",
+        "replies": []
+      },
+      {
+        "id": "36f9e318-4d0b-5c86-b3b7-8cf1b1fb0984",
+        "displayName": "匿名旅人",
+        "content": "第一次來也不會緊張，店員把流程說得很清楚，整晚節奏很舒服。",
+        "isPinned": false,
+        "createdAt": "2026-06-26T19:28:00+08:00",
+        "replies": []
+      },
+      {
+        "id": "8695a773-efc6-5dae-9f67-73e1f87cc775",
+        "displayName": "白銀鄉常客",
+        "content": "喜歡這裡的低光佈置，適合把角色故事慢慢講完。",
+        "isPinned": false,
+        "createdAt": "2026-06-25T23:35:00+08:00",
+        "replies": [
+          {
+            "id": "2e7cddfa-526c-5196-acdb-a7ec35cbc160",
+            "displayName": "櫃檯回覆",
+            "content": "謝謝你的留言，期待下次再一起補完角色故事。",
+            "createdAt": "2026-06-25T23:43:00+08:00"
+          }
+        ]
+      },
+      {
+        "id": "7e190b09-3b2c-5479-9e7c-a5e4f27416ec",
+        "displayName": "月下來客",
+        "content": "月下祝杯的氣氛很漂亮，短籤詩讓角色有了新的靈感。",
+        "isPinned": false,
+        "createdAt": "2026-06-24T22:42:00+08:00",
+        "replies": []
+      },
+      {
+        "id": "1ccef544-4b0c-5b77-ae8f-072b12d0ebf1",
+        "displayName": "初訪冒險者",
+        "content": "包廂陪談節奏剛好，適合想安靜聊天的晚上。",
+        "isPinned": false,
+        "createdAt": "2026-06-23T21:49:00+08:00",
+        "replies": []
+      },
+      {
+        "id": "dbd1cc53-3e2d-5e6f-bd03-161d03ace5a1",
+        "displayName": "匿名旅人",
+        "content": "第一次來也不會緊張，店員把流程說得很清楚，整晚節奏很舒服。",
+        "isPinned": false,
+        "createdAt": "2026-06-30T20:56:00+08:00",
+        "replies": []
+      },
+      {
+        "id": "1eeec1c6-cdbd-518c-a03a-17e59174db64",
+        "displayName": "白銀鄉常客",
+        "content": "喜歡這裡的低光佈置，適合把角色故事慢慢講完。",
+        "isPinned": false,
+        "createdAt": "2026-06-29T19:03:00+08:00",
+        "replies": []
+      },
+      {
+        "id": "40917371-7c91-5c8c-b60e-575598e86be6",
+        "displayName": "月下來客",
+        "content": "月下祝杯的氣氛很漂亮，短籤詩讓角色有了新的靈感。",
+        "isPinned": false,
+        "createdAt": "2026-06-28T23:10:00+08:00",
+        "replies": [
+          {
+            "id": "68f3a0e0-dc58-53a2-8898-779a38aeeb2d",
+            "displayName": "櫃檯回覆",
+            "content": "謝謝你的留言，期待下次再一起補完角色故事。",
+            "createdAt": "2026-06-28T23:18:00+08:00"
+          }
+        ]
+      },
+      {
+        "id": "12fa5bde-41a9-57ed-bb80-0274e79d9728",
+        "displayName": "初訪冒險者",
+        "content": "包廂陪談節奏剛好，適合想安靜聊天的晚上。",
+        "isPinned": false,
+        "createdAt": "2026-06-27T22:17:00+08:00",
+        "replies": []
+      },
+      {
+        "id": "8acd7f8f-5b05-55d6-8cdc-212b976b722b",
+        "displayName": "匿名旅人",
+        "content": "第一次來也不會緊張，店員把流程說得很清楚，整晚節奏很舒服。",
+        "isPinned": false,
+        "createdAt": "2026-06-26T21:24:00+08:00",
+        "replies": []
+      },
+      {
+        "id": "6290fa4b-ffcf-5571-878f-8c6b8d7886ac",
+        "displayName": "白銀鄉常客",
+        "content": "喜歡這裡的低光佈置，適合把角色故事慢慢講完。",
+        "isPinned": false,
+        "createdAt": "2026-06-25T20:31:00+08:00",
+        "replies": []
+      },
+      {
+        "id": "0a081eec-30fd-524a-a00f-8ee8f97702be",
+        "displayName": "月下來客",
+        "content": "月下祝杯的氣氛很漂亮，短籤詩讓角色有了新的靈感。",
+        "isPinned": false,
+        "createdAt": "2026-06-24T19:38:00+08:00",
+        "replies": []
+      },
+      {
+        "id": "6cccdfd8-8092-5b1a-b1c1-409330debc4e",
+        "displayName": "初訪冒險者",
+        "content": "包廂陪談節奏剛好，適合想安靜聊天的晚上。",
+        "isPinned": false,
+        "createdAt": "2026-06-23T23:45:00+08:00",
+        "replies": [
+          {
+            "id": "c12b9f2b-fbb3-538c-9cd9-62b15b9599be",
+            "displayName": "櫃檯回覆",
+            "content": "謝謝你的留言，期待下次再一起補完角色故事。",
+            "createdAt": "2026-06-23T23:53:00+08:00"
+          }
+        ]
+      },
+      {
+        "id": "62c8d9c1-6e5d-53fc-9435-cc2eccc37bb5",
+        "displayName": "匿名旅人",
+        "content": "第一次來也不會緊張，店員把流程說得很清楚，整晚節奏很舒服。",
+        "isPinned": false,
+        "createdAt": "2026-06-30T22:52:00+08:00",
+        "replies": []
+      }
+    ]
+  }
+}

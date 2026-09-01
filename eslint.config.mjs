@@ -36,6 +36,27 @@ const eslintConfig = defineConfig([
       },
     },
   },
+  {
+    // These client surfaces intentionally synchronize URL/navigation state with
+    // existing animated transitions. Remove each exemption when that feature is
+    // migrated into its own module and the state model can be revised safely.
+    files: [
+      "features/gallery/components/GalleryArchive.tsx",
+      "components/layout/SiteChrome.tsx",
+      "features/staff/components/StaffArchive.tsx",
+      "features/staff/components/StaffProfile.tsx",
+    ],
+    rules: {
+      "react-hooks/set-state-in-effect": "off",
+    },
+  },
+  {
+    // These links deliberately drive custom route-transition animations.
+    files: ["features/home/components/HomeLanding.tsx", "components/layout/SiteChrome.tsx"],
+    rules: {
+      "@next/next/no-html-link-for-pages": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

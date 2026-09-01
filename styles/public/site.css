@@ -1,0 +1,6 @@
+@import "tailwindcss";
+@import "./layers/00-foundation.css";
+@import "./layers/10-page-layouts.css";
+@import "./layers/20-theme-history.css";
+@import "./layers/30-pearl-theme.css";
+@import "./layers/40-refinements.css";

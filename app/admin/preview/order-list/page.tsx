@@ -7,15 +7,15 @@ const rows = [
 ];
 
 const navigation = [
-  ["00", "點單管理"], ["01", "訂單列表"], ["02", "後台首頁"], ["03", "店員設定"],
-  ["04", "菜單設定"], ["05", "活動設定"], ["06", "首頁設定"],
+  { label: "營運操作", items: [["00", "點單管理"], ["01", "訂單列表"], ["02", "後台首頁"]] },
+  { label: "內容與設定", items: [["03", "店員設定"], ["04", "菜單設定"], ["05", "活動設定"], ["06", "首頁設定"]] },
 ];
 
 export default function AdminOrderListPreviewPage() {
   return <div className="adminTheme"><main className="adminShell adminMockShell">
     <aside className="adminTopbar">
-      <div className="adminTopbarBrand"><span className="adminTopbarMark"><img src="/favicon.svg" alt="" /></span><span className="adminTopbarBrandCopy"><strong>清醒夢</strong><small>LUCID DREAM / ADMIN</small></span><button className="adminBackToSite adminBrandSiteLink" type="button">↗ 公開網站</button></div>
-      <nav className="adminNav" aria-label="Mock 後台功能選單"><p className="adminNavLabel">工作區</p>{navigation.map(([index, label]) => <button className={label === "訂單列表" ? "isActive" : ""} key={index} type="button"><span>{index}</span>{label}</button>)}</nav>
+      <div className="adminTopbarBrand"><span className="adminTopbarMark"><img src="/favicon.svg" alt="" /></span><span className="adminTopbarBrandCopy"><strong>清醒夢</strong><small>LUCID DREAM</small></span><button className="adminBackToSite adminBrandSiteLink" type="button">↗ 公開網站</button></div>
+      <nav className="adminNav" aria-label="Mock 後台功能選單">{navigation.map((group) => <section className="adminNavGroup" key={group.label}><p className="adminNavLabel">{group.label}</p>{group.items.map(([index, label]) => <button className={label === "訂單列表" ? "isActive" : ""} key={index} type="button"><span>{index}</span>{label}</button>)}</section>)}</nav>
       <div className="adminTopbarUtilities"><div className="adminAccount"><div className="adminAccountIdentity"><small>目前登入</small><strong>Zero</strong><span>開發者</span></div><button className="adminButton adminButton-ghost adminThemeToggle" type="button">☾</button><button className="adminButton adminButton-ghost" type="button">登出</button></div></div>
     </aside>
     <div className="adminWorkspace"><div className="adminContent"><section className="adminPage adminOrderListPage">

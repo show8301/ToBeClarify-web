@@ -297,6 +297,7 @@
 /* Operations-first pass: preserve the public palette without decorative noise. */
 .adminShell {
   background: linear-gradient(145deg,#f3f1f7,#e8ebf4 58%,#e6edf2);
+  overflow-x:hidden;
 }
 .adminShell::before { display:none; }
 .adminTopbar {
@@ -314,6 +315,33 @@
   box-shadow:none;
 }
 .adminNav button.isActive span { background:rgba(128,153,196,.2); }
+
+.adminTopbarBrand {
+  grid-template-columns:44px minmax(0,1fr);
+  grid-template-rows:auto auto;
+  grid-template-areas:"mark copy" "site site";
+  column-gap:11px;
+  row-gap:0;
+}
+.adminTopbarMark { grid-area:mark; width:44px; height:44px; }
+.adminTopbarBrandCopy { grid-area:copy; overflow:hidden; }
+.adminTopbarBrandCopy strong { font-size:18px; letter-spacing:-.02em; }
+.adminTopbarBrandCopy small { overflow:hidden; margin-top:4px; font-size:8px; letter-spacing:.09em; text-overflow:ellipsis; white-space:nowrap; }
+.adminBrandSiteLink { grid-area:site; width:100%; margin-top:12px; padding:9px 11px; }
+.adminNav { gap:0; }
+.adminNavGroup { display:grid; gap:5px; min-width:0; }
+.adminNavGroup + .adminNavGroup { margin-top:20px; padding-top:17px; border-top:1px solid rgba(49,51,74,.1); }
+.adminNavGroup .adminNavLabel { margin:0 10px 7px; }
+
+@media(max-width:1020px){
+  .adminNavGroup { grid-column:1/-1; grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .adminNavGroup .adminNavLabel { grid-column:1/-1; }
+  .adminNavGroup + .adminNavGroup { margin-top:8px; padding-top:12px; }
+}
+
+@media(max-width:680px){
+  .adminNavGroup { grid-template-columns:1fr 1fr; }
+}
 
 .adminPanel,
 .adminOrderInlinePanel,

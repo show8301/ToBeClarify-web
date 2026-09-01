@@ -38,19 +38,11 @@ export default function AdminPreviewPage() {
         <aside className="adminTopbar">
           <div className="adminTopbarBrand">
             <span className="adminTopbarMark"><img src="/favicon.svg" alt="" /></span>
-            <span className="adminTopbarBrandCopy"><strong>清醒夢</strong><small>LUCID DREAM / ADMIN</small></span>
+            <span className="adminTopbarBrandCopy"><strong>清醒夢</strong><small>LUCID DREAM</small></span>
             <button className="adminBackToSite adminBrandSiteLink" type="button">↗ 公開網站</button>
           </div>
           <nav className="adminNav" aria-label="Mock 後台功能選單">
-            <p className="adminNavLabel">工作區</p>
-            {[
-              ["00", "點單管理"], ["01", "訂單列表"], ["02", "後台首頁"],
-              ["03", "店員設定"], ["04", "菜單設定"], ["05", "活動設定"], ["06", "首頁設定"],
-            ].map(([index, label]) => (
-              <button className={label === "點單管理" ? "isActive" : ""} key={index} type="button">
-                <span>{index}</span>{label}
-              </button>
-            ))}
+            {[["營運操作", [["00", "點單管理"], ["01", "訂單列表"], ["02", "後台首頁"]]], ["內容與設定", [["03", "店員設定"], ["04", "菜單設定"], ["05", "活動設定"], ["06", "首頁設定"]]]].map(([group, items]) => <section className="adminNavGroup" key={group as string}><p className="adminNavLabel">{group as string}</p>{(items as string[][]).map(([index, label]) => <button className={label === "點單管理" ? "isActive" : ""} key={index} type="button"><span>{index}</span>{label}</button>)}</section>)}
           </nav>
           <div className="adminTopbarUtilities">
             <div className="adminAccount">

@@ -2,19 +2,23 @@ import { useEffect, useMemo, useState } from 'react';
 import { useAdminAuth } from './AdminAuthContext.jsx';
 import { AdminButton } from './AdminShared.jsx';
 
-const allItems = [
-  { route: '/admin/orders', label: '點單管理', index: '00', roles: ['developer', 'manager', 'clerk'] },
-  { route: '/admin/order-list', label: '訂單列表', index: '01', roles: ['developer', 'manager', 'clerk'] },
-  { route: '/admin', label: '後台首頁', index: '02', roles: ['developer', 'manager', 'clerk'] },
-  { route: '/admin/staff', label: '店員設定', index: '03', roles: ['developer', 'manager', 'clerk'] },
-  { route: '/admin/menu', label: '菜單設定', index: '04', roles: ['developer', 'manager'] },
-  { route: '/admin/events', label: '活動設定', index: '05', roles: ['developer', 'manager'] },
-  { route: '/admin/home', label: '首頁設定', index: '06', roles: ['developer', 'manager'] },
+const allGroups = [
+  { label: '營運操作', items: [
+    { route: '/admin/orders', label: '點單管理', index: '00', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin/order-list', label: '訂單列表', index: '01', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin', label: '後台首頁', index: '02', roles: ['developer', 'manager', 'clerk'] },
+  ] },
+  { label: '內容與設定', items: [
+    { route: '/admin/staff', label: '店員設定', index: '03', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin/menu', label: '菜單設定', index: '04', roles: ['developer', 'manager'] },
+    { route: '/admin/events', label: '活動設定', index: '05', roles: ['developer', 'manager'] },
+    { route: '/admin/home', label: '首頁設定', index: '06', roles: ['developer', 'manager'] },
+  ] },
 ];
 
 export function AdminLayout({ route, navigate, children }) {
   const { user, logout } = useAdminAuth();
-  const items = useMemo(() => allItems.filter((item) => item.roles.includes(user.role)), [user.role]);
+  const groups = useMemo(() => allGroups.map((group) => ({ ...group, items: group.items.filter((item) => item.roles.includes(user.role)) })).filter((group) => group.items.length), [user.role]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [themeReady, setThemeReady] = useState(false);
@@ -53,7 +57,7 @@ export function AdminLayout({ route, navigate, children }) {
       <header className={`adminTopbar ${isMenuOpen ? 'isMenuOpen' : ''}`.trim()}>
         <div className="adminTopbarBrand">
           <span className="adminTopbarMark"><img src="/favicon.svg" alt="" /></span>
-          <span className="adminTopbarBrandCopy"><strong>清醒夢</strong><small>LUCID DREAM / ADMIN</small></span>
+          <span className="adminTopbarBrandCopy"><strong>清醒夢</strong><small>LUCID DREAM</small></span>
           <button className="adminBackToSite adminBrandSiteLink" type="button" onClick={() => handleNavigate('/home')}>↗ 公開網站</button>
         </div>
         <button
@@ -68,12 +72,10 @@ export function AdminLayout({ route, navigate, children }) {
           <span />
         </button>
         <nav className={`adminNav ${isMenuOpen ? 'isOpen' : ''}`} aria-label="後台功能選單">
-          <p className="adminNavLabel">工作區</p>
-          {items.map((item) => (
-            <button key={item.route} className={route === item.route ? 'isActive' : ''} aria-current={route === item.route ? 'page' : undefined} type="button" onClick={() => handleNavigate(item.route)}>
-              <span>{item.index}</span>{item.label}
-            </button>
-          ))}
+          {groups.map((group) => <section className="adminNavGroup" key={group.label}>
+            <p className="adminNavLabel">{group.label}</p>
+            {group.items.map((item) => <button key={item.route} className={route === item.route ? 'isActive' : ''} aria-current={route === item.route ? 'page' : undefined} type="button" onClick={() => handleNavigate(item.route)}><span>{item.index}</span>{item.label}</button>)}
+          </section>)}
         </nav>
         <div className="adminTopbarUtilities">
           <div className="adminAccount">

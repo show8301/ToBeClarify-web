@@ -143,22 +143,29 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
                   <span className="dreamer-role-ribbon" title={person.roleTitle || "DREAM STAFF"}>
                     <i>✦</i><b>{person.roleTitle || "DREAM STAFF"}</b><i>✦</i>
                   </span>
+                  <span className="dreamer-file-number">{fileNumber}</span>
                   <span className="dreamer-photo-statuses">
                     <span className={`dreamer-duty${person.isWorkingToday ? " is-online" : ""}`}>
                       <i aria-hidden="true"/><span><small>{person.isWorkingToday ? "ON DUTY" : "OFF DUTY"}</small><b>{person.statusText || "未排班"}</b></span>
                     </span>
                     {canBeNominated && <span className="dreamer-nomination" aria-label="此店員可以指名"><i aria-hidden="true">✦</i><b>可以指名</b></span>}
-                    <span className="dreamer-file-number">{fileNumber}</span>
                   </span>
                 </span>
                 <span className="dreamer-card-body">
-                  <span className="dreamer-card-heading"><strong>{person.displayName}</strong>{person.nickname && <em>✦　暱稱｜{person.nickname}　✦</em>}</span>
+                  <span className={`dreamer-card-heading${person.signatureUrl ? " has-signature" : ""}`}>
+                    {person.signatureUrl
+                      ? <img className="dreamer-card-signature" src={person.signatureUrl} alt={`${person.displayName} 的簽名`}/>
+                      : <strong>{person.displayName}</strong>}
+                    {person.nickname && <em>✦　暱稱｜{person.nickname}　✦</em>}
+                  </span>
                   <span className="dreamer-card-bio">{person.shortBio || "這位夢境成員正在準備自己的介紹。"}</span>
-                  {services.length > 0 && <span className="dreamer-services" aria-label="可提供服務">
-                    {services.slice(0,2).map((service,serviceIndex)=><b key={service.id}><img src={`/assets/staff-card-chip-icon-${serviceIndex===0?"a":"b"}.png`} alt="" aria-hidden="true"/>{service.serviceName}</b>)}
-                    {services.length > 2 && <i><img src="/assets/staff-card-chip-icon-c.png" alt="" aria-hidden="true"/>+{services.length-2}</i>}
-                  </span>}
-                  <span className="dreamer-card-link"><small>FILE · {fileNumber}</small><b>VIEW PROFILE <ArrowUpRight aria-hidden="true"/></b></span>
+                  <span className="dreamer-card-footer">
+                    {services.length > 0 && <span className="dreamer-services" aria-label="可提供服務">
+                      {services.slice(0,2).map((service,serviceIndex)=><b key={service.id}><img src={`/assets/staff-card-chip-icon-${serviceIndex===0?"a":"b"}.png`} alt="" aria-hidden="true"/>{service.serviceName}</b>)}
+                      {services.length > 2 && <i><img src="/assets/staff-card-chip-icon-c.png" alt="" aria-hidden="true"/>+{services.length-2}</i>}
+                    </span>}
+                    <span className="dreamer-card-link"><small>FILE · {fileNumber}</small><b>VIEW PROFILE <ArrowUpRight aria-hidden="true"/></b></span>
+                  </span>
                 </span>
               </a>
             );

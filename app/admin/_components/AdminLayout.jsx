@@ -66,18 +66,19 @@ export function AdminLayout({ route, navigate, children }) {
           <span />
         </button>
         <nav className={`adminNav ${isMenuOpen ? 'isOpen' : ''}`} aria-label="後台功能選單">
-          <button className={route === '/admin' ? 'isActive' : ''} type="button" onClick={() => handleNavigate('/admin')}>
+          <p className="adminNavLabel">工作區</p>
+          <button className={route === '/admin' ? 'isActive' : ''} aria-current={route === '/admin' ? 'page' : undefined} type="button" onClick={() => handleNavigate('/admin')}>
             <span>00</span>後台首頁
           </button>
           {items.map((item) => (
-            <button key={item.route} className={route === item.route ? 'isActive' : ''} type="button" onClick={() => handleNavigate(item.route)}>
+            <button key={item.route} className={route === item.route ? 'isActive' : ''} aria-current={route === item.route ? 'page' : undefined} type="button" onClick={() => handleNavigate(item.route)}>
               <span>{item.index}</span>{item.label}
             </button>
           ))}
         </nav>
         <div className="adminTopbarUtilities">
           <div className="adminAccount">
-            <div className="adminAccountIdentity"><strong>{user.displayName}</strong><span>{user.roleLabel}</span></div>
+            <div className="adminAccountIdentity"><small>目前登入</small><strong>{user.displayName}</strong><span>{user.roleLabel}</span></div>
             <AdminButton
               variant="ghost"
               className="adminThemeToggle"

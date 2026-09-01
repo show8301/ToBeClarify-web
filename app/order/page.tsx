@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import OrderClient from "./OrderClient";
 import "./ordering.css";
+import "./ordering-modern.css";
 
 export const dynamic = "force-dynamic";
 

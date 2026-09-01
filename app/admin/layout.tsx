@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./admin.css";
+import "./admin-modern.css";
 
 export const metadata: Metadata = {
   title: "清醒夢｜後台管理",

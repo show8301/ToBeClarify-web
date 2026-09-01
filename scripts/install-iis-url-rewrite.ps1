@@ -10,18 +10,14 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-. (Join-Path $PSScriptRoot 'native-command.ps1')
-
 $appcmdPath = Join-Path $env:windir 'System32\inetsrv\appcmd.exe'
 if (-not (Test-Path -LiteralPath $appcmdPath -PathType Leaf)) {
     throw "IIS appcmd.exe was not found: $appcmdPath"
 }
 
 function Test-UrlRewriteModule {
-    $moduleResult = Invoke-NativeCommand `
-        -FilePath $appcmdPath `
-        -ArgumentList @('list', 'module', 'RewriteModule')
-    return ($moduleResult.ExitCode -eq 0 -and ($moduleResult.Output -match 'RewriteModule'))
+    $moduleOutput = & $appcmdPath list module RewriteModule 2>&1
+    return ($LASTEXITCODE -eq 0 -and ($moduleOutput -match 'RewriteModule'))
 }
 
 function Start-WindowsInstallerService {

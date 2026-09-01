@@ -10,13 +10,11 @@ requests to the port assigned to that environment.
 - Microsoft IIS URL Rewrite 2.1 (x64)
 - Microsoft Application Request Routing (ARR) 3.0
 - Node.js 22.13.0 or newer
-- PM2 7.0.3 or newer installed in the shared Web runtime directory
 - Windows PowerShell 5.1 with the `ScheduledTasks` module
 - A self-hosted GitHub Actions runner whose service identity:
   - is a local administrator;
-  - can register and run the PM2 resurrection scheduled task;
+  - can register and run scheduled tasks;
   - has Modify permission on the deployment parent directory;
-  - has Modify permission on `D:\pm2\ToBeClarify-web`;
   - can update IIS server-level proxy configuration.
 
 IISNode and ASP.NET are not required. ARR proxy support is enabled
@@ -57,27 +55,9 @@ Development optionally accepts:
 - `DEV_ORDERING_API_BASE_URL` — defaults in application code when omitted
 
 The deployment identity is intentionally not configurable through repository
-variables. Production always uses port `4300` and PM2 application
-`tobeclarify-web-prod`; development always uses port `4310` and PM2 application
-`tobeclarify-web-dev`. Both use the isolated PM2 home
-`D:\pm2\ToBeClarify-web`, so Web deployments cannot operate the separate PM2
-daemon that currently owns `D:\cron`.
-
-### Install the isolated PM2 runtime
-
-The interactive server administrator does not need to sign in as the GitHub
-Actions runner account. From an elevated PowerShell window, run:
-
-```powershell
-.\scripts\install-vinext-pm2.ps1 -RunnerAccount "$env:COMPUTERNAME\show8301"
-```
-
-This installs a pinned PM2 CLI at
-`D:\pm2\ToBeClarify-web\cli\node_modules\.bin\pm2.cmd` and grants the runner
-account Modify permission on the isolated Web PM2 directory. The installer does
-not start a PM2 daemon. The first Web deployment starts the daemon as the
-`show8301` runner service account, preventing it from attaching to the
-Administrator-owned `D:\cron` PM2 daemon.
+variables. Production always uses port `4300` and Scheduled Task
+`ToBeClarify Vinext PROD`; development always uses port `4310` and Scheduled
+Task `ToBeClarify Vinext DEV`.
 
 ## Workflow behavior
 
@@ -94,36 +74,16 @@ Administrator-owned `D:\cron` PM2 daemon.
   manually merged into `main`; that push then deploys to the production
   environment.
 - Production and DEV use different IIS directories, fixed Node ports, fixed
-  PM2 application names, and GitHub environments. A shared deployment
+  Scheduled Task names, and GitHub environments. A shared deployment
   concurrency group serializes changes on the common IIS host.
-- Before stopping the target, deployment requires the sibling process manager,
+- Before stopping the target, deployment requires the sibling Scheduled Task,
   localhost health endpoint, and public IIS health endpoint to agree on a live
   deployment SHA. It verifies the same sibling SHA again after deployment.
 - A manual run with `preflight_only` checks the runner and IIS without changing
   the site selected by the workflow branch.
 - Deployment uses a staging directory, retains one rollback directory, starts
-  Vinext through PM2 with `autorestart: true` and `watch: false`, and rolls back
-  automatically when either the localhost or public health check does not
-  report the current Git commit SHA.
-- Every successful deployment saves the isolated Web PM2 process list. The
-  `ToBeClarify PM2 Web Resurrect` startup task runs `pm2 resurrect` after a
-  Windows reboot.
-
-## Migration from the legacy Scheduled Tasks
-
-The deployer supports a reversible transition while DEV and production are
-migrated one at a time:
-
-- A sibling environment may still run through its verified legacy Scheduled
-  Task while the target moves to PM2.
-- The target's legacy task is stopped only after its path and port identity are
-  verified, and it is disabled only after the PM2 deployment passes both health
-  checks.
-- If deployment fails, the previous directory and previous process manager are
-  restored automatically.
-- The legacy tasks remain registered but disabled during the initial soak
-  period. They can be deleted manually after both environments have remained
-  stable for 24–48 hours.
+  Vinext through a scheduled task, and rolls back automatically when either the
+  localhost or public health check does not report the current Git commit SHA.
 
 ## Required Web release sequence
 

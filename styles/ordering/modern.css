@@ -480,10 +480,14 @@
   padding:10px 10px 8px;
   display:grid;
   justify-items:center;
+  border:0;
+  border-radius:0;
   background:transparent;
   color:#34394f;
+  box-shadow:none;
   text-align:center;
 }
+.nominationStaffGrid .orderStaffSelect:hover { border:0; background:transparent; box-shadow:none; transform:none; }
 .nominationStaffGrid .orderStaffSelect>span {
   width:72px;
   height:86px;

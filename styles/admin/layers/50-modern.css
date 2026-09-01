@@ -307,6 +307,8 @@
   backdrop-filter:blur(16px);
 }
 .adminTopbarMark { box-shadow:none; }
+.adminTopbarMark img,
+.adminLoginMark img { filter:none; }
 .adminBrandSiteLink { background:transparent; }
 .adminNav button:hover { border-color:transparent; background:rgba(128,153,196,.09); }
 .adminNav button.isActive {

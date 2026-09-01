@@ -57,7 +57,7 @@ test('homepage slides expose an editable playback duration', async () => {
   assert.match(source, /displaySeconds: Math\.min\(60, Math\.max\(1/);
   assert.match(source, /播放 \{Number\(item\.displaySeconds\) \|\| 10\} 秒/);
   assert.match(landing, /const seconds=Math\.min\(60,Math\.max\(1,Number\(current\?\.displaySeconds\)\|\|10\)\)/);
-  assert.match(landing, /fetch\("https:\/\/api\.marchgroup\.net\/api\/client\/home"/);
+  assert.match(landing, /fetch\("\/api\/public\/home"/);
 });
 
 test('developer can control each public menu page from the admin home', async () => {

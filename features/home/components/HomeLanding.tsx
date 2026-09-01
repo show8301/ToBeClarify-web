@@ -45,7 +45,7 @@ export default function HomeLanding({home,pricingRules:initialPricingRules=[]}:H
 
   useEffect(()=>{
     const controller=new AbortController();
-    const homeRequest=fetch("https://api.marchgroup.net/api/client/home",{cache:"no-store",headers:{Accept:"application/json"},signal:controller.signal})
+    const homeRequest=fetch("/api/public/home",{cache:"no-store",headers:{Accept:"application/json"},signal:controller.signal})
       .then((response)=>response.ok?response.json():null)
       .then((payload:unknown)=>{
         const data=payload as {success?:boolean;data?:{slides?:HomeData["slides"];pageVisibility?:Partial<HomeData["pageVisibility"]>}}|null;
@@ -53,7 +53,7 @@ export default function HomeLanding({home,pricingRules:initialPricingRules=[]}:H
         if(Array.isArray(data.data?.slides))setSlides(data.data.slides);
         if(data.data?.pageVisibility)setLivePageVisibility({...home.pageVisibility,...data.data.pageVisibility});
       });
-    const menuRequest=fetch("https://api.marchgroup.net/api/client/menu",{cache:"no-store",headers:{Accept:"application/json"},signal:controller.signal})
+    const menuRequest=fetch("/api/public/menu",{cache:"no-store",headers:{Accept:"application/json"},signal:controller.signal})
       .then((response)=>response.ok?response.json():null)
       .then((payload:unknown)=>{
         const data=payload as {success?:boolean;data?:{pricingRules?:unknown}}|null;
@@ -62,7 +62,7 @@ export default function HomeLanding({home,pricingRules:initialPricingRules=[]}:H
       });
     Promise.all([homeRequest,menuRequest]).catch(()=>{});
     return()=>controller.abort();
-  },[]);
+  },[home.pageVisibility]);
 
   useEffect(()=>{
     if(reduceMotion||images.length<2)return;

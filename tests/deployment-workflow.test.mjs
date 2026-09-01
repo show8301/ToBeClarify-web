@@ -24,12 +24,6 @@ test("the shared workflow deploys only dev and main to isolated targets", async 
   assert.doesNotMatch(workflow, /vars\.(?:DEV_NODE_TASK_NAME|WEB_NODE_TASK_NAME)/);
   assert.match(workflow, /group: vinext-iis-deployment/);
   assert.match(workflow, /SIBLING_HEALTH_CHECK_URL/);
-  assert.match(workflow, /deploy\/pm2\/ecosystem\.config\.cjs/);
-  assert.match(workflow, /scripts\/native-command\.ps1/);
-  assert.match(workflow, /scripts\/normalize-pm2-jlist\.cjs/);
-  assert.match(workflow, /scripts\/resurrect-vinext-pm2\.ps1/);
-  assert.match(workflow, /Validate PM2 on Windows without deployment/);
-  assert.match(workflow, /test-vinext-pm2-runtime\.ps1/);
 });
 
 test("development deployment skips automated test suites", async () => {
@@ -54,23 +48,15 @@ test("the IIS deployer derives immutable identities for both environments", asyn
   assert.match(deployScript, /\[ValidateSet\('production', 'development'\)\]/);
   assert.match(deployScript, /DeployLeaf = 'ToBeClarify_web'/);
   assert.match(deployScript, /NodePort = 4300/);
-  assert.match(deployScript, /Pm2AppName = 'tobeclarify-web-prod'/);
+  assert.match(deployScript, /TaskName = 'ToBeClarify Vinext PROD'/);
   assert.match(deployScript, /DeployLeaf = 'ToBeClarify_web_dev'/);
   assert.match(deployScript, /NodePort = 4310/);
-  assert.match(deployScript, /Pm2AppName = 'tobeclarify-web-dev'/);
+  assert.match(deployScript, /TaskName = 'ToBeClarify Vinext DEV'/);
   assert.doesNotMatch(deployScript, /\[int\]\$NodePort/);
-  assert.doesNotMatch(deployScript, /\[string\]\$Pm2AppName/);
+  assert.doesNotMatch(deployScript, /\[string\]\$TaskName/);
   assert.match(deployScript, /function Rename-DirectoryWithRetry/);
-  assert.match(deployScript, /function Assert-Pm2AppIdentity/);
-  assert.match(deployScript, /function Assert-LegacyVinextTaskIdentity/);
-  assert.match(deployScript, /\$Pm2Home = 'D:\\pm2\\ToBeClarify-web'/);
-  assert.match(
-    deployScript,
-    /cli\\node_modules\\\.bin\\pm2\.cmd/,
-  );
-  assert.match(deployScript, /startOrRestart/);
-  assert.match(deployScript, /Save-Pm2ProcessList/);
-  assert.match(deployScript, /Register-Pm2StartupTask/);
+  assert.match(deployScript, /function Assert-VinextTaskIdentity/);
+  assert.match(deployScript, /-AllowMissing \| Out-Null/);
   assert.match(deployScript, /-ExpectedDeploymentSha \$DeploymentSha/);
   assert.match(deployScript, /Protected sibling verified before deployment/);
   assert.match(deployScript, /Protected sibling remained healthy/);
@@ -78,50 +64,11 @@ test("the IIS deployer derives immutable identities for both environments", asyn
   assert.match(deployScript, /\$runtimeConfig\.ORDERING_API_BASE_URL/);
 });
 
-test("the PM2 Vinext process survives GitHub runner cleanup", async () => {
-  const deployScript = await readRepositoryFile("scripts/deploy-vinext-iis.ps1");
-  const ecosystem = await readRepositoryFile("deploy/pm2/ecosystem.config.cjs");
+test("the scheduled Vinext process survives GitHub runner cleanup", async () => {
+  const launcher = await readRepositoryFile("scripts/start-vinext.ps1");
 
-  assert.match(deployScript, /Remove-Item Env:RUNNER_TRACKING_ID -ErrorAction SilentlyContinue/);
-  assert.match(ecosystem, /autorestart: true/);
-  assert.match(ecosystem, /watch: false/);
-  assert.match(ecosystem, /exp_backoff_restart_delay: 1000/);
-  assert.match(ecosystem, /instances: 1/);
-  assert.match(ecosystem, /exec_mode: "fork"/);
-});
-
-test("the PM2 process list is normalized before Windows PowerShell parses it", async () => {
-  const deployScript = await readRepositoryFile("scripts/deploy-vinext-iis.ps1");
-
-  assert.match(deployScript, /normalize-pm2-jlist\.cjs/);
-  assert.match(deployScript, /\$script:SystemNodePath/);
-  assert.match(deployScript, /Invoke-NativeCommand/);
-  assert.doesNotMatch(
-    deployScript,
-    /\$text\.Substring\([^\r\n]+\)\s*\|\s*ConvertFrom-Json/,
+  assert.match(
+    launcher,
+    /\$env:RUNNER_TRACKING_ID = "tobeclarify-vinext-\$Port"[\s\S]*Remove-Item Env:RUNNER_TRACKING_ID -ErrorAction SilentlyContinue/,
   );
-});
-
-test("native stderr is captured before the caller's Stop preference is restored", async () => {
-  const nativeHelper = await readRepositoryFile("scripts/native-command.ps1");
-
-  assert.match(nativeHelper, /\$previousErrorActionPreference = \$ErrorActionPreference/);
-  assert.match(nativeHelper, /\$ErrorActionPreference = 'Continue'/);
-  assert.match(nativeHelper, /@\(& \$FilePath @ArgumentList 2>&1\)/);
-  assert.match(nativeHelper, /\$commandExitCode = \$LASTEXITCODE/);
-  assert.match(nativeHelper, /finally/);
-  assert.match(nativeHelper, /\$ErrorActionPreference = \$previousErrorActionPreference/);
-  assert.match(nativeHelper, /\$global:LASTEXITCODE = \$previousLastExitCode/);
-});
-
-test("deployment never targets every PM2 process and retains reversible migration", async () => {
-  const deployScript = await readRepositoryFile("scripts/deploy-vinext-iis.ps1");
-
-  assert.doesNotMatch(deployScript, /Invoke-Pm2[^\r\n]+@\([^\r\n]*['"]all['"]/i);
-  assert.match(deployScript, /Stop-Pm2App -Name \$Pm2AppName/);
-  assert.match(deployScript, /Protected sibling verified before deployment/);
-  assert.match(deployScript, /Protected sibling remained healthy/);
-  assert.match(deployScript, /Write-Warning 'Vinext deployment failed\. Restoring the previous site\.'/);
-  assert.match(deployScript, /Start-ScheduledTask -TaskName \$LegacyTaskName/);
-  assert.match(deployScript, /Save-Pm2ProcessList/);
 });

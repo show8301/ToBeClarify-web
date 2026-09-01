@@ -96,7 +96,7 @@ function Invoke-Pm2 {
         throw "PM2 command failed with exit code ${exitCode}: pm2 $($Arguments -join ' ')`n$($output -join [Environment]::NewLine)"
     }
 
-    return $output
+    return ,$output
 }
 
 function Get-Pm2App {

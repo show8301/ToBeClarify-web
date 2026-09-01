@@ -4,7 +4,7 @@ export type Service = {
 };
 export type GalleryImage = { id:string; imageUrl:string; thumbnailUrl?:string|null };
 export type StaffSummary = {
-  id:string; displayName:string; nickname:string|null; avatarUrl:string|null; roleTitle:string|null;
+  id:string; displayName:string; nickname:string|null; avatarUrl:string|null; signatureUrl?:string|null; roleTitle:string|null;
   shortBio:string; isWorkingToday:boolean; currentStatus:string; statusText:string;
   isNominatable:boolean;
   commonServices:Service[]; specialServices:Service[];

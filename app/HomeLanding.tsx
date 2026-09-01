@@ -2,12 +2,39 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
-import type { HomeData } from "./site-types";
+import type { HomeData, PricingRule } from "./site-types";
 
-export default function HomeLanding({home}:{home:HomeData}){
+type HomeLandingProps = { home:HomeData; pricingRules?:PricingRule[] };
+
+function legacyPricingRules(home:HomeData):PricingRule[]{
+  return home.shopInfo.pricing.map((item,index)=>({
+    id:`legacy-pricing-${index}`,
+    title:item.name,
+    description:"",
+    priceText:item.price,
+  }));
+}
+
+function normalizePricingRules(value:unknown):PricingRule[]{
+  if(!Array.isArray(value))return [];
+  return value.flatMap((item,index)=>{
+    if(!item||typeof item!=="object")return [];
+    const rule=item as Partial<PricingRule>;
+    if(typeof rule.title!=="string"||!rule.title.trim())return [];
+    return [{
+      id:typeof rule.id==="string"&&rule.id?rule.id:`live-pricing-${index}`,
+      title:rule.title,
+      description:typeof rule.description==="string"?rule.description:"",
+      priceText:typeof rule.priceText==="string"?rule.priceText:"",
+    }];
+  });
+}
+
+export default function HomeLanding({home,pricingRules:initialPricingRules=[]}:HomeLandingProps){
   const [slide,setSlide]=useState(0);
   const [slides,setSlides]=useState(home.slides);
   const [livePageVisibility,setLivePageVisibility]=useState(home.pageVisibility);
+  const [pricingRules,setPricingRules]=useState<PricingRule[]>(initialPricingRules.length?initialPricingRules:legacyPricingRules(home));
   const [heroLoaded,setHeroLoaded]=useState(false);
   const [aboutLoaded,setAboutLoaded]=useState(false);
   const [loadedEvents,setLoadedEvents]=useState<Record<string,boolean>>({});
@@ -18,15 +45,22 @@ export default function HomeLanding({home}:{home:HomeData}){
 
   useEffect(()=>{
     const controller=new AbortController();
-    fetch("https://api.marchgroup.net/api/client/home",{cache:"no-store",headers:{Accept:"application/json"},signal:controller.signal})
+    const homeRequest=fetch("https://api.marchgroup.net/api/client/home",{cache:"no-store",headers:{Accept:"application/json"},signal:controller.signal})
       .then((response)=>response.ok?response.json():null)
       .then((payload:unknown)=>{
         const data=payload as {success?:boolean;data?:{slides?:HomeData["slides"];pageVisibility?:Partial<HomeData["pageVisibility"]>}}|null;
         if(!data?.success)return;
         if(Array.isArray(data.data?.slides))setSlides(data.data.slides);
         if(data.data?.pageVisibility)setLivePageVisibility({...home.pageVisibility,...data.data.pageVisibility});
-      })
-      .catch(()=>{});
+      });
+    const menuRequest=fetch("https://api.marchgroup.net/api/client/menu",{cache:"no-store",headers:{Accept:"application/json"},signal:controller.signal})
+      .then((response)=>response.ok?response.json():null)
+      .then((payload:unknown)=>{
+        const data=payload as {success?:boolean;data?:{pricingRules?:unknown}}|null;
+        if(!data?.success||!Array.isArray(data.data?.pricingRules))return;
+        setPricingRules(normalizePricingRules(data.data.pricingRules));
+      });
+    Promise.all([homeRequest,menuRequest]).catch(()=>{});
     return()=>controller.abort();
   },[]);
 
@@ -88,7 +122,7 @@ export default function HomeLanding({home}:{home:HomeData}){
 
     <section className="home-pricing">
       <header><div><span>FIRST VISIT GUIDE</span><h2>入夢指南</h2></div><p>{home.shopInfo.entryNote}</p></header>
-      <div>{home.shopInfo.pricing.map((item,index)=><motion.article key={item.name} initial={reduceMotion?false:{opacity:0,y:24}} whileInView={{opacity:1,y:0}} viewport={{once:true,amount:.25}} transition={{delay:index*.08}}><span>{String(index+1).padStart(2,"0")}</span><h3>{item.name}</h3><b>{item.price}</b><i>{index===0?"ENTRY":index===1?"COMPANY":"PRIVATE"}</i></motion.article>)}</div>
+      <div>{pricingRules.map((item,index)=><motion.article key={item.id||`${item.title}-${index}`} initial={reduceMotion?false:{opacity:0,y:24}} whileInView={{opacity:1,y:0}} viewport={{once:true,amount:.25}} transition={{delay:index*.08}}><span>{String(index+1).padStart(2,"0")}</span><h3>{item.title}</h3><b>{item.priceText}</b><i>{index===0?"ENTRY":index===1?"COMPANY":"PRIVATE"}</i></motion.article>)}</div>
     </section>
 
     {!!home.carousels.length&&<section className="home-events">

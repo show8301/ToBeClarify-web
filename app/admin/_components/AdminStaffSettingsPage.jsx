@@ -11,6 +11,7 @@ import {
 
 const emptyStaff = {
   id: '', displayName: '', nickname: '', avatarMediaId: null, avatarUrl: '', avatarFile: null, avatarPreviewUrl: '',
+  signatureSupported: false, signatureMediaId: null, signatureUrl: '', signatureFile: null, signaturePreviewUrl: '',
   roleTitle: '', shortBio: '', profileBio: '', isWorkingToday: true,
   bufferMinutes: '', isNominatable: false,
   sortOrder: 0, isActive: true, services: [], gallery: [],
@@ -75,8 +76,11 @@ function toEditor(value) {
   return {
     ...emptyStaff,
     ...value,
+    signatureSupported: Object.prototype.hasOwnProperty.call(value || {}, 'signatureMediaId') || Object.prototype.hasOwnProperty.call(value || {}, 'signatureUrl'),
     avatarFile: null,
     avatarPreviewUrl: '',
+    signatureFile: null,
+    signaturePreviewUrl: '',
     services: (value.services || []).map(toServiceEditor),
     gallery: (value.gallery || []).map((item) => ({ ...item, _file: null, _previewUrl: '' })),
   };
@@ -128,6 +132,7 @@ export function AdminStaffSettingsPage() {
   useEffect(() => {
     const activeUrls = new Set([
       form.avatarPreviewUrl,
+      form.signaturePreviewUrl,
       ...form.gallery.map((item) => item._previewUrl),
       editingGallery?._previewUrl,
     ].filter(Boolean));
@@ -165,6 +170,11 @@ export function AdminStaffSettingsPage() {
   const updateAvatarFile = (file) => {
     const previewUrl = createLocalPreview(file);
     setForm((current) => ({ ...current, avatarFile: file, avatarPreviewUrl: previewUrl }));
+  };
+
+  const updateSignatureFile = (file) => {
+    const previewUrl = createLocalPreview(file);
+    setForm((current) => ({ ...current, signatureFile: file, signaturePreviewUrl: previewUrl }));
   };
 
   const updateGalleryFile = (file) => {
@@ -291,6 +301,14 @@ export function AdminStaffSettingsPage() {
         avatarMediaId = uploaded.id;
         avatarUrl = uploaded.url;
       }
+      let signatureMediaId = form.signatureSupported ? (form.signatureMediaId || null) : null;
+      let signatureUrl = form.signatureSupported ? (form.signatureUrl || null) : null;
+      if (form.signatureSupported && form.signatureFile) {
+        const uploaded = await adminApi.uploadMedia(form.signatureFile, 'staff');
+        uploadedMediaIds.push(uploaded.id);
+        signatureMediaId = uploaded.id;
+        signatureUrl = uploaded.url;
+      }
       const gallery = [];
       for (const item of (form.gallery || []).filter((value) => value._file || value.mediaId)) {
         let mediaId = item.mediaId || null;
@@ -311,6 +329,7 @@ export function AdminStaffSettingsPage() {
       }
       const saved = await adminApi.saveStaffMember(form.id, {
         displayName: form.displayName, nickname: form.nickname || null, avatarMediaId, avatarUrl,
+        signatureMediaId, signatureUrl,
         roleTitle: form.roleTitle || null, shortBio: form.shortBio || null, profileBio: form.profileBio || null,
         isWorkingToday: form.isWorkingToday, bufferMinutes, isNominatable: form.isNominatable === true,
         sortOrder: canManageAll ? Number(form.sortOrder) || 0 : Number(staffList.find((item) => item.id === form.id)?.sortOrder) || 0,
@@ -494,6 +513,7 @@ export function AdminStaffSettingsPage() {
                 <AdminField label="卡片簡介" className="span-2" required><textarea required disabled={isReadOnly} rows="3" value={form.shortBio || ''} onChange={(event) => update('shortBio', event.target.value)} /></AdminField>
                 <AdminField label="詳細介紹" className="span-2"><textarea disabled={isReadOnly} rows="7" value={form.profileBio || ''} onChange={(event) => update('profileBio', event.target.value)} /></AdminField>
                 <AdminAvatarPicker label="頭像" value={form.avatarUrl} pendingFile={form.avatarFile} hint="選擇圖片後會開啟 4:5 裁切框，輸出固定為 1200 × 1500px WebP；既有頭像也能重新調整。儲存店員資料後才會正式上傳。" disabled={isReadOnly} onChange={updateAvatarFile} onClear={() => { update('avatarFile', null); update('avatarPreviewUrl', ''); update('avatarUrl', ''); update('avatarMediaId', null); }} />
+                <AdminAvatarPicker kind="signature" label="顯示名稱簽名圖" value={form.signatureUrl} pendingFile={form.signatureFile} hint={form.signatureSupported ? "選擇帶透明背景的 PNG 或 WebP 後會開啟 3:2 裁切框，輸出為保留透明通道的 1200 × 800px WebP。上傳後公開卡片會用簽名圖取代文字顯示名稱；未上傳時仍顯示文字。" : "目前 API 尚未提供簽名圖欄位；待 API 更新後此功能會自動啟用。"} disabled={isReadOnly || !form.signatureSupported} onChange={updateSignatureFile} onClear={() => { update('signatureFile', null); update('signaturePreviewUrl', ''); update('signatureUrl', ''); update('signatureMediaId', null); }} />
               </div>
             </AdminPanel>
 
@@ -573,6 +593,7 @@ function StaffPublicCard({ form, navigation }) {
   const nickname = form.nickname && form.nickname !== form.displayName ? form.nickname : '';
   const role = form.roleTitle || 'DREAM STAFF';
   const avatarUrl = form.avatarPreviewUrl || form.avatarUrl;
+  const signatureUrl = form.signaturePreviewUrl || form.signatureUrl;
   const services = form.services.filter((item) => item.isEnabled);
   const isNominatable = form.isNominatable === true;
   return <article className={`adminRosterCardPreview ${form.isActive ? '' : 'isHidden'}`.trim()}>
@@ -582,15 +603,19 @@ function StaffPublicCard({ form, navigation }) {
     </div>
     <div className="adminRosterStatusBar">
       <span className={`adminRosterDuty ${form.isWorkingToday ? 'isOnline' : ''}`}><i /><small>{form.isWorkingToday ? 'ON DUTY' : 'OFF DUTY'}<b>{form.statusText || (form.isWorkingToday ? '待命中' : '未排班')}</b></small></span>
-      <span className="adminRosterNomination">✦ {isNominatable ? '可以指名' : '暫不開放指名'}</span>
       <strong>{navigation.number}</strong>
+      <span className="adminRosterNomination">✦ {isNominatable ? '可以指名' : '暫不開放指名'}</span>
     </div>
     <div className="adminRosterCardBody">
-      <h2>{displayName}</h2>
+      <div className="adminRosterCardHeading">
+        {signatureUrl ? <img src={signatureUrl} alt={`${displayName} 的簽名`} /> : <h2>{displayName}</h2>}
+      </div>
       {nickname ? <em>✦　暱稱｜{nickname}　✦</em> : null}
       <p>{form.shortBio || '這位夢境成員正在準備自己的介紹。'}</p>
-      {services.length ? <div className="adminRosterServiceChips">{services.slice(0, 2).map((item, index) => <span key={item.id}><img src={`/assets/staff-card-chip-icon-${index === 0 ? 'a' : 'b'}.png`} alt="" />{item.serviceName}</span>)}{services.length > 2 ? <i><img src="/assets/staff-card-chip-icon-c.png" alt="" />+{services.length - 2}</i> : null}</div> : null}
-      <footer><small>FILE · {navigation.number}</small><b>VIEW PROFILE ↗</b></footer>
+      <div className="adminRosterCardLower">
+        {services.length ? <div className="adminRosterServiceChips" aria-label="可提供服務">{services.slice(0, 2).map((item, index) => <span key={item.id}><img src={`/assets/staff-card-chip-icon-${index === 0 ? 'a' : 'b'}.png`} alt="" />{item.serviceName}</span>)}{services.length > 2 ? <i><img src="/assets/staff-card-chip-icon-c.png" alt="" />+{services.length - 2}</i> : null}</div> : null}
+        <footer><small>FILE · {navigation.number}</small><b>VIEW PROFILE ↗</b></footer>
+      </div>
     </div>
   </article>;
 }

@@ -1030,7 +1030,7 @@
 .adminOrderMessage { position: sticky; z-index: 15; top: 92px; display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 14px; padding: 12px 15px; border: 1px solid rgba(25,133,94,.35); border-radius: 12px; background: #dff8ed; color: #155e47; font-size: 13px; box-shadow: 0 10px 25px rgba(0,0,0,.12); }
 .adminOrderMessage.isError { border-color: rgba(216,78,58,.35); background: #ffe1db; color: #9d3425; }
 .adminOrderMessage button { background: transparent; color: currentColor; font-size: 20px; }
-.adminOrderWorkspace { min-height: 720px; display: grid; grid-template-columns: minmax(300px,360px) minmax(0,1fr); overflow: hidden; border: 1px solid var(--color-border); border-radius: 20px; background: rgba(250,247,239,.86); box-shadow: 12px 14px 0 rgba(185,170,255,.52); }
+.adminOrderWorkspace { min-height: 720px; display: grid; grid-template-columns: minmax(250px,300px) minmax(0,1fr); overflow: hidden; border: 1px solid var(--color-border); border-radius: 20px; background: rgba(250,247,239,.86); box-shadow: 12px 14px 0 rgba(185,170,255,.52); }
 .adminCustomerPane { max-height: calc(100vh - 164px); min-height: 720px; overflow-y: auto; border-right: 1px solid var(--color-border-strong); background: rgba(237,232,244,.74); scrollbar-width: thin; }
 .adminCustomerToolbar { position: sticky; z-index: 4; top: 0; display: grid; gap: 10px; padding: 16px; border-bottom: 1px solid var(--color-border-strong); background: rgba(245,241,248,.96); backdrop-filter: blur(14px); }
 .adminCustomerToolbar>label { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 10px; color: var(--color-fg-mute); font-size: 11px; }
@@ -1044,7 +1044,7 @@
 .adminCustomerGroup>button { position: sticky; z-index: 3; top: 142px; width: 100%; display: flex; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid var(--color-border); background: rgba(220,223,239,.96); color: var(--color-fg-soft); font: 700 10px/1 var(--font-mono); letter-spacing: .08em; text-align: left; }
 .adminCustomerGroup>button b { display: grid; min-width: 24px; height: 20px; place-items: center; border-radius: 999px; background: var(--color-fg); color: #fff; }
 .adminCustomerGroup>div>p { margin: 0; padding: 18px; color: var(--color-fg-mute); font-size: 11px; text-align: center; }
-.adminCustomerRow { width: 100%; display: grid; grid-template-columns: 40px minmax(0,1fr) auto; gap: 10px; align-items: center; padding: 11px 13px; border-bottom: 1px solid var(--color-border); background: rgba(255,255,255,.36); text-align: left; }
+.adminCustomerRow { width: 100%; display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--color-border); background: rgba(255,255,255,.36); text-align: left; }
 .adminCustomerRow:hover,.adminCustomerRow.isActive { background: rgba(189,241,223,.54); }
 .adminCustomerRow.isActive { box-shadow: inset 4px 0 var(--color-accent-dark); }
 .adminCustomerInitial { display: grid; width: 36px; height: 36px; place-items: center; border-radius: 50%; background: linear-gradient(145deg,#b9aaff,#bdf1df); font-weight: 800; }
@@ -1082,8 +1082,8 @@
 .adminOrderInlinePanel,.adminIssuedPanel,.adminOrderingSettings { margin-bottom:16px; padding:18px; border:1px solid var(--color-border-strong); border-radius:17px; background:rgba(250,247,239,.94); box-shadow:8px 9px 0 rgba(189,241,223,.55); }.adminOrderInlinePanel>header,.adminIssuedPanel>header,.adminOrderingSettings>header { display:flex; justify-content:space-between; gap:18px; align-items:start; margin-bottom:15px; }.adminOrderInlinePanel h2,.adminIssuedPanel h2,.adminOrderingSettings h2 { margin:6px 0 0; font-size:22px; }.adminOrderInlinePanel header>button,.adminIssuedPanel header>button { background:transparent; font-size:22px; }.adminOrderInlinePanel form { display:grid; grid-template-columns:1fr 1fr 180px auto; gap:10px; align-items:end; }.adminOrderInlinePanel label,.adminOrderingSettings label,.adminNominationPause label { display:grid; gap:5px; color:var(--color-fg-mute); font-size:10px; }.adminOrderInlinePanel input,.adminOrderingSettings input,.adminNominationPause input { width:100%; padding:9px; border:1px solid var(--color-border-strong); border-radius:8px; background:rgba(255,255,255,.78); }
 .adminIssuedPanel>div { display:grid; grid-template-columns:2fr 1fr; gap:10px; }.adminIssuedPanel label { min-width:0; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; align-items:center; padding:11px; border:1px solid var(--color-border); border-radius:10px; }.adminIssuedPanel code { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:11px; }.adminIssuedPanel label button { padding:7px 9px; border-radius:8px; background:var(--color-fg); color:#fff; font-size:10px; }.adminIssuedPanel p { margin:12px 0 0; color:var(--color-fg-mute); font-size:10px; }
 .adminOrderingSettings header p { margin:6px 0 0; color:var(--color-fg-mute); font-size:11px; }.adminOrderingSettingsGrid { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:9px; }.adminNominationPause { display:flex; align-items:end; gap:9px; margin-top:14px; padding-top:14px; border-top:1px solid var(--color-border); }.adminNominationPause label { width:150px; }.adminNominationPause span { margin-left:auto; color:var(--color-accent-2); font-size:11px; }
-.adminBusinessHours{display:grid;grid-template-columns:160px 160px minmax(180px,auto) 1fr;align-items:end;gap:10px;margin-bottom:14px;padding:12px;border:1px solid var(--color-border);border-radius:11px;background:rgba(255,255,255,.46)}.adminBusinessHours input[type=time]{width:100%;padding:9px;border:1px solid var(--color-border-strong);border-radius:8px;background:rgba(255,255,255,.78)}.adminBusinessHours .adminBusinessNextDay{display:flex;align-items:center;gap:7px;min-height:39px}.adminBusinessHours .adminBusinessNextDay input{width:auto}.adminBusinessHours p{margin:0;color:var(--color-fg-mute);font-size:10px}.adminBusinessPeriod{display:grid;gap:2px;margin:0;padding:8px 9px;border:1px solid var(--color-border);border-radius:8px;color:var(--color-fg-mute);font-size:9px}.adminBusinessPeriod.isOpen{border-color:rgba(44,151,116,.35);color:var(--color-accent-2)}.adminBusinessPeriod span{font-size:9px}
-@media(max-width:1100px){.adminOrderWorkspace{grid-template-columns:300px minmax(0,1fr)}.adminSelectedCustomer{grid-template-columns:1fr}.adminSelectedCustomer dl{grid-row:2}.adminSessionControls{grid-row:3}.adminOrderingSettingsGrid{grid-template-columns:repeat(3,1fr)}.adminBusinessHours{grid-template-columns:1fr 1fr}.adminBusinessHours p{grid-column:1/-1}.adminOrderInlinePanel form{grid-template-columns:1fr 1fr}.adminOrderInlinePanel form .adminButton{align-self:end}}
+.adminBusinessHours{display:grid;grid-template-columns:160px 160px minmax(180px,auto) 1fr;align-items:end;gap:10px;margin-bottom:14px;padding:12px;border:1px solid var(--color-border);border-radius:11px;background:rgba(255,255,255,.46)}.adminBusinessHours input[type=time]{width:100%;padding:9px;border:1px solid var(--color-border-strong);border-radius:8px;background:rgba(255,255,255,.78)}.adminBusinessHours .adminBusinessNextDay{display:flex;align-items:center;gap:7px;min-height:39px}.adminBusinessHours .adminBusinessNextDay input{width:auto}.adminBusinessHours p{margin:0;color:var(--color-fg-mute);font-size:10px}.adminBusinessPeriod{display:grid;gap:5px;margin:0;padding:10px 12px;border:1px solid var(--color-border);border-radius:8px;color:var(--color-fg-mute);font-size:11px}.adminBusinessPeriod.isOpen{border-color:rgba(44,151,116,.35);color:var(--color-accent-2)}.adminBusinessPeriod strong{font-size:11px}.adminBusinessPeriod span{font:800 14px/1.25 var(--font-mono);letter-spacing:.02em;white-space:nowrap}
+@media(max-width:1100px){.adminOrderWorkspace{grid-template-columns:minmax(240px,280px) minmax(0,1fr)}.adminSelectedCustomer{grid-template-columns:1fr}.adminSelectedCustomer dl{grid-row:2}.adminSessionControls{grid-row:3}.adminOrderingSettingsGrid{grid-template-columns:repeat(3,1fr)}.adminBusinessHours{grid-template-columns:1fr 1fr}.adminBusinessHours p{grid-column:1/-1}.adminOrderInlinePanel form{grid-template-columns:1fr 1fr}.adminOrderInlinePanel form .adminButton{align-self:end}}
 @media(max-width:760px){.adminOrderWorkspace{display:block;overflow:visible;border:0;background:transparent;box-shadow:none}.adminCustomerPane{max-height:420px;min-height:0;border:1px solid var(--color-border-strong);border-radius:16px}.adminCustomerGroup>button{top:142px}.adminOrderDetailPane{max-height:none;min-height:0;margin-top:16px;padding:0;overflow:visible}.adminSelectedCustomer dl{display:grid;grid-template-columns:1fr 1fr}.adminNomineeGrid{grid-template-columns:1fr}.adminOrderItemList>div{grid-template-columns:minmax(0,1fr) auto}.adminOrderItemActions{grid-column:1/-1}.adminOrderItemActions button{flex:1}.adminOrderItemEditor{grid-template-columns:1fr 1fr}.adminOrderItemEditor label:first-child,.adminOrderItemEditor>.adminButton,.adminOrderItemEditor>small{grid-column:1/-1}.adminOrderTotals{display:grid;justify-content:stretch;text-align:right}.adminOrderInlinePanel form,.adminIssuedPanel>div,.adminOrderingSettingsGrid{grid-template-columns:1fr}.adminNominationPause{align-items:stretch;flex-direction:column}.adminNominationPause label{width:100%}.adminNominationPause span{margin:0}.adminOrderCardHead{align-items:start}.adminOrderMessage{top:78px}}
 
 .adminLoginShell,
@@ -2201,6 +2201,37 @@
   color: var(--color-fg-soft);
 }
 
+:root[data-admin-theme="dark"] .adminStaffPreviewHeader h2,
+:root[data-admin-theme="dark"] .adminStaffPreviewCurrent {
+  color: var(--color-fg) !important;
+}
+
+:root[data-admin-theme="dark"] .adminStaffPreviewHeader small {
+  color: var(--color-fg-soft);
+}
+
+:root[data-admin-theme="dark"] .adminStaffPreviewCurrent {
+  border-color: rgba(218, 234, 244, .28);
+  background: rgba(37, 58, 75, .9);
+}
+
+:root[data-admin-theme="dark"] .adminDragCardContent strong {
+  color: var(--color-fg);
+}
+
+:root[data-admin-theme="dark"] .adminDragCardContent small {
+  color: var(--color-fg-soft);
+}
+
+:root[data-admin-theme="dark"] .adminDragCardMeta em {
+  color: var(--color-accent-2);
+}
+
+:root[data-admin-theme="dark"] .adminNomineeGrid span {
+  background: var(--color-accent);
+  color: #102131;
+}
+
 @media (max-width: 1100px) {
   .adminBusinessOverrideGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
@@ -2211,3 +2242,26 @@
   .adminBusinessOverrideReason { grid-column: auto; }
   .adminBusinessOverrideActions > * { flex: 1; }
 }
+
+/* Transparent 3:2 staff signatures use the same crop/compression workflow as avatars. */
+.adminSignaturePreview {
+  width: min(420px,100%);aspect-ratio:3 / 2;
+  background-color:rgba(255,255,255,.28);
+  background-image:linear-gradient(45deg,rgba(92,102,126,.13) 25%,transparent 25%),linear-gradient(-45deg,rgba(92,102,126,.13) 25%,transparent 25%),linear-gradient(45deg,transparent 75%,rgba(92,102,126,.13) 75%),linear-gradient(-45deg,transparent 75%,rgba(92,102,126,.13) 75%);
+  background-size:22px 22px;background-position:0 0,0 11px,11px -11px,-11px 0
+}
+.adminSignaturePreview img{object-fit:contain}
+.adminRosterStatusBar{grid-template-columns:minmax(0,1fr) 34px auto;min-height:52px;background:linear-gradient(90deg,rgba(234,237,248,.96),rgba(194,199,226,.93) 55%,rgba(164,220,215,.92))}
+.adminRosterDuty small{font-size:7px;font-weight:820;letter-spacing:.14em}
+.adminRosterDuty small b{font-size:11px;font-weight:820}
+.adminRosterNomination{justify-self:end;min-height:29px;padding:0 9px;display:inline-flex;align-items:center;border:1px solid rgba(255,255,255,.84);border-radius:999px;background:rgba(255,255,255,.42);color:#31334a;font-size:9px;font-weight:820}
+.adminRosterCardHeading{width:100%;min-height:104px;display:grid;place-items:center}
+.adminRosterCardHeading h2{width:100%;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.adminRosterCardHeading img{display:block;width:min(190px,88%);aspect-ratio:3 / 2;object-fit:contain;filter:drop-shadow(0 4px 7px rgba(49,51,74,.12))}
+.adminRosterCardBody>p{white-space:pre-line}
+.adminRosterCardLower{width:100%;margin-top:auto;display:flex;flex-direction:column;gap:14px}
+.adminRosterCardLower .adminRosterServiceChips{margin-top:0}
+.adminRosterCardLower footer{margin-top:0}
+:root[data-admin-theme="dark"] .adminSignaturePreview{background-color:rgba(15,30,43,.72);background-image:linear-gradient(45deg,rgba(218,234,244,.08) 25%,transparent 25%),linear-gradient(-45deg,rgba(218,234,244,.08) 25%,transparent 25%),linear-gradient(45deg,transparent 75%,rgba(218,234,244,.08) 75%),linear-gradient(-45deg,transparent 75%,rgba(218,234,244,.08) 75%)}
+:root[data-admin-theme="dark"] .adminRosterNomination{border-color:rgba(218,234,244,.24);background:rgba(37,58,75,.88);color:#b8f1e2}
+@media(max-width:720px){.adminSignaturePreview{width:100%;max-width:420px}.adminRosterCardHeading{min-height:92px}.adminRosterCardHeading img{width:min(170px,86%)}}

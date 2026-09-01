@@ -698,3 +698,16 @@ body.modal-open .site-parallax-bubbles i{animation-play-state:paused}
   .dreamer-card-footer{gap:12px}
   .dreamer-card-footer .dreamer-services{margin:0}
 }
+
+/* Ordering modal embeds profile content without duplicate page navigation. */
+.profile-page .profile-spread.is-order-embedded{
+  grid-template-rows:minmax(0,1fr);
+  padding-top:22px;
+  padding-bottom:22px;
+}
+@media(max-width:820px){
+  .profile-page .profile-spread.is-order-embedded{
+    padding-top:14px;
+    padding-bottom:calc(24px + env(safe-area-inset-bottom));
+  }
+}

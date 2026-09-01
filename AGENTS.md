@@ -1,5 +1,12 @@
 # Repository instructions
 
+## Coding standards
+
+- Read and follow [`docs/coding-standards.md`](docs/coding-standards.md) before making Web code changes.
+- New source code uses TypeScript/TSX. Existing JavaScript/JSX may be migrated incrementally when materially edited.
+- Cross-domain runtime implementation imports are forbidden; type-only imports from explicit contract modules are allowed.
+- Browser code uses same-origin `/api/...` clients; upstream API origins belong only in `lib/server/upstream-config.ts`.
+
 ## Development deployment checks
 
 - Skip all automated test suites for a `dev` branch deployment by default, including unit, component, integration, E2E, and browser tests. Run them only when the user explicitly requests testing for that run.

@@ -59,10 +59,21 @@ export function AdminHomePage({ navigate }) {
   const canManageAll = user.role === 'developer' || user.role === 'manager';
   const canHideMenu = user.role === 'developer';
   const [visibility, setVisibility] = useState({ loading: canHideMenu, saving: false, pages: { ...defaultPageVisibility }, error: '' });
-  const [visibilityOpen, setVisibilityOpen] = useState(true);
+  const [visibilityOpen, setVisibilityOpen] = useState(false);
+  const [credentialToolsOpen, setCredentialToolsOpen] = useState(false);
   const [staffDirectory, setStaffDirectory] = useState({ loading: canHideMenu, items: [], error: '' });
-  const [staffDirectoryOpen, setStaffDirectoryOpen] = useState(true);
+  const [staffDirectoryOpen, setStaffDirectoryOpen] = useState(false);
   const [staffDirectoryPage, setStaffDirectoryPage] = useState(1);
+  const [operations, setOperations] = useState({ loading: true, context: null, error: '' });
+
+  const loadOperations = () => {
+    setOperations((current) => ({ ...current, loading: true, error: '' }));
+    adminApi.getOrderingContext()
+      .then((context) => setOperations({ loading: false, context, error: '' }))
+      .catch((error) => setOperations({ loading: false, context: null, error: error?.message || '無法讀取今日營運資料。' }));
+  };
+
+  useEffect(() => { loadOperations(); }, []);
 
   useEffect(() => {
     if (!canHideMenu) return undefined;
@@ -118,16 +129,30 @@ export function AdminHomePage({ navigate }) {
     currentStaffDirectoryPage * STAFF_PAGE_SIZE,
   );
 
+  const context = operations.context;
+  const periodLabel = context?.periodStatus === 'open' ? '營業中' : context?.periodStatus === 'closed' ? '已關店' : context?.periodStatus === 'settled' ? '已結算' : '尚未開店';
+  const intakeLabel = context?.intakeMode === 'normal' ? '正常接單' : context?.intakeMode === 'coordination' ? '協調接單' : '店員接單';
+  const closeTime = context?.projectedCloseAt || context?.referenceEndsAt;
+
   return (
-    <AdminPage eyebrow="Management Console" title={`歡迎回到後台，${user.displayName}`} description={`目前身份：${user.roleLabel}`} actions={<span className="adminPageLoginStatus" role="status">已登入</span>}>
-      <div className="adminDashboardCards">
-        {canManageAll ? <>
-          <AdminPanel title="首頁設定" description="維護店舖介紹、首頁規則與活動輪播。"><AdminButton onClick={() => navigate('/admin/home')}>進入設定</AdminButton></AdminPanel>
-          <AdminPanel title="活動與菜單" description="快速進入活動或菜單資料管理。"><div className="adminInlineActions"><AdminButton variant="secondary" onClick={() => navigate('/admin/events')}>活動設定</AdminButton><AdminButton variant="secondary" onClick={() => navigate('/admin/menu')}>菜單設定</AdminButton></div></AdminPanel>
-        </> : <AdminPanel title="店員設定" description="維護自己的公開資料與服務內容。"><AdminButton onClick={() => navigate('/admin/staff')}>進入設定</AdminButton></AdminPanel>}
-      </div>
-      {canManageAll ? <AdminCredentialTools /> : null}
-      {canHideMenu ? <div className="adminDeveloperTools">
+    <AdminPage eyebrow="OPERATIONS OVERVIEW" title="營運總覽" description={`${user.displayName}，這裡集中顯示今日需要處理的資訊。`} actions={<AdminButton variant="secondary" disabled={operations.loading} onClick={loadOperations}>重新整理</AdminButton>}>
+      <section className="adminOperationsOverview">
+        <header><div><span>今日營業</span><h2>{operations.loading ? '讀取中…' : periodLabel}</h2><p>{context ? `${intakeLabel}${closeTime ? ` · 預計 ${new Date(closeTime).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })} 結束` : ''}` : operations.error || '尚無營運資料'}</p></div><div className="adminOperationsActions"><AdminButton onClick={() => navigate('/admin/orders')}>進入點單管理</AdminButton><AdminButton variant="secondary" onClick={() => navigate('/admin/order-list')}>查詢訂單</AdminButton></div></header>
+        <div className="adminOperationsMetrics"><article><span>等待處理</span><strong>{context?.waitingOrderCount ?? '—'}</strong><small>筆訂單</small></article><article><span>尚未完成</span><strong>{context?.unfinishedOrderCount ?? '—'}</strong><small>筆訂單</small></article><article><span>接單模式</span><strong className="isText">{context ? intakeLabel : '—'}</strong><small>目前狀態</small></article><article><span>店員管理</span><strong className="isText">工作狀態</strong><button type="button" onClick={() => navigate('/admin/staff')}>前往管理 <span aria-hidden="true">›</span></button></article></div>
+      </section>
+
+      {canManageAll ? <section className="adminOverviewSettings"><header><div><h2>內容與系統設定</h2><p>低頻設定集中在這裡，不干擾現場操作。</p></div></header><div><button type="button" onClick={() => navigate('/admin/menu')}><strong>菜單設定</strong><span>品項、分類與價格</span><i>›</i></button><button type="button" onClick={() => navigate('/admin/events')}><strong>活動設定</strong><span>活動內容與檔期</span><i>›</i></button><button type="button" onClick={() => navigate('/admin/home')}><strong>首頁設定</strong><span>店舖介紹與輪播</span><i>›</i></button></div></section> : null}
+      {canManageAll ? <div className="adminDeveloperTools">
+        <DeveloperDisclosure
+          title="帳號安全工具"
+          description="取得註冊金鑰，或協助後台使用者重設帳號。"
+          contentId="admin-credential-tools-content"
+          open={credentialToolsOpen}
+          onToggle={setCredentialToolsOpen}
+        >
+          <AdminCredentialTools embedded />
+        </DeveloperDisclosure>
+        {canHideMenu ? <>
         <DeveloperDisclosure
           title="頁面顯示狀態"
           description="調整公開網站 MENU 中 00–07 各頁面的顯示狀態。"
@@ -176,6 +201,7 @@ export function AdminHomePage({ navigate }) {
             </div> : null}
           </> : null}
         </DeveloperDisclosure>
+        </> : null}
       </div> : null}
     </AdminPage>
   );

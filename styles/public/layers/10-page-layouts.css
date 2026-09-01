@@ -85,4 +85,3 @@ body{font-size:var(--type-body);line-height:1.65;text-rendering:optimizeLegibili
 
 @media(max-width:560px){:root{--type-body:17px;--type-reading:18px}.site-header nav a span{font-size:17px}.home-pricing h2,.home-events h2,.home-final-cta h2,.menu-sets h2,.menu-catalog h2,.live-status h2,.live-timeline h2,.staff-honor h2,.guest-podium h2{font-size:40px;line-height:1.1}.weekly-card-copy p,.menu-sets article p,.menu-category li p{font-size:17px}.weekly-modal-intro p,.guest-note>p{font-size:17px}.archive-footer{font-size:var(--type-caption)}}
 @media(max-width:560px){.service-grid h3{font-size:18px}.service-grid p{font-size:15px}.service-grid article>b{font-size:14px}}
-

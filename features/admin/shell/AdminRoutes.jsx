@@ -9,6 +9,7 @@ import { AdminHomePage } from '@/features/admin/dashboard/AdminHomePage.jsx';
 import { AdminEventsPage } from '@/features/admin/events/AdminEventsPage.jsx';
 import { AdminHomeSettingsPage } from '@/features/admin/home/AdminHomeSettingsPage.jsx';
 import { AdminLayout } from '@/features/admin/layout/AdminLayout.jsx';
+import { AdminOrderListPage } from '@/features/admin/media/AdminOrderListPage.jsx';
 import { AdminMenuPage } from '@/features/admin/menu/AdminMenuPage.jsx';
 import { AdminOrdersPage } from '@/features/admin/orders/AdminOrdersPage.jsx';
 import { AdminStaffSettingsPage } from '@/features/admin/staff/AdminStaffSettingsPage.jsx';
@@ -74,6 +75,10 @@ export function AdminMenuRoute() {
 
 export function AdminOrdersRoute() {
   return <AdminProtectedRoute><AdminOrdersPage /></AdminProtectedRoute>;
+}
+
+export function AdminOrderListRoute() {
+  return <AdminProtectedRoute><AdminOrderListPage /></AdminProtectedRoute>;
 }
 
 export function AdminLoginRoute() {

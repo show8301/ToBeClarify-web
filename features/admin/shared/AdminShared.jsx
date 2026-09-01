@@ -68,7 +68,20 @@ export function AdminToggle({ checked, onChange, label = '啟用', ariaLabel, di
   );
 }
 
-export function AdminImagePicker({ label = '圖片', value, pendingFile, onChange, onClear, hint, className = '', disabled = false, required = false }) {
+function originalImageUrl(value) {
+  if (!value) return '';
+  try {
+    const url = new URL(value, window.location.origin);
+    const mediaMatch = url.pathname.match(/\/api\/client\/media\/([^/]+)/);
+    if (mediaMatch) return `/api/admin-media/${encodeURIComponent(decodeURIComponent(mediaMatch[1]))}`;
+    url.searchParams.set('variant', 'original');
+    return url.href;
+  } catch {
+    return value;
+  }
+}
+
+export function AdminImagePicker({ label = '圖片', value, pendingFile, onChange, onClear, hint, className = '', disabled = false, required = false, cropConfig = null, output = undefined }) {
   const [preview, setPreview] = useState(value || '');
   const [processing, setProcessing] = useState(false);
   const [feedback, setFeedback] = useState({ status: '', error: '' });
@@ -84,20 +97,36 @@ export function AdminImagePicker({ label = '圖片', value, pendingFile, onChang
     return () => URL.revokeObjectURL(url);
   }, [pendingFile, value]);
 
-  const handleFile = async (file) => {
-    if (!file) return;
+  const runProcess = async (request) => {
     setProcessing(true);
-    setFeedback({ status: '正在轉換並壓縮圖片…', error: '' });
+    setFeedback({ status: cropConfig ? '請在裁切框調整圖片…' : '正在轉換並壓縮圖片…', error: '' });
     try {
-      const processed = await processImage({ file, crop: false });
+      const processed = await processImage(request);
       onChange(processed);
-      setFeedback({ status: `已轉為 WebP：${formatImageFileSize(file.size)} → ${formatImageFileSize(processed.size)}。`, error: '' });
+      setFeedback({ status: cropConfig
+        ? `已裁切為 ${cropConfig.width} × ${cropConfig.height}px WebP，檔案大小 ${formatImageFileSize(processed.size)}。`
+        : `已轉為 WebP，檔案大小 ${formatImageFileSize(processed.size)}。`, error: '' });
     } catch (error) {
-      setFeedback({ status: '', error: error?.message || '圖片處理失敗，請重新選擇。' });
+      if (error?.name === 'ImageProcessingCanceledError') setFeedback({ status: '', error: '' });
+      else setFeedback({ status: '', error: error?.message || '圖片處理失敗，請重新選擇。' });
     } finally {
       setProcessing(false);
     }
   };
+
+  const handleFile = (file) => {
+    if (!file) return;
+    return runProcess({ file, crop: Boolean(cropConfig), cropConfig, output });
+  };
+
+  const adjustImage = () => runProcess({
+    file: pendingFile || undefined,
+    sourceUrl: pendingFile ? undefined : originalImageUrl(value),
+    sourceName: 'menu-image',
+    crop: true,
+    cropConfig,
+    output,
+  });
 
   return (
     <div className={`adminImagePicker ${className}`.trim()}>
@@ -113,6 +142,7 @@ export function AdminImagePicker({ label = '圖片', value, pendingFile, onChang
           {processing ? '處理中…' : '選擇圖片'}
           <input type="file" disabled={processing} accept="image/jpeg,image/png,image/webp" onChange={(event) => { handleFile(event.target.files?.[0] || null); event.target.value = ''; }} />
         </label> : null}
+        {preview && cropConfig && !disabled ? <AdminButton variant="ghost" disabled={processing} onClick={adjustImage}>調整裁切</AdminButton> : null}
         {preview && !disabled ? <AdminButton variant="ghost" disabled={processing} onClick={() => { setFeedback({ status: '', error: '' }); onClear(); }}>清除</AdminButton> : null}
       </div>
       {feedback.status ? <small className="adminFieldHint" role="status">{feedback.status}</small> : null}

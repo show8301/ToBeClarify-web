@@ -466,6 +466,103 @@
 .nominationServiceGrid footer { align-self:end; padding-top:10px; border-color:#d9dee7; }
 .nominationServiceGrid footer b { font-size:15px; }
 .nominationServiceGrid footer small { color:#687085; }
+.orderStaffCard {
+  min-width:0;
+  overflow:hidden;
+  border:1px solid #dfe3eb;
+  border-radius:12px;
+  background:#f8f9fb;
+}
+.orderStaffCard.isActive { border-color:#9fb1cf; background:#e7edf6; }
+.orderStaffSelect {
+  width:100%;
+  padding:10px 10px 8px;
+  display:grid;
+  justify-items:center;
+  background:transparent;
+  color:#34394f;
+  text-align:center;
+}
+.orderStaffSelect>span {
+  width:72px;
+  height:86px;
+  margin:0 auto 9px;
+  overflow:hidden;
+  border-radius:10px;
+  background:#e3e7ee;
+}
+.orderStaffSelect img { width:100%; height:100%; object-fit:cover; }
+.orderStaffSelect strong { max-width:100%; overflow:hidden; font-size:13px; text-overflow:ellipsis; white-space:nowrap; }
+.orderStaffSelect small { max-width:100%; margin-top:3px; overflow:hidden; color:#747c8f; font-size:9px; text-overflow:ellipsis; white-space:nowrap; }
+.orderStaffProfileButton {
+  width:calc(100% - 16px);
+  min-height:34px;
+  margin:0 8px 8px;
+  border:1px solid #d7dde7;
+  border-radius:8px;
+  background:#fff;
+  color:#59657c;
+  font-size:10px;
+  font-weight:700;
+}
+.orderStaffProfileButton:hover { border-color:#a8b7cf; background:#f4f7fb; }
+.orderStaffModalBackdrop {
+  position:fixed;
+  z-index:120;
+  inset:0;
+  padding:24px;
+  display:grid;
+  place-items:center;
+  background:rgba(35,39,55,.58);
+  backdrop-filter:blur(5px);
+}
+.orderStaffModal {
+  width:min(1080px,calc(100vw - 48px));
+  height:min(820px,calc(100vh - 48px));
+  overflow:hidden;
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr) auto;
+  border:1px solid #d8dde6;
+  border-radius:16px;
+  background:#f7f8fa;
+  box-shadow:0 24px 80px rgba(23,27,42,.26);
+}
+.orderStaffModal>header {
+  min-height:62px;
+  padding:10px 14px 10px 18px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+  border-bottom:1px solid #dfe3eb;
+  background:#fff;
+}
+.orderStaffModal>header div { min-width:0; display:grid; grid-template-columns:auto 1fr; align-items:baseline; gap:3px 9px; }
+.orderStaffModal>header span { color:#7186ad; font:750 8px/1 var(--o-mono); letter-spacing:.14em; }
+.orderStaffModal>header strong { overflow:hidden; font-size:17px; text-overflow:ellipsis; white-space:nowrap; }
+.orderStaffModal>header small { grid-column:1/-1; color:#747c8f; font-size:10px; }
+.orderStaffModal>header button { width:38px; height:38px; flex:0 0 auto; border:1px solid #d9dee7; border-radius:10px; background:#f7f8fa; color:#555e73; font-size:22px; }
+.orderStaffFrame { position:relative; min-height:0; background:#eef1f6; }
+.orderStaffFrame iframe { position:relative; z-index:1; width:100%; height:100%; border:0; background:#fff; opacity:0; transition:opacity .2s ease; }
+.orderStaffFrame.isLoaded iframe { opacity:1; }
+.orderStaffFrameLoading { position:absolute; inset:0; display:grid; place-content:center; justify-items:center; gap:10px; color:#59657c; }
+.orderStaffFrameLoading span { width:46px; height:46px; display:grid; place-items:center; border:1px solid #cfd7e4; border-radius:50%; background:#fff; color:#7186ad; font:800 12px/1 var(--o-mono); }
+.orderStaffFrameLoading strong { font-size:12px; }
+.orderStaffFrame.isLoaded .orderStaffFrameLoading { display:none; }
+.orderStaffModal>footer {
+  min-height:66px;
+  padding:10px 14px;
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  gap:10px;
+  border-top:1px solid #dfe3eb;
+  background:#fff;
+}
+.orderStaffModal>footer a,
+.orderStaffModal>footer button { min-height:42px; padding:9px 16px; border-radius:9px; font-size:12px; font-weight:750; text-decoration:none; }
+.orderStaffModal>footer a { display:flex; align-items:center; border:1px solid #d8dde6; color:#50596d; }
+.orderStaffModal>footer button { border:1px solid #7186ad; background:#7186ad; color:#fff; }
 .nominationComposer { padding:20px; }
 .nominationComposer h2 { margin-bottom:14px; font-size:21px; }
 .nominationControls select {
@@ -506,6 +603,16 @@
   .orderRecommendationHead{display:block}.orderRecommendationHead p{margin-top:5px}
   .nominationServiceGrid{grid-template-columns:1fr}
   .nominationServiceGrid>button{min-height:148px}
+  .nominationStaffGrid{display:flex;gap:8px;margin-inline:-2px;padding:2px;overflow-x:auto;scroll-snap-type:x mandatory}
+  .orderStaffCard{flex:0 0 138px;scroll-snap-align:start}
+  .orderStaffSelect>span{width:82px;height:98px}
   .nominationControls{grid-template-columns:1fr}
   .orderNotice{top:auto;right:12px;bottom:86px;left:12px;min-width:0;max-width:none;transform:none}
+  .orderStaffModalBackdrop{padding:0;place-items:stretch}
+  .orderStaffModal{width:100vw;height:100dvh;border:0;border-radius:0}
+  .orderStaffModal>header{min-height:56px;padding:8px 10px 8px 14px}
+  .orderStaffModal>header strong{font-size:16px}
+  .orderStaffModal>footer{min-height:64px;padding:9px 10px;padding-bottom:max(9px,env(safe-area-inset-bottom))}
+  .orderStaffModal>footer a{padding-inline:12px;font-size:11px}
+  .orderStaffModal>footer button{flex:1}
 }

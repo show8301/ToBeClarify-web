@@ -1,4 +1,4 @@
-import { adminApi } from '../admin-api.js';
+import { adminApi } from '@/features/admin/api/client.js';
 
 export async function cleanupAdminMedia(mediaIds) {
   const ids = [...new Set((mediaIds || []).filter(Boolean))];

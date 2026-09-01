@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { adminApi } from '../admin-api.js';
+import { adminApi } from '@/features/admin/api/client.js';
 import {
   AdminButton, AdminDialog, AdminDragList, AdminField, AdminImagePicker, AdminPage, AdminPanel, AdminState, AdminToggle,
   newId,
-} from './AdminShared.jsx';
+} from '@/features/admin/shared/AdminShared.jsx';
 
 const tabs = [['pricing', '消費規則'], ['categories', '分類'], ['items', '餐點品項'], ['sets', '套餐']];
 const emptyPricing = { id: '', title: '', description: '', priceText: '', sortOrder: 0, isEnabled: true };

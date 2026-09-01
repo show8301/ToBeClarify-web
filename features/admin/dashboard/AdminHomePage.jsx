@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { adminApi } from '../admin-api.js';
-import { useAdminAuth } from './AdminAuthContext.jsx';
-import { AdminButton, AdminPage, AdminPanel, AdminToggle } from './AdminShared.jsx';
-import { AdminCredentialTools } from './AdminCredentialTools.jsx';
+import { adminApi } from '@/features/admin/api/client.js';
+import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
+import { AdminButton, AdminPage, AdminPanel, AdminToggle } from '@/features/admin/shared/AdminShared.jsx';
+import { AdminCredentialTools } from '@/features/admin/dashboard/AdminCredentialTools.jsx';
 
 const PUBLIC_PAGES = [
   { key: 'home', number: '00', label: '首頁' },

@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { adminApi } from '../admin-api.js';
-import { useAdminAuth } from './AdminAuthContext.jsx';
-import { AdminButton, AdminDialog, AdminPanel } from './AdminShared.jsx';
+import { adminApi } from '@/features/admin/api/client.js';
+import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
+import { AdminButton, AdminDialog, AdminPanel } from '@/features/admin/shared/AdminShared.jsx';
 
 export function AdminCredentialTools() {
   const { user } = useAdminAuth();

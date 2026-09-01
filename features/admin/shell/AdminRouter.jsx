@@ -1,14 +1,14 @@
 import { useEffect } from 'react';
-import { AdminAuthProvider, useAdminAuth } from './AdminAuthContext.jsx';
-import { AdminHomePage } from './AdminHomePage.jsx';
-import { AdminLoginPage } from './AdminLoginPage.jsx';
-import { AdminForgotPasswordPage } from './AdminForgotPasswordPage.jsx';
-import { AdminLayout } from './AdminLayout.jsx';
-import { AdminHomeSettingsPage } from './AdminHomeSettingsPage.jsx';
-import { AdminStaffSettingsPage } from './AdminStaffSettingsPage.jsx';
-import { AdminEventsPage } from './AdminEventsPage.jsx';
-import { AdminMenuPage } from './AdminMenuPage.jsx';
-import { AdminOrdersPage } from './AdminOrdersPage.jsx';
+import { AdminAuthProvider, useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
+import { AdminHomePage } from '@/features/admin/dashboard/AdminHomePage.jsx';
+import { AdminLoginPage } from '@/features/admin/auth/AdminLoginPage.jsx';
+import { AdminForgotPasswordPage } from '@/features/admin/auth/AdminForgotPasswordPage.jsx';
+import { AdminLayout } from '@/features/admin/layout/AdminLayout.jsx';
+import { AdminHomeSettingsPage } from '@/features/admin/home/AdminHomeSettingsPage.jsx';
+import { AdminStaffSettingsPage } from '@/features/admin/staff/AdminStaffSettingsPage.jsx';
+import { AdminEventsPage } from '@/features/admin/events/AdminEventsPage.jsx';
+import { AdminMenuPage } from '@/features/admin/menu/AdminMenuPage.jsx';
+import { AdminOrdersPage } from '@/features/admin/orders/AdminOrdersPage.jsx';
 
 export function AdminRouter({ route, navigate }) {
   return (

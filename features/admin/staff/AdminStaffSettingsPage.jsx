@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { adminApi } from '../admin-api.js';
-import { useAdminAuth } from './AdminAuthContext.jsx';
-import { AdminAvatarPicker } from './AdminAvatarPicker.jsx';
-import { cleanupAdminMedia } from './adminMedia.js';
-import { useAdminToast } from './AdminToastProvider.jsx';
+import { adminApi } from '@/features/admin/api/client.js';
+import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
+import { AdminAvatarPicker } from '@/features/admin/media/AdminAvatarPicker.jsx';
+import { cleanupAdminMedia } from '@/features/admin/media/adminMedia.js';
+import { useAdminToast } from '@/features/admin/shared/AdminToastProvider.jsx';
 import {
   AdminButton, AdminDialog, AdminDragList, AdminField, AdminImagePicker, AdminPage, AdminPanel, AdminState,
   AdminToggle, newId,
-} from './AdminShared.jsx';
+} from '@/features/admin/shared/AdminShared.jsx';
 
 const emptyStaff = {
   id: '', displayName: '', nickname: '', avatarMediaId: null, avatarUrl: '', avatarFile: null, avatarPreviewUrl: '',

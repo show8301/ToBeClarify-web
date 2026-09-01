@@ -3,11 +3,11 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 test('staff avatar editor keeps separate upload, crop, and delete actions', async () => {
-  const source = await readFile(new URL('../app/admin/_components/AdminAvatarPicker.jsx', import.meta.url), 'utf8');
-  const processor = await readFile(new URL('../app/admin/_components/AdminImageProcessingProvider.jsx', import.meta.url), 'utf8');
-  const client = await readFile(new URL('../app/admin/AdminClient.tsx', import.meta.url), 'utf8');
-  const shared = await readFile(new URL('../app/admin/_components/AdminShared.jsx', import.meta.url), 'utf8');
-  const imageProcessing = await readFile(new URL('../app/admin/_components/adminImageProcessing.js', import.meta.url), 'utf8');
+  const source = await readFile(new URL('../features/admin/media/AdminAvatarPicker.jsx', import.meta.url), 'utf8');
+  const processor = await readFile(new URL('../features/admin/media/AdminImageProcessingProvider.jsx', import.meta.url), 'utf8');
+  const client = await readFile(new URL('../features/admin/shell/AdminClient.tsx', import.meta.url), 'utf8');
+  const shared = await readFile(new URL('../features/admin/shared/AdminShared.jsx', import.meta.url), 'utf8');
+  const imageProcessing = await readFile(new URL('../features/admin/media/adminImageProcessing.js', import.meta.url), 'utf8');
   const proxy = await readFile(new URL('../app/api/admin-media/[id]/route.ts', import.meta.url), 'utf8');
 
   assert.match(source, /上傳圖片/);
@@ -30,7 +30,7 @@ test('staff avatar editor keeps separate upload, crop, and delete actions', asyn
 });
 
 test('homepage slides expose an editable playback duration', async () => {
-  const source = await readFile(new URL('../app/admin/_components/AdminHomeSettingsPage.jsx', import.meta.url), 'utf8');
+  const source = await readFile(new URL('../features/admin/home/AdminHomeSettingsPage.jsx', import.meta.url), 'utf8');
   const landing = await readFile(new URL('../features/home/components/HomeLanding.tsx', import.meta.url), 'utf8');
 
   assert.match(source, /label="播放秒數"><input type="number"/);
@@ -41,8 +41,8 @@ test('homepage slides expose an editable playback duration', async () => {
 });
 
 test('developer can control each public menu page from the admin home', async () => {
-  const dashboard = await readFile(new URL('../app/admin/_components/AdminHomePage.jsx', import.meta.url), 'utf8');
-  const api = await readFile(new URL('../app/admin/admin-api.js', import.meta.url), 'utf8');
+  const dashboard = await readFile(new URL('../features/admin/dashboard/AdminHomePage.jsx', import.meta.url), 'utf8');
+  const api = await readFile(new URL('../features/admin/api/client.js', import.meta.url), 'utf8');
   const styles = await readFile(new URL('../styles/admin/site.css', import.meta.url), 'utf8');
   const data = await readFile(new URL('../features/site/server/data.ts', import.meta.url), 'utf8');
   const chrome = await readFile(new URL('../components/layout/SiteChrome.tsx', import.meta.url), 'utf8');
@@ -69,7 +69,7 @@ test('developer can control each public menu page from the admin home', async ()
 });
 
 test('staff ordering settings expose buffer, staff nomination, and public service prices', async () => {
-  const source = await readFile(new URL('../app/admin/_components/AdminStaffSettingsPage.jsx', import.meta.url), 'utf8');
+  const source = await readFile(new URL('../features/admin/staff/AdminStaffSettingsPage.jsx', import.meta.url), 'utf8');
   const archive = await readFile(new URL('../features/staff/components/StaffArchive.tsx', import.meta.url), 'utf8');
   const profile = await readFile(new URL('../features/staff/components/StaffProfile.tsx', import.meta.url), 'utf8');
 
@@ -131,12 +131,12 @@ test('the LD signature opens admin login only after five clicks', async () => {
 });
 
 test('password recovery is linked from login and reset keys are permission-gated', async () => {
-  const login = await readFile(new URL('../app/admin/_components/AdminLoginPage.jsx', import.meta.url), 'utf8');
-  const recovery = await readFile(new URL('../app/admin/_components/AdminForgotPasswordPage.jsx', import.meta.url), 'utf8');
-  const credentials = await readFile(new URL('../app/admin/_components/AdminCredentialTools.jsx', import.meta.url), 'utf8');
-  const dashboard = await readFile(new URL('../app/admin/_components/AdminHomePage.jsx', import.meta.url), 'utf8');
-  const router = await readFile(new URL('../app/admin/_components/AdminRouter.jsx', import.meta.url), 'utf8');
-  const api = await readFile(new URL('../app/admin/admin-api.js', import.meta.url), 'utf8');
+  const login = await readFile(new URL('../features/admin/auth/AdminLoginPage.jsx', import.meta.url), 'utf8');
+  const recovery = await readFile(new URL('../features/admin/auth/AdminForgotPasswordPage.jsx', import.meta.url), 'utf8');
+  const credentials = await readFile(new URL('../features/admin/dashboard/AdminCredentialTools.jsx', import.meta.url), 'utf8');
+  const dashboard = await readFile(new URL('../features/admin/dashboard/AdminHomePage.jsx', import.meta.url), 'utf8');
+  const router = await readFile(new URL('../features/admin/shell/AdminRouter.jsx', import.meta.url), 'utf8');
+  const api = await readFile(new URL('../features/admin/api/client.js', import.meta.url), 'utf8');
 
   assert.match(login, /href="\/admin\/forgot-password"/);
   assert.match(login, /忘記密碼/);

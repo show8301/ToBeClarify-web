@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useAdminAuth } from './AdminAuthContext.jsx';
-import { AdminButton } from './AdminShared.jsx';
+import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
+import { AdminButton } from '@/features/admin/shared/AdminShared.jsx';
 
 const allItems = [
   { route: '/admin/home', label: '首頁設定', index: '01', roles: ['developer', 'manager'] },

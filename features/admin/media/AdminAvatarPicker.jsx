@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AdminButton } from './AdminShared.jsx';
+import { AdminButton } from '@/features/admin/shared/AdminShared.jsx';
 import { ImageProcessingCanceledError } from './AdminImageProcessingProvider.jsx';
 import { useAdminImageProcessing } from './AdminImageProcessingContext.js';
 import { formatImageFileSize } from './adminImageProcessing.js';

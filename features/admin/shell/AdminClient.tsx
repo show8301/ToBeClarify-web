@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { AdminRouter } from "./_components/AdminRouter.jsx";
-import { AdminImageProcessingProvider } from "./_components/AdminImageProcessingProvider.jsx";
-import { AdminToastProvider } from "./_components/AdminToastProvider.jsx";
+import { AdminRouter } from "@/features/admin/shell/AdminRouter.jsx";
+import { AdminImageProcessingProvider } from "@/features/admin/media/AdminImageProcessingProvider.jsx";
+import { AdminToastProvider } from "@/features/admin/shared/AdminToastProvider.jsx";
 
 export default function AdminClient() {
   const pathname = usePathname();

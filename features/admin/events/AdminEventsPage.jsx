@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { adminApi } from '../admin-api.js';
+import { adminApi } from '@/features/admin/api/client.js';
 import {
   AdminButton, AdminDialog, AdminDragList, AdminField, AdminImagePicker, AdminPage, AdminPanel, AdminState,
   AdminToggle, newId, splitParagraphs, toDateTimeLocal,
-} from './AdminShared.jsx';
+} from '@/features/admin/shared/AdminShared.jsx';
 
 const emptyReport = {
   id: '', albumTitle: '', albumDescription: '', coverMediaId: null, coverImageUrl: '', coverFile: null,

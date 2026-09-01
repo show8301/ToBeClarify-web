@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { adminApi } from '../admin-api.js';
-import { useAdminAuth } from './AdminAuthContext.jsx';
-import { AdminButton } from './AdminShared.jsx';
+import { adminApi } from '@/features/admin/api/client.js';
+import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
+import { AdminButton } from '@/features/admin/shared/AdminShared.jsx';
 
 const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 const money = (value) => `${Number(value || 0).toLocaleString('zh-TW')} G`;

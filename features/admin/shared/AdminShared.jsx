@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Dialog } from '@base-ui/react/dialog';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { useAdminImageProcessing } from './AdminImageProcessingContext.js';
-import { formatImageFileSize } from './adminImageProcessing.js';
+import { useAdminImageProcessing } from '@/features/admin/media/AdminImageProcessingContext.js';
+import { formatImageFileSize } from '@/features/admin/media/adminImageProcessing.js';
 
 export function AdminPage({ eyebrow, title, description, actions, children }) {
   return (

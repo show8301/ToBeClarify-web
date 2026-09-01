@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useMemo, useRef, useState } from 'react';
-import { AdminButton, AdminDialog } from './AdminShared.jsx';
+import { AdminButton, AdminDialog } from '@/features/admin/shared/AdminShared.jsx';
 import { AdminImageProcessingContext } from './AdminImageProcessingContext.js';
 import { assertSupportedImage, compressImageFile, cropImageFile, imageFileName } from './adminImageProcessing.js';
 

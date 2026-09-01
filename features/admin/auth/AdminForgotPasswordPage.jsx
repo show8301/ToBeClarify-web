@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { adminApi, ApiError } from '../admin-api.js';
-import { AdminButton } from './AdminShared.jsx';
+import { adminApi, ApiError } from '@/features/admin/api/client.js';
+import { AdminButton } from '@/features/admin/shared/AdminShared.jsx';
 
 export function AdminForgotPasswordPage({ navigate }) {
   const [form, setForm] = useState({ loginName: '', newPassword: '', confirmPassword: '', verificationCode: '' });

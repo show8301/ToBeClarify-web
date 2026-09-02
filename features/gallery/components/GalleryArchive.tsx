@@ -124,7 +124,7 @@ export default function GalleryArchive({albums,initialAlbumId=null}:{albums:Gall
       </motion.div>
     </motion.div>}</AnimatePresence>
 
-    <AnimatePresence>{selected&&photoIndex!==null&&photos[photoIndex]&&<motion.div className="weekly-photo-stage" role="dialog" aria-modal="true" aria-label={photos[photoIndex].title} initial={reduceMotion?false:{opacity:0,backdropFilter:"blur(0px)"}} animate={{opacity:1,backdropFilter:"blur(18px)"}} exit={reduceMotion?{opacity:0}:{opacity:0,backdropFilter:"blur(0px)"}} transition={{duration:.28}} onPointerDown={(event)=>{if(event.target===event.currentTarget)setPhotoIndex(null)}}>
+    <AnimatePresence>{selected&&photoIndex!==null&&photos[photoIndex]&&<motion.div className="weekly-photo-stage" role="dialog" aria-modal="true" aria-label={photos[photoIndex].title} initial={reduceMotion?false:{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} transition={{duration:.28}} onPointerDown={(event)=>{if(event.target===event.currentTarget)setPhotoIndex(null)}}>
       <header><span>{selected.albumTitle}</span><button onClick={()=>setPhotoIndex(null)}>BACK TO REPORT <i>×</i></button></header>
       <button className="weekly-photo-arrow prev" onClick={()=>step(-1)} aria-label="上一張">←</button>
       <motion.figure key={photos[photoIndex].id} initial={reduceMotion?false:{opacity:0,y:28,scale:.9,rotate:-.8}} animate={{opacity:1,y:0,scale:1,rotate:0}} exit={reduceMotion?{opacity:0}:{opacity:0,y:16,scale:.96}} transition={{type:"spring",stiffness:210,damping:24,mass:.85}}><LightboxImage photo={photos[photoIndex]} onSwipe={step}/><figcaption><span>{photos[photoIndex].title}</span><b>{String(photoIndex+1).padStart(2,"0")} / {String(photos.length).padStart(2,"0")}</b></figcaption></motion.figure>

@@ -94,7 +94,7 @@ export default function HomeLanding({home,pricingRules:initialPricingRules=[]}:H
     </motion.div>}
     <section className="home-hero">
       <div className={`home-hero-visual${heroLoaded?" is-image-loaded":""}`}>
-        <AnimatePresence mode="sync" initial={!reduceMotion}>{current&&<motion.img key={current.id} src={current.imageUrl} alt="清醒夢店內景象" loading="eager" decoding="async" onLoad={()=>setHeroLoaded(true)} onError={()=>setHeroLoaded(true)} initial={reduceMotion?false:{opacity:0,scale:1.075,filter:"blur(8px)"}} animate={{opacity:1,scale:1,filter:"blur(0px)"}} exit={reduceMotion?{opacity:0}:{opacity:0,scale:1.025,filter:"blur(4px)"}} transition={{duration:reduceMotion ? .2 : 1.1,ease:[.22,1,.36,1]}}/>}</AnimatePresence>
+        <AnimatePresence mode="sync" initial={!reduceMotion}>{current&&<motion.img key={current.id} src={current.imageUrl} alt="清醒夢店內景象" loading="eager" decoding="async" onLoad={()=>setHeroLoaded(true)} onError={()=>setHeroLoaded(true)} initial={reduceMotion?false:{opacity:0,scale:1.075}} animate={{opacity:1,scale:1}} exit={reduceMotion?{opacity:0}:{opacity:0,scale:1.025}} transition={{duration:reduceMotion ? .2 : 1.1,ease:[.22,1,.36,1]}}/>}</AnimatePresence>
         <span className="home-dream-caustics" aria-hidden="true"/>
         <span className="home-dream-mist" aria-hidden="true"/>
         <span className="home-hero-grid"/>
@@ -105,7 +105,7 @@ export default function HomeLanding({home,pricingRules:initialPricingRules=[]}:H
           <button className="home-slide-arrow" onClick={()=>setSlide(value=>(value+1)%images.length)} aria-label="下一張店景">→</button>
         </div>}
       </div>
-      <motion.div className="home-hero-copy" initial={reduceMotion?false:{opacity:0,y:28,filter:"blur(8px)"}} animate={{opacity:1,y:0,filter:"blur(0px)"}} transition={{delay:reduceMotion ? 0 : .72,duration:reduceMotion ? .2 : 1.15,ease:[.22,1,.36,1]}}>
+      <motion.div className="home-hero-copy" initial={reduceMotion?false:{opacity:0,y:28}} animate={{opacity:1,y:0}} transition={{delay:reduceMotion ? 0 : .72,duration:reduceMotion ? .2 : 1.15,ease:[.22,1,.36,1]}}>
         <span>WELCOME TO THE WAKING DREAM</span>
         <h1><i>LUCID</i><br/>DREAM</h1>
         <p>{shopInfo.subtitle}</p>

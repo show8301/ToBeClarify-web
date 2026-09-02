@@ -5,7 +5,7 @@
 .adminOrderMessage button { background: transparent; color: currentColor; font-size: 20px; }
 .adminOrderWorkspace { min-height: 720px; display: grid; grid-template-columns: minmax(250px,300px) minmax(0,1fr); overflow: hidden; border: 1px solid var(--color-border); border-radius: 20px; background: rgba(250,247,239,.86); box-shadow: 12px 14px 0 rgba(185,170,255,.52); }
 .adminCustomerPane { max-height: calc(100vh - 164px); min-height: 720px; overflow-y: auto; border-right: 1px solid var(--color-border-strong); background: rgba(237,232,244,.74); scrollbar-width: thin; }
-.adminCustomerToolbar { position: sticky; z-index: 4; top: 0; display: grid; gap: 10px; padding: 16px; border-bottom: 1px solid var(--color-border-strong); background: rgba(245,241,248,.96); backdrop-filter: blur(14px); }
+.adminCustomerToolbar { position: sticky; z-index: 4; top: 0; display: grid; gap: 10px; padding: 16px; border-bottom: 1px solid var(--color-border-strong); background: rgba(245,241,248,.96);  }
 .adminCustomerToolbar>label { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 10px; color: var(--color-fg-mute); font-size: 11px; }
 .adminCustomerToolbar input { min-width: 0; width: 100%; padding: 9px 10px; border: 1px solid var(--color-border-strong); border-radius: 9px; background: rgba(255,255,255,.82); }
 .adminCustomerToolbar form { display: grid; grid-template-columns: minmax(0,1fr) auto; }

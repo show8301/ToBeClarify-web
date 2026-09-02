@@ -1,7 +1,8 @@
-/* Staff roster v3: editorial portrait cards with a clear, unoccluded reading order. */
+/* Staff roster v3: editorial portrait cards with a clear,unoccluded reading order. */
 .staff-gallery{grid-template-columns:repeat(12,minmax(0,1fr));gap:34px 26px;align-items:stretch}
 .dreamer-card{
   grid-column:span 4;min-width:0;display:grid;grid-template-rows:auto 1fr;position:relative;overflow:hidden;
+  content-visibility:auto;contain-intrinsic-size:auto 760px;
   border:1px solid rgba(255,255,255,.9);border-radius:16px;
   background:linear-gradient(150deg,rgba(255,255,255,.72),rgba(245,240,248,.48) 54%,rgba(227,235,247,.5));
   box-shadow:0 20px 48px rgba(118,121,161,.13),inset 0 1px rgba(255,255,255,.94);
@@ -13,10 +14,10 @@
 .dreamer-card:hover{transform:translateY(-7px);border-color:rgba(255,255,255,1);box-shadow:0 30px 68px rgba(118,121,161,.19),0 10px 30px rgba(232,199,218,.12)}
 .dreamer-card-photo{min-width:0;aspect-ratio:4/5;position:relative;display:block;overflow:hidden;background:linear-gradient(145deg,var(--dream-violet),var(--dream-blue))}
 .dreamer-card-photo::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(49,51,74,.03),transparent 68%,rgba(49,51,74,.16));box-shadow:inset 0 -1px rgba(255,255,255,.7)}
-.dreamer-card-photo img{width:100%;height:100%;display:block;object-fit:cover;object-position:center 30%;filter:saturate(.92) contrast(.98);transition:transform .75s cubic-bezier(.22,1,.36,1),filter .55s ease}
-.dreamer-card:hover .dreamer-card-photo img{transform:scale(1.035);filter:saturate(1) contrast(1)}
-.dreamer-file-number{position:absolute;z-index:2;left:14px;top:14px;min-width:38px;height:30px;padding:0 10px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.88);border-radius:9px;background:rgba(248,247,251,.78);box-shadow:0 6px 18px rgba(49,51,74,.1);backdrop-filter:blur(10px);font-family:var(--font-geist-mono),monospace;font-size:10px;line-height:1;font-weight:750;letter-spacing:.1em}
-.dreamer-duty{position:absolute;z-index:2;right:14px;top:14px;max-width:58%;min-height:36px;padding:6px 10px;display:flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.88);border-radius:10px;background:rgba(248,247,251,.8);box-shadow:0 6px 18px rgba(49,51,74,.1);backdrop-filter:blur(10px)}
+.dreamer-card-photo img{width:100%;height:100%;display:block;object-fit:cover;object-position:center 30%;transition:transform .75s cubic-bezier(.22,1,.36,1)}
+.dreamer-card:hover .dreamer-card-photo img{transform:scale(1.035)}
+.dreamer-file-number{position:absolute;z-index:2;left:14px;top:14px;min-width:38px;height:30px;padding:0 10px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.88);border-radius:9px;background:rgba(248,247,251,.94);box-shadow:0 6px 18px rgba(49,51,74,.1);font-family:var(--font-geist-mono),monospace;font-size:10px;line-height:1;font-weight:750;letter-spacing:.1em}
+.dreamer-duty{position:absolute;z-index:2;right:14px;top:14px;max-width:58%;min-height:36px;padding:6px 10px;display:flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.88);border-radius:10px;background:rgba(248,247,251,.95);box-shadow:0 6px 18px rgba(49,51,74,.1)}
 .dreamer-duty>i{flex:0 0 7px;width:7px;height:7px;border-radius:50%;background:#a8a6af}.dreamer-duty.is-online>i{background:#43c993;box-shadow:0 0 0 3px rgba(67,201,147,.16)}
 .dreamer-duty>span{min-width:0;display:grid;gap:2px}.dreamer-duty small{font-family:var(--font-geist-mono),monospace;font-size:7px;line-height:1;font-weight:750;letter-spacing:.14em;opacity:.56}.dreamer-duty b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;line-height:1.1}
 .dreamer-card-body{min-width:0;min-height:218px;padding:21px 22px 18px;display:flex;flex-direction:column}
@@ -50,7 +51,7 @@
   .photo-caption{border-radius:11px}
 }
 
-/* Staff profile v4: one measured frame on tablet/mobile, without ticket rails. */
+/* Staff profile v4: one measured frame on tablet/mobile,without ticket rails. */
 .profile-modal-head,.profile-modal-head *,.dossier,.dossier *{box-sizing:border-box}
 .role-row,.dossier-foot{width:auto;max-width:none}
 .service-grid article{
@@ -157,12 +158,11 @@
   .dossier-foot{margin-inline:14px;font-size:7px}
 }
 
-/* Report close control: keep the gradient in the page atmosphere, not inside the icon. */
+/* Report close control: keep the gradient in the page atmosphere,not inside the icon. */
 .weekly-modal-sheet>header button{
   background:rgba(255,255,255,.62);color:var(--ink);
   border:1px solid rgba(255,255,255,.94);
-  box-shadow:0 8px 22px rgba(101,120,159,.14);backdrop-filter:blur(12px)
-}
+  box-shadow:0 8px 22px rgba(101,120,159,.14);}
 .weekly-modal-sheet>header button i{background:none;color:inherit;border:0}
 @media(max-width:560px){
   .weekly-modal-sheet>header button{
@@ -185,7 +185,7 @@
   display:flex;align-items:center;gap:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   clip-path:polygon(0 0,88% 0,100% 50%,88% 100%,0 100%);
   background:linear-gradient(90deg,rgba(129,124,190,.9),rgba(163,161,216,.86));color:white;
-  font-size:12px;font-weight:680;letter-spacing:.04em;backdrop-filter:blur(10px)
+  font-size:12px;font-weight:680;letter-spacing:.04em
 }
 .dreamer-role-ribbon i{font-size:9px;font-style:normal;opacity:.9}
 .dreamer-file-number{left:auto;right:13px;top:13px;min-width:34px;height:27px;padding-inline:8px;background:rgba(247,247,251,.76);font-size:8px}
@@ -225,7 +225,7 @@
   .dreamer-card-link{align-items:center}.dreamer-card-link>b{font-size:8px!important}.dreamer-card-link svg{width:12px;height:12px;margin-left:5px}
 }
 
-/* Profile photo controls: smaller captions, metadata outside the photograph. */
+/* Profile photo controls: smaller captions,metadata outside the photograph. */
 .photo-caption{left:16px;right:auto;bottom:14px;width:auto;max-width:calc(100% - 32px);padding:9px 12px;gap:22px;border-radius:10px;background:rgba(245,243,249,.78);box-shadow:0 7px 20px rgba(49,51,74,.1)}
 .photo-caption b{font-size:15px}.photo-caption i{font-size:7px}
 .back-label-short{display:none}
@@ -274,7 +274,7 @@
   .home-business-status>b{width:max-content;min-height:44px}
 }
 
-/* Roster photo transition: a light tonal bridge, without a hard dark band. */
+/* Roster photo transition: a light tonal bridge,without a hard dark band. */
 .dreamer-card-photo::after{background:linear-gradient(180deg,transparent 0 78%,rgba(133,147,202,.24) 100%)}
 .dreamer-role-ribbon{
   top:18px;max-width:calc(100% - 76px);height:36px;padding:0 13px;gap:7px;
@@ -285,7 +285,7 @@
 .dreamer-role-ribbon>i{flex:0 0 auto}
 .dreamer-file-number{
   right:15px;top:22px;min-width:0;height:auto;padding:0;
-  border:0;border-radius:0;background:transparent;box-shadow:none;backdrop-filter:none;
+  border:0;border-radius:0;background:transparent;box-shadow:none;
   color:rgba(255,255,255,.8);-webkit-text-stroke:0;
   font-family:var(--font-geist-mono),ui-monospace,"SFMono-Regular",Consolas,monospace;font-size:25px;font-weight:560;line-height:1;
   font-variant-numeric:tabular-nums;letter-spacing:-.045em;text-shadow:0 1px 5px rgba(49,51,74,.24)
@@ -295,17 +295,16 @@
   display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;
   border-top:1px solid rgba(255,255,255,.76);
   background:linear-gradient(90deg,rgba(223,226,240,.84),rgba(184,187,216,.74) 58%,rgba(160,217,214,.72));
-  box-shadow:0 -10px 28px rgba(49,51,74,.08);backdrop-filter:blur(12px) saturate(1.12)
-}
+  box-shadow:0 -10px 28px rgba(49,51,74,.08);}
 .dreamer-photo-statuses .dreamer-duty{
   position:static;inset:auto;max-width:none;min-width:0;min-height:0;padding:0;
-  border:0;border-radius:0;background:transparent;box-shadow:none;backdrop-filter:none;color:#31334a
+  border:0;border-radius:0;background:transparent;box-shadow:none;color:#31334a
 }
 .dreamer-photo-statuses .dreamer-duty small{color:rgba(49,51,74,.58);opacity:1}
 .dreamer-photo-statuses .dreamer-duty b{color:#31334a;text-shadow:none}
 .dreamer-nomination{
   justify-self:end;min-height:0;padding:0;display:inline-flex;align-items:center;gap:5px;
-  border:0;border-radius:0;background:transparent;box-shadow:none;backdrop-filter:none;
+  border:0;border-radius:0;background:transparent;box-shadow:none;
   color:#31334a;white-space:nowrap;font-size:9px;font-weight:760;line-height:1
 }
 .dreamer-nomination>i{color:#fff;font-size:8px;font-style:normal;text-shadow:0 1px 4px rgba(88,91,136,.32)}
@@ -355,13 +354,7 @@
 .site-content:has(.weekly-modal){z-index:61}
 .site-frame:has(.weekly-modal) .site-floating-top{opacity:0;visibility:hidden;pointer-events:none}
 body.modal-open{animation-play-state:paused}
-body.modal-open .site-frame::before,
-body.modal-open .site-frame::after,
-body.modal-open .site-parallax-bubbles i{animation-play-state:paused}
-.weekly-modal{backdrop-filter:blur(8px) saturate(1.02)}
-.weekly-modal-sheet>header{backdrop-filter:blur(10px)}
-.weekly-modal-intro{backdrop-filter:none}
-@media(max-width:560px){.weekly-modal{backdrop-filter:blur(7px)}}
+body.modal-open .site-frame::before,body.modal-open .site-frame::after,body.modal-open .site-parallax-bubbles i{animation-play-state:paused}
 
 /* Decorative service-chip symbols supplied by the venue. */
 .dreamer-services>b,.dreamer-services>i{
@@ -373,10 +366,7 @@ body.modal-open .site-parallax-bubbles i{animation-play-state:paused}
   box-shadow:inset 0 1px 0 rgba(255,255,255,.58),0 3px 10px rgba(101,120,159,.08)
 }
 .dreamer-services>i{background:linear-gradient(135deg,rgba(160,217,214,.68),rgba(184,187,216,.66))}
-.dreamer-services img{
-  flex:0 0 15px;width:15px;height:15px;object-fit:contain;
-  filter:saturate(1.12) contrast(1.08) drop-shadow(0 1px 2px rgba(70,73,112,.2))
-}
+.dreamer-services img{flex:0 0 15px;width:15px;height:15px;object-fit:contain}
 @media(max-width:620px){
   .dreamer-role-ribbon{top:14px;height:33px;padding-inline:11px;gap:6px;font-size:11px}
   .dreamer-photo-statuses{min-height:42px;padding:6px 12px;gap:8px}
@@ -389,10 +379,8 @@ body.modal-open .site-parallax-bubbles i{animation-play-state:paused}
 /* Keep the mobile roster cheap to repaint while preserving the card appearance. */
 @media(max-width:620px){
   .dreamer-card{box-shadow:0 8px 20px rgba(101,120,159,.1),inset 0 1px rgba(255,255,255,.8);transition:none}
-  .dreamer-card-photo img{filter:none;transition:none}
-  .dreamer-role-ribbon,.dreamer-photo-statuses{backdrop-filter:none}
+  .dreamer-card-photo img{transition:none}
   .dreamer-services>b,.dreamer-services>i{box-shadow:none}
-  .dreamer-services img{filter:none}
 }
 
 /* Deep-page navigation: keep a compact menu affordance within reach without pinning the full header. */
@@ -403,7 +391,7 @@ body.modal-open .site-parallax-bubbles i{animation-play-state:paused}
   border:1px solid rgba(255,255,255,.92);border-radius:16px;overflow:hidden;
   color:var(--ink);background:linear-gradient(145deg,rgba(250,247,251,.94),rgba(231,232,244,.9));
   box-shadow:0 26px 68px rgba(118,121,161,.22),inset 0 1px rgba(255,255,255,.94);
-  backdrop-filter:blur(26px) saturate(1.12);
+
   opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-10px);
   transition:opacity .22s ease,visibility .22s ease,transform .28s cubic-bezier(.22,1,.36,1)
 }
@@ -419,7 +407,7 @@ body.modal-open .site-parallax-bubbles i{animation-play-state:paused}
   border:1px solid rgba(255,255,255,.92);border-radius:999px;
   color:var(--ink);background:linear-gradient(120deg,rgba(249,246,251,.9),rgba(218,227,245,.86),rgba(219,239,239,.84));
   box-shadow:0 12px 34px rgba(101,120,159,.2),inset 0 1px rgba(255,255,255,.92);
-  backdrop-filter:blur(20px) saturate(1.14);cursor:pointer;
+  cursor:pointer;
   opacity:0;visibility:hidden;pointer-events:none;transform:translateY(12px) scale(.96);
   transition:opacity .22s ease,visibility .22s ease,transform .32s cubic-bezier(.22,1,.36,1),box-shadow .22s ease;
 }
@@ -445,20 +433,26 @@ body.modal-open .site-parallax-bubbles i{animation-play-state:paused}
 @media(prefers-reduced-motion:reduce){.site-floating-top{transition-duration:.01ms}}
 .home-admin-trigger{color:inherit;text-decoration:none;font:inherit;letter-spacing:inherit;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}.home-admin-trigger:focus-visible{outline:1px solid currentColor;outline-offset:2px;border-radius:2px}
 
-/* Performance guard: keep the dream atmosphere without scroll-bound GPU work. */
-.site-frame::before,.site-frame::after{will-change:auto;filter:blur(24px);animation-duration:32s}
-.site-frame::after{filter:blur(28px);animation-duration:24s}
+/* Performance guard: keep the dream palette as static gradients without full-page compositing work. */
+body{animation:none;background-attachment:scroll}
+.site-frame::before,.site-frame::after{will-change:auto;animation:none}
 .site-parallax-bubbles,.site-parallax-mist{will-change:auto}
-.site-parallax-bubbles i{backdrop-filter:none}
-.site-parallax-mist{filter:blur(24px)}
-.site-header,.site-header nav,.site-navigation,.site-floating-top{backdrop-filter:blur(12px) saturate(1.05)}
-.home-dream-caustics{filter:blur(7px) contrast(1.1);animation-duration:28s}
-.home-dream-mist{filter:blur(18px);animation-duration:22s}
+.site-parallax-bubbles i{animation:none}
+.home-dream-caustics,.home-dream-mist,.profile-pearl,.home-hero-copy h1::after{animation:none}
+
+/* Long feeds only render near the viewport; static surfaces replace costly glass layers. */
+.dreamer-card,.weekly-card,.guest-note,.live-status a,.menu-sets article{
+  content-visibility:auto;
+  contain-intrinsic-size:auto 520px;
+}
+.home-pricing article,.home-event-card,.weekly-card,.menu-cover-card,.menu-sets article,
+.live-clock,.live-status a,.staff-honor a,.guest-podium article,.guest-composer,
+.guest-note,.dossier,.intro-note,.intro-feature,.timeline-board{
+  background-color:rgba(247,247,251,.94);
+}
 
 /* Image placeholders reserve the existing media boxes and fade away after load. */
-.home-hero-visual:not(.is-image-loaded)::before,
-.home-about-photo:not(.is-image-loaded)::after,
-.home-event-card:not(.is-image-loaded)::before{
+.home-hero-visual:not(.is-image-loaded)::before,.home-about-photo:not(.is-image-loaded)::after,.home-event-card:not(.is-image-loaded)::before{
   content:"";position:absolute;pointer-events:none;
   background:linear-gradient(105deg,rgba(255,255,255,.16),rgba(255,255,255,.48),rgba(160,217,214,.2),rgba(255,255,255,.16));
   background-size:220% 100%;animation:home-image-shimmer 1.6s linear infinite;
@@ -473,14 +467,13 @@ body.modal-open .site-parallax-bubbles i{animation-play-state:paused}
 @media(max-width:620px){
   body{background-attachment:scroll}
   .home-dream-entry{display:none}
-  .site-frame::before,.site-frame::after{animation:none;filter:blur(16px);opacity:.35}
+  .site-frame::before,.site-frame::after{animation:none;opacity:.35}
   .site-parallax-bubbles{display:none}
-  .site-parallax-mist{opacity:.24!important;filter:blur(16px)!important;animation:none}
-  .site-header,.site-header nav,.site-navigation,.site-floating-top{backdrop-filter:none}
+  .site-parallax-mist{opacity:.24!important;animation:none}
   .home-dream-caustics{display:none}
-  .home-dream-mist{opacity:.14;filter:none;animation:none}
-  .home-page .home-pricing article,.home-page .home-event-card{backdrop-filter:none!important;background:rgba(247,247,251,.9)}
-  .home-page .home-hero-index,.home-page .home-hero-ticket,.home-page .home-event-card>span{backdrop-filter:none;background:rgba(247,247,251,.88)}
+  .home-dream-mist{opacity:.14;animation:none}
+  .home-page .home-pricing article,.home-page .home-event-card{background:rgba(247,247,251,.9)}
+  .home-page .home-hero-index,.home-page .home-hero-ticket,.home-page .home-event-card>span{background:rgba(247,247,251,.88)}
 }
 @media(prefers-reduced-motion:reduce){
   .site-frame::before,.site-frame::after,.home-dream-caustics,.home-dream-mist,.home-image-shimmer{animation:none}
@@ -502,14 +495,10 @@ body.modal-open .site-parallax-bubbles i{animation-play-state:paused}
 .weekly-photo-stage figcaption{position:relative;z-index:2}
 .weekly-collage-sentinel{position:relative;z-index:1;min-height:64px;display:flex;align-items:center;justify-content:center;gap:10px;color:rgba(49,51,74,.62);font:800 9px/1 var(--font-geist-mono),ui-monospace,monospace;letter-spacing:.14em}
 .weekly-collage-sentinel i{width:28px;height:2px;background:linear-gradient(90deg,var(--dream-violet),var(--dream-blue));animation:home-image-shimmer 1.2s linear infinite}
-.weekly-modal{backdrop-filter:blur(4px) saturate(1.01)}
-.weekly-modal-sheet>header{backdrop-filter:blur(6px) saturate(1.04)}
-.weekly-photo-stage,.weekly-photo-stage>header{backdrop-filter:blur(6px)}
 
 @media(max-width:620px){
-  .weekly-card{backdrop-filter:none!important;transform:none!important;transition:none}
+  .weekly-card{transform:none!important;transition:none}
   .weekly-card-photo img,.weekly-collage img{transition:none}
-  .weekly-modal,.weekly-photo-stage,.weekly-photo-stage>header,.weekly-modal-sheet>header,.weekly-sheet-grabber{backdrop-filter:none!important}
   .weekly-modal-sheet::before,.weekly-modal-sheet::after{display:none}
   .weekly-modal-intro{box-shadow:none}
   .weekly-collage button,.weekly-collage button.photo-0,.weekly-collage button.photo-4{aspect-ratio:4/3;box-shadow:none;transform:none}
@@ -519,7 +508,7 @@ body.modal-open .site-parallax-bubbles i{animation-play-state:paused}
   .weekly-card-photo::before,.weekly-collage button::before,.weekly-photo-stage figure::before,.weekly-collage-sentinel i{animation:none}
 }
 
-/* Full-screen dream directory, inspired by Motion's layered text reveal. */
+/* Full-screen dream directory,inspired by Motion's layered text reveal. */
 .site-navigation-shell{
   position:fixed;inset:0;z-index:180;overflow:hidden;color:var(--ink);
   isolation:isolate
@@ -550,7 +539,7 @@ body.modal-open .site-parallax-bubbles i{animation-play-state:paused}
 .site-navigation-shell .site-navigation{
   position:absolute;inset:clamp(96px,11vh,126px) clamp(24px,7vw,110px) clamp(104px,13vh,145px);
   z-index:1;width:auto;max-height:none;padding:0;display:flex;flex-direction:column;justify-content:center;gap:0;
-  border:0;border-radius:0;overflow:visible;color:inherit;background:transparent;box-shadow:none;backdrop-filter:none;
+  border:0;border-radius:0;overflow:visible;color:inherit;background:transparent;box-shadow:none;
   opacity:1;visibility:visible;pointer-events:auto;transform:none;transition:none
 }
 .site-navigation-shell .site-menu-link{
@@ -600,8 +589,7 @@ body.modal-open .site-parallax-bubbles i{animation-play-state:paused}
 @media(prefers-reduced-motion:reduce){.live-clock.is-syncing>small>i{animation:none}}
 
 /* Gallery lightbox: render immediately and keep the cached thumbnail visible until full is decoded. */
-.weekly-photo-stage{background:#535a75;backdrop-filter:none!important}
-.weekly-photo-stage>header{backdrop-filter:none!important}
+.weekly-photo-stage{background:#535a75;}
 .weekly-photo-stage figure::before{display:none}
 .weekly-photo-media{width:100%;height:calc(100% - 38px);display:block;position:relative;overflow:hidden;border-radius:inherit;background:rgba(49,51,74,.72)}
 .weekly-photo-stage figure .weekly-photo-media>img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;border-radius:inherit}
@@ -629,7 +617,7 @@ body.modal-open .site-parallax-bubbles i{animation-play-state:paused}
 .site-menu-toggle.is-open span:first-child{transform:rotate(45deg)}
 .site-menu-toggle.is-open span:nth-child(2){transform:rotate(-45deg)}
 
-/* Empty live schedules should read as a state, not as a clipped blank table. */
+/* Empty live schedules should read as a state,not as a clipped blank table. */
 .timeline-empty{min-height:230px;margin-top:45px;padding:clamp(28px,4vw,54px);display:flex;flex-direction:column;justify-content:center;border:1px solid rgba(47,48,75,.28);background:rgba(255,255,255,.32);box-shadow:10px 12px 0 rgba(160,217,214,.62)}
 .timeline-empty>span{font:800 var(--type-label)/1.25 var(--font-geist-mono),ui-monospace,monospace;letter-spacing:.2em;color:var(--hair-shadow)}
 .timeline-empty>strong{margin-top:18px;font-size:clamp(28px,3vw,46px);line-height:1.15}
@@ -637,8 +625,7 @@ body.modal-open .site-parallax-bubbles i{animation-play-state:paused}
 @media(max-width:760px){.timeline-empty{min-height:190px;margin-top:32px;padding:28px 24px;box-shadow:7px 8px 0 rgba(160,217,214,.62)}}
 
 /* The lightbox starts in true contain mode; zoom is applied only to the canvas. */
-.lightbox figure .zoom-photo-canvas>img,
-.weekly-photo-stage figure .zoom-photo-canvas>img{
+.lightbox figure .zoom-photo-canvas>img,.weekly-photo-stage figure .zoom-photo-canvas>img{
   position:absolute;
   inset:0;
   width:100%;
@@ -646,14 +633,14 @@ body.modal-open .site-parallax-bubbles i{animation-play-state:paused}
   object-fit:contain;
 }
 
-/* Step one card at a time, while keeping both rows natively scrollable. */
+/* Step one card at a time,while keeping both rows natively scrollable. */
 .live-marquee-hint{display:block;margin-top:25px;color:rgba(49,51,74,.58);font:750 var(--type-caption)/1.4 var(--font-geist-mono),ui-monospace,monospace;letter-spacing:.1em;text-align:right}
 .live-status>.live-marquee{margin:14px calc(clamp(24px,5vw,75px)*-1) 0;padding:10px 0 18px!important;display:flex!important;grid-template-columns:none!important;flex-direction:column;gap:16px;overflow:visible!important;scroll-snap-type:none!important}
 .live-marquee-row{width:100%;overflow-x:auto;overflow-y:hidden;overscroll-behavior-inline:contain;scroll-snap-type:none;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .live-marquee-row::-webkit-scrollbar{display:none}
 .live-marquee-track{width:max-content;display:flex}
 .live-marquee-group{display:flex;gap:16px;padding:0 16px 10px 0}
-.live-marquee .live-marquee-group>a{width:clamp(180px,15vw,230px);flex:0 0 clamp(180px,15vw,230px);scroll-snap-align:none;background:rgba(249,247,251,.88)!important;backdrop-filter:none!important;box-shadow:0 8px 20px rgba(83,92,128,.12)!important}
+.live-marquee .live-marquee-group>a{width:clamp(180px,15vw,230px);flex:0 0 clamp(180px,15vw,230px);scroll-snap-align:none;background:rgba(249,247,251,.88)!important;box-shadow:0 8px 20px rgba(83,92,128,.12)!important}
 .live-marquee .live-marquee-group>a:before{content:"LD";position:absolute;z-index:0;top:10px;left:10px;width:calc(100% - 20px);aspect-ratio:4/5;display:grid;place-items:center;border-radius:12px;background:linear-gradient(145deg,rgba(232,199,218,.38),rgba(169,199,234,.38));color:rgba(47,48,75,.24);font:800 28px/1 var(--font-geist-mono),ui-monospace,monospace;letter-spacing:.16em}
 .live-marquee .live-marquee-group>a>img{position:relative;z-index:1;aspect-ratio:4/5;object-position:center top;border-radius:12px}
 .live-marquee .live-marquee-group>a>span{z-index:2;top:18px;right:18px;width:10px;height:10px;padding:0;border:0;background:transparent;box-shadow:none;overflow:visible;font-size:0}
@@ -662,7 +649,7 @@ body.modal-open .site-parallax-bubbles i{animation-play-state:paused}
 .live-staff-empty{margin:45px 0 0;padding:28px;border:1px solid rgba(47,48,75,.28);background:rgba(255,255,255,.32);font-size:17px}
 @media(max-width:760px){.live-marquee-hint{margin-top:20px;text-align:left}.live-status>.live-marquee{margin:10px -22px 0;padding-inline:0!important;gap:13px}.live-marquee-group{gap:13px;padding:0 13px 10px 0}.live-marquee .live-marquee-group>a{width:172px;flex-basis:172px}}
 
-/* Staff-card content hierarchy, signature artwork, and backend-authored line breaks. */
+/* Staff-card content hierarchy,signature artwork,and backend-authored line breaks. */
 .dreamer-photo-statuses{
   min-height:50px;padding:7px 14px;grid-template-columns:minmax(0,1fr) auto;gap:14px;
   background:linear-gradient(90deg,rgba(234,237,248,.94),rgba(194,199,226,.91) 55%,rgba(164,220,215,.9));
@@ -680,7 +667,7 @@ body.modal-open .site-parallax-bubbles i{animation-play-state:paused}
 .dreamer-card-heading{min-height:104px;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .dreamer-card-heading>strong{margin-top:0}
 .dreamer-card-heading.has-signature{min-height:126px}
-.dreamer-card-signature{display:block;width:min(190px,88%);aspect-ratio:3/2;object-fit:contain;filter:drop-shadow(0 4px 7px rgba(49,51,74,.12))}
+.dreamer-card-signature{display:block;width:min(190px,88%);aspect-ratio:3/2;object-fit:contain}
 .dreamer-card-heading.has-signature>em{margin-top:4px}
 .dreamer-card-bio{white-space:pre-line}
 .dreamer-card-footer{width:100%;margin-top:auto;display:flex;flex-direction:column;gap:14px}

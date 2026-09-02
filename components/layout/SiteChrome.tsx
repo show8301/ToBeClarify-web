@@ -201,6 +201,6 @@ export default function SiteChrome({navigation,shopInfo,pageVisibility,menuHidde
       <div><b>OPEN</b><span>{shopInfo.openHours}</span><b>LOCATION</b><span>{shopInfo.server} · {shopInfo.address}</span></div>
       {(!visibility || visibility.staff !== false) && <a href="/staff" onClick={(event)=>navigate(event,"/staff")}>MEET THE DREAMERS <i>↗</i></a>}
     </footer>
-    <AnimatePresence>{leaving&&<motion.div className="site-route-transition" initial={{clipPath:"inset(100% 0 0 0)",filter:"blur(5px)"}} animate={{clipPath:"inset(0% 0 0 0)",filter:"blur(0px)"}} exit={{opacity:0}} transition={{duration:.58,ease:[.76,0,.24,1]}} aria-hidden="true"><motion.span initial={{opacity:0,y:18,letterSpacing:".42em"}} animate={{opacity:1,y:0,letterSpacing:".23em"}} transition={{delay:.25,duration:.55,ease:[.22,1,.36,1]}}>ENTERING ANOTHER DREAM <i>✦</i></motion.span></motion.div>}</AnimatePresence>
+    <AnimatePresence>{leaving&&<motion.div className="site-route-transition" initial={{clipPath:"inset(100% 0 0 0)"}} animate={{clipPath:"inset(0% 0 0 0)"}} exit={{opacity:0}} transition={{duration:.58,ease:[.76,0,.24,1]}} aria-hidden="true"><motion.span initial={{opacity:0,y:18,letterSpacing:".42em"}} animate={{opacity:1,y:0,letterSpacing:".23em"}} transition={{delay:.25,duration:.55,ease:[.22,1,.36,1]}}>ENTERING ANOTHER DREAM <i>✦</i></motion.span></motion.div>}</AnimatePresence>
   </div>;
 }

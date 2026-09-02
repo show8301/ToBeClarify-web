@@ -168,9 +168,9 @@ export default function ZoomablePhoto({src,alt,placeholderSrc,onSwipe}:ZoomableP
         dragElastic={.04}
         dragMomentum={false}
         style={{x,y,scale:scaleValue}}
-        initial={reduceMotion?false:{opacity:0,filter:"blur(7px)"}}
-        animate={{opacity:1,filter:"blur(0px)"}}
-        exit={reduceMotion?{opacity:0}:{opacity:0,filter:"blur(4px)"}}
+        initial={reduceMotion?false:{opacity:0}}
+        animate={{opacity:1}}
+        exit={{opacity:0}}
         transition={{opacity:{duration:.22},filter:{duration:.26}}}
         onDoubleClick={(event)=>setZoom(zoomed?MIN_SCALE:2.4,focusFromPointer(event.clientX,event.clientY))}
       >

@@ -286,7 +286,7 @@
   background: rgba(247, 247, 251, .78);
   color: #31334a;
   font-size: 11px;
-  backdrop-filter: blur(10px);
+
 }
 .adminPreviewStatusBadge {
   position: absolute;

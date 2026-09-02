@@ -440,11 +440,8 @@ body{animation:none;background-attachment:scroll}
 .site-parallax-bubbles i{animation:none}
 .home-dream-caustics,.home-dream-mist,.profile-pearl,.home-hero-copy h1::after{animation:none}
 
-/* Long feeds only render near the viewport; static surfaces replace costly glass layers. */
-.dreamer-card,.weekly-card,.guest-note,.live-status a,.menu-sets article{
-  content-visibility:auto;
-  contain-intrinsic-size:auto 520px;
-}
+/* Only vertically stacked notes are deferred. Horizontal and masonry cards must keep their real height. */
+.guest-note{content-visibility:auto;contain-intrinsic-size:auto 300px}
 .home-pricing article,.home-event-card,.weekly-card,.menu-cover-card,.menu-sets article,
 .live-clock,.live-status a,.staff-honor a,.guest-podium article,.guest-composer,
 .guest-note,.dossier,.intro-note,.intro-feature,.timeline-board{

@@ -375,7 +375,7 @@
   .orderTopbar{position:relative;min-height:56px;background:#f9fafc}
   .orderTopbar .orderBrand img{width:32px;height:32px}
   .orderTabs{top:0;padding:5px 12px}.orderTabs button{min-height:34px;padding:5px 11px}
-  .orderWorkspace{padding:20px 14px 108px}
+  .orderWorkspace{padding:20px 14px calc(132px + env(safe-area-inset-bottom))}
   .orderPageHeading{min-height:0;margin-bottom:16px;padding-bottom:17px}
   .orderPageHeading h1{font-size:36px}
   .orderPageHeading p{font-size:12px}
@@ -387,6 +387,19 @@
   .orderProductCard footer{padding:5px 12px 12px}.orderProductCard footer button{min-width:78px;min-height:40px}
   .orderAside{inset:auto 12px 12px;width:auto;border-radius:13px;box-shadow:0 8px 26px rgba(82,87,120,.13)}
   .orderAside>button{min-width:142px}
+  .orderMockCartLayout .cartLines{gap:14px}
+  .orderMockCartLayout .cartLine{
+    min-height:112px;
+    padding:18px;
+    grid-template-columns:64px minmax(0,1fr) 40px;
+    column-gap:14px;
+    row-gap:8px;
+  }
+  .orderMockCartLayout .cartLine>span{align-self:start;padding-top:4px}
+  .orderMockCartLayout .cartLine div strong{font-size:17px;line-height:1.35}
+  .orderMockCartLayout .cartLine div small{margin-top:6px;font-size:10px;line-height:1.4}
+  .orderMockCartLayout .cartLine>b{margin-top:2px;font-size:14px;line-height:1.3}
+  .orderMockCartLayout .cartLine>button{width:40px;height:40px;align-self:center}
 }
 
 /* Guided ordering preview. */

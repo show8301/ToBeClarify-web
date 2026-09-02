@@ -57,6 +57,17 @@ export default function OrderPreviewPage() {
   const selectedScenario = scenarios.find((item) => item.id === scenario) || scenarios[0];
   const visibleProducts = category === "推薦" ? products.filter((product) => product.category === selectedScenario.category) : products.filter((product) => product.category === category);
 
+  const selectScenario = (item: (typeof scenarios)[number]) => {
+    const targetId = item.category === "服務" ? "staff-service-options" : "meal-recommendations";
+    setScenario(item.id);
+    if (item.category === "服務") setTab("nomination");
+    else setCategory("推薦");
+
+    window.setTimeout(() => {
+      document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 0);
+  };
+
   const addProduct = (id: string) => {
     setCart((current) => ({ ...current, [id]: (current[id] || 0) + 1 }));
     setNotice("已加入本次點餐");
@@ -86,15 +97,15 @@ export default function OrderPreviewPage() {
       {tab === "meal" ? <>
         <PageHeading eyebrow="TONIGHT'S MOOD" title="今晚想怎麼度過？">先選一個最接近現在心情的情境，我們再替你整理適合的餐點與服務。</PageHeading>
         <section className="orderScenarioGuide" aria-label="選擇今晚的情境">
-          {scenarios.map((item, index) => <button className={scenario === item.id ? "isActive" : ""} type="button" key={item.id} onClick={() => { setScenario(item.id); if (item.category === "服務") setTab("nomination"); else setCategory("推薦"); }}><span>0{index + 1}</span><strong>{item.title}</strong><small>{item.detail}</small><b aria-hidden="true">→</b></button>)}
+          {scenarios.map((item, index) => <button className={scenario === item.id ? "isActive" : ""} type="button" key={item.id} aria-pressed={scenario === item.id} onClick={() => selectScenario(item)}><span>0{index + 1}</span><strong>{item.title}</strong><small>{item.detail}</small><b aria-hidden="true">→</b></button>)}
         </section>
-        <div className="orderRecommendationHead"><div><span>RECOMMENDED</span><h2>{selectedScenario.title}，可以從這裡開始</h2></div><p>也可以直接切換分類查看全部餐點。</p></div>
+        <div className="orderRecommendationHead" id="meal-recommendations"><div><span>RECOMMENDED</span><h2>{selectedScenario.title}，可以從這裡開始</h2></div><p>也可以直接切換分類查看全部餐點。</p></div>
         <div className="orderCategoryRail">{["推薦", "特調", "甜點", "宵夜"].map((item) => <button className={category === item ? "isActive" : ""} type="button" key={item} onClick={() => setCategory(item)}>{item}</button>)}</div>
         <div className="orderProductGrid">{visibleProducts.map((product) => <article className="orderProductCard" key={product.id}><div className={`orderProductImage ${product.tone}`}><span>LD</span></div><div><small>{product.tag}</small><h2>{product.name}</h2><p>{product.description}</p></div><footer><strong>{money(product.price)}</strong><button type="button" onClick={() => addProduct(product.id)}><span aria-hidden="true">＋</span>加入{cart[product.id] ? ` ${cart[product.id]}` : ""}</button></footer></article>)}</div>
       </> : null}
       {tab === "nomination" ? <>
         <PageHeading eyebrow="STAFF SERVICE" title="今晚想要誰陪你？">依序選擇店員、服務內容與開始時間。送出後仍需由店員確認。</PageHeading>
-        <section className="nominationSection"><header><span>01</span><div><h2>選擇店員</h2><p>點擊頭像選擇店員，或先查看完整人物介紹。</p></div></header><div className="nominationStaffGrid">{staff.map((person) => <article className={`orderStaffCard ${nomineeId === person.id ? "isActive" : ""}`} key={person.id}><button className="orderStaffSelect" type="button" onClick={() => setNomineeId(person.id)}><span><img src={person.avatarUrl} alt={`${person.displayName} 的頭像`} /></span><strong>{person.displayName}</strong><small>{person.roleTitle}</small></button><button className="orderStaffProfileButton" type="button" onClick={() => { setProfileFrameLoaded(false); setProfileStaffId(person.id); }}>查看介紹</button></article>)}</div></section>
+        <section className="nominationSection" id="staff-service-options"><header><span>01</span><div><h2>選擇店員</h2><p>點選店員指定，或先查看人物介紹。</p></div></header><div className="nominationStaffGrid">{staff.map((person) => <article className={`orderStaffCard ${nomineeId === person.id ? "isActive" : ""}`} key={person.id}><button className="orderStaffSelect" type="button" aria-pressed={nomineeId === person.id} onClick={() => setNomineeId(person.id)}><span><img src={person.avatarUrl} alt={`${person.displayName} 的頭像`} /></span><strong>{person.displayName}</strong><small>{person.roleTitle}</small></button><button className="orderStaffProfileButton" type="button" onClick={() => { setProfileFrameLoaded(false); setProfileStaffId(person.id); }}>查看介紹</button></article>)}</div></section>
         <section className="nominationSection"><header><span>02</span><div><h2>{nominee.displayName} 提供的服務</h2><p>選擇你今晚需要的陪伴方式。</p></div></header><div className="nominationServiceGrid">{services.map((service) => <button type="button" className={serviceId === service.id ? "isActive" : ""} key={service.id} onClick={() => setServiceId(service.id)}><span>SERVICE</span><strong>{service.name}</strong><p>{service.description}</p><footer><b>{money(service.price)}</b><small>{service.duration}</small></footer></button>)}</div></section>
         <section className="nominationComposer"><div><span>03 · CONFIRM</span><h2>{nominee.displayName} · {selectedService.name}</h2></div><div className="nominationControls"><label>希望開始時間<select value={serviceTime} onChange={(event) => setServiceTime(event.target.value)}><option>23:20</option><option>23:40</option><option>00:00</option></select></label><label>服務時間<strong>{selectedService.duration}</strong></label><label>預估費用<strong>{money(selectedService.price)}</strong></label></div><button className="orderPrimaryAction" type="button" onClick={() => { setServiceAdded(true); setNotice("指名服務已加入本次點餐"); setTab("cart"); }}>加入本次點餐</button></section>
       </> : null}

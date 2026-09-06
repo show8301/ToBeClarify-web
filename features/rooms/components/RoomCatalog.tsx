@@ -29,7 +29,7 @@ function RoomCard({room,index,segmentMinutes}:{room:Room;index:number;segmentMin
       <p className="room-card-intro">{room.shortDescription}</p>
       {paragraphs.length?<div className="room-card-detail">{paragraphs.map((paragraph,paragraphIndex)=><p key={`${room.id}-detail-${paragraphIndex}`}>{paragraph}</p>)}</div>:null}
       <div className="room-card-price"><span><small>每節時間</small><strong>{segmentMinutes} 分鐘</strong></span><span><small>使用價格</small><strong>{money(room.segmentPrice)} <em>/ 節</em></strong></span></div>
-      <p className="room-card-note">包廂服務目前由店員協助訂購，請於入席前向現場店員確認空間與時段。</p>
+      <p className="room-card-note">可直接從顧客點餐頁選擇包廂與時段；若現場安排有變動，請再向店員確認。</p>
     </div>
   </article>;
 }
@@ -37,7 +37,7 @@ function RoomCard({room,index,segmentMinutes}:{room:Room;index:number;segmentMin
 export default function RoomCatalog({data}:{data:RoomsData}){
   return <div className="room-page">
     <section className="room-hero"><div><span>PRIVATE ROOMS / {String(data.rooms.length).padStart(2,"0")} SPACES</span><h1>ROOM<br/><i>ARCHIVE</i></h1><p>在喧囂之外，替每一次相遇保留一個完整的場景。包廂屬性、每節價格與照片，先在這裡看見今晚的可能。</p></div><a href="/menu" className="room-hero-back">← 回到佳餚名錄</a></section>
-    <section className="room-notice"><span>HOUSE NOTE</span><p>包廂以每節 {data.segmentMinutes} 分鐘計算。店內共用包廂可由當班店員協助安排；店員專屬包廂則以所屬店員的現場說明為準。</p></section>
+    <section className="room-notice"><span>HOUSE NOTE</span><p>包廂以每節 {data.segmentMinutes} 分鐘計算。進入顧客點餐頁後，可直接選擇包廂與時段；實際送出時只會檢查該包廂時段是否已被占用。</p></section>
     <section className="room-list" aria-label="包廂列表">{data.rooms.map((room,index)=><RoomCard key={room.id} room={room} index={index} segmentMinutes={data.segmentMinutes}/>)}</section>
     {!data.rooms.length?<div className="room-empty"><span>NO ROOMS YET</span><strong>今晚尚未公開包廂</strong><p>包廂資料會在後台完成設定後出現在這裡。</p></div>:null}
   </div>;

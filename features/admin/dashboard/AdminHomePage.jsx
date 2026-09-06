@@ -9,6 +9,7 @@ const PUBLIC_PAGES = [
   { key: 'staff', number: '01', label: '店員珍藏' },
   { key: 'gallery', number: '02', label: '艾歐澤亞週報' },
   { key: 'menu', number: '03', label: '佳餚名錄' },
+  { key: 'rooms', number: '03·1', label: '包廂介紹' },
   { key: 'guestbook', number: '04', label: '留聲機' },
   { key: 'liveUpdate', number: '05', label: '店舖動態' },
   { key: 'staffRanking', number: '06', label: '店員榜' },
@@ -155,7 +156,7 @@ export function AdminHomePage({ navigate }) {
         {canHideMenu ? <>
         <DeveloperDisclosure
           title="頁面顯示狀態"
-          description="調整公開網站 MENU 中 00–07 各頁面的顯示狀態。"
+          description="調整公開網站 MENU 各頁面的顯示狀態。"
           contentId="admin-page-visibility-content"
           open={visibilityOpen}
           onToggle={setVisibilityOpen}

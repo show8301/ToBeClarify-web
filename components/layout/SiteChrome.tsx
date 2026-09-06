@@ -12,7 +12,7 @@ const pageRouteKeys:Record<string,keyof HomePageVisibility> = {
   "/staff": "staff",
   "/gallery": "gallery",
   "/menu": "menu",
-  "/menu/rooms": "menu",
+  "/menu/rooms": "rooms",
   "/guestbook": "guestbook",
   "/liveupdate": "liveUpdate",
   "/staffRanking": "staffRanking",
@@ -170,7 +170,7 @@ export default function SiteChrome({navigation,shopInfo,pageVisibility,menuHidde
     ...((!visibility || visibility.home !== false)?[{id:"site-home",label:"首頁",routePath:"/"}]:[]),
     ...items.map((item)=>({id:item.id,label:item.label,routePath:resolvePath(item.routePath)})),
   ];
-  if ((!visibility || visibility.menu !== false) && !menuEntries.some((item)=>item.routePath==="/menu/rooms")) {
+  if ((!visibility || visibility.menu !== false) && (!visibility || visibility.rooms !== false) && !menuEntries.some((item)=>item.routePath==="/menu/rooms")) {
     const menuIndex=menuEntries.findIndex((item)=>item.routePath==="/menu");
     menuEntries.splice(menuIndex<0?menuEntries.length:menuIndex+1,0,{id:"site-menu-rooms",label:"包廂介紹",routePath:"/menu/rooms"});
   }

@@ -12,6 +12,6 @@ export const metadata:Metadata={
 
 export default function RoomPage(){
   const home=getSiteHome();
-  if(!home.pageVisibility.menu)notFound();
+  if(!home.pageVisibility.menu||!home.pageVisibility.rooms)notFound();
   return <SiteChrome navigation={home.navigation} shopInfo={home.shopInfo} pageVisibility={home.pageVisibility}><RoomCatalog data={getRoomsData()}/></SiteChrome>;
 }

@@ -102,12 +102,16 @@ test('developer can control each public menu page from the admin home', async ()
   assert.match(styles, /\.adminStaffDirectoryTable/);
   assert.match(dashboard, /number: '00'/);
   assert.match(dashboard, /number: '07'/);
+  assert.match(dashboard, /key: 'rooms'/);
+  assert.match(dashboard, /number: '03·1'/);
   assert.match(dashboard, /label=\{visibility\.pages\[page\.key\] \? '顯示' : '隱藏'\}/);
   assert.doesNotMatch(dashboard, /label="隱藏 MENU 功能"/);
   assert.match(data, /pageVisibility/);
   assert.match(chrome, /pageVisibility/);
   assert.match(chrome, /pageNumbers/);
-  assert.match(menu, /if\(!home\.pageVisibility\.menu\)notFound\(\)/);
+  assert.match(chrome, /"\/menu\/rooms": "rooms"/);
+  assert.match(menu, /if\(!home\.pageVisibility\.menu\|\|!home\.pageVisibility\.rooms\)notFound\(\)/);
+  assert.match(menu, /roomsVisible=\{home\.pageVisibility\.rooms\}/);
 });
 
 test('staff ordering settings expose buffer, staff nomination, and public service prices', async () => {

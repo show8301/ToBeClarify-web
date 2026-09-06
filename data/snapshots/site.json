@@ -55,6 +55,7 @@
       "staff": true,
       "gallery": true,
       "menu": true,
+      "rooms": true,
       "guestbook": true,
       "liveUpdate": true,
       "staffRanking": true,

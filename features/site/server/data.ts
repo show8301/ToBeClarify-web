@@ -33,7 +33,7 @@ function readCache<T>(entry:CacheEntry<T>,loader:()=>Promise<T>):T{
   return entry.value;
 }
 
-const defaultPageVisibility:HomePageVisibility={home:true,staff:true,gallery:true,menu:true,guestbook:true,liveUpdate:true,staffRanking:true,monetaryRanking:true};
+const defaultPageVisibility:HomePageVisibility={home:true,staff:true,gallery:true,menu:true,rooms:true,guestbook:true,liveUpdate:true,staffRanking:true,monetaryRanking:true};
 
 function normalizePageVisibility(value:unknown):HomePageVisibility{
   if(!value||typeof value!=="object")return defaultPageVisibility;
@@ -44,6 +44,7 @@ function normalizePageVisibility(value:unknown):HomePageVisibility{
     staff:source.staff!==false,
     gallery:source.gallery!==false,
     menu:typeof source.menu==="boolean"?source.menu:!legacyMenuHidden,
+    rooms:source.rooms!==false,
     guestbook:source.guestbook!==false,
     liveUpdate:source.liveUpdate!==false,
     staffRanking:source.staffRanking!==false,

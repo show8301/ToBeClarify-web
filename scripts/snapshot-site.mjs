@@ -34,6 +34,7 @@ const snapshot = {
       staff:pageVisibility.staff !== false,
       gallery:pageVisibility.gallery !== false,
       menu:typeof pageVisibility.menu === "boolean" ? pageVisibility.menu : pageVisibility.menuHidden !== true,
+      rooms:pageVisibility.rooms !== false,
       guestbook:pageVisibility.guestbook !== false,
       liveUpdate:pageVisibility.liveUpdate !== false,
       staffRanking:pageVisibility.staffRanking !== false,

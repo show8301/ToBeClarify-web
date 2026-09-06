@@ -46,6 +46,7 @@ export type HomePageVisibility = {
   staff:boolean;
   gallery:boolean;
   menu:boolean;
+  rooms:boolean;
   guestbook:boolean;
   liveUpdate:boolean;
   staffRanking:boolean;

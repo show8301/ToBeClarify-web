@@ -104,6 +104,7 @@ test('developer can control each public menu page from the admin home', async ()
   assert.match(dashboard, /number: '07'/);
   assert.match(dashboard, /key: 'rooms'/);
   assert.match(dashboard, /number: '03·1'/);
+  assert.match(dashboard, /rooms: value\.rooms !== false/);
   assert.match(dashboard, /label=\{visibility\.pages\[page\.key\] \? '顯示' : '隱藏'\}/);
   assert.doesNotMatch(dashboard, /label="隱藏 MENU 功能"/);
   assert.match(data, /pageVisibility/);

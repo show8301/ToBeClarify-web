@@ -27,6 +27,7 @@ function normalizePageVisibility(value) {
     staff: value.staff !== false,
     gallery: value.gallery !== false,
     menu: typeof value.menu === 'boolean' ? value.menu : !legacyMenuHidden,
+    rooms: value.rooms !== false,
     guestbook: value.guestbook !== false,
     liveUpdate: value.liveUpdate !== false,
     staffRanking: value.staffRanking !== false,

@@ -12,6 +12,7 @@ const pageRouteKeys:Record<string,keyof HomePageVisibility> = {
   "/staff": "staff",
   "/gallery": "gallery",
   "/menu": "menu",
+  "/menu/rooms": "menu",
   "/guestbook": "guestbook",
   "/liveupdate": "liveUpdate",
   "/staffRanking": "staffRanking",
@@ -22,6 +23,7 @@ const pageNumbers:Record<string,string> = {
   "/staff": "01",
   "/gallery": "02",
   "/menu": "03",
+  "/menu/rooms": "03·1",
   "/guestbook": "04",
   "/liveupdate": "05",
   "/staffRanking": "06",
@@ -32,6 +34,7 @@ const pageEnglishLabels:Record<string,string> = {
   "/staff": "DREAMERS",
   "/gallery": "GALLERY",
   "/menu": "SERVICE MENU",
+  "/menu/rooms": "PRIVATE ROOMS",
   "/guestbook": "GUESTBOOK",
   "/liveupdate": "LIVE TONIGHT",
   "/staffRanking": "STAFF RANKING",
@@ -167,6 +170,10 @@ export default function SiteChrome({navigation,shopInfo,pageVisibility,menuHidde
     ...((!visibility || visibility.home !== false)?[{id:"site-home",label:"首頁",routePath:"/"}]:[]),
     ...items.map((item)=>({id:item.id,label:item.label,routePath:resolvePath(item.routePath)})),
   ];
+  if ((!visibility || visibility.menu !== false) && !menuEntries.some((item)=>item.routePath==="/menu/rooms")) {
+    const menuIndex=menuEntries.findIndex((item)=>item.routePath==="/menu");
+    menuEntries.splice(menuIndex<0?menuEntries.length:menuIndex+1,0,{id:"site-menu-rooms",label:"包廂介紹",routePath:"/menu/rooms"});
+  }
 
   return <div className={`site-frame${open?" is-menu-open":""}`}>
     <div className="site-parallax-bubbles site-bubbles-far" aria-hidden="true"><i/><i/><i/><i/></div>

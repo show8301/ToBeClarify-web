@@ -1,0 +1,37 @@
+{
+  "segmentMinutes": 20,
+  "rooms": [
+    {
+      "id": "room-sea-garden",
+      "roomName": "海霧水庭",
+      "shortDescription": "以水景、夜光與安靜談席為主的店內共用包廂。",
+      "detailContent": "適合雙人短談、拍照與需要一點距離感的夜晚。實際入席時間以店員現場安排為準。",
+      "ownershipType": "common",
+      "ownerStaffId": null,
+      "ownerStaffName": null,
+      "segmentMinutes": 20,
+      "segmentPrice": 120000,
+      "photos": [
+        { "id": "room-sea-garden-1", "mediaId": null, "imageUrl": "https://api.marchgroup.net/api/client/media/000a8c50-d71a-415b-ac2f-7f3164ffa7a3?variant=hero", "sortOrder": 0 },
+        { "id": "room-sea-garden-2", "mediaId": null, "imageUrl": "https://api.marchgroup.net/api/client/media/db20470c-57dc-44f2-b864-7ba33d26cc2f?variant=hero", "sortOrder": 1 },
+        { "id": "room-sea-garden-3", "mediaId": null, "imageUrl": "https://api.marchgroup.net/api/client/media/96d67340-dabd-4449-8e74-6f3c33454b14?variant=hero", "sortOrder": 2 },
+        { "id": "room-sea-garden-4", "mediaId": null, "imageUrl": "https://api.marchgroup.net/api/client/media/8d72a915-bb34-4aed-bcd1-df109e4d406d?variant=hero", "sortOrder": 3 }
+      ]
+    },
+    {
+      "id": "room-crystal-whisper",
+      "roomName": "水晶祕語廳",
+      "shortDescription": "留給指定店員的專屬包廂，適合延續一段完整角色相遇。",
+      "detailContent": "空間以低光與小桌席為主，服務內容與入席節奏請先和所屬店員確認。",
+      "ownershipType": "dedicated",
+      "ownerStaffId": "dcd49fb5-cacf-4447-9471-8a75950a4a8c",
+      "ownerStaffName": "塔克西跩佛",
+      "segmentMinutes": 20,
+      "segmentPrice": 150000,
+      "photos": [
+        { "id": "room-crystal-whisper-1", "mediaId": null, "imageUrl": "https://api.marchgroup.net/api/client/media/5d7e6041-4127-4c89-8796-d2623c8ed30d?variant=hero", "sortOrder": 0 },
+        { "id": "room-crystal-whisper-2", "mediaId": null, "imageUrl": "https://api.marchgroup.net/api/client/media/bdd7aa67-fc7b-5cd1-8737-1209f89fa9e0?variant=hero", "sortOrder": 1 }
+      ]
+    }
+  ]
+}

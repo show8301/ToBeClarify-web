@@ -145,6 +145,26 @@ export const adminApi = {
     method: id ? 'PUT' : 'POST', body: JSON.stringify(body), signal,
   }),
   deleteMenuSet: (id, signal) => request(`/menu/sets/${encodeURIComponent(id)}`, { method: 'DELETE', signal }),
+  getRooms: (signal) => request('/rooms', { signal }),
+  saveRoom: (id, body, signal) => request(id ? `/rooms/${encodeURIComponent(id)}` : '/rooms', {
+    method: id ? 'PUT' : 'POST', body: JSON.stringify(body), signal,
+  }),
+  getRoomProfitSharing: (signal) => request('/payroll/room-profit-sharing', { signal }),
+  saveRoomProfitSharing: (body, signal) => request('/payroll/room-profit-sharing', {
+    method: 'PUT', body: JSON.stringify(body), signal,
+  }),
+  getRoomOrders: ({ businessDate, status } = {}, signal) => {
+    const params = new URLSearchParams();
+    if (businessDate) params.set('businessDate', businessDate);
+    if (status) params.set('status', status);
+    return request(`/room-orders${params.size ? `?${params}` : ''}`, { signal });
+  },
+  createRoomOrder: (body, signal) => request('/room-orders', {
+    method: 'POST', body: JSON.stringify(body), signal,
+  }),
+  updateRoomOrderStatus: (id, status, signal) => request(`/room-orders/${encodeURIComponent(id)}/status`, {
+    method: 'PUT', body: JSON.stringify({ status }), signal,
+  }),
   getOrderSessions: ({ businessDate, search } = {}, signal) => {
     const params = new URLSearchParams();
     if (businessDate) params.set('businessDate', businessDate);

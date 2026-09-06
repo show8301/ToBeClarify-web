@@ -36,5 +36,6 @@ export default function MenuCatalog({menu}:{menu:MenuData}){
         <ol>{active.items.map((item,index)=><li key={item.id}><span>{String(index+1).padStart(2,"0")}</span><div><h4>{item.itemName}</h4><p>{item.itemDescription}</p></div><b>{item.priceText||gil(item.price)}</b></li>)}</ol>
       </motion.div>}</AnimatePresence>
     </section>
+    <section className="menu-room-entry"><div><span>PRIVATE ROOMS</span><h2>今晚想把哪一段相遇，留在包廂裡？</h2><p>查看店內共用與店員專屬包廂的照片、每節價格與使用說明。</p></div><a href="/menu/rooms">進入包廂介紹 <i>↗</i></a></section>
   </div>;
 }

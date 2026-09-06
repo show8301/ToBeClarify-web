@@ -10,11 +10,16 @@ requests to the port assigned to that environment.
 - Microsoft IIS URL Rewrite 2.1 (x64)
 - Microsoft Application Request Routing (ARR) 3.0
 - Node.js 22.13.0 or newer
+- PM2 7.0.3 or newer, either globally visible to the runner account or
+  installed in the shared CLI directory
 - Windows PowerShell 5.1 with the `ScheduledTasks` module
 - A self-hosted GitHub Actions runner whose service identity:
   - is a local administrator;
-  - can register and run scheduled tasks;
+  - can run either global `pm2.cmd` or the shared command at
+    `D:\pm2\ToBeClarify-web\cli\node_modules\.bin\pm2.cmd`;
+  - can register the PM2 resurrection startup task;
   - has Modify permission on the deployment parent directory;
+  - has Modify permission on `D:\pm2\ToBeClarify-web`;
   - can update IIS server-level proxy configuration.
 
 IISNode and ASP.NET are not required. ARR proxy support is enabled
@@ -56,8 +61,17 @@ Development optionally accepts:
 
 The deployment identity is intentionally not configurable through repository
 variables. Production always uses port `4300` and Scheduled Task
-`ToBeClarify Vinext PROD`; development always uses port `4310` and Scheduled
-Task `ToBeClarify Vinext DEV`.
+`ToBeClarify Vinext PROD` during migration, then PM2 application
+`tobeclarify-web-prod`; development always uses port `4310` and migrates from
+Scheduled Task `ToBeClarify Vinext DEV` to PM2 application
+`tobeclarify-web-dev`.
+
+Both PM2 applications use the fixed `PM2_HOME`
+`D:\pm2\ToBeClarify-web`. This prevents the GitHub Actions runner account and
+an interactive administrator account from creating different Web process
+lists. Command resolution prefers a runner-visible global PM2 and falls back to
+the fixed shared CLI. In either case, daemon state and the dump file remain
+isolated from unrelated PM2 applications such as `D:\cron`.
 
 ## Workflow behavior
 
@@ -74,16 +88,39 @@ Task `ToBeClarify Vinext DEV`.
   manually merged into `main`; that push then deploys to the production
   environment.
 - Production and DEV use different IIS directories, fixed Node ports, fixed
-  Scheduled Task names, and GitHub environments. A shared deployment
+  PM2 application names, and GitHub environments. A shared deployment
   concurrency group serializes changes on the common IIS host.
-- Before stopping the target, deployment requires the sibling Scheduled Task,
+- Before stopping the target, deployment requires the sibling process manager,
   localhost health endpoint, and public IIS health endpoint to agree on a live
   deployment SHA. It verifies the same sibling SHA again after deployment.
 - A manual run with `preflight_only` checks the runner and IIS without changing
   the site selected by the workflow branch.
-- Deployment uses a staging directory, retains one rollback directory, starts
-  Vinext through a scheduled task, and rolls back automatically when either the
-  localhost or public health check does not report the current Git commit SHA.
+- Deployment uses a staging directory, retains one rollback directory, and
+  starts Vinext through PM2 with `autorestart: true` and `watch: false`. File
+  changes during deployment therefore cannot race the controlled directory
+  swap.
+- A pull request runs an isolated PM2 smoke application on the Windows runner,
+  terminates its Node PID, verifies PM2 restarts it, and deletes it without
+  saving it to the production process list.
+- Deployment rolls back automatically when either the localhost or public
+  health check does not report the current Git commit SHA. It restores the
+  previous process manager and verifies the previous SHA after rollback.
+- Every successful deployment runs `pm2 save`. The shared
+  `ToBeClarify PM2 Web Resurrect` startup task only runs `pm2 resurrect` after
+  Windows starts; PM2, rather than Scheduled Tasks, watches the Node processes.
+
+## Reversible Scheduled Task migration
+
+- DEV and production migrate independently. A sibling may still run through
+  its legacy Scheduled Task while the target is already managed by PM2.
+- The target legacy task is stopped only after its directory and port identity
+  are verified. It remains registered but disabled after a successful PM2
+  health check.
+- On first-migration failure, the deployer restores the rollback directory,
+  enables the legacy task, starts it, and verifies the old deployment SHA.
+- Keep both disabled legacy tasks for the initial soak period. They can be
+  removed in a separate cleanup only after DEV and production have both proven
+  stable.
 
 ## Required Web release sequence
 

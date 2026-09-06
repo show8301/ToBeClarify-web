@@ -51,15 +51,15 @@ jobs:
           $parseErrors = @()
           Get-ChildItem -Path scripts -Filter '*.ps1' | ForEach-Object {
             $tokens = $null
-            $errors = $null
+            $fileParseErrors = $null
             [System.Management.Automation.Language.Parser]::ParseFile(
               $_.FullName,
               [ref]$tokens,
-              [ref]$errors
+              [ref]$fileParseErrors
             ) | Out-Null
 
-            foreach ($error in $errors) {
-              $parseErrors += "$($_.Name):$($error.Extent.StartLineNumber): $($error.Message)"
+            foreach ($fileParseError in $fileParseErrors) {
+              $parseErrors += "$($_.Name):$($fileParseError.Extent.StartLineNumber): $($fileParseError.Message)"
             }
           }
 
@@ -92,6 +92,8 @@ jobs:
             package.json
             package-lock.json
             deploy/web.config.template
+            scripts/native-command.ps1
+            scripts/resurrect-vinext-pm2.ps1
             scripts/start-vinext.ps1
           if-no-files-found: error
           retention-days: 7
@@ -113,6 +115,31 @@ jobs:
             exit 1
           fi
           echo "Accepted production promotion: dev -> main."
+
+  validate-pm2-runtime:
+    name: Validate isolated PM2 watchdog on Windows
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    needs: build
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 10
+    concurrency:
+      group: vinext-iis-deployment
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout deployment validation scripts
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Parse scripts and prove PM2 crash recovery
+        shell: powershell
+        run: .\scripts\test-vinext-pm2-runtime.ps1 -SmokeTest
 
   deploy:
     name: Preflight and deploy to IIS
@@ -215,6 +242,7 @@ jobs:
       - name: Check runner and IIS prerequisites
         shell: powershell
         run: |
+          .\scripts\test-vinext-pm2-runtime.ps1
           .\scripts\test-iis-reverse-proxy-prerequisites.ps1 `
             -DeployPath $env:DEPLOY_PATH `
             -MinimumNodeVersion '${{ env.NODE_VERSION }}'

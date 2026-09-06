@@ -3,12 +3,16 @@ param(
 
     [string]$DeployPath,
 
+    [string]$Pm2Home = 'D:\pm2\ToBeClarify-web',
+
     [ValidatePattern('^\d+\.\d+\.\d+$')]
     [string]$MinimumNodeVersion = '22.13.0'
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+
+. (Join-Path $PSScriptRoot 'native-command.ps1')
 
 $missing = New-Object System.Collections.Generic.List[string]
 $details = New-Object System.Collections.Generic.List[string]
@@ -17,16 +21,16 @@ if (-not (Test-Path -LiteralPath $AppCmdPath -PathType Leaf)) {
     $missing.Add('IIS Web Server management tools (appcmd.exe)')
 }
 else {
-    $rewriteOutput = & $AppCmdPath list module RewriteModule 2>&1
-    if ($LASTEXITCODE -ne 0 -or -not ($rewriteOutput -match 'RewriteModule')) {
+    $rewriteResult = Invoke-NativeCommand -FilePath $AppCmdPath -ArgumentList @('list', 'module', 'RewriteModule')
+    if ($rewriteResult.ExitCode -ne 0 -or -not ($rewriteResult.Output -match 'RewriteModule')) {
         $missing.Add('Microsoft IIS URL Rewrite 2.1 (x64)')
     }
     else {
         $details.Add('Microsoft IIS URL Rewrite is available.')
     }
 
-    $proxyOutput = & $AppCmdPath list config /section:system.webServer/proxy 2>&1
-    if ($LASTEXITCODE -ne 0) {
+    $proxyResult = Invoke-NativeCommand -FilePath $AppCmdPath -ArgumentList @('list', 'config', '/section:system.webServer/proxy')
+    if ($proxyResult.ExitCode -ne 0) {
         $missing.Add('Microsoft Application Request Routing (ARR) 3.0')
     }
     else {
@@ -40,7 +44,11 @@ if ($null -eq $nodeCommand) {
 }
 else {
     try {
-        $nodeVersionText = (& $nodeCommand.Source --version).TrimStart('v')
+        $nodeVersionResult = Invoke-NativeCommand -FilePath $nodeCommand.Source -ArgumentList @('--version')
+        if ($nodeVersionResult.ExitCode -ne 0) {
+            throw "node --version failed with exit code $($nodeVersionResult.ExitCode)"
+        }
+        $nodeVersionText = ($nodeVersionResult.Output | Select-Object -Last 1).Trim().TrimStart('v')
         $nodeVersion = [version]$nodeVersionText
         if ($nodeVersion -lt [version]$MinimumNodeVersion) {
             $missing.Add("Node.js $MinimumNodeVersion or newer (found $nodeVersionText)")
@@ -61,13 +69,57 @@ else {
     $details.Add('npm is available on the runner PATH.')
 }
 
+$pm2CommandPath = $null
+try {
+    $pm2CommandPath = Resolve-Pm2Command
+}
+catch {
+    $missing.Add($_.Exception.Message)
+}
+if (-not [string]::IsNullOrWhiteSpace($pm2CommandPath)) {
+    $originalPm2Home = $env:PM2_HOME
+    try {
+        $env:PM2_HOME = [System.IO.Path]::GetFullPath($Pm2Home)
+        New-Item -Path $env:PM2_HOME -ItemType Directory -Force | Out-Null
+        Remove-Item Env:RUNNER_TRACKING_ID -ErrorAction SilentlyContinue
+        $pm2VersionResult = Invoke-NativeCommand -FilePath $pm2CommandPath -ArgumentList @('--version')
+        $pm2VersionText = @(
+            $pm2VersionResult.Output |
+                ForEach-Object { ([string]$_).Trim() } |
+                Where-Object { $_ -match '^\d+\.\d+\.\d+$' }
+        ) | Select-Object -Last 1
+        if ($pm2VersionResult.ExitCode -ne 0 -or
+            [string]::IsNullOrWhiteSpace($pm2VersionText) -or
+            [version]$pm2VersionText -lt [version]'7.0.3') {
+            $missing.Add("PM2 7.0.3 or newer (found $pm2VersionText)")
+        }
+        else {
+            $details.Add("PM2 $pm2VersionText is available at $pm2CommandPath.")
+            $details.Add("The isolated Web PM2 home is writable: $($env:PM2_HOME).")
+        }
+    }
+    catch {
+        $missing.Add("A writable isolated PM2 home at $Pm2Home for the runner account")
+    }
+    finally {
+        if ([string]::IsNullOrWhiteSpace($originalPm2Home)) {
+            Remove-Item Env:PM2_HOME -ErrorAction SilentlyContinue
+        }
+        else {
+            $env:PM2_HOME = $originalPm2Home
+        }
+    }
+}
+
 $scheduledTaskCommands = @(
     'Get-ScheduledTask',
     'New-ScheduledTaskAction',
     'New-ScheduledTaskPrincipal',
     'Register-ScheduledTask',
     'Start-ScheduledTask',
-    'Stop-ScheduledTask'
+    'Stop-ScheduledTask',
+    'Enable-ScheduledTask',
+    'Disable-ScheduledTask'
 )
 $missingScheduledTaskCommands = @(
     $scheduledTaskCommands | Where-Object {

@@ -32,11 +32,21 @@ export type LiveUpdateConfig = {
   lastUpdatedAt:string; scheduleStart:string; scheduleEnd:string; timeSlots:string[];
 };
 
+export type LiveRoomStatus = {
+  id:string;
+  roomName:string;
+  ownershipType:"common"|"dedicated"|string;
+  ownerStaffName:string|null;
+  currentStatus:"available"|"reserved"|"occupied"|string;
+  statusText:string;
+};
+
 export type HomePageVisibility = {
   home:boolean;
   staff:boolean;
   gallery:boolean;
   menu:boolean;
+  rooms:boolean;
   guestbook:boolean;
   liveUpdate:boolean;
   staffRanking:boolean;

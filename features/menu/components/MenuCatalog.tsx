@@ -1,16 +1,29 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useState } from "react";
-import type { MenuData } from "@/features/site/types";
+import { useEffect, useState } from "react";
+import type { HomePageVisibility, MenuData } from "@/features/site/types";
 
 const gil=(value:number)=>`${new Intl.NumberFormat("zh-TW").format(value)} Gil`;
 const isInternalCopy=(value:string)=>/(demo|mock|測試|api\s*(提供|維護)|後台.*維護)/i.test(value);
 
-export default function MenuCatalog({menu}:{menu:MenuData}){
+export default function MenuCatalog({menu,roomsVisible=true}:{menu:MenuData;roomsVisible?:boolean}){
   const [category,setCategory]=useState(menu.categories[0]?.id??"");
+  const [showRoomEntry,setShowRoomEntry]=useState(roomsVisible);
   const reduceMotion=useReducedMotion();
   const active=menu.categories.find(item=>item.id===category)??menu.categories[0];
+  useEffect(()=>{
+    setShowRoomEntry(roomsVisible);
+    const controller=new AbortController();
+    fetch("/api/public/home",{cache:"no-store",headers:{Accept:"application/json"},signal:controller.signal})
+      .then((response)=>response.ok?response.json():null)
+      .then((payload:unknown)=>{
+        const data=payload as {success?:boolean;data?:{pageVisibility?:Partial<HomePageVisibility>}}|null;
+        if(data?.success&&data.data?.pageVisibility&&typeof data.data.pageVisibility.rooms==="boolean")setShowRoomEntry(data.data.pageVisibility.rooms);
+      })
+      .catch(()=>{});
+    return()=>controller.abort();
+  },[roomsVisible]);
   return <div className="menu-page">
     <section className="menu-hero">
       <div><span>THE TASTE OF A WAKING DREAM</span><h1>NIGHT<br/><i>MENU</i></h1></div>
@@ -36,5 +49,6 @@ export default function MenuCatalog({menu}:{menu:MenuData}){
         <ol>{active.items.map((item,index)=><li key={item.id}><span>{String(index+1).padStart(2,"0")}</span><div><h4>{item.itemName}</h4><p>{item.itemDescription}</p></div><b>{item.priceText||gil(item.price)}</b></li>)}</ol>
       </motion.div>}</AnimatePresence>
     </section>
+    {showRoomEntry&&<section className="menu-room-entry"><div><span>PRIVATE ROOMS</span><h2>今晚想把哪一段相遇，留在包廂裡？</h2><p>查看店內共用與店員專屬包廂的照片、每節價格與使用說明。</p></div><a href="/menu/rooms">進入包廂介紹 <i>↗</i></a></section>}
   </div>;
 }

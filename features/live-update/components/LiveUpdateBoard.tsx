@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import type { LiveUpdateConfig, StaffReservation } from "@/features/site/types";
+import type { LiveRoomStatus, LiveUpdateConfig, StaffReservation } from "@/features/site/types";
 import type { StaffSummary } from "@/features/staff/types";
+import type { Room } from "@/features/rooms/types";
 
 function tonightRange(){
   const from=new Date();
@@ -67,9 +68,26 @@ function LiveMarqueeRow({people,reverse=false,onNavigate}:{people:StaffSummary[]
   </div>;
 }
 
-export default function LiveUpdateBoard({staff,config}:{staff:StaffSummary[];config:LiveUpdateConfig}){
+function initialRoomStatuses(rooms:Room[]):LiveRoomStatus[]{
+  return rooms.map((room)=>({
+    id:room.id,
+    roomName:room.roomName,
+    ownershipType:room.ownershipType,
+    ownerStaffName:room.ownerStaffName,
+    currentStatus:"available",
+    statusText:"可使用",
+  }));
+}
+
+function LiveRoomSection({rooms}:{rooms:LiveRoomStatus[]}){
+  const ownershipLabel=(room:LiveRoomStatus)=>room.ownershipType==="dedicated"?`店員專屬 · ${room.ownerStaffName||"指定店員"}`:"店內共用";
+  return <section className="live-room-status"><header><div><span>ROOM STATUS</span><h2>包廂目前狀態</h2></div><b>{String(rooms.length).padStart(2,"0")} ROOMS</b></header>{rooms.length?<div className="live-room-grid">{rooms.map((room,index)=><article key={room.id}><div className="live-room-index">{String(index+1).padStart(2,"0")}</div><div><span className={`live-room-dot is-${room.currentStatus}`}><i/></span><h3>{room.roomName}</h3><small>{ownershipLabel(room)}</small></div><strong className={`is-${room.currentStatus}`}>{room.statusText}</strong></article>)}</div>:<div className="timeline-empty"><span>NO ROOM STATUS</span><strong>今晚尚無公開包廂狀態</strong><p>包廂資料完成設定後會在這裡顯示。</p></div>}</section>;
+}
+
+export default function LiveUpdateBoard({staff,rooms,config}:{staff:StaffSummary[];rooms:Room[];config:LiveUpdateConfig}){
   const [staffMembers,setStaffMembers]=useState(staff);
   const [reservations,setReservations]=useState<StaffReservation[]>([]);
+  const [roomStatuses,setRoomStatuses]=useState<LiveRoomStatus[]>(()=>initialRoomStatuses(rooms));
   const [updated,setUpdated]=useState<Date|null>(null);
   const [syncStatus,setSyncStatus]=useState<"syncing"|"ready"|"error">("syncing");
   const syncInFlight=useRef(false);
@@ -110,9 +128,10 @@ export default function LiveUpdateBoard({staff,config}:{staff:StaffSummary[];con
       const range=tonightRange();
       const response=await fetch(`/api/live-status?from=${encodeURIComponent(range.from)}&to=${encodeURIComponent(range.to)}`,{cache:"no-store"});
       if(!response.ok)throw new Error(`Live status returned ${response.status}`);
-      const payload=await response.json() as {staff:StaffSummary[];reservations:StaffReservation[];syncedAt:string};
+      const payload=await response.json() as {staff:StaffSummary[];reservations:StaffReservation[];rooms?:LiveRoomStatus[];syncedAt:string};
       setStaffMembers(payload.staff);
       setReservations(payload.reservations);
+      if(payload.rooms?.length)setRoomStatuses(payload.rooms);
       setUpdated(new Date(payload.syncedAt));
       setSyncStatus("ready");
     }catch{
@@ -159,5 +178,7 @@ export default function LiveUpdateBoard({staff,config}:{staff:StaffSummary[];con
     <section className="live-status"><header><div><span>STAFF STATUS</span><h2>今晚待命</h2></div><b>{String(working.length).padStart(2,"0")} ON DUTY</b></header>{working.length?<><small className="live-marquee-hint">← 左右滑動查看全部店員 →</small><div className="live-marquee" aria-label="今晚待命店員"><LiveMarqueeRow people={marqueeRows[0]} onNavigate={rememberLivePosition}/>{marqueeRows[1].length>0&&<LiveMarqueeRow people={marqueeRows[1]} reverse onNavigate={rememberLivePosition}/>}</div></>:<p className="live-staff-empty">今晚尚無店員公開待命狀態。</p>}</section>
 
     <section className="live-timeline"><header><div><span>RESERVATION TIMELINE</span><h2>今夜時序</h2></div><p>{reservations.length?`目前公開 ${reservations.length} 筆預約時段。`:"公開預約會在這裡顯示；店員的即時狀態請以上方卡片為準。"}</p></header>{reservations.length?<div className="timeline-scroll"><div className="timeline-board" style={{minWidth:`${Math.max(760,slots.length*100)}px`}}><div className="timeline-times"><span>STAFF</span>{slots.map(slot=><b key={slot}>{slot}</b>)}</div>{working.map(person=><div className="timeline-row" key={person.id}><div><img src={person.avatarUrl||"/og.png"} alt="" loading="lazy" decoding="async"/><span>{person.displayName}</span></div><div className="timeline-line">{(barsByStaff.get(person.id)??[]).map(bar=><span key={bar.id} className={bar.status} style={{left:`${bar.left}%`,width:`${bar.width}%`}}><b>{bar.serviceLabel}</b><small>{new Date(bar.startsAt).toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit",hour12:false})}</small></span>)}</div></div>)}</div></div>:<div className="timeline-empty"><span>NO PUBLIC RESERVATIONS</span><strong>今晚尚無公開預約</strong><p>有公開時段後會自動出現在這裡，不需要重新整理頁面。</p></div>}</section>
+
+    <LiveRoomSection rooms={roomStatuses}/>
   </div>;
 }

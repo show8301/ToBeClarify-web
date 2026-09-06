@@ -13,6 +13,7 @@ import { AdminOrderListPage } from '@/features/admin/media/AdminOrderListPage.js
 import { AdminMenuPage } from '@/features/admin/menu/AdminMenuPage.jsx';
 import { AdminOrdersPage } from '@/features/admin/orders/AdminOrdersPage.jsx';
 import { AdminStaffSettingsPage } from '@/features/admin/staff/AdminStaffSettingsPage.jsx';
+import { AdminRoomsPage } from '@/features/admin/rooms/AdminRoomsPage.jsx';
 
 const managerRoles = ['developer', 'manager'];
 
@@ -63,6 +64,10 @@ export function AdminHomeSettingsRoute() {
 
 export function AdminStaffSettingsRoute() {
   return <AdminProtectedRoute><AdminStaffSettingsPage /></AdminProtectedRoute>;
+}
+
+export function AdminRoomsRoute() {
+  return <AdminProtectedRoute><AdminRoomsPage /></AdminProtectedRoute>;
 }
 
 export function AdminEventsRoute() {

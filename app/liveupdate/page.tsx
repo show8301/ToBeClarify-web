@@ -3,6 +3,7 @@ import LiveUpdateBoard from "@/features/live-update/components/LiveUpdateBoard";
 import SiteChrome from "@/components/layout/SiteChrome";
 import { getSiteHome } from "@/features/site/server/data";
 import { getStaffList } from "@/features/staff/server/data";
+import { getRoomsData } from "@/features/rooms/server/data";
 
 export const metadata:Metadata={
   title:"即時動態｜清醒夢 Lucid Dream",
@@ -11,5 +12,5 @@ export const metadata:Metadata={
 
 export default function LiveUpdatePage(){
   const home=getSiteHome();
-  return <SiteChrome navigation={home.navigation} shopInfo={home.shopInfo} pageVisibility={home.pageVisibility}><LiveUpdateBoard staff={getStaffList()} config={home.liveUpdateConfig}/></SiteChrome>;
+  return <SiteChrome navigation={home.navigation} shopInfo={home.shopInfo} pageVisibility={home.pageVisibility}><LiveUpdateBoard staff={getStaffList()} rooms={getRoomsData().rooms} config={home.liveUpdateConfig}/></SiteChrome>;
 }

@@ -165,6 +165,29 @@ export const adminApi = {
   updateRoomOrderStatus: (id, status, signal) => request(`/room-orders/${encodeURIComponent(id)}/status`, {
     method: 'PUT', body: JSON.stringify({ status }), signal,
   }),
+  getSettlement: ({ businessDate, sessionNo = 1 } = {}, signal) => {
+    const params = new URLSearchParams({ businessDate, sessionNo: String(sessionNo) });
+    return request(`/settlement?${params}`, { signal });
+  },
+  getSettlementRules: (dayType, signal) => request(`/settlement/rules${dayType ? `?dayType=${encodeURIComponent(dayType)}` : ''}`, { signal }),
+  saveSettlementRule: (body, signal) => request('/settlement/rules', {
+    method: 'POST', body: JSON.stringify(body), signal,
+  }),
+  saveSettlementInputs: (body, signal) => request('/settlement/inputs', {
+    method: 'PUT', body: JSON.stringify(body), signal,
+  }),
+  calculateSettlement: (body, signal) => request('/settlement/calculate', {
+    method: 'POST', body: JSON.stringify(body), signal,
+  }),
+  finalizeSettlement: (body, signal) => request('/settlement/finalize', {
+    method: 'POST', body: JSON.stringify(body), signal,
+  }),
+  reopenSettlement: (body, signal) => request('/settlement/reopen', {
+    method: 'POST', body: JSON.stringify(body), signal,
+  }),
+  adjustSettlementOrder: (orderId, body, signal) => request(`/settlement/orders/${encodeURIComponent(orderId)}/amount`, {
+    method: 'PUT', body: JSON.stringify(body), signal,
+  }),
   getOrderSessions: ({ businessDate, search } = {}, signal) => {
     const params = new URLSearchParams();
     if (businessDate) params.set('businessDate', businessDate);

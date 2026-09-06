@@ -119,9 +119,10 @@ export default function OrderClient() {
 
   const tabs = [
     ['meal', '一般點餐'],
-    ...(catalog.rooms?.length ? [['room', '訂購包廂']] : []),
     ...(!catalog.settings.nominationPaused ? [['nomination', '指名服務']] : []),
-    ['tip', '小費'], ['cart', `本次點餐 ${cartCount || ''}`], ['orders', '我的訂單'], ['help', '請洽店員'],
+    ['tip', '小費'],
+    ...(catalog.rooms?.length ? [['room', '訂購包廂']] : []),
+    ['cart', `本次點餐 ${cartCount || ''}`], ['orders', '我的訂單'], ['help', '請洽店員'],
   ];
 
   return (

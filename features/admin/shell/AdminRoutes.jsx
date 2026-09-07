@@ -14,6 +14,7 @@ import { AdminOrderListPage } from '@/features/admin/media/AdminOrderListPage.js
 import { AdminMenuPage } from '@/features/admin/menu/AdminMenuPage.jsx';
 import { AdminOrdersPage } from '@/features/admin/orders/AdminOrdersPage.jsx';
 import { AdminStaffSettingsPage } from '@/features/admin/staff/AdminStaffSettingsPage.jsx';
+import { AdminDutyPlanningPage } from '@/features/admin/duty-planning/AdminDutyPlanningPage.tsx';
 import { AdminRoomsPage } from '@/features/admin/rooms/AdminRoomsPage.jsx';
 import { AdminRoomServicePage } from '@/features/admin/rooms/AdminRoomServicePage.tsx';
 import { AdminSettlementPage } from '@/features/admin/settlement/AdminSettlementPage.tsx';
@@ -83,6 +84,11 @@ export function AdminHomeSettingsRoute() {
 
 export function AdminStaffSettingsRoute() {
   return <AdminProtectedRoute><AdminStaffSettingsPage /></AdminProtectedRoute>;
+}
+
+export function AdminDutyPlanningRoute() {
+  const navigate = useAdminNavigation();
+  return <AdminProtectedRoute><AdminDutyPlanningPage navigate={navigate} /></AdminProtectedRoute>;
 }
 
 export function AdminRoomsRoute() {

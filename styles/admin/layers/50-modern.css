@@ -722,6 +722,60 @@
 .adminStaffWorkModeOption { display:grid; gap:7px; padding:11px; border:1px solid rgba(49,51,74,.12); border-radius:10px; background:rgba(255,255,255,.36); }
 .adminStaffWorkModeOption .adminToggle { min-height:38px; }
 .adminStaffWorkModeSaving { color:#477077; font-size:10px; }
+.adminDutyPlanningMetrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); margin-bottom:18px; overflow:hidden; border:1px solid var(--color-border); border-radius:18px; background:rgba(255,255,255,.42); box-shadow:0 15px 36px rgba(118,121,161,.08); }
+.adminDutyPlanningMetrics article { display:grid; gap:5px; min-width:0; padding:17px 18px; border-right:1px solid var(--color-border); }
+.adminDutyPlanningMetrics article:last-child { border-right:0; }
+.adminDutyPlanningMetrics span { color:var(--color-fg-mute); font:700 10px/1 var(--font-mono); letter-spacing:.07em; }
+.adminDutyPlanningMetrics strong { overflow:hidden; color:var(--color-fg); font:800 23px/1.1 var(--font-display); text-overflow:ellipsis; white-space:nowrap; }
+.adminDutyPlanningMetrics article:first-child strong { font-size:15px; }
+.adminDutyPlanningMetrics small { color:var(--color-fg-mute); font-size:10px; }
+.adminDutyPlanningToolbar { display:flex; align-items:end; gap:18px; margin-bottom:18px; padding:14px 16px; border:1px solid var(--color-border); border-radius:14px; background:rgba(255,255,255,.3); }
+.adminDutyPlanningToolbar .adminField { width:min(220px,100%); }
+.adminDutyPlanningToolbarNote { display:grid; gap:4px; padding-bottom:5px; }
+.adminDutyPlanningToolbarNote strong { color:var(--color-fg); font-size:13px; }
+.adminDutyPlanningToolbarNote small { color:var(--color-fg-mute); font-size:11px; }
+.adminDutyPlanningLayout { display:grid; grid-template-columns:minmax(0,1.45fr) minmax(320px,.75fr); gap:18px; align-items:start; }
+.adminDutyPlanningList { display:grid; gap:14px; min-width:0; }
+.adminDutyDatePanel { min-width:0; }
+.adminDutyDatePanel .adminPanelHeader h2 { font-size:18px; }
+.adminDutyPlanList { display:grid; gap:8px; }
+.adminDutyPlanCard { display:grid; grid-template-columns:minmax(130px,1.1fr) minmax(160px,1fr) minmax(80px,.65fr) auto; align-items:center; gap:12px; padding:12px; border:1px solid var(--color-border); border-left:3px solid var(--color-border-strong); border-radius:12px; background:rgba(255,255,255,.4); }
+.adminDutyPlanCard.is-approved { border-left-color:#2d9d76; }
+.adminDutyPlanCard.is-pending { border-left-color:#c79b48; }
+.adminDutyPlanCard.is-rejected { border-left-color:#aa6a82; }
+.adminDutyPlanIdentity { display:grid; gap:3px; min-width:0; }
+.adminDutyPlanIdentity strong { overflow:hidden; color:var(--color-fg); font-size:13px; text-overflow:ellipsis; white-space:nowrap; }
+.adminDutyPlanIdentity small,.adminDutyPlanStatus small { color:var(--color-fg-mute); font-size:10px; }
+.adminDutyPlanRoles { display:flex; flex-wrap:wrap; gap:5px; }
+.adminDutyPlanRoles span { padding:5px 7px; border-radius:999px; background:rgba(128,153,196,.12); color:var(--color-accent-dark); font-size:10px; font-weight:750; }
+.adminDutyPlanStatus { display:grid; gap:4px; min-width:0; }
+.adminDutyPlanStatus b { width:max-content; padding:5px 7px; border-radius:999px; background:rgba(199,155,72,.14); color:#84652b; font-size:10px; white-space:nowrap; }
+.is-approved .adminDutyPlanStatus b { background:rgba(45,157,118,.13); color:#287d61; }
+.is-rejected .adminDutyPlanStatus b { background:rgba(170,106,130,.14); color:#8c5268; }
+.adminDutyPlanStatus small { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.adminDutyPlanActions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:6px; }
+.adminDutyPlanActions .adminButton { min-height:35px; padding:7px 9px; font-size:10px; }
+.adminDutyPlanEditor { position:sticky; top:18px; }
+.adminDutyPlanForm { display:grid; gap:14px; }
+.adminDutyPlanForm .adminField input,.adminDutyPlanForm .adminField select { min-height:43px; }
+.adminDutyPlanTimeGrid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.adminDutyPlanReadonly { display:grid; gap:6px; padding:10px 0; }
+.adminDutyPlanReadonly span,.adminDutyRoleChoices legend { color:var(--color-fg-mute); font-size:11px; font-weight:700; }
+.adminDutyPlanReadonly strong { color:var(--color-fg); font-size:14px; }
+.adminDutyRoleChoices { display:grid; gap:8px; margin:0; padding:0; border:0; }
+.adminDutyRoleChoices legend { margin-bottom:2px; }
+.adminDutyRoleChoice { display:grid; gap:5px; padding:10px; border:1px solid var(--color-border); border-radius:10px; background:rgba(255,255,255,.3); }
+.adminDutyRoleChoice .adminToggle { min-height:34px; }
+.adminDutyRoleChoice .adminToggle > span { color:var(--color-fg); font-size:12px; font-weight:700; }
+.adminDutyRoleChoice small { color:var(--color-fg-mute); font-size:10px; }
+.adminDutyPlanEditorActions { display:flex; justify-content:flex-end; gap:8px; margin-top:3px; padding-top:14px; border-top:1px solid var(--color-border); }
+.adminDutyPlanEditorEmpty { display:grid; justify-items:start; gap:12px; padding:18px 0 4px; }
+.adminDutyPlanEditorEmpty > span { color:var(--color-accent-dark); font-size:25px; }
+.adminDutyPlanEditorEmpty p { margin:0; color:var(--color-fg-mute); font-size:12px; line-height:1.7; }
+.adminDutyPlanningNote { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-top:18px; padding:14px 16px; border:1px solid rgba(45,157,118,.22); border-radius:14px; background:rgba(45,157,118,.07); color:var(--color-fg-soft); font-size:12px; }
+.adminDutyPlanningNote strong { color:var(--color-fg); }
+.adminDutyPlanningNote i { color:#2d9d76; font-style:normal; }
+.adminDutyPlanningLinks { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
 :root[data-admin-theme="dark"] .adminRoleDashboardMetrics { background:#142229; border-color:rgba(255,255,255,.13); }
 :root[data-admin-theme="dark"] .adminRoleDashboardRow { background:rgba(25,40,47,.72); border-color:rgba(255,255,255,.12); }
 :root[data-admin-theme="dark"] .adminRoleDashboardNotice { background:rgba(91,72,39,.36); color:#ead7ae; }
@@ -731,9 +785,19 @@
 :root[data-admin-theme="dark"] .adminManagerControls>label input { background:#1b2c34; color:#eef4f5; border-color:rgba(255,255,255,.15); }
 :root[data-admin-theme="dark"] .adminManagerControls .adminBusinessModeButtons button { background:#1b2c34; color:#eef4f5; }
 :root[data-admin-theme="dark"] .adminStaffWorkModeOption { background:rgba(255,255,255,.04); border-color:rgba(255,255,255,.13); }
+:root[data-admin-theme="dark"] .adminDutyPlanningMetrics,
+:root[data-admin-theme="dark"] .adminDutyPlanningToolbar,
+:root[data-admin-theme="dark"] .adminDutyPlanCard,
+:root[data-admin-theme="dark"] .adminDutyRoleChoice { background:rgba(255,255,255,.04); border-color:rgba(255,255,255,.13); }
+:root[data-admin-theme="dark"] .adminDutyPlanRoles span { background:rgba(128,153,196,.2); color:#c0d0ee; }
+:root[data-admin-theme="dark"] .adminDutyPlanStatus b { color:#ead7ae; }
+:root[data-admin-theme="dark"] .is-approved .adminDutyPlanStatus b { color:#91ddc3; }
+:root[data-admin-theme="dark"] .is-rejected .adminDutyPlanStatus b { color:#efb4c7; }
 
 @media(max-width:820px){
   .adminRoleDashboardGrid { grid-template-columns:1fr; }
+  .adminDutyPlanningLayout { grid-template-columns:1fr; }
+  .adminDutyPlanEditor { position:static; }
 }
 @media(max-width:680px){
   .adminRoleDashboardMetrics { grid-template-columns:1fr 1fr; }
@@ -746,4 +810,12 @@
   .adminRoleDashboardPrimaryActionBody { align-items:flex-start; flex-direction:column; }
   .adminRoleDashboardPrimaryActionBody .adminButton { width:100%; }
   .adminStaffWorkModeOptions { grid-template-columns:1fr; }
+  .adminDutyPlanningMetrics { grid-template-columns:1fr 1fr; }
+  .adminDutyPlanningMetrics article:nth-child(2) { border-right:0; }
+  .adminDutyPlanningMetrics article:nth-child(-n+2) { border-bottom:1px solid var(--color-border); }
+  .adminDutyPlanningToolbar { align-items:stretch; flex-direction:column; gap:10px; }
+  .adminDutyPlanningToolbar .adminField { width:100%; }
+  .adminDutyPlanCard { grid-template-columns:1fr auto; align-items:start; }
+  .adminDutyPlanRoles,.adminDutyPlanStatus { grid-column:1 / -1; }
+  .adminDutyPlanActions { grid-column:1 / -1; justify-content:flex-start; }
 }

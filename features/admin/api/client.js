@@ -121,6 +121,21 @@ export const adminApi = {
   updateStaffDailyWorkMode: (id, body, signal) => request(`/staff-members/${encodeURIComponent(id)}/today-work-mode`, {
     method: 'PUT', body: JSON.stringify(body), signal,
   }),
+  getDutyPlans: ({ from, to } = {}, signal) => {
+    const params = new URLSearchParams();
+    if (from) params.set('from', from);
+    if (to) params.set('to', to);
+    return request(`/duty-plans${params.size ? `?${params}` : ''}`, { signal });
+  },
+  createDutyPlan: (body, signal) => request('/duty-plans', {
+    method: 'POST', body: JSON.stringify(body), signal,
+  }),
+  updateDutyPlan: (id, body, signal) => request(`/duty-plans/${encodeURIComponent(id)}`, {
+    method: 'PUT', body: JSON.stringify(body), signal,
+  }),
+  reviewDutyPlan: (id, body, signal) => request(`/duty-plans/${encodeURIComponent(id)}/review`, {
+    method: 'POST', body: JSON.stringify(body), signal,
+  }),
   reorderStaffMembers: (items, signal) => request('/staff-members/order', {
     method: 'PUT', body: JSON.stringify({ items }), signal,
   }),

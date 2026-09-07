@@ -510,7 +510,7 @@ export function AdminStaffSettingsPage() {
       {message ? <div className="adminNotice" role="alert">{message}</div> : null}
       <AdminState loading={state.loading} error={state.error} onRetry={load} />
       {!state.loading && !state.error ? <>
-        <AdminPanel className="adminStaffListPanel" title="店員列表" description={canManageAll ? '拖曳卡片調整公開列表順序；排班與公開狀態會立即儲存。' : '可查看所有店員資料；只能修改自己的公開狀態與今日排班。'} actions={canManageAll ? <AdminButton variant="secondary" onClick={saveStaffOrder} disabled={!staffOrderDirty || orderSaving}>{orderSaving ? '儲存中…' : '儲存店員順序'}</AdminButton> : null}>
+        <AdminPanel className="adminStaffListPanel" title="店員列表" description={canManageAll ? '拖曳卡片調整公開列表順序；值班規劃與公開狀態會分開管理。' : '可查看所有店員資料；只能修改自己的公開狀態與值班規劃。'} actions={canManageAll ? <AdminButton variant="secondary" onClick={saveStaffOrder} disabled={!staffOrderDirty || orderSaving}>{orderSaving ? '儲存中…' : '儲存店員順序'}</AdminButton> : null}>
           <AdminDragList
             items={staffList}
             canDrag={canManageAll}
@@ -540,9 +540,10 @@ export function AdminStaffSettingsPage() {
                   </div>
                 </div>
                 <div className={`adminStaffListControls ${statusSaving ? 'isSaving' : ''}`} onClick={(event) => event.stopPropagation()}>
-                  <div className="adminStaffListControl">
-                    <span className="adminStaffListControlLabel">今日排班</span>
-                    <AdminToggle checked={item.isWorkingToday} disabled={!canChange || statusSaving} onChange={(value) => toggleStaffStatus(item, 'isWorkingToday', value)} label={item.isWorkingToday ? '上班' : '休假'} ariaLabel={`切換${item.displayName}今日有上班`} />
+                  <div className="adminStaffListControl adminStaffDutySummary">
+                    <span className="adminStaffListControlLabel">今日值班</span>
+                    <strong>{item.isWorkingToday ? (item.todayShift || '已核准') : '休假／不值班'}</strong>
+                    <a href="/admin/duty-planning">值班規劃</a>
                   </div>
                   <div className="adminStaffListControl">
                     <span className="adminStaffListControlLabel">公開狀態</span>

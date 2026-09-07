@@ -3,13 +3,20 @@ import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
 import { AdminButton } from '@/features/admin/shared/AdminShared.jsx';
 
 const allGroups = [
-  { label: '營運操作', items: [
-    { route: '/admin/orders', label: '點單管理', index: '00', roles: ['developer', 'manager', 'clerk'] },
-    { route: '/admin/order-list', label: '訂單列表', index: '01', roles: ['developer', 'manager', 'clerk'] },
-    { route: '/admin', label: '營運總覽', index: '02', roles: ['developer', 'manager', 'clerk'] },
-    { route: '/admin/staff', label: '店員管理', index: '03', roles: ['developer', 'manager', 'clerk'] },
-    { route: '/admin/rooms', label: '包廂管理', index: '04', roles: ['developer', 'manager', 'clerk'] },
-    { route: '/admin/settlement', label: '帳目／薪資結算', index: '05', roles: ['developer', 'manager'] },
+  { label: '營運', items: [
+    { route: '/admin', label: '營業工作台', index: '00', roles: ['manager', 'clerk'] },
+    { route: '/admin/rooms/service', label: '包廂服務排程', index: '01', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin/duty-planning', label: '值班規劃', index: '04', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin/overview', label: '營運總覽', index: '02', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin/settlement', label: '帳目／薪資結算', index: '03', roles: ['developer', 'manager', 'clerk'] },
+  ] },
+  { label: '查詢與管理', items: [
+    { route: '/admin/order-list', label: '訂單查詢', index: '10', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin/staff', label: '店員資料設定', index: '11', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin/rooms', label: '包廂內容管理', index: '12', roles: ['developer', 'manager', 'clerk'] },
+  ] },
+  { label: '系統工具', items: [
+    { route: '/admin/orders', label: '完整點單管理（開發者工具）', index: '90', roles: ['developer', 'manager', 'clerk'] },
   ] },
   { label: '內容與設定', items: [
     { route: '/admin/menu', label: '菜單設定', index: '06', roles: ['developer', 'manager'] },

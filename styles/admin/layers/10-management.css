@@ -383,6 +383,10 @@
 .adminStaffListControl { display: grid; align-content: center; gap: 7px; min-width: 0; }
 .adminStaffListControlLabel { color: rgba(49,51,74,.48); font: 700 9px/1 var(--font-mono); letter-spacing: .08em; }
 .adminStaffListControl .adminToggle { color: #4f5575; font-size: 11px; font-weight: 700; }
+.adminStaffDutySummary { align-content: center; gap: 4px; }
+.adminStaffDutySummary strong { overflow: hidden; color: var(--color-fg); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.adminStaffDutySummary a { color: var(--color-accent-dark); font-size: 10px; font-weight: 750; text-decoration: none; }
+.adminStaffDutySummary a:hover { text-decoration: underline; }
 .adminStaffListEditButton { min-width: 82px; min-height: 40px; }
 .adminStaffListControls > small { position: absolute; right: 0; bottom: -3px; color: #477077; font-size: 9px; }
 .adminStaffListControls.isSaving { opacity: .72; }

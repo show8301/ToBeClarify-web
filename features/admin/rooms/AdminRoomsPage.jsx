@@ -118,7 +118,7 @@ export function AdminRoomsPage() {
 
   const activeCount = useMemo(() => rooms.filter((room) => room.isActive).length, [rooms]);
 
-  return <AdminPage eyebrow="ROOM SERVICE" title="包廂管理" description="管理公開包廂介紹、照片與店內安排。內容與照片三種後台角色皆可編輯；價格與包廂歸屬僅開發者／經理可調整。" actions={<><AdminButton variant="secondary" disabled={loading} onClick={() => load(form.id)}>重新整理</AdminButton><AdminButton onClick={startNew}>＋ 新增包廂</AdminButton></>}>
+  return <AdminPage eyebrow="ROOM CONTENT" title="包廂內容管理" description="管理公開包廂介紹、照片與內容。營業期間的預約與服務狀態請至包廂服務排程；價格與包廂歸屬僅開發者／經理可調整。" actions={<><AdminButton variant="secondary" disabled={loading} onClick={() => load(form.id)}>重新整理</AdminButton><AdminButton onClick={startNew}>＋ 新增包廂</AdminButton></>}>
     {message.text ? <div className={message.error ? 'adminRoomMessage isError' : 'adminRoomMessage'} role="status">{message.text}</div> : null}
     <AdminState loading={loading} error={null} />
     <div className="adminRoomLayout">

@@ -6,6 +6,7 @@ import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
 import { AdminForgotPasswordPage } from '@/features/admin/auth/AdminForgotPasswordPage.jsx';
 import { AdminLoginPage } from '@/features/admin/auth/AdminLoginPage.jsx';
 import { AdminHomePage } from '@/features/admin/dashboard/AdminHomePage.jsx';
+import { AdminRoleOperationsPage } from '@/features/admin/operations/AdminRoleOperationsPage.tsx';
 import { AdminEventsPage } from '@/features/admin/events/AdminEventsPage.jsx';
 import { AdminHomeSettingsPage } from '@/features/admin/home/AdminHomeSettingsPage.jsx';
 import { AdminLayout } from '@/features/admin/layout/AdminLayout.jsx';
@@ -13,7 +14,9 @@ import { AdminOrderListPage } from '@/features/admin/media/AdminOrderListPage.js
 import { AdminMenuPage } from '@/features/admin/menu/AdminMenuPage.jsx';
 import { AdminOrdersPage } from '@/features/admin/orders/AdminOrdersPage.jsx';
 import { AdminStaffSettingsPage } from '@/features/admin/staff/AdminStaffSettingsPage.jsx';
+import { AdminDutyPlanningPage } from '@/features/admin/duty-planning/AdminDutyPlanningPage.tsx';
 import { AdminRoomsPage } from '@/features/admin/rooms/AdminRoomsPage.jsx';
+import { AdminRoomServicePage } from '@/features/admin/rooms/AdminRoomServicePage.tsx';
 import { AdminSettlementPage } from '@/features/admin/settlement/AdminSettlementPage.tsx';
 
 const managerRoles = ['developer', 'manager'];
@@ -21,6 +24,17 @@ const managerRoles = ['developer', 'manager'];
 function useAdminNavigation() {
   const router = useRouter();
   return useCallback((route) => router.push(route), [router]);
+}
+
+function AdminDashboardLanding({ navigate }) {
+  const { user } = useAdminAuth();
+
+  useEffect(() => {
+    if (user?.role === 'developer') navigate('/admin/orders');
+  }, [navigate, user]);
+
+  if (user?.role === 'developer') return <AdminLoading />;
+  return <AdminRoleOperationsPage navigate={navigate} />;
 }
 
 function AdminProtectedRoute({ children, roles }) {
@@ -56,6 +70,11 @@ function AdminAnonymousRoute({ children, redirectAuthenticated = false }) {
 
 export function AdminDashboardRoute() {
   const navigate = useAdminNavigation();
+  return <AdminProtectedRoute><AdminDashboardLanding navigate={navigate} /></AdminProtectedRoute>;
+}
+
+export function AdminOverviewRoute() {
+  const navigate = useAdminNavigation();
   return <AdminProtectedRoute><AdminHomePage navigate={navigate} /></AdminProtectedRoute>;
 }
 
@@ -67,12 +86,21 @@ export function AdminStaffSettingsRoute() {
   return <AdminProtectedRoute><AdminStaffSettingsPage /></AdminProtectedRoute>;
 }
 
+export function AdminDutyPlanningRoute() {
+  const navigate = useAdminNavigation();
+  return <AdminProtectedRoute><AdminDutyPlanningPage navigate={navigate} /></AdminProtectedRoute>;
+}
+
 export function AdminRoomsRoute() {
   return <AdminProtectedRoute><AdminRoomsPage /></AdminProtectedRoute>;
 }
 
+export function AdminRoomServiceRoute() {
+  return <AdminProtectedRoute><AdminRoomServicePage /></AdminProtectedRoute>;
+}
+
 export function AdminSettlementRoute() {
-  return <AdminProtectedRoute roles={managerRoles}><AdminSettlementPage /></AdminProtectedRoute>;
+  return <AdminProtectedRoute><AdminSettlementPage /></AdminProtectedRoute>;
 }
 
 export function AdminEventsRoute() {

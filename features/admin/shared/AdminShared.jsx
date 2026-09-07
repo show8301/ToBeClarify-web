@@ -4,6 +4,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useAdminImageProcessing } from '@/features/admin/media/AdminImageProcessingContext.js';
 import { formatImageFileSize } from '@/features/admin/media/adminImageProcessing.js';
 
+/** @param {{ eyebrow?: import('react').ReactNode, title?: import('react').ReactNode, description?: import('react').ReactNode, actions?: import('react').ReactNode, children?: import('react').ReactNode }} props */
 export function AdminPage({ eyebrow, title, description, actions, children }) {
   return (
     <section className="adminPage">
@@ -20,6 +21,7 @@ export function AdminPage({ eyebrow, title, description, actions, children }) {
   );
 }
 
+/** @param {{ title?: import('react').ReactNode, description?: import('react').ReactNode, actions?: import('react').ReactNode, children?: import('react').ReactNode, className?: string }} props */
 export function AdminPanel({ title, description, actions, children, className = '' }) {
   return (
     <section className={`adminPanel ${className}`.trim()}>
@@ -37,6 +39,7 @@ export function AdminPanel({ title, description, actions, children, className = 
   );
 }
 
+/** @param {{ label: import('react').ReactNode, children?: import('react').ReactNode, hint?: import('react').ReactNode, className?: string, required?: boolean }} props */
 export function AdminField({ label, children, hint, className = '', required = false }) {
   return (
     <label className={`adminField ${className}`.trim()}>

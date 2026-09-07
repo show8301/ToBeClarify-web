@@ -13,11 +13,15 @@ const albumsCache:CacheEntry<GalleryAlbumSummary[]>={value:snapshot.albums,expir
 const staffRankingCache:CacheEntry<RankingItem[]>={value:snapshot.staffRanking,expiresAt:0,refresh:null};
 const monetaryRankingCache:CacheEntry<RankingItem[]>={value:snapshot.monetaryRanking,expiresAt:0,refresh:null};
 const guestbookCache:CacheEntry<GuestbookPage>={value:snapshot.guestbook,expiresAt:0,refresh:null};
-const albumCaches=new Map(Object.entries(snapshot.albumDetails).map(([id,value])=>[id,{value,expiresAt:0,refresh:null} satisfies CacheEntry<GalleryAlbum>]));
+const albumCaches=new Map<string,CacheEntry<GalleryAlbum|null>>(Object.entries(snapshot.albumDetails).map(([id,value])=>[id,{value,expiresAt:0,refresh:null}]));
+
+class PublicApiError extends Error {
+  constructor(public status:number,path:string){super(`${path} returned ${status}`)}
+}
 
 async function request<T>(path:string):Promise<T>{
   const response=await fetch(publicClientApiUrl(path),{cache:"no-store",headers:{Accept:"application/json"},signal:AbortSignal.timeout(REQUEST_TIMEOUT)});
-  if(!response.ok)throw new Error(`${path} returned ${response.status}`);
+  if(!response.ok)throw new PublicApiError(response.status,path);
   const payload=await response.json() as {success:boolean;data:T;message?:string};
   if(!payload.success)throw new Error(payload.message||`${path} failed`);
   return payload.data;
@@ -64,10 +68,25 @@ export function getSiteHome():HomeData{
 }
 export function getMenuData():MenuData{return readCache(menuCache,()=>request<MenuData>("/menu"))}
 export function getGalleryAlbums():GalleryAlbumSummary[]{return readCache(albumsCache,()=>request<GalleryAlbumSummary[]>("/gallery-albums"))}
-export function getGalleryAlbum(id:string):GalleryAlbum|null{
-  const entry=albumCaches.get(id);
-  if(!entry)return null;
-  return readCache(entry,()=>request<GalleryAlbum>(`/gallery-albums/${encodeURIComponent(id)}`));
+export async function getGalleryAlbum(id:string):Promise<GalleryAlbum|null>{
+  let entry=albumCaches.get(id);
+  if(!entry){
+    entry={value:null,expiresAt:0,refresh:null};
+    albumCaches.set(id,entry);
+  }
+  const cached=entry;
+  if(Date.now()>=cached.expiresAt&&!cached.refresh){
+    cached.refresh=request<GalleryAlbum>(`/gallery-albums/${encodeURIComponent(id)}`)
+      .then(value=>{cached.value=value;cached.expiresAt=Date.now()+CACHE_TTL})
+      .catch((error:unknown)=>{
+        // An unpublished/deleted album must not survive in the snapshot fallback.
+        if(error instanceof PublicApiError&&error.status===404)cached.value=null;
+        cached.expiresAt=Date.now()+30_000;
+      })
+      .finally(()=>{cached.refresh=null});
+  }
+  await cached.refresh;
+  return cached.value;
 }
 export function getRankings(type:"staffRanking"|"monetaryRanking"):RankingItem[]{
   const entry=type==="staffRanking"?staffRankingCache:monetaryRankingCache;

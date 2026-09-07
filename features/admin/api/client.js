@@ -183,6 +183,7 @@ export const adminApi = {
   updateRoomOrderStatus: (id, status, signal) => request(`/room-orders/${encodeURIComponent(id)}/status`, {
     method: 'PUT', body: JSON.stringify({ status }), signal,
   }),
+  /** @param {{ businessDate?: string, sessionNo?: number }} [query] @param {AbortSignal} [signal] */
   getSettlement: ({ businessDate, sessionNo = 1 } = {}, signal) => {
     const params = new URLSearchParams({ businessDate, sessionNo: String(sessionNo) });
     return request(`/settlement?${params}`, { signal });

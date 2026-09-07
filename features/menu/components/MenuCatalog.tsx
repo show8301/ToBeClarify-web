@@ -9,17 +9,17 @@ const isInternalCopy=(value:string)=>/(demo|mock|測試|api\s*(提供|維護)|�
 
 export default function MenuCatalog({menu,roomsVisible=true}:{menu:MenuData;roomsVisible?:boolean}){
   const [category,setCategory]=useState(menu.categories[0]?.id??"");
-  const [showRoomEntry,setShowRoomEntry]=useState(roomsVisible);
+  const [roomVisibility,setRoomVisibility]=useState<{source:boolean;visible:boolean}|null>(null);
+  const showRoomEntry=roomVisibility?.source===roomsVisible?roomVisibility.visible:roomsVisible;
   const reduceMotion=useReducedMotion();
   const active=menu.categories.find(item=>item.id===category)??menu.categories[0];
   useEffect(()=>{
-    setShowRoomEntry(roomsVisible);
     const controller=new AbortController();
     fetch("/api/public/home",{cache:"no-store",headers:{Accept:"application/json"},signal:controller.signal})
       .then((response)=>response.ok?response.json():null)
       .then((payload:unknown)=>{
         const data=payload as {success?:boolean;data?:{pageVisibility?:Partial<HomePageVisibility>}}|null;
-        if(data?.success&&data.data?.pageVisibility&&typeof data.data.pageVisibility.rooms==="boolean")setShowRoomEntry(data.data.pageVisibility.rooms);
+        if(data?.success&&data.data?.pageVisibility&&typeof data.data.pageVisibility.rooms==="boolean")setRoomVisibility({source:roomsVisible,visible:data.data.pageVisibility.rooms});
       })
       .catch(()=>{});
     return()=>controller.abort();

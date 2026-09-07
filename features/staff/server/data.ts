@@ -38,7 +38,10 @@ async function request<T>(url:string):Promise<T> {
 function refreshList() {
   if (listRefresh) return;
   listRefresh = request<{data:StaffSummary[]}>(publicClientApiUrl(STAFF_API_PATH))
-    .then(({data}) => { if (data?.length) listCache = { value:data, expiresAt:Date.now()+CACHE_TTL }; })
+    .then(({data}) => {
+      if (!Array.isArray(data)) throw new Error("Invalid staff list response");
+      listCache = { value:data, expiresAt:Date.now()+CACHE_TTL };
+    })
     .catch(() => { listCache.expiresAt = Date.now()+CACHE_TTL; })
     .finally(() => { listRefresh = null; });
 }

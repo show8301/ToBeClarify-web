@@ -72,8 +72,8 @@ export default function SiteChrome({navigation,shopInfo,pageVisibility,menuHidde
   const [leaving,setLeaving] = useState<string|null>(null);
   const [showFloatingTop,setShowFloatingTop] = useState(false);
   const [livePageVisibility,setLivePageVisibility] = useState(pageVisibility);
-  const navigationTimer = useRef<ReturnType<typeof window.setTimeout>|null>(null);
-  const navigationWatchdog = useRef<ReturnType<typeof window.setTimeout>|null>(null);
+  const navigationTimer = useRef<number|null>(null);
+  const navigationWatchdog = useRef<number|null>(null);
   const pathname = usePathname();
   const router = useRouter();
   const reduceMotion = useReducedMotion();

@@ -1,10 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { adminApi } from '@/features/admin/api/client.js';
 
+/** @type {import('react').Context<import('./types').AdminAuthValue | null>} */
 const AdminAuthContext = createContext(null);
 
 export function AdminAuthProvider({ children }) {
-  const [state, setState] = useState({ loading: true, user: null, error: null });
+  const [state, setState] = useState(/** @type {import('./types').AdminAuthState} */ ({ loading: true, user: null, error: null }));
 
   const refresh = useCallback(async (signal) => {
     setState((current) => ({ ...current, loading: true, error: null }));

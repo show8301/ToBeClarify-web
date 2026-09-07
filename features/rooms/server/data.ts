@@ -19,7 +19,8 @@ async function request<T>(path:string):Promise<T>{
 function refreshRooms(){
   if(roomsRefresh)return;
   roomsRefresh=request<RoomsData>("/rooms").then((value)=>{
-    if(value?.rooms?.length)roomsCache={value,expiresAt:Date.now()+CACHE_TTL};
+    if(!Array.isArray(value?.rooms))throw new Error("Invalid rooms response");
+    roomsCache={value,expiresAt:Date.now()+CACHE_TTL};
   }).catch(()=>{ roomsCache.expiresAt=Date.now()+CACHE_TTL; }).finally(()=>{ roomsRefresh=null; });
 }
 

@@ -126,6 +126,7 @@ export function AdminServiceDashboard({ data, navigate, runAction, actionState }
       { label: "開啟中的顧客", value: data.context?.openSessionCount ?? data.sessions.length, detail: intakeModeLabel(data.context?.intakeMode || "") },
     ]} />
     <ActionFeedback state={actionState} />
+    <AdminPanel className="adminRoleDashboardPrimaryAction" title="第一個流程：發點餐碼" description="顧客入場後，先建立本次點餐工作階段，再把點餐碼交給顧客。"><div className="adminRoleDashboardPrimaryActionBody"><div><strong>顧客到了嗎？先發點餐碼</strong><small>建立顧客工作階段後，後續訂單與現場待辦才會集中到今天的工作台。</small></div><AdminButton onClick={() => navigate("/admin/orders?focus=create")}>發點餐碼</AdminButton></div></AdminPanel>
     <div className="adminRoleDashboardGrid">
       <AdminPanel title="現場待辦" description="先處理協調單，再依顧客或訂單進入完整操作。">
         <div className="adminRoleDashboardRows">

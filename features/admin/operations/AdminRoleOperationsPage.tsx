@@ -44,18 +44,30 @@ function toAdminUser(value: unknown): CurrentAdminUser {
   };
 }
 
-function resolveDashboardRole(value: unknown): DashboardRole {
+const dashboardRoleLabels: Record<Exclude<DashboardRole, "developer">, string> = {
+  designated: "指名人員",
+  service: "服務員",
+  manager: "經理",
+};
+
+function resolveAccountRole(value: unknown): DashboardRole | null {
   const record = isRecord(value) ? value : {};
-  const dutyRole = [record.dutyRole, record.operationalRole, record.todayRole, record.dashboardRole]
-    .map((item) => stringValue(item).toLowerCase())
-    .find(Boolean) || "";
-  if (["designated", "nominee", "指名", "指名人員"].includes(dutyRole)) return "designated";
-  if (["manager", "經理"].includes(dutyRole)) return "manager";
-  if (["developer", "開發者"].includes(dutyRole)) return "developer";
-  if (["service", "clerk", "staff", "服務員", "店員"].includes(dutyRole)) return "service";
   if (record.role === "developer") return "developer";
   if (record.role === "manager") return "manager";
-  return "service";
+  return null;
+}
+
+function resolveAvailableDashboardRoles(value: unknown, staff: OperationsStaffMember | undefined): DashboardRole[] {
+  const accountRole = resolveAccountRole(value);
+  if (accountRole) return [accountRole];
+  const activeRoles = staff?.todayWorkMode?.activeRoles;
+  if (Array.isArray(activeRoles)) {
+    const roles = activeRoles.filter((role): role is "designated" | "service" => role === "designated" || role === "service");
+    if (roles.length) return Array.from(new Set(roles)).sort((left, right) => (left === "designated" ? -1 : right === "designated" ? 1 : 0));
+  }
+  // Before the daily work-mode migration reaches an environment, preserve the
+  // existing clerk behaviour and provide a safe service dashboard fallback.
+  return ["service"];
 }
 
 function errorMessage(error: unknown) {
@@ -164,7 +176,13 @@ function normalizeStaffMember(value: unknown): OperationsStaffMember | null {
   if (!isRecord(value)) return null;
   const id = stringValue(value.id);
   if (!id) return null;
-  return { id, displayName: stringValue(value.displayName, "未命名店員"), roleTitle: stringValue(value.roleTitle), statusText: stringValue(value.statusText), isWorkingToday: booleanValue(value.isWorkingToday, true), isActive: booleanValue(value.isActive, true) };
+  const workMode = isRecord(value.todayWorkMode) ? {
+    businessDate: stringValue(value.todayWorkMode.businessDate),
+    isWorking: booleanValue(value.todayWorkMode.isWorking, booleanValue(value.isWorkingToday, true)),
+    scheduledRoles: Array.isArray(value.todayWorkMode.scheduledRoles) ? value.todayWorkMode.scheduledRoles.map((role) => stringValue(role)).filter(Boolean) : [],
+    activeRoles: Array.isArray(value.todayWorkMode.activeRoles) ? value.todayWorkMode.activeRoles.map((role) => stringValue(role)).filter(Boolean) : [],
+  } : null;
+  return { id, displayName: stringValue(value.displayName, "未命名店員"), roleTitle: stringValue(value.roleTitle), statusText: stringValue(value.statusText), isWorkingToday: booleanValue(value.isWorkingToday, true), isActive: booleanValue(value.isActive, true), todayWorkMode: workMode };
 }
 
 function arrayValue(value: unknown) {
@@ -174,9 +192,15 @@ function arrayValue(value: unknown) {
 export function AdminRoleOperationsPage({ navigate }: { navigate: Navigate }) {
   const { user } = useAdminAuth();
   const adminUser = useMemo(() => toAdminUser(user), [user]);
-  const dashboardRole = useMemo(() => resolveDashboardRole(user), [user]);
   const [state, setState] = useState({ loading: true, data: emptyData, error: "" });
   const [actionState, setActionState] = useState<OperationsActionState>({ busyId: "", message: "", error: "" });
+  const currentStaff = useMemo(() => state.data.staff.find((staff) => staff.id === adminUser.staffMemberId), [adminUser.staffMemberId, state.data.staff]);
+  const availableRoles = useMemo(() => resolveAvailableDashboardRoles(user, currentStaff), [currentStaff, user]);
+  const [selectedRole, setSelectedRole] = useState<DashboardRole | null>(null);
+  useEffect(() => {
+    setSelectedRole((current) => current && availableRoles.includes(current) ? current : availableRoles[0]);
+  }, [availableRoles]);
+  const dashboardRole = selectedRole || availableRoles[0] || "service";
   const config = dashboardRole === "developer" ? null : dashboardConfigs[dashboardRole];
 
   const load = useCallback(async () => {
@@ -233,6 +257,8 @@ export function AdminRoleOperationsPage({ navigate }: { navigate: Navigate }) {
 
   return <AdminPage eyebrow={`${config.label.toUpperCase()} DASHBOARD`} title={config.title} description={`${adminUser.displayName}，${config.description}`} actions={<AdminButton variant="secondary" disabled={state.loading} onClick={() => void load()}>{state.loading ? "讀取中…" : "重新整理"}</AdminButton>}>
     {state.error ? <div className="adminOrderMessage isError" role="alert">{state.error}</div> : null}
+    {availableRoles.length > 1 ? <div className="adminRoleSwitcher" role="group" aria-label="今日啟用工作身分"><span>今日啟用身分</span>{availableRoles.map((role) => <button type="button" className={dashboardRole === role ? "isActive" : ""} key={role} onClick={() => setSelectedRole(role)}>{dashboardRoleLabels[role as Exclude<DashboardRole, "developer">]}</button>)}</div> : null}
+    {currentStaff?.todayWorkMode && currentStaff.todayWorkMode.isWorking && !currentStaff.todayWorkMode.activeRoles.some((role) => role === "service" || role === "designated") ? <div className="adminRoleDashboardNotice" role="status">今天尚未啟用服務員或指名人員身分，目前先顯示服務員工作台；請在店員設定開啟今日工作身分。</div> : null}
     {dashboardRole === "designated" ? <AdminDesignatedDashboard data={state.data} user={adminUser} navigate={navigate} runAction={runAction} actionState={actionState} /> : null}
     {dashboardRole === "service" ? <AdminServiceDashboard data={state.data} navigate={navigate} runAction={runAction} actionState={actionState} /> : null}
     {dashboardRole === "manager" ? <AdminManagerDashboard data={state.data} navigate={navigate} runAction={runAction} actionState={actionState} /> : null}

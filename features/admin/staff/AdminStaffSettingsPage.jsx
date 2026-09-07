@@ -9,11 +9,18 @@ import {
   AdminToggle, newId,
 } from '@/features/admin/shared/AdminShared.jsx';
 
+const dailyWorkRoleOptions = [
+  { id: 'service', label: '服務員', description: '接待顧客、發點餐碼、處理現場訂單' },
+  { id: 'designated', label: '指名人員', description: '接收並確認被指名的服務' },
+  { id: 'backstage', label: '幕後', description: '支援備料、後台與其他營運工作' },
+];
+
 const emptyStaff = {
   id: '', displayName: '', nickname: '', avatarMediaId: null, avatarUrl: '', avatarFile: null, avatarPreviewUrl: '',
   signatureSupported: false, signatureMediaId: null, signatureUrl: '', signatureFile: null, signaturePreviewUrl: '',
   roleTitle: '', shortBio: '', profileBio: '', isWorkingToday: true,
   bufferMinutes: '', isNominatable: false,
+  todayWorkMode: { businessDate: '', isWorking: true, scheduledRoles: ['service'], activeRoles: ['service'] },
   sortOrder: 0, isActive: true, services: [], gallery: [],
 };
 
@@ -73,6 +80,10 @@ function serviceMeta(item) {
 }
 
 function toEditor(value) {
+  const legacyRoles = ['service'];
+  const sourceWorkMode = value?.todayWorkMode || {};
+  const scheduledRoles = Array.isArray(sourceWorkMode.scheduledRoles) ? sourceWorkMode.scheduledRoles : legacyRoles;
+  const activeRoles = Array.isArray(sourceWorkMode.activeRoles) ? sourceWorkMode.activeRoles : (value?.isWorkingToday === false ? [] : scheduledRoles);
   return {
     ...emptyStaff,
     ...value,
@@ -81,6 +92,12 @@ function toEditor(value) {
     avatarPreviewUrl: '',
     signatureFile: null,
     signaturePreviewUrl: '',
+    todayWorkMode: {
+      businessDate: sourceWorkMode.businessDate || '',
+      isWorking: sourceWorkMode.isWorking ?? value?.isWorkingToday ?? true,
+      scheduledRoles,
+      activeRoles,
+    },
     services: (value.services || []).map(toServiceEditor),
     gallery: (value.gallery || []).map((item) => ({ ...item, _file: null, _previewUrl: '' })),
   };
@@ -108,6 +125,7 @@ export function AdminStaffSettingsPage() {
   const [editingGallery, setEditingGallery] = useState(null);
   const [state, setState] = useState({ loading: true, error: null });
   const [saving, setSaving] = useState(false);
+  const [workModeSaving, setWorkModeSaving] = useState(false);
   const [orderSaving, setOrderSaving] = useState(false);
   const [statusSavingIds, setStatusSavingIds] = useState(() => new Set());
   const [staffOrderDirty, setStaffOrderDirty] = useState(false);
@@ -260,6 +278,39 @@ export function AdminStaffSettingsPage() {
         next.delete(item.id);
         return next;
       });
+    }
+  };
+
+  const toggleTodayWorkRole = async (role, enabled) => {
+    if (!canEditSelected || !form.id || workModeSaving) return;
+    const current = form.todayWorkMode || emptyStaff.todayWorkMode;
+    const scheduledRoles = new Set(current.scheduledRoles || []);
+    const activeRoles = new Set(current.activeRoles || []);
+    if (enabled) {
+      scheduledRoles.add(role);
+      activeRoles.add(role);
+    } else {
+      scheduledRoles.delete(role);
+      activeRoles.delete(role);
+    }
+    const body = {
+      isWorking: current.isWorking !== false,
+      scheduledRoles: [...scheduledRoles],
+      activeRoles: [...activeRoles],
+    };
+    setForm((value) => ({ ...value, todayWorkMode: { ...current, ...body } }));
+    setWorkModeSaving(true);
+    try {
+      const saved = await adminApi.updateStaffDailyWorkMode(form.id, body);
+      setForm(toEditor(saved));
+      setStaffList((currentList) => currentList.map((item) => item.id === saved.id ? saved : item));
+      setMessage('');
+      toast.add({ title: '操作完成', description: '今日工作身分已更新。', type: 'success' });
+    } catch (error) {
+      setForm((value) => ({ ...value, todayWorkMode: current }));
+      setMessage(error.message);
+    } finally {
+      setWorkModeSaving(false);
     }
   };
 
@@ -474,6 +525,8 @@ export function AdminStaffSettingsPage() {
                     <small className="adminStaffListRole">{item.roleTitle || '尚未設定角色'}</small>
                     <div className="adminStaffListSummary">
                       <span className={item.isWorkingToday ? 'isWorking' : ''}>{item.isWorkingToday ? '今日上班' : '今日休假'}</span>
+                      {(item.todayWorkMode?.activeRoles || []).map((role) => <span key={role}>{dailyWorkRoleOptions.find((option) => option.id === role)?.label || role}</span>)}
+                      {item.isWorkingToday && !(item.todayWorkMode?.activeRoles || []).length ? <span>尚未啟用身分</span> : null}
                       {item.bufferMinutes === null || item.bufferMinutes === undefined ? null : <span className="adminStaffBufferLine">中間休息 {item.bufferMinutes} 分鐘</span>}
                     </div>
                   </div>
@@ -509,11 +562,21 @@ export function AdminStaffSettingsPage() {
                 <AdminField label="暱稱"><input disabled={isReadOnly} value={form.nickname || ''} onChange={(event) => update('nickname', event.target.value)} /></AdminField>
                 <AdminField label="角色標籤"><input disabled={isReadOnly} value={form.roleTitle || ''} onChange={(event) => update('roleTitle', event.target.value)} /></AdminField>
                 <AdminField label="中間休息時間"><input type="number" min="0" max="1440" step="5" inputMode="numeric" disabled={isReadOnly} value={form.bufferMinutes ?? ''} onChange={(event) => update('bufferMinutes', event.target.value === '' ? '' : Number(event.target.value))} /><small>單位：分鐘；非必填，僅供後台自動排程使用。</small></AdminField>
-                <div className="adminStaffBasicToggle"><AdminToggle checked={form.isNominatable === true} disabled={isReadOnly} onChange={(value) => update('isNominatable', value)} label="開放指名" /><small>必填狀態，預設關閉；公開卡片會依此顯示「可以指名」。</small></div>
+                <div className="adminStaffBasicToggle"><AdminToggle checked={form.isNominatable === true} disabled={isReadOnly} onChange={(value) => update('isNominatable', value)} label="開放指名" /><small>公開卡片是否顯示「可以指名」；這不代表今天的工作身分。</small></div>
                 <AdminField label="卡片簡介" className="span-2" required><textarea required disabled={isReadOnly} rows="3" value={form.shortBio || ''} onChange={(event) => update('shortBio', event.target.value)} /></AdminField>
                 <AdminField label="詳細介紹" className="span-2"><textarea disabled={isReadOnly} rows="7" value={form.profileBio || ''} onChange={(event) => update('profileBio', event.target.value)} /></AdminField>
                 <AdminAvatarPicker label="頭像" value={form.avatarUrl} pendingFile={form.avatarFile} hint="選擇圖片後會開啟 4:5 裁切框，輸出固定為 1200 × 1500px WebP；既有頭像也能重新調整。儲存店員資料後才會正式上傳。" disabled={isReadOnly} onChange={updateAvatarFile} onClear={() => { update('avatarFile', null); update('avatarPreviewUrl', ''); update('avatarUrl', ''); update('avatarMediaId', null); }} />
                 <AdminAvatarPicker kind="signature" label="顯示名稱簽名圖" value={form.signatureUrl} pendingFile={form.signatureFile} hint={form.signatureSupported ? "選擇帶透明背景的 PNG 或 WebP 後會開啟 3:2 裁切框，輸出為保留透明通道的 1200 × 800px WebP。上傳後公開卡片會用簽名圖取代文字顯示名稱；未上傳時仍顯示文字。" : "目前 API 尚未提供簽名圖欄位；待 API 更新後此功能會自動啟用。"} disabled={isReadOnly || !form.signatureSupported} onChange={updateSignatureFile} onClear={() => { update('signatureFile', null); update('signaturePreviewUrl', ''); update('signatureUrl', ''); update('signatureMediaId', null); }} />
+              </div>
+            </AdminPanel>
+
+            <AdminPanel title="今日工作身分／啟用開關" description="這裡控制今天實際承擔的工作身分；「開放指名」只代表公開卡片是否接受指名，不再用來直接判定 dashboard。">
+              <div className="adminStaffWorkModePanel">
+                <div className="adminStaffWorkModeIntro"><strong>{form.todayWorkMode?.businessDate || '今日'} 的工作身分</strong><small>目前先將今日排班身分與現場啟用同步，之後可再拆成預排與上班中的兩層開關。</small></div>
+                <div className="adminStaffWorkModeOptions">
+                  {dailyWorkRoleOptions.map((option) => <div className="adminStaffWorkModeOption" key={option.id}><AdminToggle checked={(form.todayWorkMode?.activeRoles || []).includes(option.id)} disabled={isReadOnly || workModeSaving} onChange={(value) => void toggleTodayWorkRole(option.id, value)} label={option.label} ariaLabel={`切換今日${option.label}身分`} /><small>{option.description}</small></div>)}
+                </div>
+                {workModeSaving ? <small className="adminStaffWorkModeSaving" role="status">身分開關儲存中…</small> : null}
               </div>
             </AdminPanel>
 

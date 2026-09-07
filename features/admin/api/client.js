@@ -118,6 +118,9 @@ export const adminApi = {
   updateStaffMemberStatus: (id, body, signal) => request(`/staff-members/${encodeURIComponent(id)}/status`, {
     method: 'PUT', body: JSON.stringify(body), signal,
   }),
+  updateStaffDailyWorkMode: (id, body, signal) => request(`/staff-members/${encodeURIComponent(id)}/today-work-mode`, {
+    method: 'PUT', body: JSON.stringify(body), signal,
+  }),
   reorderStaffMembers: (items, signal) => request('/staff-members/order', {
     method: 'PUT', body: JSON.stringify({ items }), signal,
   }),

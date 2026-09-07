@@ -91,6 +91,12 @@ export type OperationsStaffMember = {
   statusText: string;
   isWorkingToday: boolean;
   isActive: boolean;
+  todayWorkMode: {
+    businessDate: string;
+    isWorking: boolean;
+    scheduledRoles: string[];
+    activeRoles: string[];
+  } | null;
 };
 
 export type OperationsData = {

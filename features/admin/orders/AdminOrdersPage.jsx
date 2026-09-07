@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { adminApi } from '@/features/admin/api/client.js';
 import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
 import { AdminButton } from '@/features/admin/shared/AdminShared.jsx';
@@ -39,6 +39,7 @@ const localDateTimeNow = () => localDateTimeValue(new Date().toISOString());
 export function AdminOrdersPage() {
   const { user } = useAdminAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const canManage = user.role === 'developer' || user.role === 'manager';
   const [businessDate, setBusinessDate] = useState(today);
   const [search, setSearch] = useState('');
@@ -49,7 +50,7 @@ export function AdminOrdersPage() {
   const [businessContext, setBusinessContext] = useState(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ text: '', error: false });
-  const [showCreate, setShowCreate] = useState(false);
+  const [showCreate, setShowCreate] = useState(() => searchParams.get('focus') === 'create');
   const [showSettings, setShowSettings] = useState(false);
   const [groupsOpen, setGroupsOpen] = useState({ attention: true, others: true });
   const [issued, setIssued] = useState(null);
@@ -76,6 +77,7 @@ export function AdminOrdersPage() {
   };
   useEffect(() => { loadBusinessContext().catch(() => {}); }, []);
   useEffect(() => { if (canManage) adminApi.getOrderingSettings().then(setSettings).catch(() => {}); }, [canManage]);
+  useEffect(() => { if (searchParams.get('focus') === 'create') setShowCreate(true); }, [searchParams]);
 
   const selected = sessions.find((item) => item.session.id === selectedId);
   const groups = useMemo(() => ({

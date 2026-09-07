@@ -95,8 +95,8 @@
 }
 
 .adminNavLabel { margin: 0 10px 8px; color: var(--color-fg-mute); font: 750 10px/1 var(--font-mono); letter-spacing: .16em; text-transform: uppercase; }
-.adminNav button { position: relative; justify-content: flex-start; width: 100%; min-height: 48px; padding: 10px 12px; border-radius: 12px; color: var(--color-fg-soft); font-size: 14px; font-weight: 700; text-align: left; }
-.adminNav button span { display: grid; place-items: center; width: 27px; height: 27px; border-radius: 8px; background: rgba(49,51,74,.06); font: 700 10px/1 var(--font-mono); }
+.adminNav button { position: relative; justify-content: flex-start; width: 100%; min-height: 42px; padding: 8px 11px; border-radius: 11px; color: var(--color-fg-soft); font-size: 14px; font-weight: 700; text-align: left; }
+.adminNav button span { display: grid; place-items: center; width: 25px; height: 25px; border-radius: 7px; background: rgba(49,51,74,.06); font: 700 10px/1 var(--font-mono); }
 .adminNav button:hover { border-color: rgba(255,255,255,.78); background: rgba(255,255,255,.4); }
 .adminNav button.isActive { border-color: rgba(255,255,255,.9); background: linear-gradient(115deg,rgba(193,185,223,.62),rgba(169,199,234,.55) 52%,rgba(232,199,218,.58)); color: var(--color-fg); box-shadow: 0 9px 24px rgba(118,121,161,.12); }
 .adminNav button.isActive span { background: rgba(255,255,255,.62); color: var(--color-fg); }
@@ -339,8 +339,8 @@
 .adminBrandSiteLink { grid-area:site; width:100%; margin-top:12px; padding:9px 11px; }
 .adminNav { gap:0; }
 .adminNavGroup { display:grid; gap:5px; min-width:0; }
-.adminNavGroup + .adminNavGroup { margin-top:20px; padding-top:17px; border-top:1px solid rgba(49,51,74,.1); }
-.adminNavGroup .adminNavLabel { margin:0 10px 7px; }
+.adminNavGroup + .adminNavGroup { margin-top:12px; padding-top:11px; border-top:1px solid rgba(49,51,74,.1); }
+.adminNavGroup .adminNavLabel { margin:0 10px 5px; }
 
 @media(max-width:1020px){
   .adminNavGroup { grid-column:1/-1; grid-template-columns:repeat(3,minmax(0,1fr)); }
@@ -683,6 +683,15 @@
 .adminRoleDashboardRow .adminButton { min-height:36px; padding:8px 11px; font-size:11px; }
 .adminRoleDashboardEmpty { margin:0; padding:20px 4px; color:var(--color-fg-mute); font-size:12px; text-align:center; }
 .adminRoleDashboardNotice { padding:13px 15px; border:1px solid rgba(170,127,71,.24); border-radius:11px; background:rgba(244,231,202,.52); color:#745a34; font-size:12px; line-height:1.6; }
+.adminRoleSwitcher { display:flex; flex-wrap:wrap; align-items:center; gap:6px; padding:8px; border:1px solid rgba(49,51,74,.12); border-radius:11px; background:rgba(250,250,253,.82); }
+.adminRoleSwitcher > span { margin:0 4px 0 3px; color:var(--color-fg-mute); font-size:11px; font-weight:750; }
+.adminRoleSwitcher button { min-height:34px; padding:7px 11px; border:1px solid rgba(101,120,159,.22); border-radius:8px; background:rgba(255,255,255,.64); color:var(--color-fg-soft); font-size:11px; font-weight:750; }
+.adminRoleSwitcher button.isActive { border-color:rgba(101,120,159,.46); background:#65789f; color:#fff; }
+.adminRoleDashboardPrimaryAction { margin:0; border-color:rgba(61,130,122,.25); background:linear-gradient(115deg,rgba(224,244,239,.74),rgba(234,238,249,.76)); }
+.adminRoleDashboardPrimaryActionBody { display:flex; align-items:center; justify-content:space-between; gap:18px; }
+.adminRoleDashboardPrimaryActionBody > div { display:grid; gap:5px; }
+.adminRoleDashboardPrimaryActionBody strong { color:var(--color-fg); font-size:15px; }
+.adminRoleDashboardPrimaryActionBody small { color:var(--color-fg-mute); font-size:11px; line-height:1.5; }
 .adminRoleDashboardQuickLinks { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
 .adminRoleDashboardQuickLinks .adminButton { min-height:42px; }
 .adminRoleDashboardControlHint { display:block; margin-top:12px; color:var(--color-fg-mute); font-size:11px; }
@@ -699,11 +708,23 @@
 .adminRoleDashboardStaffList>div>span.isOnline { background:#2d9d76; box-shadow:0 0 0 3px rgba(45,157,118,.12); }
 .adminRoleDashboardStaffList strong { overflow:hidden; color:var(--color-fg); font-size:12px; text-overflow:ellipsis; white-space:nowrap; }
 .adminRoleDashboardStaffList small { color:var(--color-fg-mute); font-size:10px; }
+.adminStaffWorkModePanel { display:grid; gap:14px; }
+.adminStaffWorkModeIntro { display:grid; gap:5px; }
+.adminStaffWorkModeIntro strong { color:var(--color-fg); font-size:13px; }
+.adminStaffWorkModeIntro small,.adminStaffWorkModeOption small { color:var(--color-fg-mute); font-size:11px; line-height:1.5; }
+.adminStaffWorkModeOptions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
+.adminStaffWorkModeOption { display:grid; gap:7px; padding:11px; border:1px solid rgba(49,51,74,.12); border-radius:10px; background:rgba(255,255,255,.36); }
+.adminStaffWorkModeOption .adminToggle { min-height:38px; }
+.adminStaffWorkModeSaving { color:#477077; font-size:10px; }
 :root[data-admin-theme="dark"] .adminRoleDashboardMetrics { background:#142229; border-color:rgba(255,255,255,.13); }
 :root[data-admin-theme="dark"] .adminRoleDashboardRow { background:rgba(25,40,47,.72); border-color:rgba(255,255,255,.12); }
 :root[data-admin-theme="dark"] .adminRoleDashboardNotice { background:rgba(91,72,39,.36); color:#ead7ae; }
+:root[data-admin-theme="dark"] .adminRoleSwitcher { background:rgba(20,34,40,.9); border-color:rgba(255,255,255,.13); }
+:root[data-admin-theme="dark"] .adminRoleSwitcher button { background:rgba(255,255,255,.06); color:var(--color-fg); border-color:rgba(255,255,255,.15); }
+:root[data-admin-theme="dark"] .adminRoleDashboardPrimaryAction { background:linear-gradient(115deg,rgba(34,75,70,.62),rgba(32,51,72,.74)); border-color:rgba(117,201,184,.24); }
 :root[data-admin-theme="dark"] .adminManagerControls>label input { background:#1b2c34; color:#eef4f5; border-color:rgba(255,255,255,.15); }
 :root[data-admin-theme="dark"] .adminManagerControls .adminBusinessModeButtons button { background:#1b2c34; color:#eef4f5; }
+:root[data-admin-theme="dark"] .adminStaffWorkModeOption { background:rgba(255,255,255,.04); border-color:rgba(255,255,255,.13); }
 
 @media(max-width:820px){
   .adminRoleDashboardGrid { grid-template-columns:1fr; }
@@ -716,4 +737,7 @@
   .adminRoleDashboardRowCopy { grid-column:1/-1; }
   .adminRoleDashboardRow .adminButton { justify-self:start; }
   .adminRoleDashboardBadge { justify-self:end; }
+  .adminRoleDashboardPrimaryActionBody { align-items:flex-start; flex-direction:column; }
+  .adminRoleDashboardPrimaryActionBody .adminButton { width:100%; }
+  .adminStaffWorkModeOptions { grid-template-columns:1fr; }
 }

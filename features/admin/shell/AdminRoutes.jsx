@@ -14,6 +14,7 @@ import { AdminMenuPage } from '@/features/admin/menu/AdminMenuPage.jsx';
 import { AdminOrdersPage } from '@/features/admin/orders/AdminOrdersPage.jsx';
 import { AdminStaffSettingsPage } from '@/features/admin/staff/AdminStaffSettingsPage.jsx';
 import { AdminRoomsPage } from '@/features/admin/rooms/AdminRoomsPage.jsx';
+import { AdminSettlementPage } from '@/features/admin/settlement/AdminSettlementPage.tsx';
 
 const managerRoles = ['developer', 'manager'];
 
@@ -68,6 +69,10 @@ export function AdminStaffSettingsRoute() {
 
 export function AdminRoomsRoute() {
   return <AdminProtectedRoute><AdminRoomsPage /></AdminProtectedRoute>;
+}
+
+export function AdminSettlementRoute() {
+  return <AdminProtectedRoute roles={managerRoles}><AdminSettlementPage /></AdminProtectedRoute>;
 }
 
 export function AdminEventsRoute() {

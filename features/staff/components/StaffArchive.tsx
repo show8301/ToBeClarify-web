@@ -16,8 +16,8 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
   const [featuredPaused, setFeaturedPaused] = useState(false);
   const [textNameIds, setTextNameIds] = useState<Set<string>>(() => new Set());
   const deferredQuery = useDeferredValue(query);
-  const navigationTimer = useRef<ReturnType<typeof window.setTimeout>|null>(null);
-  const navigationWatchdog = useRef<ReturnType<typeof window.setTimeout>|null>(null);
+  const navigationTimer = useRef<number|null>(null);
+  const navigationWatchdog = useRef<number|null>(null);
   const router = useRouter();
   const reduceMotion = useReducedMotion();
   const filtered = useMemo(() => initialStaff.filter((person) =>

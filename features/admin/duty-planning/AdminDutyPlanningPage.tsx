@@ -98,7 +98,7 @@ function emptyDraft(staffId: string, businessDate: string): DutyPlanDraft {
 
 export function AdminDutyPlanningPage({ navigate }: { navigate: Navigate }) {
   const { user } = useAdminAuth();
-  const canManageAll = user.role === "manager" || user.role === "developer";
+  const canManageAll = user?.role === "manager" || user?.role === "developer";
   const [rangeStart, setRangeStart] = useState(today);
   const rangeEnd = useMemo(() => addDays(rangeStart, 13), [rangeStart]);
   const [plans, setPlans] = useState<DutyPlan[]>([]);
@@ -138,7 +138,7 @@ export function AdminDutyPlanningPage({ navigate }: { navigate: Navigate }) {
     return () => window.clearTimeout(timer);
   }, [load]);
 
-  const ownStaff = staff.find((item) => item.id === user.staffMemberId);
+  const ownStaff = staff.find((item) => item.id === user?.staffMemberId);
   const editableStaff = canManageAll ? staff : (ownStaff ? [ownStaff] : []);
   const pendingCount = plans.filter((plan) => plan.approvalStatus === "pending").length;
   const approvedCount = plans.filter((plan) => plan.approvalStatus === "approved").length;
@@ -150,7 +150,7 @@ export function AdminDutyPlanningPage({ navigate }: { navigate: Navigate }) {
   }, [plans]);
 
   const startNew = (businessDate = rangeStart) => {
-    const staffId = canManageAll ? (staff[0]?.id || "") : (user.staffMemberId || "");
+    const staffId = canManageAll ? (staff[0]?.id || "") : (user?.staffMemberId || "");
     setDraft(emptyDraft(staffId, businessDate));
     setMessage("");
     setError("");
@@ -253,7 +253,7 @@ export function AdminDutyPlanningPage({ navigate }: { navigate: Navigate }) {
               <div className="adminDutyPlanIdentity"><strong>{plan.staffName}</strong><small>{plan.isWorking ? `${plan.startTime} ～ ${plan.endTime}` : "休假／不值班"}</small></div>
               <div className="adminDutyPlanRoles">{plan.scheduledRoles.length ? plan.scheduledRoles.map((role) => <span key={role}>{roleLabel(role)}</span>) : <span>無啟用職位</span>}</div>
               <div className="adminDutyPlanStatus"><b>{approvalLabels[plan.approvalStatus]}</b>{plan.approvalNote ? <small>{plan.approvalNote}</small> : null}</div>
-              <div className="adminDutyPlanActions"><AdminButton variant="ghost" onClick={() => editPlan(plan)} disabled={!canManageAll && plan.staffId !== user.staffMemberId}>編輯</AdminButton>{canManageAll && plan.approvalStatus !== "approved" ? <><AdminButton variant="secondary" disabled={reviewingId === plan.id} onClick={() => void review(plan, "approve")}>核准</AdminButton><AdminButton variant="danger" disabled={reviewingId === plan.id} onClick={() => void review(plan, "reject")}>退回</AdminButton></> : null}</div>
+              <div className="adminDutyPlanActions"><AdminButton variant="ghost" onClick={() => editPlan(plan)} disabled={!canManageAll && plan.staffId !== user?.staffMemberId}>編輯</AdminButton>{canManageAll && plan.approvalStatus !== "approved" ? <><AdminButton variant="secondary" disabled={reviewingId === plan.id} onClick={() => void review(plan, "approve")}>核准</AdminButton><AdminButton variant="danger" disabled={reviewingId === plan.id} onClick={() => void review(plan, "reject")}>退回</AdminButton></> : null}</div>
             </article>)}
           </div>
         </AdminPanel>)}

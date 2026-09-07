@@ -82,6 +82,12 @@ jobs:
           NODE_OPTIONS: --experimental-strip-types
         run: npm run build
 
+      - name: Check TypeScript contracts
+        run: npm run typecheck
+
+      - name: Lint application
+        run: npm run lint
+
       - name: Upload deployable Vinext application
         if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.preflight_only != true)
         uses: actions/upload-artifact@v4

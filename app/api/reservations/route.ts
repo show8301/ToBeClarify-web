@@ -16,5 +16,5 @@ export async function GET(request:Request){
     if(!response.ok)throw new Error(`Reservations returned ${response.status}`);
     const payload=await response.json() as {success:boolean;data:StaffReservation[]};
     return Response.json(payload.data??[],{headers:{"Cache-Control":"public, max-age=60, stale-while-revalidate=300"}});
-  }catch{return Response.json([],{headers:{"Cache-Control":"public, max-age=30"}})}
+  }catch{return Response.json({error:"Unable to load reservations"},{status:502,headers:{"Cache-Control":"no-store"}})}
 }

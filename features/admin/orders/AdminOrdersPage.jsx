@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { adminApi } from '@/features/admin/api/client.js';
 import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
 import { AdminButton } from '@/features/admin/shared/AdminShared.jsx';
@@ -37,6 +38,7 @@ const localDateTimeNow = () => localDateTimeValue(new Date().toISOString());
 
 export function AdminOrdersPage() {
   const { user } = useAdminAuth();
+  const router = useRouter();
   const canManage = user.role === 'developer' || user.role === 'manager';
   const [businessDate, setBusinessDate] = useState(today);
   const [search, setSearch] = useState('');
@@ -49,7 +51,6 @@ export function AdminOrdersPage() {
   const [message, setMessage] = useState({ text: '', error: false });
   const [showCreate, setShowCreate] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [showRoomService, setShowRoomService] = useState(false);
   const [groupsOpen, setGroupsOpen] = useState({ attention: true, others: true });
   const [issued, setIssued] = useState(null);
 
@@ -102,13 +103,12 @@ export function AdminOrdersPage() {
   };
 
   return <section className="adminPage adminOrdersPage">
-    <header className="adminPageHeading"><div><p className="eyebrow">ORDER CONTROL</p><h1>點單管理</h1><p>左側以搜尋與待處理分組收納大量顧客；右側集中顯示該顧客今天的全部訂單。</p></div><div className="adminPageActions"><AdminButton variant="secondary" onClick={() => loadSessions(selectedId)}>重新整理</AdminButton><AdminButton variant="secondary" onClick={() => setShowRoomService(!showRoomService)}>包廂服務</AdminButton>{canManage ? <AdminButton variant="ghost" onClick={() => setShowSettings(!showSettings)}>營運參數</AdminButton> : null}<AdminButton onClick={() => setShowCreate(!showCreate)}>＋ 開立點餐碼</AdminButton></div></header>
+    <header className="adminPageHeading"><div><p className="eyebrow">DEVELOPER ORDER CONTROL</p><h1>完整點單管理</h1><p>開發者工具：查看所有顧客與訂單、檢查狀態並處理需要完整資料視角的例外作業。</p></div><div className="adminPageActions"><AdminButton variant="secondary" onClick={() => loadSessions(selectedId)}>重新整理</AdminButton><AdminButton variant="secondary" onClick={() => router.push('/admin/rooms/service')}>包廂服務排程</AdminButton>{canManage ? <AdminButton variant="ghost" onClick={() => setShowSettings(!showSettings)}>營運參數</AdminButton> : null}<AdminButton onClick={() => setShowCreate(!showCreate)}>＋ 開立點餐碼</AdminButton></div></header>
     {message.text ? <div className={message.error ? 'adminOrderMessage isError' : 'adminOrderMessage'} role="status">{message.text}<button onClick={() => setMessage({ text: '', error: false })}>×</button></div> : null}
     {businessContext ? <BusinessOperationsBar context={businessContext} canManage={canManage} onChanged={(value, text) => { setBusinessContext(value); setBusinessDate(value.referenceBusinessDate); setMessage({ text, error: false }); }} onError={(error) => setMessage({ text: error.message, error: true })} /> : null}
     {showCreate ? <CreateSessionPanel onClose={() => setShowCreate(false)} onIssued={(result) => { setIssued(result); setShowCreate(false); loadSessions(result.session.id); }} /> : null}
     {issued ? <IssuedPanel issued={issued} onClose={() => setIssued(null)} /> : null}
     {canManage && showSettings && settings ? <SettingsPanel settings={settings} onSaved={(value) => { setSettings(value); setMessage({ text: '營運參數已更新。', error: false }); }} /> : null}
-    {showRoomService ? <AdminRoomServicePanel onMessage={(text, error = false) => setMessage({ text, error })} /> : null}
     <div className="adminOrderWorkspace">
       <aside className="adminCustomerPane">
         <div className="adminCustomerToolbar"><label>營業日<input type="date" value={businessDate} onChange={(event) => setBusinessDate(event.target.value)} /></label>{businessContext ? <p className={businessContext.orderingOpen ? 'adminBusinessPeriod isOpen' : 'adminBusinessPeriod'}><strong>{businessContext.orderingOpen ? '目前營業中' : '目前非營業時段'}</strong><span>{formatBusinessPeriodTime(businessContext.referenceStartsAt)} ～ {formatBusinessPeriodTime(businessContext.referenceEndsAt)}</span></p> : null}<form onSubmit={(event) => { event.preventDefault(); loadSessions(); }}><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="搜尋顧客名稱或遊戲 ID" /><button type="submit">搜尋</button></form><div><span>本營業日顧客</span><strong>{sessions.length}</strong></div></div>
@@ -314,50 +314,6 @@ function compactOrderUrl(value) {
 
 function CopyIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="8" y="8" width="11" height="11" rx="2" /><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" /></svg>;
-}
-
-function AdminRoomServicePanel({ onMessage }) {
-  const [date, setDate] = useState(today);
-  const [rooms, setRooms] = useState([]);
-  const [orders, setOrders] = useState([]);
-  const [form, setForm] = useState({ roomId: '', startsAt: `${today()}T20:00`, segmentCount: 1, note: '' });
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-
-  const load = async () => {
-    setLoading(true);
-    try {
-      const [roomData, orderData] = await Promise.all([
-        adminApi.getRooms(),
-        adminApi.getRoomOrders({ businessDate: date }),
-      ]);
-      setRooms(roomData || []);
-      setOrders(orderData || []);
-      setForm((current) => ({ ...current, roomId: current.roomId || roomData?.[0]?.id || '', startsAt: current.startsAt.startsWith(date) ? current.startsAt : `${date}T20:00` }));
-    } catch (error) { onMessage(error.message, true); }
-    finally { setLoading(false); }
-  };
-
-  useEffect(() => { load(); }, [date]);
-
-  const create = async () => {
-    if (!form.roomId || !form.startsAt) return;
-    setSaving(true);
-    try {
-      await adminApi.createRoomOrder({ roomId: form.roomId, businessDate: date, startsAt: form.startsAt, segmentCount: Number(form.segmentCount), note: form.note.trim() || null });
-      setForm((current) => ({ ...current, note: '' }));
-      onMessage('包廂服務訂單已建立。');
-      await load();
-    } catch (error) { onMessage(error.message, true); }
-    finally { setSaving(false); }
-  };
-
-  const updateStatus = async (id, status) => {
-    try { await adminApi.updateRoomOrderStatus(id, status); onMessage('包廂服務狀態已更新。'); await load(); }
-    catch (error) { onMessage(error.message, true); }
-  };
-
-  return <section className="adminPanel adminRoomServicePanel"><header><div><p className="eyebrow">ROOM SERVICE SCHEDULE</p><h2>包廂服務排程</h2><p>這裡會同時顯示顧客自助訂購與後台代客建立的包廂時段；每節時間依營運參數計算。</p></div><AdminButton variant="ghost" onClick={load} disabled={loading}>重新整理</AdminButton></header><div className="adminRoomServiceForm"><label>營業日<input type="date" value={date} onChange={(event) => setDate(event.target.value)} /></label><label>選擇包廂<select value={form.roomId} onChange={(event) => setForm({ ...form, roomId: event.target.value })}><option value="">請選擇</option>{rooms.filter((room) => room.isActive).map((room) => <option key={room.id} value={room.id}>{room.roomName} · {money(room.segmentPrice)}</option>)}</select></label><label>節數<input type="number" min="1" max="72" value={form.segmentCount} onChange={(event) => setForm({ ...form, segmentCount: event.target.value })} /></label><label>開始時間<input type="datetime-local" value={form.startsAt} onChange={(event) => setForm({ ...form, startsAt: event.target.value })} /></label><label>備註<input value={form.note} maxLength="500" onChange={(event) => setForm({ ...form, note: event.target.value })} placeholder="選填" /></label><AdminButton disabled={saving || loading || !form.roomId} onClick={create}>{saving ? '建立中…' : '建立包廂服務'}</AdminButton></div><div className="adminRoomServiceRows">{orders.map((order) => <article className="adminRoomServiceRow" key={order.id}><strong>{order.roomName}<small>{new Date(order.startsAt).toLocaleString('zh-TW')} ～ {new Date(order.endsAt).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false })}</small></strong><span>{order.segmentCount} 節 · {order.note || '無備註'}</span><b>{money(order.totalAmount)}</b><select value={order.status} onChange={(event) => updateStatus(order.id, event.target.value)}><option value="scheduled">已預約</option><option value="in_service">服務中</option><option value="completed">已完成</option><option value="cancelled">已取消</option></select></article>)}{!orders.length && !loading ? <p className="adminEmptyText">這個營業日尚無包廂服務訂單。</p> : null}</div></section>;
 }
 
 function SettingsPanel({ settings, onSaved }) {

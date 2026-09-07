@@ -6,6 +6,7 @@ import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
 import { AdminForgotPasswordPage } from '@/features/admin/auth/AdminForgotPasswordPage.jsx';
 import { AdminLoginPage } from '@/features/admin/auth/AdminLoginPage.jsx';
 import { AdminHomePage } from '@/features/admin/dashboard/AdminHomePage.jsx';
+import { AdminOperationsPage } from '@/features/admin/operations/AdminOperationsPage.tsx';
 import { AdminEventsPage } from '@/features/admin/events/AdminEventsPage.jsx';
 import { AdminHomeSettingsPage } from '@/features/admin/home/AdminHomeSettingsPage.jsx';
 import { AdminLayout } from '@/features/admin/layout/AdminLayout.jsx';
@@ -14,6 +15,7 @@ import { AdminMenuPage } from '@/features/admin/menu/AdminMenuPage.jsx';
 import { AdminOrdersPage } from '@/features/admin/orders/AdminOrdersPage.jsx';
 import { AdminStaffSettingsPage } from '@/features/admin/staff/AdminStaffSettingsPage.jsx';
 import { AdminRoomsPage } from '@/features/admin/rooms/AdminRoomsPage.jsx';
+import { AdminRoomServicePage } from '@/features/admin/rooms/AdminRoomServicePage.tsx';
 import { AdminSettlementPage } from '@/features/admin/settlement/AdminSettlementPage.tsx';
 
 const managerRoles = ['developer', 'manager'];
@@ -56,6 +58,11 @@ function AdminAnonymousRoute({ children, redirectAuthenticated = false }) {
 
 export function AdminDashboardRoute() {
   const navigate = useAdminNavigation();
+  return <AdminProtectedRoute><AdminOperationsPage navigate={navigate} /></AdminProtectedRoute>;
+}
+
+export function AdminOverviewRoute() {
+  const navigate = useAdminNavigation();
   return <AdminProtectedRoute><AdminHomePage navigate={navigate} /></AdminProtectedRoute>;
 }
 
@@ -69,6 +76,10 @@ export function AdminStaffSettingsRoute() {
 
 export function AdminRoomsRoute() {
   return <AdminProtectedRoute><AdminRoomsPage /></AdminProtectedRoute>;
+}
+
+export function AdminRoomServiceRoute() {
+  return <AdminProtectedRoute><AdminRoomServicePage /></AdminProtectedRoute>;
 }
 
 export function AdminSettlementRoute() {

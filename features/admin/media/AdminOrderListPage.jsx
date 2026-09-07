@@ -63,7 +63,7 @@ export function AdminOrderListPage() {
 
   return <section className="adminPage adminOrderListPage">
     <header className="adminPageHeading">
-      <div><p className="eyebrow">ORDER HISTORY</p><h1>訂單列表</h1><p>依營業日查詢所有顧客訂單，快速核對狀態、金額與明細。</p></div>
+      <div><p className="eyebrow">ORDER QUERY</p><h1>訂單查詢</h1><p>營業結束後依日期、關鍵字或狀態查詢訂單，核對問題並作為後續營運調整參考。</p></div>
       <div className="adminPageActions"><AdminButton variant="secondary" disabled={loading} onClick={loadOrders}>重新整理</AdminButton></div>
     </header>
 

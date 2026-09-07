@@ -9,11 +9,12 @@ const allGroups = [
     { route: '/admin', label: '營運總覽', index: '02', roles: ['developer', 'manager', 'clerk'] },
     { route: '/admin/staff', label: '店員管理', index: '03', roles: ['developer', 'manager', 'clerk'] },
     { route: '/admin/rooms', label: '包廂管理', index: '04', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin/settlement', label: '帳目／薪資結算', index: '05', roles: ['developer', 'manager'] },
   ] },
   { label: '內容與設定', items: [
-    { route: '/admin/menu', label: '菜單設定', index: '05', roles: ['developer', 'manager'] },
-    { route: '/admin/events', label: '活動設定', index: '06', roles: ['developer', 'manager'] },
-    { route: '/admin/home', label: '首頁設定', index: '07', roles: ['developer', 'manager'] },
+    { route: '/admin/menu', label: '菜單設定', index: '06', roles: ['developer', 'manager'] },
+    { route: '/admin/events', label: '活動設定', index: '07', roles: ['developer', 'manager'] },
+    { route: '/admin/home', label: '首頁設定', index: '08', roles: ['developer', 'manager'] },
   ] },
 ];
 

@@ -1,0 +1,19 @@
+.adminSettlementToolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-bottom: 18px; }
+.adminSettlementToolbar .adminField { min-width: 150px; }
+.adminSettlementSummary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.adminSettlementSummary > div { padding: 14px; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface-muted); }
+.adminSettlementSummary span, .adminSettlementSummary strong { display: block; }
+.adminSettlementSummary span { color: var(--color-text-muted); font-size: .82rem; }
+.adminSettlementSummary strong { margin-top: 5px; font-size: 1.12rem; }
+.adminSettlementTableWrap { overflow-x: auto; }
+.adminSettlementTable { width: 100%; border-collapse: collapse; min-width: 760px; }
+.adminSettlementTable th, .adminSettlementTable td { padding: 10px 9px; border-bottom: 1px solid var(--color-border); text-align: left; white-space: nowrap; }
+.adminSettlementTable th { color: var(--color-text-muted); font-size: .78rem; font-weight: 600; }
+.adminSettlementTable input { width: 90px; }
+.adminSettlementAddInput { margin-bottom: 14px; }
+.adminSettlementAddInput select { min-width: 280px; }
+.adminSettlementConfirm { display: inline-flex; gap: 8px; align-items: center; margin-top: 14px; }
+.adminSettlementAnomalies { border-color: rgba(189, 91, 55, .48); }
+.adminSettlementAnomalies ul { margin: 0; padding-left: 20px; color: var(--color-danger, #b6533d); }
+@media (max-width: 800px) { .adminSettlementSummary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .adminSettlementSummary { grid-template-columns: 1fr; } }

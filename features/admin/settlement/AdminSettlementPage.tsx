@@ -84,12 +84,12 @@ export function AdminSettlementPage() {
     try {
       const [nextOverview, nextStaff] = await Promise.all([
         adminApi.getSettlement({ businessDate: date, sessionNo }),
-        adminApi.getAllStaffList(),
+        canManage ? adminApi.getAllStaffList() : Promise.resolve([]),
       ]);
       setOverview(nextOverview);
       setDayType(nextOverview.run.dayType || "normal");
       setInputs(nextOverview.staffInputs || []);
-      setStaff(nextStaff || []);
+      setStaff(canManage ? (nextStaff || []) : (user?.staffMemberId ? [{ id: user.staffMemberId, displayName: user.displayName, isActive: true }] : []));
       setRunFields({
         publicTipAmount: nextOverview.run.publicTipAmount || 0,
         admissionFeeOverride: nextOverview.run.admissionFeeOverride ?? "",

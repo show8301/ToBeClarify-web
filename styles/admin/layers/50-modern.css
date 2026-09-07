@@ -712,6 +712,12 @@
 .adminStaffWorkModeIntro { display:grid; gap:5px; }
 .adminStaffWorkModeIntro strong { color:var(--color-fg); font-size:13px; }
 .adminStaffWorkModeIntro small,.adminStaffWorkModeOption small { color:var(--color-fg-mute); font-size:11px; line-height:1.5; }
+.adminStaffWorkModeSections { display:grid; gap:12px; }
+.adminStaffWorkModeSection { display:grid; gap:10px; padding:12px; border:1px solid rgba(49,51,74,.12); border-radius:10px; background:rgba(255,255,255,.22); }
+.adminStaffWorkModeSection.isTemporary { border-color:rgba(45,157,118,.28); background:rgba(45,157,118,.06); }
+.adminStaffWorkModeSectionHeading { display:grid; gap:4px; }
+.adminStaffWorkModeSectionHeading strong { color:var(--color-fg); font-size:12px; }
+.adminStaffWorkModeSectionHeading small { color:var(--color-fg-mute); font-size:11px; line-height:1.5; }
 .adminStaffWorkModeOptions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
 .adminStaffWorkModeOption { display:grid; gap:7px; padding:11px; border:1px solid rgba(49,51,74,.12); border-radius:10px; background:rgba(255,255,255,.36); }
 .adminStaffWorkModeOption .adminToggle { min-height:38px; }

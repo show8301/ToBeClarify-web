@@ -1,6 +1,7 @@
 export type DashboardRole = "designated" | "service" | "manager" | "developer";
 
 export type CurrentAdminUser = {
+  id: string;
   displayName: string;
   role: string;
   roleLabel: string;

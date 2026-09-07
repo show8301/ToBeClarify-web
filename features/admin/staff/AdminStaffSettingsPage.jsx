@@ -281,17 +281,25 @@ export function AdminStaffSettingsPage() {
     }
   };
 
-  const toggleTodayWorkRole = async (role, enabled) => {
+  const updateTodayWorkRole = async (role, mode, enabled) => {
     if (!canEditSelected || !form.id || workModeSaving) return;
     const current = form.todayWorkMode || emptyStaff.todayWorkMode;
     const scheduledRoles = new Set(current.scheduledRoles || []);
     const activeRoles = new Set(current.activeRoles || []);
-    if (enabled) {
-      scheduledRoles.add(role);
-      activeRoles.add(role);
+    if (mode === 'scheduled') {
+      if (enabled) scheduledRoles.add(role);
+      else {
+        scheduledRoles.delete(role);
+        activeRoles.delete(role);
+      }
     } else {
-      scheduledRoles.delete(role);
-      activeRoles.delete(role);
+      if (enabled) {
+        if (!scheduledRoles.has(role)) {
+          setMessage('今日啟用職位必須先包含在排班允許職位中。');
+          return;
+        }
+        activeRoles.add(role);
+      } else activeRoles.delete(role);
     }
     const body = {
       isWorking: current.isWorking !== false,
@@ -570,11 +578,12 @@ export function AdminStaffSettingsPage() {
               </div>
             </AdminPanel>
 
-            <AdminPanel title="今日工作身分／啟用開關" description="這裡控制今天實際承擔的工作身分；「開放指名」只代表公開卡片是否接受指名，不再用來直接判定 dashboard。">
+            <AdminPanel title="今日工作身分／啟用開關" description="排班允許職位決定可使用的工作台；今日啟用職位決定目前預設與可切換的工作視角。經理可臨時調整啟用，不會改掉原排班。">
               <div className="adminStaffWorkModePanel">
-                <div className="adminStaffWorkModeIntro"><strong>{form.todayWorkMode?.businessDate || '今日'} 的工作身分</strong><small>目前先將今日排班身分與現場啟用同步，之後可再拆成預排與上班中的兩層開關。</small></div>
-                <div className="adminStaffWorkModeOptions">
-                  {dailyWorkRoleOptions.map((option) => <div className="adminStaffWorkModeOption" key={option.id}><AdminToggle checked={(form.todayWorkMode?.activeRoles || []).includes(option.id)} disabled={isReadOnly || workModeSaving} onChange={(value) => void toggleTodayWorkRole(option.id, value)} label={option.label} ariaLabel={`切換今日${option.label}身分`} /><small>{option.description}</small></div>)}
+                <div className="adminStaffWorkModeIntro"><strong>{form.todayWorkMode?.businessDate || '今日'} 的工作身分</strong><small>「開放指名」只代表公開卡片是否接受指名，不會直接決定 dashboard。</small></div>
+                <div className="adminStaffWorkModeSections">
+                  <section className="adminStaffWorkModeSection"><div className="adminStaffWorkModeSectionHeading"><strong>排班允許職位</strong><small>{canManageAll ? '經理可調整今天允許承擔的職位範圍。' : '由排班決定；若需修改請請經理處理。'}</small></div><div className="adminStaffWorkModeOptions">{dailyWorkRoleOptions.map((option) => <div className="adminStaffWorkModeOption" key={`scheduled-${option.id}`}><AdminToggle checked={(form.todayWorkMode?.scheduledRoles || []).includes(option.id)} disabled={isReadOnly || workModeSaving || !canManageAll} onChange={(value) => void updateTodayWorkRole(option.id, 'scheduled', value)} label={option.label} ariaLabel={`切換${option.label}排班允許`} /><small>{option.description}</small></div>)}</div></section>
+                  <section className="adminStaffWorkModeSection isTemporary"><div className="adminStaffWorkModeSectionHeading"><strong>今日啟用職位</strong><small>這裡是今天實際使用的工作台；經理可在營業途中臨時調整。</small></div><div className="adminStaffWorkModeOptions">{dailyWorkRoleOptions.map((option) => { const allowed = (form.todayWorkMode?.scheduledRoles || []).includes(option.id); return <div className="adminStaffWorkModeOption" key={`active-${option.id}`}><AdminToggle checked={(form.todayWorkMode?.activeRoles || []).includes(option.id)} disabled={isReadOnly || workModeSaving || !allowed || form.todayWorkMode?.isWorking === false} onChange={(value) => void updateTodayWorkRole(option.id, 'active', value)} label={option.label} ariaLabel={`切換今日啟用${option.label}身分`} /><small>{allowed ? option.description : '尚未列入今日排班允許職位'}</small></div>; })}</div></section>
                 </div>
                 {workModeSaving ? <small className="adminStaffWorkModeSaving" role="status">身分開關儲存中…</small> : null}
               </div>

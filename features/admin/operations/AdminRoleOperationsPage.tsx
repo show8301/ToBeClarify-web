@@ -37,6 +37,7 @@ const dashboardConfigs: Record<Exclude<DashboardRole, "developer">, { label: str
 function toAdminUser(value: unknown): CurrentAdminUser {
   const record = isRecord(value) ? value : {};
   return {
+    id: stringValue(record.id),
     displayName: stringValue(record.displayName, "目前登入者"),
     role: stringValue(record.role, "clerk"),
     roleLabel: stringValue(record.roleLabel, "服務員"),
@@ -59,15 +60,39 @@ function resolveAccountRole(value: unknown): DashboardRole | null {
 
 function resolveAvailableDashboardRoles(value: unknown, staff: OperationsStaffMember | undefined): DashboardRole[] {
   const accountRole = resolveAccountRole(value);
-  if (accountRole) return [accountRole];
-  const activeRoles = staff?.todayWorkMode?.activeRoles;
-  if (Array.isArray(activeRoles)) {
-    const roles = activeRoles.filter((role): role is "designated" | "service" => role === "designated" || role === "service");
-    if (roles.length) return Array.from(new Set(roles)).sort((left, right) => (left === "designated" ? -1 : right === "designated" ? 1 : 0));
-  }
+  if (accountRole === "developer") return [accountRole];
+
+  const scheduledRoles = resolveOperationalDashboardRoles(staff, "scheduledRoles");
+  if (accountRole === "manager") return [accountRole, ...scheduledRoles];
+  if (scheduledRoles.length) return scheduledRoles;
+
   // Before the daily work-mode migration reaches an environment, preserve the
   // existing clerk behaviour and provide a safe service dashboard fallback.
   return ["service"];
+}
+
+function resolveOperationalDashboardRoles(
+  staff: OperationsStaffMember | undefined,
+  source: "scheduledRoles" | "activeRoles",
+): Array<"designated" | "service"> {
+  const roles = staff?.todayWorkMode?.[source];
+  if (!Array.isArray(roles)) return [];
+  return Array.from(new Set(roles.filter((role): role is "designated" | "service" => role === "designated" || role === "service")))
+    .sort((left, right) => (left === "designated" ? -1 : right === "designated" ? 1 : 0));
+}
+
+function resolveDefaultDashboardRole(value: unknown, staff: OperationsStaffMember | undefined): DashboardRole {
+  const accountRole = resolveAccountRole(value);
+  if (accountRole) return accountRole;
+  return resolveOperationalDashboardRoles(staff, "activeRoles")[0]
+    || resolveOperationalDashboardRoles(staff, "scheduledRoles")[0]
+    || "service";
+}
+
+function dashboardRoleStorageKey(user: CurrentAdminUser, staff: OperationsStaffMember | undefined) {
+  const identity = user.id || user.staffMemberId || user.displayName;
+  const businessDate = staff?.todayWorkMode?.businessDate || today();
+  return `admin-dashboard-role:${identity}:${businessDate}`;
 }
 
 function errorMessage(error: unknown) {
@@ -196,10 +221,29 @@ export function AdminRoleOperationsPage({ navigate }: { navigate: Navigate }) {
   const [actionState, setActionState] = useState<OperationsActionState>({ busyId: "", message: "", error: "" });
   const currentStaff = useMemo(() => state.data.staff.find((staff) => staff.id === adminUser.staffMemberId), [adminUser.staffMemberId, state.data.staff]);
   const availableRoles = useMemo(() => resolveAvailableDashboardRoles(user, currentStaff), [currentStaff, user]);
+  const defaultRole = useMemo(() => resolveDefaultDashboardRole(user, currentStaff), [currentStaff, user]);
+  const roleStorageKey = useMemo(() => dashboardRoleStorageKey(adminUser, currentStaff), [adminUser, currentStaff]);
+  const availableRoleSignature = availableRoles.join("|");
   const [selectedRole, setSelectedRole] = useState<DashboardRole | null>(null);
   useEffect(() => {
-    setSelectedRole((current) => current && availableRoles.includes(current) ? current : availableRoles[0]);
-  }, [availableRoles]);
+    let persistedRole: DashboardRole | null = null;
+    try {
+      const storedRole = window.sessionStorage.getItem(roleStorageKey);
+      if (storedRole === "designated" || storedRole === "service" || storedRole === "manager" || storedRole === "developer") persistedRole = storedRole;
+    } catch {
+      persistedRole = null;
+    }
+    setSelectedRole(persistedRole && availableRoles.includes(persistedRole) ? persistedRole : defaultRole);
+  }, [availableRoleSignature, availableRoles, defaultRole, roleStorageKey]);
+  const selectDashboardRole = useCallback((role: DashboardRole) => {
+    if (!availableRoles.includes(role)) return;
+    setSelectedRole(role);
+    try {
+      window.sessionStorage.setItem(roleStorageKey, role);
+    } catch {
+      // Session storage is optional; role switching remains available in memory.
+    }
+  }, [availableRoles, roleStorageKey]);
   const dashboardRole = selectedRole || availableRoles[0] || "service";
   const config = dashboardRole === "developer" ? null : dashboardConfigs[dashboardRole];
 
@@ -257,8 +301,8 @@ export function AdminRoleOperationsPage({ navigate }: { navigate: Navigate }) {
 
   return <AdminPage eyebrow={`${config.label.toUpperCase()} DASHBOARD`} title={config.title} description={`${adminUser.displayName}，${config.description}`} actions={<AdminButton variant="secondary" disabled={state.loading} onClick={() => void load()}>{state.loading ? "讀取中…" : "重新整理"}</AdminButton>}>
     {state.error ? <div className="adminOrderMessage isError" role="alert">{state.error}</div> : null}
-    {availableRoles.length > 1 ? <div className="adminRoleSwitcher" role="group" aria-label="今日啟用工作身分"><span>今日啟用身分</span>{availableRoles.map((role) => <button type="button" className={dashboardRole === role ? "isActive" : ""} key={role} onClick={() => setSelectedRole(role)}>{dashboardRoleLabels[role as Exclude<DashboardRole, "developer">]}</button>)}</div> : null}
-    {currentStaff?.todayWorkMode && currentStaff.todayWorkMode.isWorking && !currentStaff.todayWorkMode.activeRoles.some((role) => role === "service" || role === "designated") ? <div className="adminRoleDashboardNotice" role="status">今天尚未啟用服務員或指名人員身分，目前先顯示服務員工作台；請在店員設定開啟今日工作身分。</div> : null}
+    {availableRoles.length > 1 ? <div className="adminRoleSwitcher" role="group" aria-label="今日可用工作身分"><span>{adminUser.role === "manager" ? "目前工作視角" : "今日可用身分"}</span>{availableRoles.map((role) => <button type="button" className={dashboardRole === role ? "isActive" : ""} key={role} onClick={() => selectDashboardRole(role)}>{dashboardRoleLabels[role as Exclude<DashboardRole, "developer">]}</button>)}</div> : null}
+    {currentStaff?.todayWorkMode && currentStaff.todayWorkMode.isWorking && !currentStaff.todayWorkMode.activeRoles.some((role) => role === "service" || role === "designated") ? <div className="adminRoleDashboardNotice" role="status">今天尚未啟用服務員或指名人員身分，目前依今日排班顯示預設工作台；若需調整，請在店員設定開啟今日啟用職位。</div> : null}
     {dashboardRole === "designated" ? <AdminDesignatedDashboard data={state.data} user={adminUser} navigate={navigate} runAction={runAction} actionState={actionState} /> : null}
     {dashboardRole === "service" ? <AdminServiceDashboard data={state.data} navigate={navigate} runAction={runAction} actionState={actionState} /> : null}
     {dashboardRole === "manager" ? <AdminManagerDashboard data={state.data} navigate={navigate} runAction={runAction} actionState={actionState} /> : null}

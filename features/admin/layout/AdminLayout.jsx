@@ -4,7 +4,7 @@ import { AdminButton } from '@/features/admin/shared/AdminShared.jsx';
 
 const allGroups = [
   { label: '營運', items: [
-    { route: '/admin', label: '營業工作台', index: '00', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin', label: '營業工作台', index: '00', roles: ['manager', 'clerk'] },
     { route: '/admin/rooms/service', label: '包廂服務排程', index: '01', roles: ['developer', 'manager', 'clerk'] },
     { route: '/admin/overview', label: '營運總覽', index: '02', roles: ['developer', 'manager', 'clerk'] },
     { route: '/admin/settlement', label: '帳目／薪資結算', index: '03', roles: ['developer', 'manager', 'clerk'] },

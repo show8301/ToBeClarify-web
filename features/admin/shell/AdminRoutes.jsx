@@ -6,7 +6,7 @@ import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
 import { AdminForgotPasswordPage } from '@/features/admin/auth/AdminForgotPasswordPage.jsx';
 import { AdminLoginPage } from '@/features/admin/auth/AdminLoginPage.jsx';
 import { AdminHomePage } from '@/features/admin/dashboard/AdminHomePage.jsx';
-import { AdminOperationsPage } from '@/features/admin/operations/AdminOperationsPage.tsx';
+import { AdminRoleOperationsPage } from '@/features/admin/operations/AdminRoleOperationsPage.tsx';
 import { AdminEventsPage } from '@/features/admin/events/AdminEventsPage.jsx';
 import { AdminHomeSettingsPage } from '@/features/admin/home/AdminHomeSettingsPage.jsx';
 import { AdminLayout } from '@/features/admin/layout/AdminLayout.jsx';
@@ -23,6 +23,17 @@ const managerRoles = ['developer', 'manager'];
 function useAdminNavigation() {
   const router = useRouter();
   return useCallback((route) => router.push(route), [router]);
+}
+
+function AdminDashboardLanding({ navigate }) {
+  const { user } = useAdminAuth();
+
+  useEffect(() => {
+    if (user?.role === 'developer') navigate('/admin/orders');
+  }, [navigate, user]);
+
+  if (user?.role === 'developer') return <AdminLoading />;
+  return <AdminRoleOperationsPage navigate={navigate} />;
 }
 
 function AdminProtectedRoute({ children, roles }) {
@@ -58,7 +69,7 @@ function AdminAnonymousRoute({ children, redirectAuthenticated = false }) {
 
 export function AdminDashboardRoute() {
   const navigate = useAdminNavigation();
-  return <AdminProtectedRoute><AdminOperationsPage navigate={navigate} /></AdminProtectedRoute>;
+  return <AdminProtectedRoute><AdminDashboardLanding navigate={navigate} /></AdminProtectedRoute>;
 }
 
 export function AdminOverviewRoute() {

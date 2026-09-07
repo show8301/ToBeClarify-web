@@ -185,6 +185,12 @@ export const adminApi = {
   reopenSettlement: (body, signal) => request('/settlement/reopen', {
     method: 'POST', body: JSON.stringify(body), signal,
   }),
+  submitSettlementAttendanceBackfill: (body, signal) => request('/settlement/attendance/backfill', {
+    method: 'POST', body: JSON.stringify(body), signal,
+  }),
+  reviewSettlementAttendanceBackfill: (requestId, body, signal) => request(`/settlement/attendance/backfill/${encodeURIComponent(requestId)}/review`, {
+    method: 'POST', body: JSON.stringify(body), signal,
+  }),
   adjustSettlementOrder: (orderId, body, signal) => request(`/settlement/orders/${encodeURIComponent(orderId)}/amount`, {
     method: 'PUT', body: JSON.stringify(body), signal,
   }),

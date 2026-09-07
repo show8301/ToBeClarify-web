@@ -72,7 +72,7 @@ export function AdminRoomsRoute() {
 }
 
 export function AdminSettlementRoute() {
-  return <AdminProtectedRoute roles={managerRoles}><AdminSettlementPage /></AdminProtectedRoute>;
+  return <AdminProtectedRoute><AdminSettlementPage /></AdminProtectedRoute>;
 }
 
 export function AdminEventsRoute() {

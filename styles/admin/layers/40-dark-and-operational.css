@@ -570,6 +570,42 @@
   color-scheme: dark;
 }
 
+:root[data-admin-theme="dark"] .adminRoomServiceForm,
+:root[data-admin-theme="dark"] .adminRoomServiceRow {
+  border-color: rgba(218, 234, 244, .34);
+  background: linear-gradient(135deg, rgba(35, 61, 78, .96), rgba(25, 43, 57, .98));
+  color: var(--color-fg);
+  box-shadow: inset 0 1px rgba(255, 255, 255, .04);
+}
+
+:root[data-admin-theme="dark"] .adminRoomServiceForm label {
+  color: var(--color-fg-soft);
+}
+
+:root[data-admin-theme="dark"] .adminRoomServiceForm input,
+:root[data-admin-theme="dark"] .adminRoomServiceForm select,
+:root[data-admin-theme="dark"] .adminRoomServiceRow select {
+  border-color: rgba(218, 234, 244, .4);
+  background: rgba(13, 27, 40, .92);
+  color: #f4fbfd;
+  color-scheme: dark;
+}
+
+:root[data-admin-theme="dark"] .adminRoomServiceForm input::placeholder {
+  color: rgba(237, 244, 247, .7);
+  opacity: 1;
+}
+
+:root[data-admin-theme="dark"] .adminRoomServiceRow strong,
+:root[data-admin-theme="dark"] .adminRoomServiceRow > span,
+:root[data-admin-theme="dark"] .adminRoomServiceRow > b {
+  color: #f4fbfd;
+}
+
+:root[data-admin-theme="dark"] .adminRoomServiceRow small {
+  color: rgba(237, 244, 247, .78);
+}
+
 :root[data-admin-theme="dark"] .adminNomineeGrid article,
 :root[data-admin-theme="dark"] .adminAddonSummary article,
 :root[data-admin-theme="dark"] .adminAddonComposer > div {
@@ -614,15 +650,38 @@
   color: var(--color-fg);
 }
 
-:root[data-admin-theme="dark"] .adminIssuedPanel label {
+:root[data-admin-theme="dark"] .adminIssuedPanel .adminIssuedField {
   border-color: rgba(218, 234, 244, .24);
-  background: rgba(27, 49, 66, .84);
+  background: linear-gradient(135deg, rgba(35, 61, 78, .96), rgba(26, 45, 61, .98));
+  color: var(--color-fg);
 }
 
-:root[data-admin-theme="dark"] .adminIssuedPanel label button {
+:root[data-admin-theme="dark"] .adminIssuedPanel .adminIssuedFieldLabel strong,
+:root[data-admin-theme="dark"] .adminIssuedPanel .adminIssuedField code {
+  color: #f4fbfd;
+}
+
+:root[data-admin-theme="dark"] .adminIssuedPanel .adminIssuedFieldLabel small {
+  color: rgba(237, 244, 247, .78);
+}
+
+:root[data-admin-theme="dark"] .adminIssuedPanel .adminCopyIconButton {
   border: 1px solid rgba(159, 199, 232, .44);
-  background: rgba(62, 91, 117, .7);
-  color: var(--color-fg);
+  background: #b8d9ee;
+  color: #102131;
+}
+
+:root[data-admin-theme="dark"] .adminIssuedPanel .adminCopyIconButton:hover,
+:root[data-admin-theme="dark"] .adminIssuedPanel .adminCopyIconButton:focus-visible {
+  border-color: #f4fbfd;
+  background: #f4fbfd;
+  color: #102131;
+}
+
+:root[data-admin-theme="dark"] .adminIssuedPanel .adminCopyStatus {
+  border: 1px solid rgba(184, 217, 238, .42);
+  background: #102131;
+  color: #f4fbfd;
 }
 
 :root[data-admin-theme="dark"] .adminDeveloperDisclosure {

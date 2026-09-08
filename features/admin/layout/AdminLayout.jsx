@@ -83,7 +83,7 @@ export function AdminLayout({ route, navigate, children }) {
         <nav className={`adminNav ${isMenuOpen ? 'isOpen' : ''}`} aria-label="後台功能選單">
           {groups.map((group) => <section className="adminNavGroup" key={group.label}>
             <p className="adminNavLabel">{group.label}</p>
-            {group.items.map((item) => <button key={item.route} className={route === item.route ? 'isActive' : ''} aria-current={route === item.route ? 'page' : undefined} type="button" onClick={() => handleNavigate(item.route)}><span>{item.index}</span>{item.label}</button>)}
+            {group.items.map((item) => <button key={item.route} className={route === item.route ? 'isActive' : ''} aria-current={route === item.route ? 'page' : undefined} type="button" onClick={() => handleNavigate(item.route)}><span className="adminNavIndex">{item.index}</span><span className="adminNavText">{item.label}</span></button>)}
           </section>)}
         </nav>
         <div className="adminTopbarUtilities">

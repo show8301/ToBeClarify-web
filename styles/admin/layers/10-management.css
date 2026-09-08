@@ -28,10 +28,10 @@
   white-space: nowrap;
   transition: background .2s ease, color .2s ease, border-color .2s ease;
 }
-.adminNav button span { color: var(--color-fg-mute); font-family: var(--font-mono); font-size: 11px; }
+.adminNav button .adminNavIndex { color: var(--color-fg-mute); font-family: var(--font-mono); font-size: 11px; }
 .adminNav button:hover,
 .adminNav button.isActive { border-color: rgba(var(--color-accent-rgb), .24); background: rgba(var(--color-accent-rgb), .08); color: var(--color-fg); }
-.adminNav button.isActive span { color: var(--color-accent); }
+.adminNav button.isActive .adminNavIndex { color: var(--color-accent); }
 .adminBackToSite { color: var(--color-fg-mute); font-size: 13px; }
 .adminBackToSite:hover { color: var(--color-accent); }
 .adminContent { min-width: 0; padding-bottom: 60px; }

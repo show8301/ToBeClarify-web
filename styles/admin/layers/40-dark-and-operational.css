@@ -614,15 +614,38 @@
   color: var(--color-fg);
 }
 
-:root[data-admin-theme="dark"] .adminIssuedPanel label {
+:root[data-admin-theme="dark"] .adminIssuedPanel .adminIssuedField {
   border-color: rgba(218, 234, 244, .24);
-  background: rgba(27, 49, 66, .84);
+  background: linear-gradient(135deg, rgba(35, 61, 78, .96), rgba(26, 45, 61, .98));
+  color: var(--color-fg);
 }
 
-:root[data-admin-theme="dark"] .adminIssuedPanel label button {
+:root[data-admin-theme="dark"] .adminIssuedPanel .adminIssuedFieldLabel strong,
+:root[data-admin-theme="dark"] .adminIssuedPanel .adminIssuedField code {
+  color: #f4fbfd;
+}
+
+:root[data-admin-theme="dark"] .adminIssuedPanel .adminIssuedFieldLabel small {
+  color: rgba(237, 244, 247, .78);
+}
+
+:root[data-admin-theme="dark"] .adminIssuedPanel .adminCopyIconButton {
   border: 1px solid rgba(159, 199, 232, .44);
-  background: rgba(62, 91, 117, .7);
-  color: var(--color-fg);
+  background: #b8d9ee;
+  color: #102131;
+}
+
+:root[data-admin-theme="dark"] .adminIssuedPanel .adminCopyIconButton:hover,
+:root[data-admin-theme="dark"] .adminIssuedPanel .adminCopyIconButton:focus-visible {
+  border-color: #f4fbfd;
+  background: #f4fbfd;
+  color: #102131;
+}
+
+:root[data-admin-theme="dark"] .adminIssuedPanel .adminCopyStatus {
+  border: 1px solid rgba(184, 217, 238, .42);
+  background: #102131;
+  color: #f4fbfd;
 }
 
 :root[data-admin-theme="dark"] .adminDeveloperDisclosure {

@@ -57,7 +57,7 @@
 .adminLoginMark { border-color: rgba(255,255,255,.82); border-radius: 14px; background: linear-gradient(145deg,#787ba0,#4d526f); box-shadow: 0 8px 18px rgba(101,120,159,.24); }
 .adminNav button:hover,
 .adminNav button.isActive { border-color: rgba(255,255,255,.92); background: linear-gradient(110deg,rgba(184,187,216,.68),rgba(160,217,214,.45)); color: #31334a; }
-.adminNav button.isActive span,
+.adminNav button.isActive .adminNavIndex,
 .adminTheme .eyebrow,
 .adminAccount span,
 .adminRegisterKeyAction > span { color: #65789f; }

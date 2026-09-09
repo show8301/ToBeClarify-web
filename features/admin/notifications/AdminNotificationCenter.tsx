@@ -66,7 +66,10 @@ export function AdminNotificationProvider({children}:{children:React.ReactNode})
   };
   useEffect(()=>{
     active.current=true;let stopped=false,baseline=true;let timer:ReturnType<typeof setTimeout>|undefined;const controller=new AbortController();let stream:EventSource|undefined;let streamCapable=false;
-    cursor.current='';presented.current.clear();setInbox({items:[],unreadCount:0});setToasts([]);setCritical([]);setState('連線中');
+    cursor.current='';presented.current.clear();
+    // Account/leader changes must clear account-scoped UI before opening the new subscription.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setInbox({items:[],unreadCount:0});setToasts([]);setCritical([]);setState('連線中');
     const channel=typeof BroadcastChannel!=='undefined'?new BroadcastChannel(`lucid-notification-events:${account}`):undefined;
     const enqueueCritical=(items:NotificationDelivery[])=>setCritical(current=>{
       const activeItems=items.filter(x=>x.content.requiresAck&&!x.acknowledgedAt&&!x.withdrawnAt&&new Date(x.expiresAt)>new Date());
@@ -126,7 +129,7 @@ export function AdminNotificationProvider({children}:{children:React.ReactNode})
       streamCapable=(cap.delivery==='sse'||cap.delivery==='sse-v2')&&typeof EventSource!=='undefined';
       if(streamCapable)connectStream();else void poll();}).catch(()=>{if(!stopped)setState('通知服務尚未就緒');});
     return()=>{stopped=true;active.current=false;controller.abort();stream?.close();channel?.close();clearTimeout(timer);void audio.current?.close().catch(()=>{});audio.current=null;};
-  },[account,leaderState.isLeader]);
+  },[account,leaderState.isLeader,leader]);
   const refresh=async()=>{const next=await notificationRequest<NotificationInbox>();if(next.snapshotCursor)cursor.current=next.snapshotCursor;setInbox(next);};
   const loadMore=async()=>{if(!inbox.nextPageToken)return;const next=await notificationRequest<NotificationInbox>(`?pageToken=${encodeURIComponent(inbox.nextPageToken)}&limit=100`);if(next.snapshotCursor)cursor.current=next.snapshotCursor;setInbox(current=>{const seen=new Set(current.items.map(item=>item.id));return {...next,items:[...current.items,...next.items.filter(item=>!seen.has(item.id))]};});};
   const read=async (ids:string[])=>{await notificationRequest('/read',{ids});await refresh();};
@@ -142,7 +145,9 @@ function NotificationCriticalModal({item,onAcknowledge}:{item:NotificationDelive
   const button=useRef<HTMLButtonElement|null>(null);const [busy,setBusy]=useState(false);const [error,setError]=useState('');
   useEffect(()=>{button.current?.focus();},[item.id]);
   const acknowledge=async()=>{setBusy(true);setError('');try{await onAcknowledge(item.id);}catch(e){setError(e instanceof Error?e.message:'確認失敗');}finally{setBusy(false);}};
-  return <div className="notification-critical-backdrop"><section className="notification-critical-modal" role="dialog" aria-modal="true" aria-labelledby={`notification-critical-title-${item.id}`} onKeyDown={event=>{if(event.key==='Escape'||event.key==='Tab'){event.preventDefault();button.current?.focus();}}}><span>緊急店內廣播</span><h2 id={`notification-critical-title-${item.id}`}>{item.content.title}</h2>{item.content.occurrenceNo&&item.content.occurrenceNo>1&&<small>第 {item.content.occurrenceNo} 次提醒</small>}<p>{item.content.message}</p>{error&&<p role="alert">{error}</p>}<button ref={button} type="button" disabled={busy} onClick={()=>void acknowledge()}>{busy?'送出中…':'已知道'}</button></section></div>;
+  // The dialog itself owns the Tab/Escape focus trap; the keyboard listener is intentional.
+  // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
+  return <div className="notification-critical-backdrop"><section className="notification-critical-modal" role="dialog" tabIndex={-1} aria-modal="true" aria-labelledby={`notification-critical-title-${item.id}`} onKeyDown={event=>{if(event.key==='Escape'||event.key==='Tab'){event.preventDefault();button.current?.focus();}}}><span>緊急店內廣播</span><h2 id={`notification-critical-title-${item.id}`}>{item.content.title}</h2>{item.content.occurrenceNo&&item.content.occurrenceNo>1&&<small>第 {item.content.occurrenceNo} 次提醒</small>}<p>{item.content.message}</p>{error&&<p role="alert">{error}</p>}<button ref={button} type="button" disabled={busy} onClick={()=>void acknowledge()}>{busy?'送出中…':'已知道'}</button></section></div>;
 }
 export function AdminNotificationBell(){
   const center=useContext(Context);const [open,setOpen]=useState(false);const [error,setError]=useState('');if(!center)return null;
@@ -155,7 +160,10 @@ export function AdminNotificationsPage(){
   const [lastBroadcastId,setLastBroadcastId]=useState('');const [receipt,setReceipt]=useState<BroadcastReceiptSummary|null>(null);
   const [file,setFile]=useState<File|null>(null),[name,setName]=useState(''),[systemCode,setSystemCode]=useState('');const [caps,setCaps]=useState<NotificationCapabilities|null>(null);const preview=useRef<HTMLAudioElement|null>(null);const [reload,setReload]=useState(0);
   useEffect(()=>{
-    const controller=new AbortController();setBusy(true);
+    const controller=new AbortController();
+    // Loading the selected scope is an external synchronization boundary.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setBusy(true);
     const staffRequest=adminApi.getStaffMembers(controller.signal).catch(()=>[]);
     void Promise.all([
       notificationRequest<NotificationSettings>(`/settings?broadcast=${broadcast}`,undefined,{signal:controller.signal}),
@@ -163,7 +171,7 @@ export function AdminNotificationsPage(){
       notificationRequest<NotificationCapabilities>('/capabilities',undefined,{signal:controller.signal}),
       staffRequest,
     ]).then(([s,a,c,staffItems])=>{if(!controller.signal.aborted){
-      const normalizedStaff=Array.isArray(staffItems)?staffItems.map((item:any)=>({id:String(item?.id??item?.staffId??item?.staffMemberId??''),displayName:String(item?.displayName??item?.nickname??item?.name??item?.id??'')})).filter(item=>item.id&&item.displayName):[];
+      const normalizedStaff=Array.isArray(staffItems)?(staffItems as unknown[]).map(item=>{const record=item&&typeof item==='object'?item as Record<string,unknown>:{};const id=String(record.id??record.staffId??record.staffMemberId??'');return {id,displayName:String(record.displayName??record.nickname??record.name??record.id??'')};}).filter(item=>item.id&&item.displayName):[];
       setSettings(s);setSounds(a);setCaps(c);setStaff(normalizedStaff);setDirty(false);setBusy(false);
     }})
       .catch(e=>{if(!controller.signal.aborted){setError(e instanceof Error?e.message:'操作失敗');setBusy(false);}});

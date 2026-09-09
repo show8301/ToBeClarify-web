@@ -47,6 +47,7 @@ async function request(path, options = {}) {
 }
 
 export const adminApi = {
+  reorderMenu: body => request('/menu/order', {method:'PUT', body:JSON.stringify(body)}),
   login: (body, signal) => request('/auth/login', {
     method: 'POST',
     body: JSON.stringify(body),

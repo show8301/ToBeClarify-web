@@ -1,3 +1,4 @@
+import {AdminNotificationBell} from '@/features/admin/notifications/AdminNotificationCenter';
 import { useEffect, useMemo, useState } from 'react';
 import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
 import { AdminButton } from '@/features/admin/shared/AdminShared.jsx';
@@ -12,6 +13,7 @@ const allGroups = [
   ] },
   { label: '查詢與管理', items: [
     { route: '/admin/order-list', label: '訂單查詢', index: '10', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin/notifications', label: '通知中心', index: '13', roles: ['developer','manager','clerk'] },
     { route: '/admin/staff', label: '店員資料設定', index: '11', roles: ['developer', 'manager', 'clerk'] },
     { route: '/admin/rooms', label: '包廂內容管理', index: '12', roles: ['developer', 'manager', 'clerk'] },
   ] },
@@ -86,7 +88,7 @@ export function AdminLayout({ route, navigate, children }) {
             {group.items.map((item) => <button key={item.route} className={route === item.route ? 'isActive' : ''} aria-current={route === item.route ? 'page' : undefined} type="button" onClick={() => handleNavigate(item.route)}><span className="adminNavIndex">{item.index}</span><span className="adminNavText">{item.label}</span></button>)}
           </section>)}
         </nav>
-        <div className="adminTopbarUtilities">
+        <div className="adminTopbarUtilities"><AdminNotificationBell/>
           <div className="adminAccount">
             <div className="adminAccountIdentity"><small>目前登入</small><strong>{user.displayName}</strong><span>{user.roleLabel}</span></div>
             <AdminButton

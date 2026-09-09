@@ -48,6 +48,7 @@ async function proxy(request: Request, { params }: RouteContext) {
   }
 
   const { path } = await params;
+  const notificationStream = request.method === "GET" && path.join("/") === "notifications/stream";
   const upstreamUrl = new URL(`${getAdminApiBaseUrl()}/${path.map(encodeURIComponent).join("/")}`);
   upstreamUrl.search = new URL(request.url).search;
 
@@ -67,7 +68,7 @@ async function proxy(request: Request, { params }: RouteContext) {
       body,
       cache: "no-store",
       redirect: "manual",
-      signal: AbortSignal.timeout(20_000),
+      signal: AbortSignal.any([request.signal, AbortSignal.timeout(notificationStream ? 65_000 : 20_000)]),
     });
 
     const responseHasBody = method !== "HEAD" && !BODYLESS_RESPONSE_STATUSES.has(upstream.status);
@@ -81,7 +82,8 @@ async function proxy(request: Request, { params }: RouteContext) {
     const setCookie = upstream.headers.get("set-cookie");
     if (setCookie) responseHeaders.set("Set-Cookie", rewriteAdminCookie(setCookie, request));
 
-    return new Response(responseHasBody ? await upstream.arrayBuffer() : null, {
+    if (notificationStream && upstream.ok) responseHeaders.set("X-Accel-Buffering", "no");
+    return new Response(responseHasBody ? (notificationStream && upstream.ok ? upstream.body : await upstream.arrayBuffer()) : null, {
       status: upstream.status,
       headers: responseHeaders,
     });

@@ -41,7 +41,8 @@ export function AdminOrdersPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const canManage = user.role === 'developer' || user.role === 'manager';
-  const [businessDate, setBusinessDate] = useState(today);
+  const requestedDate = searchParams.get('date');
+  const [businessDate, setBusinessDate] = useState(() => /^\d{4}-\d{2}-\d{2}$/.test(requestedDate || '') ? requestedDate : today());
   const [search, setSearch] = useState('');
   const [sessions, setSessions] = useState([]);
   const [selectedId, setSelectedId] = useState('');
@@ -60,7 +61,7 @@ export function AdminOrdersPage() {
     try {
       const data = await adminApi.getOrderSessions({ businessDate, search: search.trim() });
       setSessions(data || []);
-      const nextId = preferredId || (data || []).find((item) => item.session.id === selectedId)?.session.id || data?.[0]?.session.id || '';
+      const nextId = preferredId || (data || []).find((item) => item.session.id === (selectedId || searchParams.get('session')))?.session.id || data?.[0]?.session.id || '';
       setSelectedId(nextId);
       setOrders(nextId ? await adminApi.getSessionOrders(nextId) : []);
       setMessage({ text: '', error: false });
@@ -72,7 +73,7 @@ export function AdminOrdersPage() {
   const loadBusinessContext = async () => {
     const value = await adminApi.getOrderingContext();
     setBusinessContext(value);
-    setBusinessDate(value.referenceBusinessDate);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(requestedDate || '')) setBusinessDate(value.referenceBusinessDate);
     return value;
   };
   useEffect(() => { loadBusinessContext().catch(() => {}); }, []);

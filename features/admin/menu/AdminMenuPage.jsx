@@ -1,3 +1,4 @@
+import {PricingPolicyForm,ProductPolicyForm} from '@/features/admin/menu/MenuPolicyEditors';
 import { useEffect, useMemo, useState } from 'react';
 import { adminApi } from '@/features/admin/api/client.js';
 import {
@@ -5,6 +6,8 @@ import {
   newId,
 } from '@/features/admin/shared/AdminShared.jsx';
 
+const pricingPolicy = { mode: 'information', source: null, showOnHome: false, showOnMenu: true, showOnOrder: true };
+const productPolicy = { canOrderAlone: true, eventCategories: [] };
 const tabs = [['pricing', '消費規則'], ['categories', '分類'], ['items', '餐點品項'], ['sets', '套餐']];
 const emptyPricing = { id: '', title: '', description: '', priceText: '', sortOrder: 0, isEnabled: true };
 const emptyCategory = { id: '', categoryName: '', categoryDescription: '', sortOrder: 0, isEnabled: true };
@@ -54,10 +57,11 @@ export function AdminMenuPage() {
 
   useEffect(() => { load(); }, []);
 
-  const openEdit = (type, value) => setEditing({ type, form: toForm(type, value) });
+  const openEdit = (type, value) => { if(orderDirty) { setMessage('請先儲存排序，再編輯內容。'); return; } setEditing({ type, form: toForm(type, value) }); };
   const updateEditing = (key, value) => setEditing((current) => ({ ...current, form: { ...current.form, [key]: value } }));
 
   const create = () => {
+    if (orderDirty) { setMessage('請先儲存排序，再新增內容。'); return; }
     const type = tab;
     const form = toForm(type);
     form.id = newId();
@@ -67,6 +71,7 @@ export function AdminMenuPage() {
   };
 
   const updateCategoryItems = (categoryId, items) => {
+    if(menu.contractVersion!==2){setMessage('排序功能等待後端更新。');return;}
     setMenu((current) => ({ ...current, categories: current.categories.map((category) => category.id === categoryId ? { ...category, items } : category) }));
     setOrderDirty(true);
   };
@@ -98,7 +103,7 @@ export function AdminMenuPage() {
       const { type, form } = editing;
       let saved;
       if (type === 'pricing') {
-        saved = await adminApi.savePricingRule(localId(form.id), { title: form.title, description: form.description, priceText: form.priceText || null, sortOrder: Number(form.sortOrder) || 0, isEnabled: form.isEnabled });
+        saved = await adminApi.savePricingRule(localId(form.id), { policy: menu.contractVersion===2?form.policy:undefined, title: form.title, description: form.description, priceText: form.priceText || null, sortOrder: Number(form.sortOrder) || 0, isEnabled: form.isEnabled });
         setMenu((current) => ({ ...current, pricingRules: upsert(current.pricingRules, saved) }));
       }
       if (type === 'categories') {
@@ -115,9 +120,9 @@ export function AdminMenuPage() {
         }
         let tags = null;
         if (form.tagsText.trim()) {
-          try { tags = JSON.parse(form.tagsText); } catch { throw new Error('標籤 JSON 格式不正確。'); }
+          tags = [...new Set(form.tagsText.split(/[，,]/).map(x=>x.trim()).filter(Boolean))];
         }
-        saved = await adminApi.saveMenuItem(localId(form.id), { categoryId: form.categoryId, itemName: form.itemName, itemDescription: form.itemDescription || null, price: Number(form.price) || 0, mediaId, imageUrl, tags, sortOrder: Number(form.sortOrder) || 0, isAvailable: form.isAvailable });
+        saved = await adminApi.saveMenuItem(localId(form.id), { policy: menu.contractVersion===2?form.policy:undefined, categoryId: form.categoryId, itemName: form.itemName, itemDescription: form.itemDescription || null, price: Number(form.price) || 0, mediaId, imageUrl, tags, sortOrder: Number(form.sortOrder) || 0, isAvailable: form.isAvailable });
         setMenu((current) => ({ ...current, categories: current.categories.map((category) => ({ ...category, items: category.items.filter((item) => item.id !== form.id && item.id !== saved.id).concat(category.id === saved.categoryId ? [saved] : []) })) }));
       }
       if (type === 'sets') {
@@ -128,10 +133,11 @@ export function AdminMenuPage() {
           mediaId = uploaded.id;
           imageUrl = uploaded.url;
         }
-        saved = await adminApi.saveMenuSet(localId(form.id), { setName: form.setName, setDescription: form.setDescription || null, setPrice: Number(form.setPrice) || 0, mediaId, imageUrl, sortOrder: Number(form.sortOrder) || 0, isAvailable: form.isAvailable, items: form.items.map((item, index) => ({ id: localId(item.id), menuItemId: item.menuItemId, itemRole: item.itemRole, quantity: Number(item.quantity) || 1, sortOrder: index })) });
+        saved = await adminApi.saveMenuSet(localId(form.id), { policy: menu.contractVersion===2?form.policy:undefined, setName: form.setName, setDescription: form.setDescription || null, setPrice: Number(form.setPrice) || 0, mediaId, imageUrl, sortOrder: Number(form.sortOrder) || 0, isAvailable: form.isAvailable, items: form.items.map((item, index) => ({ id: localId(item.id), menuItemId: item.menuItemId, itemRole: item.itemRole, quantity: Number(item.quantity) || 1, sortOrder: index })) });
         setMenu((current) => ({ ...current, sets: upsert(current.sets, saved) }));
       }
       setEditing(null);
+      await load();
       setMessage('菜單資料已儲存。');
     } catch (error) {
       setMessage(error.message);
@@ -144,12 +150,7 @@ export function AdminMenuPage() {
     if (!orderDirty) return;
     setSaving(true);
     try {
-      for (const rule of menu.pricingRules.filter((item) => !item.id.startsWith('local-'))) await adminApi.savePricingRule(rule.id, { title: rule.title, description: rule.description, priceText: rule.priceText || null, sortOrder: Number(rule.sortOrder) || 0, isEnabled: rule.isEnabled });
-      for (const category of menu.categories.filter((item) => !item.id.startsWith('local-'))) {
-        await adminApi.saveMenuCategory(category.id, { categoryName: category.categoryName, categoryDescription: category.categoryDescription || null, sortOrder: Number(category.sortOrder) || 0, isEnabled: category.isEnabled });
-        for (const item of (category.items || []).filter((value) => !value.id.startsWith('local-'))) await adminApi.saveMenuItem(item.id, { categoryId: item.categoryId, itemName: item.itemName, itemDescription: item.itemDescription || null, price: Number(item.price) || 0, mediaId: item.mediaId || null, imageUrl: item.imageUrl || null, tags: item.tags || null, sortOrder: Number(item.sortOrder) || 0, isAvailable: item.isAvailable });
-      }
-      for (const set of menu.sets.filter((item) => !item.id.startsWith('local-'))) await adminApi.saveMenuSet(set.id, { setName: set.setName, setDescription: set.setDescription || null, setPrice: Number(set.setPrice) || 0, mediaId: set.mediaId || null, imageUrl: set.imageUrl || null, sortOrder: Number(set.sortOrder) || 0, isAvailable: set.isAvailable, items: (set.items || []).map((item, index) => ({ id: localId(item.id), menuItemId: item.menuItemId, itemRole: item.itemRole, quantity: Number(item.quantity) || 1, sortOrder: index })) });
+      await adminApi.reorderMenu({ expectedRevision: menu.revision, pricingRules: menu.pricingRules.map(x=>x.id), categories: menu.categories.map(x=>x.id), items: Object.fromEntries(menu.categories.map(x=>[x.id,x.items.map(i=>i.id)])), sets: menu.sets.map(x=>x.id) });
       setOrderDirty(false);
       setMessage('菜單排序已儲存。');
       await load();
@@ -173,6 +174,7 @@ export function AdminMenuPage() {
       if (type === 'items') setMenu((current) => ({ ...current, categories: current.categories.map((category) => ({ ...category, items: category.items.filter((item) => item.id !== form.id).map((item, index) => ({ ...item, sortOrder: index })) })) }));
       if (type === 'sets') setMenu((current) => ({ ...current, sets: current.sets.filter((item) => item.id !== form.id).map((item, index) => ({ ...item, sortOrder: index })) }));
       setEditing(null);
+      await load();
       setMessage('資料已刪除。');
     } catch (error) {
       setMessage(error.message);
@@ -182,13 +184,13 @@ export function AdminMenuPage() {
   const renderCards = () => {
     if (tab === 'items') return <div className="adminMenuGroupedList">{menu.categories.map((category) => <AdminPanel key={category.id} title={category.categoryName} description="拖曳品項卡片調整此分類內的順序。"><AdminDragList items={category.items || []} onReorder={(items) => updateCategoryItems(category.id, items)} onItemClick={(item) => openEdit('items', item)} renderItem={(item) => <><div className="adminDragCardWithImage">{item.imageUrl ? <img src={item.imageUrl} alt="" /> : null}<div><strong>{item.itemName || '未命名品項'}</strong><small>{item.price} Gil · {item.itemDescription || '沒有描述'}</small></div></div><div className="adminDragCardMeta"><em>{item.isAvailable ? '供應中' : '停售'}</em></div></>} emptyText="此分類尚無品項。" /></AdminPanel>)}</div>;
     const collection = tab === 'pricing' ? menu.pricingRules : tab === 'categories' ? menu.categories : menu.sets;
-    return <AdminDragList items={collection} onReorder={(items) => { const key = tab === 'pricing' ? 'pricingRules' : tab; setMenu((current) => ({ ...current, [key]: items })); setOrderDirty(true); }} onItemClick={(item) => openEdit(tab, item)} renderItem={(item) => <><div className="adminDragCardWithImage">{item.imageUrl ? <img src={item.imageUrl} alt="" /> : null}<div><strong>{displayName(tab, item) || '未命名資料'}</strong><small>{secondaryName(tab, item)}</small></div></div><div className="adminDragCardMeta"><em>{displayEnabled(tab, item)}</em></div></>} emptyText="尚無資料，請新增第一筆。" />;
+    return <AdminDragList items={collection} onReorder={(items) => { if(menu.contractVersion!==2){setMessage('排序功能等待後端更新。');return;} const key = tab === 'pricing' ? 'pricingRules' : tab; setMenu((current) => ({ ...current, [key]: items })); setOrderDirty(true); }} onItemClick={(item) => openEdit(tab, item)} renderItem={(item) => <><div className="adminDragCardWithImage">{item.imageUrl ? <img src={item.imageUrl} alt="" /> : null}<div><strong>{displayName(tab, item) || '未命名資料'}</strong><small>{secondaryName(tab, item)}</small></div></div><div className="adminDragCardMeta"><em>{displayEnabled(tab, item)}</em></div></>} emptyText="尚無資料，請新增第一筆。" />;
   };
 
   const currentLabel = tabs.find(([id]) => id === tab)?.[1] || '';
   return (
-    <AdminPage eyebrow="Salon Menu" title="菜單設定" description="管理消費規則、菜單分類、餐點品項與套餐組合。所有排序統一使用拖曳卡片，點擊卡片開啟編輯。" actions={<><AdminButton variant="secondary" onClick={create}>新增{currentLabel}</AdminButton><AdminButton onClick={saveOrder} disabled={!orderDirty || saving}>{saving ? '儲存中…' : '儲存排序'}</AdminButton></>}>
-      {message ? <div className="adminNotice">{message}</div> : null}
+    <AdminPage eyebrow="Salon Menu" title="菜單設定" description="管理消費規則、菜單分類、餐點品項與套餐組合。所有排序統一使用拖曳卡片，點擊卡片開啟編輯。" actions={<><AdminButton variant="secondary" onClick={create} disabled={saving}>新增{currentLabel}</AdminButton><AdminButton onClick={saveOrder} disabled={!orderDirty || saving || menu.contractVersion!==2}>{saving ? '儲存中…' : '儲存排序'}</AdminButton></>}>
+      {message ? <div className="adminNotice">{message}</div> : null}{menu.contractVersion!==2&&!state.loading&&<p className="adminNotice">新消費政策、事件分類與原子排序等待後端更新；既有菜單內容仍可編輯。</p>}
       <div className="adminTabs">{tabs.map(([id, label]) => <button type="button" key={id} className={tab === id ? 'isActive' : ''} onClick={() => setTab(id)}>{label}</button>)}</div>
       <AdminState loading={state.loading} error={state.error} onRetry={load} />
       {!state.loading && !state.error ? <AdminPanel
@@ -198,41 +200,41 @@ export function AdminMenuPage() {
       >{renderCards()}</AdminPanel> : null}
 
       <AdminDialog open={Boolean(editing)} title={editing ? `${editing.form.id.startsWith('local-') ? '新增' : '編輯'}${tabs.find(([id]) => id === editing.type)?.[1]}` : ''} description="排序請回到卡片清單拖曳調整。" onClose={() => setEditing(null)} actions={<><AdminButton variant="danger" onClick={remove}>刪除</AdminButton><span className="adminDialogActionSpacer" /><AdminButton variant="ghost" onClick={() => setEditing(null)}>取消</AdminButton><AdminButton onClick={saveEditing} disabled={saving}>{saving ? '儲存中…' : '儲存資料'}</AdminButton></>}>
-        {editing?.type === 'pricing' ? <PricingForm form={editing.form} update={updateEditing} /> : null}
+        {editing?.type === 'pricing' ? <PricingForm supportsPolicy={menu.contractVersion===2} form={editing.form} update={updateEditing} /> : null}
         {editing?.type === 'categories' ? <CategoryForm form={editing.form} update={updateEditing} /> : null}
-        {editing?.type === 'items' ? <ItemForm form={editing.form} update={updateEditing} categories={menu.categories} /> : null}
-        {editing?.type === 'sets' ? <SetForm form={editing.form} update={updateEditing} items={allItems} /> : null}
+        {editing?.type === 'items' ? <ItemForm supportsPolicy={menu.contractVersion===2} form={editing.form} update={updateEditing} categories={menu.categories} /> : null}
+        {editing?.type === 'sets' ? <SetForm supportsPolicy={menu.contractVersion===2} form={editing.form} update={updateEditing} items={allItems} /> : null}
       </AdminDialog>
     </AdminPage>
   );
 }
 
-function PricingForm({ form, update }) {
-  return <div className="adminFormGrid"><AdminField label="標題"><input value={form.title} onChange={(event) => update('title', event.target.value)} autoFocus /></AdminField><AdminField label="價格文字"><input value={form.priceText || ''} onChange={(event) => update('priceText', event.target.value)} /></AdminField><AdminField label="說明" className="span-2"><textarea rows="6" value={form.description} onChange={(event) => update('description', event.target.value)} /></AdminField><AdminToggle checked={form.isEnabled} onChange={(value) => update('isEnabled', value)} /></div>;
+function PricingForm({ supportsPolicy, form, update }) {
+  return <div className="adminFormGrid"><AdminField label="標題"><input maxLength={80} value={form.title} onChange={(event) => update('title', event.target.value)} autoFocus /></AdminField><fieldset className="adminFormWide" disabled={!supportsPolicy}><PricingPolicyForm form={form} update={update}/></fieldset><AdminField label={form.policy?.mode==='system'?'補充價格文字（系統金額以來源為準）':'價格文字'}><input maxLength={80} disabled={form.policy?.mode==='system'} value={form.priceText || ''} onChange={(event) => update('priceText', event.target.value)} /></AdminField><AdminField label="說明" className="span-2"><textarea rows="6" maxLength={500} value={form.description} onChange={(event) => update('description', event.target.value)} /></AdminField><AdminToggle checked={form.isEnabled} onChange={(value) => update('isEnabled', value)} /></div>;
 }
 
 function CategoryForm({ form, update }) {
   return <div className="adminFormGrid"><AdminField label="分類名稱"><input value={form.categoryName} onChange={(event) => update('categoryName', event.target.value)} autoFocus /></AdminField><AdminField label="分類說明" className="span-2"><textarea rows="5" value={form.categoryDescription || ''} onChange={(event) => update('categoryDescription', event.target.value)} /></AdminField><AdminToggle checked={form.isEnabled} onChange={(value) => update('isEnabled', value)} /></div>;
 }
 
-function ItemForm({ form, update, categories }) {
-  return <div className="adminFormGrid"><AdminField label="所屬分類"><select value={form.categoryId} onChange={(event) => update('categoryId', event.target.value)}>{categories.map((category) => <option key={category.id} value={category.id}>{category.categoryName}</option>)}</select></AdminField><AdminField label="品項名稱"><input value={form.itemName} onChange={(event) => update('itemName', event.target.value)} autoFocus /></AdminField><AdminField label="價格"><input type="number" min="0" value={form.price} onChange={(event) => update('price', event.target.value)} /></AdminField><AdminField label="品項描述" className="span-2"><textarea rows="5" value={form.itemDescription || ''} onChange={(event) => update('itemDescription', event.target.value)} /></AdminField><AdminField label="標籤 JSON" className="span-2" hint={'例如：["人氣","推薦"]'}><input value={form.tagsText} onChange={(event) => update('tagsText', event.target.value)} /></AdminField><AdminImagePicker label="餐點圖片" value={form.imageUrl} pendingFile={form.imageFile} cropConfig={MENU_IMAGE_CROP} output={MENU_IMAGE_OUTPUT} hint="選擇圖片後會開啟 4:3 裁切框；儲存餐點後才會上傳。" onChange={(file) => update('imageFile', file)} onClear={() => { update('imageFile', null); update('imageUrl', ''); update('mediaId', null); }} /><div className="adminFormWide"><AdminToggle checked={form.isAvailable} onChange={(value) => update('isAvailable', value)} label="目前供應" /></div></div>;
+function ItemForm({ supportsPolicy, form, update, categories }) {
+  return <div className="adminFormGrid"><AdminField label="所屬分類"><select value={form.categoryId} onChange={(event) => update('categoryId', event.target.value)}>{categories.map((category) => <option key={category.id} value={category.id}>{category.categoryName}</option>)}</select></AdminField><AdminField label="品項名稱"><input value={form.itemName} onChange={(event) => update('itemName', event.target.value)} autoFocus /></AdminField><AdminField label="價格"><input type="number" min="0" value={form.price} onChange={(event) => update('price', event.target.value)} /></AdminField><AdminField label="品項描述" className="span-2"><textarea rows="5" value={form.itemDescription || ''} onChange={(event) => update('itemDescription', event.target.value)} /></AdminField><AdminField label="標籤" className="span-2" hint="以逗號分隔，例如：人氣,推薦"><input value={form.tagsText} onChange={(event) => update('tagsText', event.target.value)} /></AdminField><fieldset className="adminFormWide" disabled={!supportsPolicy}><ProductPolicyForm form={form} update={update} single/></fieldset><AdminImagePicker label="餐點圖片" value={form.imageUrl} pendingFile={form.imageFile} cropConfig={MENU_IMAGE_CROP} output={MENU_IMAGE_OUTPUT} hint="選擇圖片後會開啟 4:3 裁切框；儲存餐點後才會上傳。" onChange={(file) => update('imageFile', file)} onClear={() => { update('imageFile', null); update('imageUrl', ''); update('mediaId', null); }} /><div className="adminFormWide"><AdminToggle checked={form.isAvailable} onChange={(value) => update('isAvailable', value)} label="目前供應" /></div></div>;
 }
 
-function SetForm({ form, update, items }) {
+function SetForm({ supportsPolicy, form, update, items }) {
   const [editingItem, setEditingItem] = useState(null);
   const updateItem = (id, key, value) => update('items', form.items.map((item) => item.id === id ? { ...item, [key]: value } : item));
-  const saveItem = () => { update('items', form.items.map((item) => item.id === editingItem.id ? editingItem : item)); setEditingItem(null); };
-  return <><div className="adminFormGrid"><AdminField label="套餐名稱"><input value={form.setName} onChange={(event) => update('setName', event.target.value)} autoFocus /></AdminField><AdminField label="套餐價格"><input type="number" min="0" value={form.setPrice} onChange={(event) => update('setPrice', event.target.value)} /></AdminField><AdminField label="套餐描述" className="span-2"><textarea rows="5" value={form.setDescription || ''} onChange={(event) => update('setDescription', event.target.value)} /></AdminField><AdminImagePicker label="套餐圖片" value={form.imageUrl} pendingFile={form.imageFile} cropConfig={MENU_IMAGE_CROP} output={MENU_IMAGE_OUTPUT} hint="選擇圖片後會開啟 4:3 裁切框；儲存套餐後才會上傳。" onChange={(file) => update('imageFile', file)} onClear={() => { update('imageFile', null); update('imageUrl', ''); update('mediaId', null); }} /><div><AdminToggle checked={form.isAvailable} onChange={(value) => update('isAvailable', value)} label="目前供應" /><p className="adminFieldHint">套餐內容排序請拖曳卡片。</p></div><div className="adminFormWide adminSetItems"><div className="adminSubheading"><strong>套餐內容</strong><AdminButton variant="secondary" onClick={() => { const item = { id: newId(), menuItemId: items[0]?.id || '', itemName: '', itemRole: 'main', quantity: 1, sortOrder: form.items.length }; update('items', [...form.items, item]); setEditingItem(item); }}>新增餐點</AdminButton></div><AdminDragList items={form.items} onReorder={(next) => update('items', next)} onItemClick={(item) => setEditingItem({ ...item })} renderItem={(item) => <><div><strong>{item.itemName || items.find((value) => value.id === item.menuItemId)?.itemName || '未選餐點'}</strong><small>{item.itemRole} · 數量 {item.quantity}</small></div><div className="adminDragCardMeta"><AdminButton variant="danger" onClick={(event) => { event.stopPropagation(); update('items', form.items.filter((value) => value.id !== item.id)); }}>移除</AdminButton></div></>} emptyText="尚無套餐內容。" /></div></div><AdminDialog open={Boolean(editingItem)} title="編輯套餐內容" onClose={() => setEditingItem(null)} actions={<><AdminButton variant="ghost" onClick={() => setEditingItem(null)}>取消</AdminButton><AdminButton onClick={saveItem}>完成編輯</AdminButton></>}><div className="adminFormGrid"><AdminField label="餐點"><select value={editingItem?.menuItemId || ''} onChange={(event) => setEditingItem((current) => ({ ...current, menuItemId: event.target.value }))}>{items.map((item) => <option key={item.id} value={item.id}>{item.itemName}</option>)}</select></AdminField><AdminField label="角色"><select value={editingItem?.itemRole || 'main'} onChange={(event) => setEditingItem((current) => ({ ...current, itemRole: event.target.value }))}><option value="main">主餐</option><option value="dessert">甜點</option><option value="drink">飲品</option></select></AdminField><AdminField label="數量"><input type="number" min="1" value={editingItem?.quantity || 1} onChange={(event) => setEditingItem((current) => ({ ...current, quantity: event.target.value }))} /></AdminField></div></AdminDialog></>;
+  const saveItem = () => { if(!editingItem.menuItemId || !Number.isInteger(Number(editingItem.quantity)) || Number(editingItem.quantity)<1 || Number(editingItem.quantity)>99) return; const next={...editingItem,itemName:items.find(x=>x.id===editingItem.menuItemId)?.itemName||'',quantity:Number(editingItem.quantity)}; update('items', form.items.some(x=>x.id===next.id)?form.items.map(item=>item.id===next.id?next:item):[...form.items,next]); setEditingItem(null); };
+  return <><div className="adminFormGrid"><AdminField label="套餐名稱"><input value={form.setName} onChange={(event) => update('setName', event.target.value)} autoFocus /></AdminField><AdminField label="套餐價格"><input type="number" min="0" value={form.setPrice} onChange={(event) => update('setPrice', event.target.value)} /></AdminField><AdminField label="套餐描述" className="span-2"><textarea rows="5" value={form.setDescription || ''} onChange={(event) => update('setDescription', event.target.value)} /></AdminField><fieldset className="adminFormWide" disabled={!supportsPolicy}><ProductPolicyForm form={form} update={update}/><p>繼承香檳塔分類：{form.items.map(part=>items.find(item=>item.id===part.menuItemId)).filter(item=>item?.policy?.eventCategories?.includes('champagne_tower')).map(item=>item.itemName).join('、')||'無'}</p></fieldset><AdminImagePicker label="套餐圖片" value={form.imageUrl} pendingFile={form.imageFile} cropConfig={MENU_IMAGE_CROP} output={MENU_IMAGE_OUTPUT} hint="選擇圖片後會開啟 4:3 裁切框；儲存套餐後才會上傳。" onChange={(file) => update('imageFile', file)} onClear={() => { update('imageFile', null); update('imageUrl', ''); update('mediaId', null); }} /><div><AdminToggle checked={form.isAvailable} onChange={(value) => update('isAvailable', value)} label="目前供應" /><p className="adminFieldHint">公開菜單隱藏停售子品，保留套餐原價；全部子品停售時隱藏整組。固定套餐有停售內容時不可下單。內容排序請拖曳卡片。</p></div><div className="adminFormWide adminSetItems"><div className="adminSubheading"><strong>套餐內容</strong><AdminButton variant="secondary" onClick={() => { const item = { id: newId(), menuItemId: items[0]?.id || '', itemName: '', itemRole: 'main', quantity: 1, sortOrder: form.items.length }; setEditingItem(item); }}>新增餐點</AdminButton></div><AdminDragList items={form.items} onReorder={(next) => update('items', next)} onItemClick={(item) => setEditingItem({ ...item })} renderItem={(item) => <><div><strong>{items.find((value) => value.id === item.menuItemId)?.itemName || item.itemName || '未選餐點'}</strong><small>{({main:'主餐',dessert:'甜點',drink:'飲品',other:'其他'}[item.itemRole]||item.itemRole)} · 數量 {item.quantity}{items.find(value=>value.id===item.menuItemId)?.isAvailable===false?' · 停售':''}</small></div><div className="adminDragCardMeta"><AdminButton variant="danger" onClick={(event) => { event.stopPropagation(); update('items', form.items.filter((value) => value.id !== item.id)); }}>移除</AdminButton></div></>} emptyText="尚無套餐內容。" /></div></div><AdminDialog open={Boolean(editingItem)} title="編輯套餐內容" onClose={() => setEditingItem(null)} actions={<><AdminButton variant="ghost" onClick={() => setEditingItem(null)}>取消</AdminButton><AdminButton onClick={saveItem}>完成編輯</AdminButton></>}><div className="adminFormGrid"><AdminField label="餐點"><select value={editingItem?.menuItemId || ''} onChange={(event) => setEditingItem((current) => ({ ...current, menuItemId: event.target.value, itemName: items.find(x=>x.id===event.target.value)?.itemName||'' }))}>{items.map((item) => <option key={item.id} value={item.id}>{item.itemName}</option>)}</select></AdminField><AdminField label="角色"><select value={editingItem?.itemRole || 'main'} onChange={(event) => setEditingItem((current) => ({ ...current, itemRole: event.target.value }))}><option value="main">主餐</option><option value="dessert">甜點</option><option value="drink">飲品</option><option value="other">其他</option></select></AdminField><AdminField label="數量"><input type="number" min="1" value={editingItem?.quantity || 1} onChange={(event) => setEditingItem((current) => ({ ...current, quantity: event.target.value }))} /></AdminField></div></AdminDialog></>;
 }
 
 function localId(id) { return id && !id.startsWith('local-') ? id : null; }
 function upsert(items, value) { return items.some((item) => item.id === value.id) ? items.map((item) => item.id === value.id ? value : item) : [...items, value]; }
 function toForm(type, value) {
-  if (type === 'pricing') return value ? { ...value } : { ...emptyPricing };
+  if (type === 'pricing') return value ? {...value, policy:{...pricingPolicy,...value.policy}} : {...emptyPricing,policy:{...pricingPolicy}};
   if (type === 'categories') return value ? { ...value } : { ...emptyCategory };
-  if (type === 'items') return value ? { ...value, imageFile: null, tagsText: value.tags ? JSON.stringify(value.tags) : '' } : { ...emptyItem };
-  return value ? { ...value, imageFile: null, items: (value.items || []).map((item) => ({ ...item })) } : { ...emptySet };
+  if (type === 'items') return value ? { ...value, imageFile: null, policy: {...productPolicy,...value.policy}, tagsText: Array.isArray(value.tags) ? value.tags.join(',') : '' } : { ...emptyItem,policy:{...productPolicy} };
+  return value ? { ...value, policy:{...productPolicy,...value.policy}, imageFile: null, items: (value.items || []).map((item) => ({ ...item })) } : { ...emptySet,items:[],policy:{...productPolicy} };
 }
 function displayName(tab, item) { return tab === 'pricing' ? item.title : tab === 'categories' ? item.categoryName : tab === 'items' ? item.itemName : item.setName; }
 function secondaryName(tab, item) { return tab === 'pricing' ? item.priceText || item.description : tab === 'categories' ? item.categoryDescription || '分類' : tab === 'items' ? `${item.price} Gil` : `${item.setPrice} Gil`; }

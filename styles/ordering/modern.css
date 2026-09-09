@@ -698,3 +698,5 @@
   .orderStaffModal>footer a{padding-inline:12px;font-size:11px}
   .orderStaffModal>footer button{flex:1}
 }
+
+.orderQuoteReview{margin:20px 0;padding:24px;border:2px solid #587b70;background:#fffdf8;color:#18201d;border-radius:16px}.orderQuoteReview dl>div{display:flex;justify-content:space-between;gap:18px;padding:8px 0;border-bottom:1px solid #ddd}.orderQuoteReview p{white-space:pre-line}.orderQuoteReview button{padding:12px 18px;margin:10px 10px 0 0;background:#173e35;color:white;border-radius:8px;cursor:pointer}.orderQuoteReview button:disabled{opacity:.5;cursor:not-allowed}.orderQuoteReview :focus-visible{outline:3px solid #805f9e;outline-offset:3px}

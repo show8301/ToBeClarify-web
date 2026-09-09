@@ -33,6 +33,7 @@ async function request(path, { token, ...options } = {}) {
 }
 
 export const orderingApi = {
+  quote: (token, body, signal) => request('/quote', {token,method:'POST',body:JSON.stringify(body),signal}),
   access: (orderToken, signal) => request('/access', { method: 'POST', body: JSON.stringify({ orderToken }), signal }),
   recover: (body, signal) => request('/recover', { method: 'POST', body: JSON.stringify(body), signal }),
   catalog: (token, signal) => request('/catalog', { token, signal }),

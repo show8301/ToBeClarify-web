@@ -724,3 +724,5 @@ body{animation:none;background-attachment:scroll}
     padding-bottom:calc(24px + env(safe-area-inset-bottom));
   }
 }
+
+.menu-update-state{padding:14px 20px;font-size:14px;background:var(--mint,#e1eee7)}.menu-update-state button{margin-left:12px;text-decoration:underline;cursor:pointer}.menu-item-thumbnail{float:left;width:80px;height:80px;object-fit:cover;margin:0 16px 8px 0}.menu-item-tags{display:flex;flex-wrap:wrap;gap:6px}.menu-item-tags small{padding:3px 8px;background:var(--mint,#e1eee7);border-radius:10px}.menu-pricing-rules p{white-space:pre-line}

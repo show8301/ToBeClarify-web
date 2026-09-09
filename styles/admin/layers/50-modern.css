@@ -688,6 +688,10 @@
 .adminRoleDashboardIdentity small,.adminRoleDashboardRowCopy small { display:block; overflow:hidden; margin-top:4px; color:var(--color-fg-mute); font-size:10px; line-height:1.45; text-overflow:ellipsis; white-space:nowrap; }
 .adminRoleDashboardBadge { flex:0 0 auto; padding:5px 8px; border-radius:999px; background:rgba(128,153,196,.1); color:#60739a; font-size:10px; font-weight:800; white-space:nowrap; }
 .adminRoleDashboardRow .adminButton { min-height:36px; padding:8px 11px; font-size:11px; }
+.adminCoordinationActions { display:flex; align-items:center; gap:6px; }
+.adminCoordinationActions .adminIconButton { min-width:34px; min-height:34px; padding:6px; font-size:17px; line-height:1; }
+.adminCoordinationAccept { color:#216b5d; }
+.adminCoordinationReject { color:#a54d61; }
 .adminRoleDashboardEmpty { margin:0; padding:20px 4px; color:var(--color-fg-mute); font-size:12px; text-align:center; }
 .adminRoleDashboardNotice { padding:13px 15px; border:1px solid rgba(170,127,71,.24); border-radius:11px; background:rgba(244,231,202,.52); color:#745a34; font-size:12px; line-height:1.6; }
 .adminRoleSwitcher { display:flex; flex-wrap:wrap; align-items:center; gap:6px; padding:8px; border:1px solid rgba(49,51,74,.12); border-radius:11px; background:rgba(250,250,253,.82); }
@@ -789,6 +793,8 @@
 :root[data-admin-theme="dark"] .adminRoleSwitcher { background:rgba(20,34,40,.9); border-color:rgba(255,255,255,.13); }
 :root[data-admin-theme="dark"] .adminRoleSwitcher button { background:rgba(255,255,255,.06); color:var(--color-fg); border-color:rgba(255,255,255,.15); }
 :root[data-admin-theme="dark"] .adminRoleDashboardPrimaryAction { background:linear-gradient(115deg,rgba(34,75,70,.62),rgba(32,51,72,.74)); border-color:rgba(117,201,184,.24); }
+:root[data-admin-theme="dark"] .adminCoordinationAccept { color:#b8f1e2; }
+:root[data-admin-theme="dark"] .adminCoordinationReject { color:#ffc0ca; }
 :root[data-admin-theme="dark"] .adminManagerControls>label input { background:#1b2c34; color:#eef4f5; border-color:rgba(255,255,255,.15); }
 :root[data-admin-theme="dark"] .adminManagerControls .adminBusinessModeButtons button { background:#1b2c34; color:#eef4f5; }
 :root[data-admin-theme="dark"] .adminStaffWorkModeOption { background:rgba(255,255,255,.04); border-color:rgba(255,255,255,.13); }
@@ -813,6 +819,7 @@
   .adminRoleDashboardRow { grid-template-columns:1fr auto; align-items:start; }
   .adminRoleDashboardRowCopy { grid-column:1/-1; }
   .adminRoleDashboardRow .adminButton { justify-self:start; }
+  .adminCoordinationActions { justify-self:end; }
   .adminRoleDashboardBadge { justify-self:end; }
   .adminRoleDashboardPrimaryActionBody { align-items:flex-start; flex-direction:column; }
   .adminRoleDashboardPrimaryActionBody .adminButton { width:100%; }

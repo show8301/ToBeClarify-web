@@ -65,20 +65,25 @@ export type HomeData = {
   carousels:HomeCarousel[];
 };
 
+export type PricingPolicy = { mode:"information"|"system"; source?:string|null; showOnHome:boolean; showOnMenu:boolean; showOnOrder:boolean; validFrom?:string|null; validUntil?:string|null };
+export type ProductPolicy = { canOrderAlone:boolean; eventCategories:string[] };
 export type MenuItem = {
-  id:string; itemName:string; itemDescription:string; price:number; priceText:string|null;
+  imageUrl?:string|null; tags?:string[]; policy?:ProductPolicy;
+  id:string; itemName:string; itemDescription:string; price:number;
 };
 export type MenuCategory = {
   id:string; categoryName:string; categoryDescription:string; items:MenuItem[];
 };
-export type PricingRule = { id:string; title:string; description:string; priceText:string };
+export type PricingRule = { id:string; title:string; description:string; priceText:string|null; policy?:PricingPolicy };
 export type MenuSetItem = {
+  isAvailable?:boolean; eventCategories?:string[];
   id:string; menuItemId:string; itemName:string; itemRole:string; quantity:number;
 };
 export type MenuSet = {
+  policy?:ProductPolicy; isOrderable?:boolean; unavailableReason?:string; effectiveEventCategories?:string[];
   id:string; setName:string; setDescription:string; setPrice:number; imageUrl:string|null; items:MenuSetItem[];
 };
-export type MenuData = { categories:MenuCategory[]; pricingRules:PricingRule[]; sets:MenuSet[]; showSets?:boolean };
+export type MenuData = { contractVersion?:number; updatedAt?:string; showSets?:boolean; categories:MenuCategory[]; pricingRules:PricingRule[]; sets:MenuSet[] };
 
 export type GalleryAlbumSummary = {
   id:string; albumTitle:string; albumDescription:string; coverImageUrl:string;

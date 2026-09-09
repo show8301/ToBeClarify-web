@@ -20,11 +20,12 @@ function normalizePricingRules(value:unknown):PricingRule[]{
   return value.flatMap((item,index)=>{
     if(!item||typeof item!=="object")return [];
     const rule=item as Partial<PricingRule>;
-    if(typeof rule.title!=="string"||!rule.title.trim())return [];
+    if(typeof rule.title!=="string"||!rule.title.trim()||rule.policy?.showOnHome===false)return [];
     return [{
       id:typeof rule.id==="string"&&rule.id?rule.id:`live-pricing-${index}`,
       title:rule.title,
       description:typeof rule.description==="string"?rule.description:"",
+      policy:rule.policy,
       priceText:typeof rule.priceText==="string"?rule.priceText:"",
     }];
   });
@@ -35,7 +36,8 @@ export default function HomeLanding({home,pricingRules:initialPricingRules=[]}:H
   const [slides,setSlides]=useState(home.slides);
   const [shopInfo,setShopInfo]=useState(home.shopInfo);
   const [livePageVisibility,setLivePageVisibility]=useState(home.pageVisibility);
-  const [pricingRules,setPricingRules]=useState<PricingRule[]>(initialPricingRules.length?initialPricingRules:legacyPricingRules(home));
+  const [pricingRules,setPricingRules]=useState<PricingRule[]>(normalizePricingRules(initialPricingRules.length?initialPricingRules:legacyPricingRules(home)));
+  const [pricingFresh,setPricingFresh]=useState(false);
   const [heroLoaded,setHeroLoaded]=useState(false);
   const [aboutLoaded,setAboutLoaded]=useState(false);
   const [loadedEvents,setLoadedEvents]=useState<Record<string,boolean>>({});
@@ -61,7 +63,7 @@ export default function HomeLanding({home,pricingRules:initialPricingRules=[]}:H
       .then((payload:unknown)=>{
         const data=payload as {success?:boolean;data?:{pricingRules?:unknown}}|null;
         if(!data?.success||!Array.isArray(data.data?.pricingRules))return;
-        setPricingRules(normalizePricingRules(data.data.pricingRules));
+        setPricingRules(normalizePricingRules(data.data.pricingRules));setPricingFresh(true);
       });
     Promise.all([homeRequest,menuRequest]).catch(()=>{});
     return()=>controller.abort();
@@ -123,7 +125,7 @@ export default function HomeLanding({home,pricingRules:initialPricingRules=[]}:H
       <div className="home-about-copy">{shopInfo.about.map((paragraph,index)=><p key={index}>{paragraph}</p>)}<div><b>OPEN</b><span>{shopInfo.openHours}</span><b>WHERE</b><span>{shopInfo.server} · {shopInfo.address}</span></div></div>
     </section>
 
-    <section className="home-pricing">
+    <section className="home-pricing">{!pricingFresh&&<p role="status">價格資訊正在更新，實際消費請以最新菜單與點餐確認為準。</p>}
       <header><div><span>FIRST VISIT GUIDE</span><h2>入夢指南</h2></div><p>{shopInfo.entryNote}</p></header>
       <div>{pricingRules.map((item,index)=><motion.article key={item.id||`${item.title}-${index}`} initial={reduceMotion?false:{opacity:0,y:24}} whileInView={{opacity:1,y:0}} viewport={{once:true,amount:.25}} transition={{delay:index*.08}}><span>{String(index+1).padStart(2,"0")}</span><h3>{item.title}</h3><b>{item.priceText}</b><i>{index===0?"ENTRY":index===1?"COMPANY":"PRIVATE"}</i></motion.article>)}</div>
     </section>

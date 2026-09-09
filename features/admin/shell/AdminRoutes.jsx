@@ -1,4 +1,10 @@
 "use client";
+import {AdminNotificationsPage} from '@/features/admin/notifications/AdminNotificationCenter';
+import {NotificationOrderPage} from '@/features/admin/notifications/NotificationOrderPage';
+
+export function AdminNotificationOrderRoute({orderId}) {
+  return <AdminProtectedRoute><NotificationOrderPage key={orderId} orderId={orderId}/></AdminProtectedRoute>;
+}
 
 import { useCallback, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
@@ -136,3 +142,5 @@ function AdminLoading() {
 function AdminError({ error }) {
   return <main className="adminState adminStateError" role="alert"><div className="adminStateMark">!</div><h1>後台暫時無法連線</h1><p>{error.message}</p></main>;
 }
+
+export function AdminNotificationsRoute(){return <AdminProtectedRoute><AdminNotificationsPage/></AdminProtectedRoute>;}

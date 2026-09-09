@@ -833,6 +833,53 @@
 :root[data-admin-theme="dark"] .adminRosterNomination{border-color:rgba(218,234,244,.24);background:rgba(37,58,75,.88);color:#b8f1e2}
 @media(max-width:720px){.adminSignaturePreview{width:100%;max-width:420px}.adminRosterCardHeading{min-height:92px}.adminRosterCardHeading img{width:min(170px,86%)}}
 
-.notification-bell{position:relative}.notification-bell>button{padding:10px 14px;border:1px solid currentColor;border-radius:8px}.notification-drawer{position:absolute;right:0;top:100%;z-index:300;width:min(420px,90vw);max-height:75vh;overflow:auto;padding:20px;background:#fffdf8;color:#18201d;border:1px solid #61726b;box-shadow:0 12px 40px #0003}.notification-drawer article{border-bottom:1px solid #ccc;padding:14px 0;display:grid;gap:7px}.notification-drawer button,.notification-drawer a{padding:8px;cursor:pointer;text-decoration:underline}.notification-toasts{position:fixed;right:20px;top:100px;z-index:400;width:min(380px,calc(100vw - 40px));display:grid;gap:12px}.notification-toasts article{position:relative;padding:20px 36px 20px 20px;background:#fffdf8;color:#18201d;border:1px solid #678077;box-shadow:0 8px 30px #0003}.notification-toasts article.is-broadcast{border:3px solid #985713}.notification-toasts article button{position:absolute;right:10px;top:8px;font-size:24px}.notification-rule{padding:18px;margin:12px 0;border:1px solid #819189;border-radius:12px}.notification-rule select{padding:10px;width:100%}.notification-toasts a{text-decoration:underline}.notification-order-detail{padding:24px;border:1px solid #819189;border-radius:12px}.notification-order-detail p{padding:6px 0}
+.notification-bell{position:fixed;top:max(20px,env(safe-area-inset-top));right:max(24px,env(safe-area-inset-right));z-index:600}.notification-bell>button{min-height:42px;padding:10px 14px;border:1px solid currentColor;border-radius:10px;background:var(--color-surface);color:var(--color-fg);box-shadow:0 10px 24px rgba(0,0,0,.18)}.notification-bell>button:hover,.notification-bell>button:focus-visible{border-color:var(--color-accent);box-shadow:0 12px 28px rgba(0,0,0,.26)}.notification-drawer{position:absolute;right:0;top:calc(100% + 10px);z-index:300;width:min(420px,90vw);max-height:75vh;overflow:auto;padding:20px;background:#fffdf8;color:#18201d;border:1px solid #61726b;box-shadow:0 12px 40px #0003}.notification-drawer article{border-bottom:1px solid #ccc;padding:14px 0;display:grid;gap:7px}.notification-drawer button,.notification-drawer a{padding:8px;cursor:pointer;text-decoration:underline}.notification-toasts{position:fixed;right:20px;top:100px;z-index:400;width:min(380px,calc(100vw - 40px));display:grid;gap:12px}.notification-toasts article{position:relative;padding:20px 36px 20px 20px;background:#fffdf8;color:#18201d;border:1px solid #678077;box-shadow:0 8px 30px #0003}.notification-toasts article.is-broadcast{border:3px solid #985713}.notification-toasts article button{position:absolute;right:10px;top:8px;font-size:24px}.notification-rule{padding:18px;margin:12px 0;border:1px solid #819189;border-radius:12px}.notification-rule select{padding:10px;width:100%}.notification-toasts a{text-decoration:underline}.notification-order-detail{padding:24px;border:1px solid #819189;border-radius:12px}.notification-order-detail p{padding:6px 0}
+
+:root[data-admin-theme="dark"] .notification-center button:not(.adminToggleSwitch),
+:root[data-admin-theme="dark"] .notification-center input:not([type="checkbox"]),
+:root[data-admin-theme="dark"] .notification-center select,
+:root[data-admin-theme="dark"] .notification-center textarea {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface-input);
+  color: var(--color-fg);
+}
+:root[data-admin-theme="dark"] .notification-center button:not(.adminToggleSwitch):hover:not(:disabled),
+:root[data-admin-theme="dark"] .notification-center button:not(.adminToggleSwitch):focus-visible,
+:root[data-admin-theme="dark"] .notification-center input:focus,
+:root[data-admin-theme="dark"] .notification-center select:focus,
+:root[data-admin-theme="dark"] .notification-center textarea:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), .16);
+}
+:root[data-admin-theme="dark"] .notification-center select option {
+  background: #142229;
+  color: var(--color-fg);
+}
+:root[data-admin-theme="dark"] .notification-center input[type="file"]::file-selector-button {
+  border: 1px solid var(--color-border-strong);
+  border-radius: 7px;
+  background: rgba(62, 91, 117, .55);
+  color: var(--color-fg);
+}
+:root[data-admin-theme="dark"] .notification-center .adminButton-primary {
+  background: linear-gradient(110deg, #6f9bc4, #4f7c9f);
+  color: #f4fbff;
+}
+:root[data-admin-theme="dark"] .notification-center .adminButton-danger {
+  background: rgba(120, 54, 73, .42);
+  color: #ffc0ca;
+}
+:root[data-admin-theme="dark"] .notification-center .notification-rule {
+  border-color: rgba(218, 234, 244, .28);
+  background: rgba(13, 23, 34, .26);
+}
+:root[data-admin-theme="dark"] .notification-drawer {
+  background: #142229;
+  color: var(--color-fg);
+  border-color: var(--color-border-strong);
+}
+:root[data-admin-theme="dark"] .notification-drawer article {
+  border-bottom-color: var(--color-border);
+}
 
 .notification-banners{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:450;width:min(900px,calc(100vw - 24px));display:grid;gap:8px;pointer-events:none}.notification-banners article{position:relative;padding:14px 42px 14px 20px;background:#fff4df;color:#342717;border:2px solid #985713;box-shadow:0 8px 30px #0003;pointer-events:auto}.notification-banners article button{position:absolute;right:10px;top:8px;font-size:24px}.notification-banners a{text-decoration:underline}.adminFormWide[disabled]{opacity:.65}

@@ -36,8 +36,8 @@ function ActionFeedback({ state }: { state: OperationsActionState }) {
   return null;
 }
 
-function OrderIdentity({ order }: { order: OperationsOrder }) {
-  return <div className="adminRoleDashboardIdentity"><strong>{order.customerName || "未命名顧客"}</strong><small>{order.orderNumber} · ID {order.gameId}</small></div>;
+function OrderIdentity({ order, compact = false }: { order: OperationsOrder; compact?: boolean }) {
+  return <div className="adminRoleDashboardIdentity"><strong>{order.customerName || "未命名顧客"}</strong><small>{compact ? order.orderNumber : `${order.orderNumber} · ID ${order.gameId}`}</small></div>;
 }
 
 function AssignedServiceRow({ order, nominee, runAction, actionState }: { order: OperationsOrder; nominee: OperationsOrder["nominees"][number]; runAction: OperationsAction; actionState: OperationsActionState }) {
@@ -100,12 +100,20 @@ export function AdminDesignatedDashboard({ data, user, navigate, runAction, acti
 }
 
 function CoordinationRow({ order, runAction, actionState }: { order: OperationsOrder; runAction: OperationsAction; actionState: OperationsActionState }) {
-  const actionId = `coordination-${order.id}`;
+  const acceptActionId = `coordination-accept-${order.id}`;
+  const rejectActionId = `coordination-reject-${order.id}`;
+  const isBusy = actionState.busyId === acceptActionId || actionState.busyId === rejectActionId;
+  const reject = () => {
+    if (!window.confirm("確定拒絕此協調單？")) return;
+    void runAction(rejectActionId, () => adminApi.decideStoreConfirmation(order.id, "rejected", "現場確認暫時無法承接"), "已拒絕協調單；顧客會收到店家目前無法承接的結果。");
+  };
   return <article className="adminRoleDashboardRow">
-    <OrderIdentity order={order} />
-    <div className="adminRoleDashboardRowCopy"><strong>協調單待確認</strong><small>{order.customerNote || "顧客已送出訂單，請現場確認是否承接。"}</small></div>
-    <span className="adminRoleDashboardBadge">{order.queueStage || "協調接單"}</span>
-    <AdminButton disabled={actionState.busyId === actionId} onClick={() => void runAction(actionId, () => adminApi.decideStoreConfirmation(order.id, "approved", "現場確認可承接"), "已接受協調單；指名服務會接續等待各店員確認。")}>{actionState.busyId === actionId ? "處理中…" : "接受協調單"}</AdminButton>
+    <OrderIdentity order={order} compact />
+    <div className="adminRoleDashboardRowCopy"><strong>協調單待確認</strong><small>{order.queueStage || "等待店家確認"}</small></div>
+    <div className="adminCoordinationActions" role="group" aria-label={`${order.customerName || "此顧客"}協調單處理`}>
+      <AdminButton className="adminIconButton adminCoordinationAccept" disabled={isBusy} aria-label="接受協調單" title="接受協調單" onClick={() => void runAction(acceptActionId, () => adminApi.decideStoreConfirmation(order.id, "approved", "現場確認可承接"), "已接受協調單；指名服務會接續等待各店員確認。")}>{actionState.busyId === acceptActionId ? "…" : "✓"}</AdminButton>
+      <AdminButton variant="danger" className="adminIconButton adminCoordinationReject" disabled={isBusy} aria-label="拒絕協調單" title="拒絕協調單" onClick={reject}>{actionState.busyId === rejectActionId ? "…" : "×"}</AdminButton>
+    </div>
   </article>;
 }
 

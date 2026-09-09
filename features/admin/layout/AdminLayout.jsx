@@ -18,7 +18,7 @@ const allGroups = [
     { route: '/admin/rooms', label: '包廂內容管理', index: '12', roles: ['developer', 'manager', 'clerk'] },
   ] },
   { label: '系統工具', items: [
-    { route: '/admin/orders', label: '完整點單管理（開發者工具）', index: '90', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin/orders', label: '完整點單管理', index: '99', roles: ['developer', 'manager', 'clerk'] },
   ] },
   { label: '內容與設定', items: [
     { route: '/admin/menu', label: '菜單設定', index: '06', roles: ['developer', 'manager'] },

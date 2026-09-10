@@ -53,7 +53,7 @@ async function proxy(request: Request, { params }: RouteContext) {
   upstreamUrl.search = new URL(request.url).search;
 
   const headers = new Headers({ Accept: request.headers.get("accept") || "application/json" });
-  for (const name of ["content-type", "cookie"]) {
+  for (const name of ["content-type", "cookie", "last-event-id"]) {
     const value = request.headers.get(name);
     if (value) headers.set(name, value);
   }

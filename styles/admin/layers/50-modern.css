@@ -698,6 +698,8 @@
 .adminRoleSwitcher > span { margin:0 4px 0 3px; color:var(--color-fg-mute); font-size:11px; font-weight:750; }
 .adminRoleSwitcher button { min-height:34px; padding:7px 11px; border:1px solid rgba(101,120,159,.22); border-radius:8px; background:rgba(255,255,255,.64); color:var(--color-fg-soft); font-size:11px; font-weight:750; }
 .adminRoleSwitcher button.isActive { border-color:rgba(101,120,159,.46); background:#65789f; color:#fff; }
+.adminRoleSwitcher.isDeveloperPreview { border-color:rgba(101,120,159,.28); background:linear-gradient(105deg,rgba(234,239,250,.86),rgba(245,247,252,.86)); }
+.adminRoleSwitcher.isDeveloperPreview > span { color:#59698e; }
 .adminRoleDashboardPrimaryAction { margin:0; border-color:rgba(61,130,122,.25); background:linear-gradient(115deg,rgba(224,244,239,.74),rgba(234,238,249,.76)); }
 .adminRoleDashboardPrimaryActionBody { display:flex; align-items:center; justify-content:space-between; gap:18px; }
 .adminRoleDashboardPrimaryActionBody > div { display:grid; gap:5px; }
@@ -792,6 +794,8 @@
 :root[data-admin-theme="dark"] .adminRoleDashboardNotice { background:rgba(91,72,39,.36); color:#ead7ae; }
 :root[data-admin-theme="dark"] .adminRoleSwitcher { background:rgba(20,34,40,.9); border-color:rgba(255,255,255,.13); }
 :root[data-admin-theme="dark"] .adminRoleSwitcher button { background:rgba(255,255,255,.06); color:var(--color-fg); border-color:rgba(255,255,255,.15); }
+:root[data-admin-theme="dark"] .adminRoleSwitcher.isDeveloperPreview { background:linear-gradient(105deg,rgba(38,53,79,.9),rgba(25,42,52,.9)); border-color:rgba(145,166,220,.38); }
+:root[data-admin-theme="dark"] .adminRoleSwitcher.isDeveloperPreview > span { color:#b5c4e8; }
 :root[data-admin-theme="dark"] .adminRoleDashboardPrimaryAction { background:linear-gradient(115deg,rgba(34,75,70,.62),rgba(32,51,72,.74)); border-color:rgba(117,201,184,.24); }
 :root[data-admin-theme="dark"] .adminCoordinationAccept { color:#b8f1e2; }
 :root[data-admin-theme="dark"] .adminCoordinationReject { color:#ffc0ca; }

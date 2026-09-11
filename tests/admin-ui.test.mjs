@@ -201,3 +201,16 @@ test('password recovery is linked from login and reset keys are permission-gated
   assert.match(api, /\/auth\/password-reset-key/);
   assert.match(api, /\/auth\/forgot-password\/reset/);
 });
+
+test('developer can preview every operational dashboard from the admin landing page', async () => {
+  const page = await readFile(new URL('../features/admin/operations/AdminRoleOperationsPage.tsx', import.meta.url), 'utf8');
+  const routes = await readFile(new URL('../features/admin/shell/AdminRoutes.jsx', import.meta.url), 'utf8');
+  const layout = await readFile(new URL('../features/admin/layout/AdminLayout.jsx', import.meta.url), 'utf8');
+
+  assert.match(page, /const developerPreviewRoles: OperationalDashboardRole\[\] = \["service", "designated", "manager"\]/);
+  assert.match(page, /if \(accountRole === "developer"\) return developerPreviewRoles/);
+  assert.match(page, /開發者工作台預覽切換/);
+  assert.match(page, /完整點單管理/);
+  assert.doesNotMatch(routes, /user\?\.role === 'developer'\) navigate\('\/admin\/orders'\)/);
+  assert.match(layout, /route: '\/admin', label: '營業工作台', index: '00', roles: \['developer', 'manager', 'clerk'\]/);
+});

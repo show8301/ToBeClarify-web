@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { adminApi } from '@/features/admin/api/client.js';
 import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
 import { useAdminImageProcessing } from '@/features/admin/media/AdminImageProcessingContext.js';
-import { AdminButton, AdminField, AdminPage, AdminPanel, AdminState, AdminToggle } from '@/features/admin/shared/AdminShared.jsx';
+import { AdminButton, AdminDialog, AdminField, AdminPage, AdminPanel, AdminState, AdminToggle } from '@/features/admin/shared/AdminShared.jsx';
 
 const emptyForm = () => ({ id: '', roomName: '', shortDescription: '', detailContent: '', ownerStaffId: '', segmentPrice: '', segmentMinutes: 20, sortOrder: 0, isActive: true, photos: [] });
 const money = (value) => Number(value || 0) > 0 ? `${Number(value).toLocaleString('zh-TW')} G / 節` : '尚未定價';
@@ -34,7 +34,9 @@ export function AdminRoomsPage() {
   const [profit, setProfit] = useState({ commonRoomStaffPercentage: 0, dedicatedRoomStaffPercentage: 100 });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [message, setMessage] = useState({ text: '', error: false });
 
   const load = async (preferredId = '') => {
@@ -62,6 +64,19 @@ export function AdminRoomsPage() {
   const update = (key, value) => setForm((current) => ({ ...current, [key]: value }));
   const selectRoom = (room) => { setForm(formFromRoom(room)); setMessage({ text: '', error: false }); };
   const startNew = () => { setForm(emptyForm()); setMessage({ text: '', error: false }); };
+
+  const deleteRoom = async () => {
+    if (!form.id || !canManageSettings) return;
+    setDeleting(true);
+    const deletedRoomName = form.roomName;
+    try {
+      await adminApi.deleteRoom(form.id);
+      setDeleteConfirmOpen(false);
+      await load();
+      setMessage({ text: `包廂「${deletedRoomName || '未命名包廂'}」已刪除。`, error: false });
+    } catch (error) { setMessage({ text: error.message, error: true }); }
+    finally { setDeleting(false); }
+  };
 
   const save = async () => {
     if (!form.roomName.trim() || !form.shortDescription.trim()) {
@@ -118,7 +133,7 @@ export function AdminRoomsPage() {
 
   const activeCount = useMemo(() => rooms.filter((room) => room.isActive).length, [rooms]);
 
-  return <AdminPage eyebrow="ROOM CONTENT" title="包廂內容管理" description="管理公開包廂介紹、照片與內容。營業期間的預約與服務狀態請至包廂服務排程；價格與包廂歸屬僅開發者／經理可調整。" actions={<><AdminButton variant="secondary" disabled={loading} onClick={() => load(form.id)}>重新整理</AdminButton><AdminButton onClick={startNew}>＋ 新增包廂</AdminButton></>}>
+  return <AdminPage eyebrow="ROOM CONTENT" title="包廂內容管理" description="管理公開包廂介紹、照片與內容。營業期間的預約與服務狀態請至包廂服務排程；價格、包廂歸屬與刪除僅開發者／經理可調整。" actions={<><AdminButton variant="secondary" disabled={loading || deleting} onClick={() => load(form.id)}>重新整理</AdminButton><AdminButton onClick={startNew}>＋ 新增包廂</AdminButton></>}>
     {message.text ? <div className={message.error ? 'adminRoomMessage isError' : 'adminRoomMessage'} role="status">{message.text}</div> : null}
     <AdminState loading={loading} error={null} />
     <div className="adminRoomLayout">
@@ -139,10 +154,23 @@ export function AdminRoomsPage() {
         </div>
 
         <div className="adminRoomPhotos"><header><div><h3>包廂照片</h3><p>最多 20 張；建議使用橫幅空間照，首張作為清單封面。</p></div><label className={`adminButton adminButton-secondary${uploading ? ' isDisabled' : ''}`}>{uploading ? '上傳處理中…' : '＋ 加入照片'}<input type="file" accept="image/jpeg,image/png,image/webp" multiple disabled={uploading || form.photos.length >= 20} onChange={(event) => { void uploadPhotos([...event.target.files]); event.target.value = ''; }} /></label></header><div className="adminRoomPhotoGrid">{form.photos.map((photo, index) => <figure key={photo.id || photo.mediaId}><img src={photo.imageUrl || `/api/admin-media/${encodeURIComponent(photo.mediaId)}`} alt={`包廂照片 ${index + 1}`} /><figcaption><span>{index === 0 ? '封面' : `照片 ${index + 1}`}</span><button type="button" onClick={() => removePhoto(photo.id)}>移除</button></figcaption></figure>)}{!form.photos.length ? <p className="adminEmptyText">尚無照片，加入後會在這裡預覽。</p> : null}</div></div>
-        <div className="adminRoomEditorActions"><AdminButton variant="ghost" onClick={startNew}>清空表單</AdminButton><AdminButton disabled={saving || uploading} onClick={save}>{saving ? '儲存中…' : '儲存包廂資料'}</AdminButton></div>
+        <div className="adminRoomEditorActions">{form.id && canManageSettings ? <><AdminButton className="adminRoomDeleteButton" variant="danger" disabled={saving || uploading || deleting} onClick={() => setDeleteConfirmOpen(true)}>刪除包廂</AdminButton><span className="adminDialogActionSpacer" aria-hidden="true" /></> : null}<AdminButton variant="ghost" disabled={deleting} onClick={startNew}>清空表單</AdminButton><AdminButton disabled={saving || uploading || deleting} onClick={save}>{saving ? '儲存中…' : '儲存包廂資料'}</AdminButton></div>
       </AdminPanel>
     </div>
 
     {canManageSettings ? <AdminPanel className="adminRoomProfitPanel" title="包廂分成設定" description="薪資計算使用包廂訂單送出時的房型快照。店內共用與店員專屬分開設定，比例為包廂金額給店員的百分比。"><div className="adminRoomProfitGrid"><AdminField label="店內共用包廂 · 店員分成"><input type="number" min="0" max="100" value={profit.commonRoomStaffPercentage} onChange={(event) => setProfit({ ...profit, commonRoomStaffPercentage: event.target.value })} /><small>例如 30 代表店員取得包廂金額的 30%。</small></AdminField><AdminField label="店員專屬包廂 · 店員分成"><input type="number" min="0" max="100" value={profit.dedicatedRoomStaffPercentage} onChange={(event) => setProfit({ ...profit, dedicatedRoomStaffPercentage: event.target.value })} /><small>專屬包廂依所屬店員規則計算。</small></AdminField><AdminButton onClick={saveProfit}>儲存分成</AdminButton></div></AdminPanel> : null}
+      <AdminDialog
+        className="adminDeleteConfirmDialog"
+        open={deleteConfirmOpen}
+        title="確定刪除包廂？"
+        description="此操作無法復原；排程中或服務中的服務訂單會阻止刪除。"
+        onClose={() => { if (!deleting) setDeleteConfirmOpen(false); }}
+        actions={<><AdminButton variant="ghost" autoFocus disabled={deleting} onClick={() => setDeleteConfirmOpen(false)}>取消</AdminButton><AdminButton variant="danger" disabled={deleting} onClick={deleteRoom}>{deleting ? '刪除中…' : `確認刪除「${form.roomName || '未命名包廂'}」`}</AdminButton></>}
+      >
+        <div className="adminDeleteConfirmContent">
+          <span aria-hidden="true">!</span>
+          <div><strong>{form.roomName || '未命名包廂'}</strong><p>刪除後會移除公開包廂資料與照片關聯；既有服務紀錄仍會保留歷史名稱與價格快照。</p></div>
+        </div>
+      </AdminDialog>
   </AdminPage>;
 }

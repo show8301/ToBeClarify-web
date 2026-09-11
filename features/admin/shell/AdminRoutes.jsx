@@ -33,13 +33,6 @@ function useAdminNavigation() {
 }
 
 function AdminDashboardLanding({ navigate }) {
-  const { user } = useAdminAuth();
-
-  useEffect(() => {
-    if (user?.role === 'developer') navigate('/admin/orders');
-  }, [navigate, user]);
-
-  if (user?.role === 'developer') return <AdminLoading />;
   return <AdminRoleOperationsPage navigate={navigate} />;
 }
 

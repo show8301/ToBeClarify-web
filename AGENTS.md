@@ -1,5 +1,12 @@
 # Repository instructions
 
+## Environment definitions
+
+- Web test environment is the `dev` branch and deploys to `https://www-dev.marchgroup.net`.
+- Web production environment is the `main` branch; promote only after the test deployment is confirmed.
+- The API project has no separate test environment. When a combined request says to deploy to the test environment, deploy Web to `dev` and deploy the API through its normal production flow to `main`.
+- API `dev` is build-only and is not an API test host.
+
 ## Coding standards
 
 - Read and follow [`docs/coding-standards.md`](docs/coding-standards.md) before making Web code changes.

@@ -168,6 +168,7 @@ export const adminApi = {
   saveRoom: (id, body, signal) => request(id ? `/rooms/${encodeURIComponent(id)}` : '/rooms', {
     method: id ? 'PUT' : 'POST', body: JSON.stringify(body), signal,
   }),
+  deleteRoom: (id, signal) => request(`/rooms/${encodeURIComponent(id)}`, { method: 'DELETE', signal }),
   getRoomProfitSharing: (signal) => request('/payroll/room-profit-sharing', { signal }),
   saveRoomProfitSharing: (body, signal) => request('/payroll/room-profit-sharing', {
     method: 'PUT', body: JSON.stringify(body), signal,

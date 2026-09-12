@@ -4,6 +4,26 @@ Both the production and DEV sites run as separate Node.js processes on
 localhost. IIS terminates each public HTTP(S) connection and reverse-proxies
 requests to the port assigned to that environment.
 
+## Environment and documentation map
+
+| Environment | Release branch | Public origin | Node port | PM2 application |
+| --- | --- | --- | --- | --- |
+| Web development | `dev` | `https://www-dev.marchgroup.net` | `4310` | `tobeclarify-web-dev` |
+| Web production | `main` | `https://www.marchgroup.net` | `4300` | `tobeclarify-web-prod` |
+
+Both branches contain [coding standards](coding-standards.md),
+[architecture](architecture.md), the [README](../README.md),
+[repository instructions](../AGENTS.md), and this deployment guide. Update
+these documents with the behavior or release policy they describe. Publishing
+their changes through a branch push still runs the normal Web release workflow;
+do not treat a documentation-only push as exempt from production confirmation.
+
+The API has no separate development host. A combined Web/API test-environment
+release sends Web to `dev` and the API through its normal production flow from
+`main`. API `dev` is build/artifact-only. Web API origins are configurable, but
+their defaults target the shared production API; preserve compatibility with
+the currently deployed production Web.
+
 ## One-time server prerequisites
 
 - IIS Web Server, including the management tools that provide `appcmd.exe`
@@ -75,9 +95,16 @@ isolated from unrelated PM2 applications such as `D:\cron`.
 
 ## Workflow behavior
 
-- Pull requests targeting `dev` perform a clean locked install, build, and
-  static/deployment validation without deploying. Automated test suites are
-  intentionally skipped unless the user explicitly requests a test run.
+- Pull requests targeting `dev` or `main` perform a clean locked install,
+  build, typecheck, lint, and script validation without deploying. The current
+  workflow also runs the isolated PM2 smoke described below for same-repository
+  pull requests. This is a separate PR check, not part of the dev push deployment.
+- For a dev release, skip automated test suites before, during, and after
+  deployment unless the user explicitly requests testing for that run. Keep
+  release verification limited to builds, static/configuration checks, deployment
+  status, and operational HTTP availability; do not add tests under a pre-merge
+  or smoke-check label. See [coding standards](coding-standards.md) for the
+  distinction between release and separate PR/production checks.
 - The only permitted production promotion pull request is `dev` → `main`.
   The workflow rejects a different source branch for a pull request targeting
   `main`, so feature branches cannot bypass the development environment.

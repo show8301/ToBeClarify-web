@@ -10,9 +10,12 @@
 ## Coding standards
 
 - Read and follow [`docs/coding-standards.md`](docs/coding-standards.md) before making Web code changes.
-- New source code uses TypeScript/TSX. Existing JavaScript/JSX may be migrated incrementally when materially edited.
+- [`docs/coding-standards-audit-20260912.md`](docs/coding-standards-audit-20260912.md) records the audit baseline and remaining implementation gaps; it does not assert full compliance or authorize unrelated fixes.
+- New application source code uses TypeScript/TSX. Existing JavaScript/JSX may be migrated incrementally when materially edited; tooling and existing tests may retain `.mjs` and deployment scripts retain `.ps1`.
 - Cross-domain runtime implementation imports are forbidden; type-only imports from explicit contract modules are allowed.
 - Browser code uses same-origin `/api/...` clients; upstream API origins belong only in `lib/server/upstream-config.ts`.
+- Keep routes thin, reuse the admin shell and providers, preserve API authority over permissions and transactions, and clean up asynchronous/browser resources.
+- For documentation-only changes, check links, referenced paths/commands, policy consistency, and the diff. Application builds and automated suites are not required solely for documentation changes.
 
 ## Development deployment checks
 

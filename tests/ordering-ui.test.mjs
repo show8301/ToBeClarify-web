@@ -57,6 +57,20 @@ test('customer ordering hides unavailable staff and keeps the ordering UI concis
   assert.match(styles, /\.orderCredit\s*\{/);
 });
 
+test('customer ordering summary uses clear actions and keeps room duration inline', async () => {
+  const source = await readFile(new URL('../features/ordering/components/OrderClient.jsx', import.meta.url), 'utf8');
+  const styles = await readFile(new URL('../styles/ordering/modern.css', import.meta.url), 'utf8');
+
+  assert.match(source, /\['cart', '購物車'\]/);
+  assert.match(source, /\['orders', '全部訂單'\]/);
+  assert.match(source, /<dt>可折抵的餐點費用<\/dt>/);
+  assert.match(source, /<button className="isSecondary"[\s\S]*查看全部訂單/);
+  assert.match(source, /<button type="button"[\s\S]*購物車結帳/);
+  assert.match(source, /className="stepperWithDuration"/);
+  assert.match(styles, /\.stepperWithDuration\s*\{[\s\S]*display:flex/);
+  assert.match(styles, /\.orderAside>button\.isSecondary\s*\{\s*margin-top:0;/);
+});
+
 test('admin ordering workspace groups customers and exposes permission-gated operating settings', async () => {
   const source = await readFile(new URL('../features/admin/orders/AdminOrdersPage.jsx', import.meta.url), 'utf8');
   const routes = await readFile(new URL('../features/admin/shell/AdminRoutes.jsx', import.meta.url), 'utf8');

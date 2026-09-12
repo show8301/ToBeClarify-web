@@ -762,3 +762,21 @@
   .orderCredit span { display:none; }
   .orderCredit strong { font-size:14px; }
 }
+
+/* Keep the duration note beside the room stepper instead of underneath it. */
+.stepperWithDuration {
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.stepperWithDuration .stepper {
+  flex:1;
+  min-width:0;
+}
+.stepperWithDuration small {
+  flex:0 0 auto;
+  white-space:nowrap;
+}
+
+/* The order-history action comes first; keep checkout as the primary action. */
+.orderAside>button.isSecondary { margin-top:0; }

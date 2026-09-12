@@ -145,7 +145,7 @@ export default function OrderClient() {
     ...(!catalog.settings.nominationPaused ? [['nomination', '指名服務']] : []),
     ['tip', '小費'],
     ...(catalog.rooms?.length ? [['room', '訂購包廂']] : []),
-    ['cart', `本次點餐 ${cartCount || ''}`], ['orders', '我的訂單'], ['help', '請洽店員'],
+    ['cart', '購物車'], ['orders', '全部訂單'], ['help', '請洽店員'],
   ];
 
   return (
@@ -174,9 +174,9 @@ export default function OrderClient() {
         </div>
         <aside className="orderAside">
           <div><span>本次點餐</span><strong>{cartCount} 項</strong></div>
-          <dl><div><dt>預估小計</dt><dd>{money(cartSubtotal)}</dd></div><div><dt>可折抵餐點</dt><dd>{money(Math.min(session.remainingMealCredit, cart.meals.reduce((sum, line) => sum + line.price * line.quantity, 0)))}</dd></div></dl>
-          <button type="button" onClick={() => setTab('cart')}>查看明細與送出</button>
-          <button className="isSecondary" type="button" onClick={() => setTab('orders')}>查看我的訂單</button>
+          <dl><div><dt>預估小計</dt><dd>{money(cartSubtotal)}</dd></div><div><dt>可折抵的餐點費用</dt><dd>{money(Math.min(session.remainingMealCredit, cart.meals.reduce((sum, line) => sum + line.price * line.quantity, 0)))}</dd></div></dl>
+          <button className="isSecondary" type="button" onClick={() => setTab('orders')}>查看全部訂單</button>
+          <button type="button" onClick={() => setTab('cart')}>購物車結帳</button>
         </aside>
       </section>
     </main>
@@ -276,7 +276,7 @@ function RoomBookingPage({ rooms, settings, cart, setCart, onNotice }) {
     </section>
     {selectedRoom ? <section className="nominationComposer roomBookingComposer"><div><span>02 / 選擇時段</span><h2>{selectedRoom.roomName}｜包廂使用</h2></div><div className="nominationControls">
       <label>開始時間<input type="datetime-local" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} /></label>
-      <label>節數<div className="stepper"><button type="button" onClick={() => setSegments(Math.max(1, safeSegments - 1))}>−</button><strong>{safeSegments}</strong><button type="button" onClick={() => setSegments(Math.min(72, safeSegments + 1))}>＋</button></div><small>使用 {duration} 分鐘</small></label>
+      <label>節數<div className="stepperWithDuration"><div className="stepper"><button type="button" onClick={() => setSegments(Math.max(1, safeSegments - 1))}>−</button><strong>{safeSegments}</strong><button type="button" onClick={() => setSegments(Math.min(72, safeSegments + 1))}>＋</button></div><small>使用 {duration} 分鐘</small></div></label>
     </div><div className="nominationPrice"><div><span>包廂使用費</span><b>{money(selectedRoom.segmentPrice)} × {safeSegments} 節</b><strong>{money(Number(selectedRoom.segmentPrice) * safeSegments)}</strong></div><footer><span>本項合計</span><strong>{money(Number(selectedRoom.segmentPrice) * safeSegments)}</strong></footer></div><button className="orderPrimaryAction" type="button" onClick={add}>加入本次點餐</button></section> : null}
   </div>;
 }

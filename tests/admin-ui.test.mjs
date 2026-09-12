@@ -202,6 +202,27 @@ test('password recovery is linked from login and reset keys are permission-gated
   assert.match(api, /\/auth\/forgot-password\/reset/);
 });
 
+test('admin login and shared controls stay readable in both themes', async () => {
+  const login = await readFile(new URL('../features/admin/auth/AdminLoginPage.jsx', import.meta.url), 'utf8');
+  const dashboard = await readFile(new URL('../features/admin/dashboard/AdminHomePage.jsx', import.meta.url), 'utf8');
+  const preview = await readFile(new URL('../app/admin/preview/home/page.tsx', import.meta.url), 'utf8');
+  const controls = await readFile(new URL('../styles/admin/layers/80-controls.css', import.meta.url), 'utf8');
+  const modern = await readFile(new URL('../styles/admin/layers/50-modern.css', import.meta.url), 'utf8');
+  const site = await readFile(new URL('../styles/admin/site.css', import.meta.url), 'utf8');
+
+  assert.doesNotMatch(login, /請輸入後台人員帳號，進入管理者專屬區域/);
+  assert.match(modern, /\.adminLoginShell \.adminLoginBrand\s*\{[\s\S]*transform:scale/);
+  assert.match(modern, /\.adminLoginShell \.adminLoginForm label > span\s*\{[\s\S]*font-size:14px/);
+  assert.match(controls, /\.adminTheme select option,[\s\S]*background-color:#fff/);
+  assert.match(controls, /:root\[data-admin-theme="dark"\] \.adminTheme select option,[\s\S]*background-color:#172332/);
+  assert.match(controls, /details:not\(\.adminDeveloperDisclosure\) > summary::after[\s\S]*content:"⌄"/);
+  assert.match(controls, /details:not\(\.adminDeveloperDisclosure\)\[open\] > summary::after[\s\S]*content:"⌃"/);
+  assert.match(controls, /adminDeveloperDisclosure\[open\][\s\S]*content:"⌃"/);
+  assert.match(dashboard, /<i aria-hidden="true" \/>/);
+  assert.match(preview, /<i aria-hidden="true" \/>/);
+  assert.match(site, /@import "\.\/layers\/80-controls\.css"/);
+});
+
 test('developer can preview every operational dashboard from the admin landing page', async () => {
   const page = await readFile(new URL('../features/admin/operations/AdminRoleOperationsPage.tsx', import.meta.url), 'utf8');
   const routes = await readFile(new URL('../features/admin/shell/AdminRoutes.jsx', import.meta.url), 'utf8');

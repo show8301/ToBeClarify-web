@@ -71,6 +71,19 @@ test('customer ordering summary uses clear actions and keeps room duration inlin
   assert.match(styles, /\.orderAside>button\.isSecondary\s*\{\s*margin-top:0;/);
 });
 
+test('customer ordering keeps service descriptions readable and uses the official empty-state mark', async () => {
+  const source = await readFile(new URL('../features/ordering/components/OrderClient.jsx', import.meta.url), 'utf8');
+  const styles = await readFile(new URL('../styles/ordering/modern.css', import.meta.url), 'utf8');
+
+  assert.match(source, /<p>\{item\.serviceDescription\}<\/p>/);
+  assert.match(source, /className="orderEmptyLogo"/);
+  assert.match(source, /<img src="\/favicon\.ico" alt="清醒夢" \/>/);
+  assert.match(styles, /\.nominationServiceGrid\s*\{[\s\S]*grid-template-columns:1fr/);
+  assert.match(styles, /\.nominationServiceGrid>button\s*\{[\s\S]*min-height:0[\s\S]*height:auto/);
+  assert.match(styles, /\.nominationServiceGrid p\s*\{[\s\S]*white-space:pre-line[\s\S]*overflow-wrap:anywhere/);
+  assert.match(styles, /\.orderTopbar \.orderBrand\s*\{[\s\S]*transform:scale/);
+});
+
 test('admin ordering workspace groups customers and exposes permission-gated operating settings', async () => {
   const source = await readFile(new URL('../features/admin/orders/AdminOrdersPage.jsx', import.meta.url), 'utf8');
   const routes = await readFile(new URL('../features/admin/shell/AdminRoutes.jsx', import.meta.url), 'utf8');

@@ -780,3 +780,54 @@
 
 /* The order-history action comes first; keep checkout as the primary action. */
 .orderAside>button.isSecondary { margin-top:0; }
+
+/* Keep service choices scannable while allowing the full description to breathe. */
+.nominationServiceGrid {
+  grid-template-columns:1fr;
+}
+.nominationServiceGrid>button {
+  min-height:0;
+  height:auto;
+  grid-template-rows:auto auto auto auto;
+}
+.nominationServiceGrid>button>strong {
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+.nominationServiceGrid p {
+  min-height:0;
+  max-width:none;
+  overflow:visible;
+  white-space:pre-line;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+  display:block;
+  -webkit-line-clamp:unset;
+}
+.nominationServiceGrid footer {
+  align-self:stretch;
+}
+
+/* Enlarge the visual mark without changing the topbar's layout height. */
+.orderTopbar .orderBrand {
+  transform:scale(1.1);
+  transform-origin:left center;
+}
+
+/* Use the official favicon in empty ordering states. */
+.orderEmpty>span.orderEmptyLogo {
+  width:64px;
+  height:64px;
+  padding:9px;
+  border-radius:18px;
+  background:#e7edf6;
+}
+.orderEmptyLogo img {
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+
+@media(max-width:620px){
+  .orderTopbar .orderBrand { transform:scale(1.06); }
+}

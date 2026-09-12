@@ -86,7 +86,6 @@ export function AdminLoginPage({ navigate }) {
         <div className="adminLoginHeading">
           <p className="eyebrow">Restricted Entrance</p>
           <h1 id="admin-login-title">後台登入</h1>
-          <p>請輸入後台人員帳號，進入管理者專屬區域。</p>
         </div>
 
         <form className="adminLoginForm" onSubmit={submit}>

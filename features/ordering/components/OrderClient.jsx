@@ -406,4 +406,4 @@ function HelpPage({ currentGameId, onRecover, loading }) {
 }
 
 function PageHeading({ kicker, title, text }) { return <header className="orderPageHeading"><span>{kicker}</span><h1>{title}</h1><p>{text}</p></header>; }
-function EmptyState({ title, text }) { return <div className="orderEmpty"><span>LD</span><h2>{title}</h2><p>{text}</p></div>; }
+function EmptyState({ title, text }) { return <div className="orderEmpty"><span className="orderEmptyLogo"><img src="/favicon.ico" alt="清醒夢" /></span><h2>{title}</h2><p>{text}</p></div>; }

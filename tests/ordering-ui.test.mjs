@@ -84,6 +84,19 @@ test('customer ordering keeps service descriptions readable and uses the officia
   assert.match(styles, /\.orderTopbar \.orderBrand\s*\{[\s\S]*transform:scale/);
 });
 
+test('room scheduling and staff-assist recovery keep their layouts aligned', async () => {
+  const source = await readFile(new URL('../features/ordering/components/OrderClient.jsx', import.meta.url), 'utf8');
+  const styles = await readFile(new URL('../styles/ordering/modern.css', import.meta.url), 'utf8');
+
+  assert.match(source, /className="stepperWithDuration nominationDurationField"/);
+  assert.match(source, /<span>使用時間<\/span><strong>\{duration\} 分鐘<\/strong>/);
+  assert.doesNotMatch(source, /className="helpIndex"/);
+  assert.match(styles, /\.roomBookingComposer \.nominationControls\s*\{[\s\S]*grid-template-columns:repeat\(3/);
+  assert.match(styles, /\.nominationDurationField\s*\{[\s\S]*display:grid/);
+  assert.match(styles, /\.orderAside>button\.isSecondary\s*\{[\s\S]*border-color:#7186ad/);
+  assert.match(styles, /\.helpCard\s*\{[\s\S]*grid-template-columns:minmax\(0,1fr\) minmax\(320px,.8fr\)[\s\S]*align-items:center/);
+});
+
 test('admin ordering workspace groups customers and exposes permission-gated operating settings', async () => {
   const source = await readFile(new URL('../features/admin/orders/AdminOrdersPage.jsx', import.meta.url), 'utf8');
   const routes = await readFile(new URL('../features/admin/shell/AdminRoutes.jsx', import.meta.url), 'utf8');

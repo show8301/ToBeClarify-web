@@ -831,3 +831,79 @@
 @media(max-width:620px){
   .orderTopbar .orderBrand { transform:scale(1.06); }
 }
+
+/* Present the room schedule as three equal, aligned fields. */
+.roomBookingComposer .nominationControls {
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  align-items:end;
+}
+.roomBookingComposer .nominationControls > label {
+  min-width:0;
+}
+.roomBookingComposer .stepper {
+  height:48px;
+}
+.nominationDurationField {
+  display:grid;
+  align-content:stretch;
+  gap:7px;
+  min-width:0;
+}
+.nominationDurationField > span {
+  font-size:12px;
+  font-weight:700;
+}
+.nominationDurationField > strong {
+  min-height:48px;
+  display:flex;
+  align-items:center;
+  padding:11px;
+  border:1px solid #d8dde6;
+  border-radius:9px;
+  background:#fff;
+  color:#34394f;
+  font-size:14px;
+  font-weight:800;
+}
+
+/* Keep the secondary order-summary action in the same button family. */
+.orderAside>button.isSecondary {
+  border-color:#7186ad;
+  background:#f7f8fa;
+  color:#4b5268;
+}
+.orderAside>button.isSecondary:hover {
+  border-color:#7186ad;
+  background:#e7edf6;
+}
+
+/* Center the recovery copy beside its form, with a single-column mobile stack. */
+.helpCard {
+  grid-template-columns:minmax(0,1fr) minmax(320px,.8fr);
+  align-items:center;
+}
+.helpCard > div {
+  align-self:center;
+}
+@media(max-width:860px){
+  .roomBookingComposer .nominationControls {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .roomBookingComposer .nominationControls > label:first-child {
+    grid-column:1/-1;
+  }
+  .helpCard {
+    grid-template-columns:1fr;
+  }
+  .helpCard form {
+    grid-column:auto;
+  }
+}
+@media(max-width:620px){
+  .roomBookingComposer .nominationControls {
+    grid-template-columns:1fr;
+  }
+  .roomBookingComposer .nominationControls > label:first-child {
+    grid-column:auto;
+  }
+}

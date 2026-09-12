@@ -276,7 +276,8 @@ function RoomBookingPage({ rooms, settings, cart, setCart, onNotice }) {
     </section>
     {selectedRoom ? <section className="nominationComposer roomBookingComposer"><div><span>02 / 選擇時段</span><h2>{selectedRoom.roomName}｜包廂使用</h2></div><div className="nominationControls">
       <label>開始時間<input type="datetime-local" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} /></label>
-      <label>節數<div className="stepperWithDuration"><div className="stepper"><button type="button" onClick={() => setSegments(Math.max(1, safeSegments - 1))}>−</button><strong>{safeSegments}</strong><button type="button" onClick={() => setSegments(Math.min(72, safeSegments + 1))}>＋</button></div><small>使用 {duration} 分鐘</small></div></label>
+      <label>節數<div className="stepper"><button type="button" onClick={() => setSegments(Math.max(1, safeSegments - 1))}>−</button><strong>{safeSegments}</strong><button type="button" onClick={() => setSegments(Math.min(72, safeSegments + 1))}>＋</button></div></label>
+      <div className="stepperWithDuration nominationDurationField"><span>使用時間</span><strong>{duration} 分鐘</strong></div>
     </div><div className="nominationPrice"><div><span>包廂使用費</span><b>{money(selectedRoom.segmentPrice)} × {safeSegments} 節</b><strong>{money(Number(selectedRoom.segmentPrice) * safeSegments)}</strong></div><footer><span>本項合計</span><strong>{money(Number(selectedRoom.segmentPrice) * safeSegments)}</strong></footer></div><button className="orderPrimaryAction" type="button" onClick={add}>加入本次點餐</button></section> : null}
   </div>;
 }
@@ -401,7 +402,7 @@ function CustomerAddonComposer({ nominee, catalog, loading, onAddon }) {
 function HelpPage({ currentGameId, onRecover, loading }) {
   const [form, setForm] = useState({ gameId: currentGameId || '', recoveryCode: '' });
   return <div className="orderPage"><PageHeading kicker="STAFF ASSIST" title="請洽店員" text="點餐碼遺失時，店員可依遊戲 ID 找到今日資料並提供六位數協助碼。" />
-    <section className="helpCard"><div className="helpIndex">?</div><div><h2>找回今天的點餐碼</h2><p>為避免他人只知道遊戲 ID 就冒用點餐，仍需由店員確認後提供協助碼。</p></div><form onSubmit={(event) => { event.preventDefault(); onRecover(form.gameId.trim(), form.recoveryCode.trim()); }}><label>顧客遊戲 ID<input value={form.gameId} onChange={(event) => setForm({ ...form, gameId: event.target.value })} required /></label><label>六位數店員協助碼<input inputMode="numeric" pattern="[0-9]{6}" maxLength={6} value={form.recoveryCode} onChange={(event) => setForm({ ...form, recoveryCode: event.target.value.replace(/\D/g, '') })} required /></label><button disabled={loading} type="submit">找回並刷新點餐 UI</button></form></section>
+    <section className="helpCard"><div><h2>找回今天的點餐碼</h2><p>為避免他人只知道遊戲 ID 就冒用點餐，仍需由店員確認後提供協助碼。</p></div><form onSubmit={(event) => { event.preventDefault(); onRecover(form.gameId.trim(), form.recoveryCode.trim()); }}><label>顧客遊戲 ID<input value={form.gameId} onChange={(event) => setForm({ ...form, gameId: event.target.value })} required /></label><label>六位數店員協助碼<input inputMode="numeric" pattern="[0-9]{6}" maxLength={6} value={form.recoveryCode} onChange={(event) => setForm({ ...form, recoveryCode: event.target.value.replace(/\D/g, '') })} required /></label><button disabled={loading} type="submit">找回並刷新點餐 UI</button></form></section>
   </div>;
 }
 

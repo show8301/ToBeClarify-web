@@ -49,7 +49,7 @@ function DeveloperDisclosure({ title, description, contentId, open, onToggle, ch
     <details className="adminDeveloperDisclosure" open={open} onToggle={(event) => onToggle(event.currentTarget.open)}>
       <summary className="adminDeveloperDisclosureSummary" aria-controls={contentId} aria-expanded={open}>
         <span><b>{title}</b><small>{description}</small></span>
-        <i aria-hidden="true">⌄</i>
+        <i aria-hidden="true" />
       </summary>
       <div id={contentId} className="adminDeveloperDisclosureBody">{children}</div>
     </details>

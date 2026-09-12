@@ -837,3 +837,19 @@
   .adminDutyPlanRoles,.adminDutyPlanStatus { grid-column:1 / -1; }
   .adminDutyPlanActions { grid-column:1 / -1; justify-content:flex-start; }
 }
+
+/* Improve the login hierarchy without changing the card's outer layout. */
+.adminLoginShell .adminLoginBrand {
+  transform:scale(1.1);
+  transform-origin:left center;
+}
+.adminLoginShell .adminLoginMark {
+  width:54px;
+  height:54px;
+}
+.adminLoginShell .adminLoginBrand strong { font-size:21px; }
+.adminLoginShell .adminLoginBrand small { font-size:11px; }
+.adminLoginShell .adminLoginForm label > span {
+  font-size:14px;
+  font-weight:700;
+}

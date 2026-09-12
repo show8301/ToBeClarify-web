@@ -32,6 +32,71 @@ test('customer ordering implements meals, staff-first nomination, tips, dependen
   assert.match(api, /submitAddon/);
 });
 
+test('customer recovery adopts the issued short order URL', async () => {
+  const source = await readFile(new URL('../features/ordering/components/OrderClient.jsx', import.meta.url), 'utf8');
+
+  assert.match(source, /new URL\(issued\.orderUrl, window\.location\.origin\)/);
+  assert.match(source, /const nextToken = issuedUrl\.searchParams\.get\('code'\) \|\| issued\.orderToken/);
+  assert.match(source, /window\.history\.replaceState\(null, '', `\$\{issuedUrl\.pathname\}\$\{issuedUrl\.search\}`\)/);
+});
+
+test('customer ordering hides unavailable staff and keeps the ordering UI concise', async () => {
+  const source = await readFile(new URL('../features/ordering/components/OrderClient.jsx', import.meta.url), 'utf8');
+  const styles = await readFile(new URL('../styles/ordering/modern.css', import.meta.url), 'utf8');
+
+  assert.match(source, /const visibleStaff = staff\.filter\(\(person\) => person\.isWorkingToday && person\.isNominatable\)/);
+  assert.match(source, /visibleStaff\.map/);
+  assert.match(source, /僅顯示今日上班且可指名的店員/);
+  assert.match(source, /選擇指名方式\(二擇一\)/);
+  assert.match(source, /指名\+加購服務/);
+  assert.match(source, /<span>可折抵餘額<\/span>/);
+  assert.doesNotMatch(source, /<small>\{item\.kind === 'set' \? 'SET' : 'MENU'\}<\/small>/);
+  assert.doesNotMatch(source, /<p>餐點、包廂、指名服務與小費會在送出前集中顯示/);
+  assert.match(styles, /\.roomBookingSection\s*\{/);
+  assert.match(styles, /\.roomBookingCard\.isActive\s*\{/);
+  assert.match(styles, /\.orderCredit\s*\{/);
+});
+
+test('customer ordering summary uses clear actions and keeps room duration inline', async () => {
+  const source = await readFile(new URL('../features/ordering/components/OrderClient.jsx', import.meta.url), 'utf8');
+  const styles = await readFile(new URL('../styles/ordering/modern.css', import.meta.url), 'utf8');
+
+  assert.match(source, /\['cart', '購物車'\]/);
+  assert.match(source, /\['orders', '全部訂單'\]/);
+  assert.match(source, /<dt>可折抵的餐點費用<\/dt>/);
+  assert.match(source, /<button className="isSecondary"[\s\S]*查看全部訂單/);
+  assert.match(source, /<button type="button"[\s\S]*購物車結帳/);
+  assert.match(source, /className="stepperWithDuration"/);
+  assert.match(styles, /\.stepperWithDuration\s*\{[\s\S]*display:flex/);
+  assert.match(styles, /\.orderAside>button\.isSecondary\s*\{\s*margin-top:0;/);
+});
+
+test('customer ordering keeps service descriptions readable and uses the official empty-state mark', async () => {
+  const source = await readFile(new URL('../features/ordering/components/OrderClient.jsx', import.meta.url), 'utf8');
+  const styles = await readFile(new URL('../styles/ordering/modern.css', import.meta.url), 'utf8');
+
+  assert.match(source, /<p>\{item\.serviceDescription\}<\/p>/);
+  assert.match(source, /className="orderEmptyLogo"/);
+  assert.match(source, /<img src="\/favicon\.ico" alt="清醒夢" \/>/);
+  assert.match(styles, /\.nominationServiceGrid\s*\{[\s\S]*grid-template-columns:1fr/);
+  assert.match(styles, /\.nominationServiceGrid>button\s*\{[\s\S]*min-height:0[\s\S]*height:auto/);
+  assert.match(styles, /\.nominationServiceGrid p\s*\{[\s\S]*white-space:pre-line[\s\S]*overflow-wrap:anywhere/);
+  assert.match(styles, /\.orderTopbar \.orderBrand\s*\{[\s\S]*transform:scale/);
+});
+
+test('room scheduling and staff-assist recovery keep their layouts aligned', async () => {
+  const source = await readFile(new URL('../features/ordering/components/OrderClient.jsx', import.meta.url), 'utf8');
+  const styles = await readFile(new URL('../styles/ordering/modern.css', import.meta.url), 'utf8');
+
+  assert.match(source, /className="stepperWithDuration nominationDurationField"/);
+  assert.match(source, /<span>使用時間<\/span><strong>\{duration\} 分鐘<\/strong>/);
+  assert.doesNotMatch(source, /className="helpIndex"/);
+  assert.match(styles, /\.roomBookingComposer \.nominationControls\s*\{[\s\S]*grid-template-columns:repeat\(3/);
+  assert.match(styles, /\.nominationDurationField\s*\{[\s\S]*display:grid/);
+  assert.match(styles, /\.orderAside>button\.isSecondary\s*\{[\s\S]*border-color:#7186ad/);
+  assert.match(styles, /\.helpCard\s*\{[\s\S]*grid-template-columns:minmax\(0,1fr\) minmax\(320px,.8fr\)[\s\S]*align-items:center/);
+});
+
 test('admin ordering workspace groups customers and exposes permission-gated operating settings', async () => {
   const source = await readFile(new URL('../features/admin/orders/AdminOrdersPage.jsx', import.meta.url), 'utf8');
   const routes = await readFile(new URL('../features/admin/shell/AdminRoutes.jsx', import.meta.url), 'utf8');

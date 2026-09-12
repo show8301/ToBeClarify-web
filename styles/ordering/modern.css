@@ -700,3 +700,210 @@
 }
 
 .orderQuoteReview{margin:20px 0;padding:24px;border:2px solid #587b70;background:#fffdf8;color:#18201d;border-radius:16px}.orderQuoteReview dl>div{display:flex;justify-content:space-between;gap:18px;padding:8px 0;border-bottom:1px solid #ddd}.orderQuoteReview p{white-space:pre-line}.orderQuoteReview button{padding:12px 18px;margin:10px 10px 0 0;background:#173e35;color:white;border-radius:8px;cursor:pointer}.orderQuoteReview button:disabled{opacity:.5;cursor:not-allowed}.orderQuoteReview :focus-visible{outline:3px solid #805f9e;outline-offset:3px}
+
+/* Keep room choices and menu cards in the same quiet card language. */
+.roomBookingSection {
+  border-color:#dfe3eb;
+  border-radius:14px;
+  background:#fbfcfd;
+  box-shadow:0 6px 20px rgba(82,87,120,.07);
+}
+.roomBookingCard {
+  border-color:#dfe3eb;
+  border-radius:12px;
+  background:#f7f8fa;
+  box-shadow:none;
+  transition:border-color .18s ease,background .18s ease;
+}
+.roomBookingCard:hover {
+  border-color:#b9c4d7;
+  transform:none;
+}
+.roomBookingCard.isActive {
+  border-color:#9fb1cf;
+  background:#e7edf6;
+  box-shadow:none;
+}
+.roomBookingImage { background:#e3e7ee; }
+.roomBookingCopy { gap:4px; padding:13px 14px 7px; }
+.roomBookingCopy small { color:#7186ad; }
+.roomBookingPrice { padding:7px 14px 12px; color:#4f5d75; }
+
+/* Remove redundant product metadata and keep the product information compact. */
+.orderProductCard>div:nth-child(2) { padding:14px 16px 10px; }
+.orderProductCard>div:nth-child(2)>h2:first-child { margin-top:0; }
+.orderProductCard p { min-height:34px; margin-top:6px; line-height:1.5; }
+
+/* Make the remaining credit easy to find without competing with the customer name. */
+.orderCredit {
+  min-width:180px;
+  padding:10px 16px;
+  border:1px solid #b9c7dc;
+  border-radius:14px;
+  background:linear-gradient(145deg,#f9fbfd,#e9eef7);
+  box-shadow:0 6px 18px rgba(82,87,120,.1);
+}
+.orderCredit span {
+  margin-bottom:5px;
+  color:#59657c;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.08em;
+}
+.orderCredit strong {
+  color:#415a86;
+  font-size:24px;
+  line-height:1;
+  letter-spacing:-.02em;
+}
+
+@media(max-width:620px){
+  .orderCredit { min-width:0; max-width:112px; padding:7px 9px; }
+  .orderCredit span { display:none; }
+  .orderCredit strong { font-size:14px; }
+}
+
+/* Keep the duration note beside the room stepper instead of underneath it. */
+.stepperWithDuration {
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.stepperWithDuration .stepper {
+  flex:1;
+  min-width:0;
+}
+.stepperWithDuration small {
+  flex:0 0 auto;
+  white-space:nowrap;
+}
+
+/* The order-history action comes first; keep checkout as the primary action. */
+.orderAside>button.isSecondary { margin-top:0; }
+
+/* Keep service choices scannable while allowing the full description to breathe. */
+.nominationServiceGrid {
+  grid-template-columns:1fr;
+}
+.nominationServiceGrid>button {
+  min-height:0;
+  height:auto;
+  grid-template-rows:auto auto auto auto;
+}
+.nominationServiceGrid>button>strong {
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+.nominationServiceGrid p {
+  min-height:0;
+  max-width:none;
+  overflow:visible;
+  white-space:pre-line;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+  display:block;
+  -webkit-line-clamp:unset;
+}
+.nominationServiceGrid footer {
+  align-self:stretch;
+}
+
+/* Enlarge the visual mark without changing the topbar's layout height. */
+.orderTopbar .orderBrand {
+  transform:scale(1.1);
+  transform-origin:left center;
+}
+
+/* Use the official favicon in empty ordering states. */
+.orderEmpty>span.orderEmptyLogo {
+  width:64px;
+  height:64px;
+  padding:9px;
+  border-radius:18px;
+  background:#e7edf6;
+}
+.orderEmptyLogo img {
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+
+@media(max-width:620px){
+  .orderTopbar .orderBrand { transform:scale(1.06); }
+}
+
+/* Present the room schedule as three equal, aligned fields. */
+.roomBookingComposer .nominationControls {
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  align-items:end;
+}
+.roomBookingComposer .nominationControls > label {
+  min-width:0;
+}
+.roomBookingComposer .stepper {
+  height:48px;
+}
+.nominationDurationField {
+  display:grid;
+  align-content:stretch;
+  gap:7px;
+  min-width:0;
+}
+.nominationDurationField > span {
+  font-size:12px;
+  font-weight:700;
+}
+.nominationDurationField > strong {
+  min-height:48px;
+  display:flex;
+  align-items:center;
+  padding:11px;
+  border:1px solid #d8dde6;
+  border-radius:9px;
+  background:#fff;
+  color:#34394f;
+  font-size:14px;
+  font-weight:800;
+}
+
+/* Keep the secondary order-summary action in the same button family. */
+.orderAside>button.isSecondary {
+  border-color:#7186ad;
+  background:#f7f8fa;
+  color:#4b5268;
+}
+.orderAside>button.isSecondary:hover {
+  border-color:#7186ad;
+  background:#e7edf6;
+}
+
+/* Center the recovery copy beside its form, with a single-column mobile stack. */
+.helpCard {
+  grid-template-columns:minmax(0,1fr) minmax(320px,.8fr);
+  align-items:center;
+}
+.helpCard > div {
+  align-self:center;
+}
+@media(max-width:860px){
+  .roomBookingComposer .nominationControls {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .roomBookingComposer .nominationControls > label:first-child {
+    grid-column:1/-1;
+  }
+  .helpCard {
+    grid-template-columns:1fr;
+  }
+  .helpCard form {
+    grid-column:auto;
+  }
+}
+@media(max-width:620px){
+  .roomBookingComposer .nominationControls {
+    grid-template-columns:1fr;
+  }
+  .roomBookingComposer .nominationControls > label:first-child {
+    grid-column:auto;
+  }
+}

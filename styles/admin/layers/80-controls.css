@@ -1,0 +1,93 @@
+/* Shared admin controls: readable native selects and clear disclosure states. */
+.adminTheme select {
+  color-scheme:light;
+  background-color:var(--color-surface-input);
+  color:var(--color-fg);
+}
+.adminTheme select option,
+.adminTheme select optgroup {
+  background-color:#fff;
+  color:#31334a;
+}
+.adminTheme select:focus-visible {
+  outline:0;
+  border-color:var(--color-accent);
+  box-shadow:0 0 0 3px rgba(var(--color-accent-rgb),.18);
+}
+
+.adminTheme details > summary {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  list-style:none;
+}
+.adminTheme details > summary::-webkit-details-marker { display:none; }
+.adminTheme details:not(.adminDeveloperDisclosure) > summary::after,
+.adminDeveloperDisclosureSummary > i {
+  display:grid;
+  flex:0 0 34px;
+  width:34px;
+  height:34px;
+  place-items:center;
+  border:1px solid rgba(var(--color-accent-rgb),.42);
+  border-radius:50%;
+  color:var(--color-accent-dark);
+  font-size:21px;
+  font-style:normal;
+  line-height:1;
+}
+.adminTheme details:not(.adminDeveloperDisclosure) > summary::after {
+  content:"⌄";
+  transform:translateY(-2px);
+  transition:background .2s ease,color .2s ease;
+}
+.adminTheme details:not(.adminDeveloperDisclosure)[open] > summary::after {
+  content:"⌃";
+  transform:translateY(2px);
+  background:rgba(var(--color-accent-rgb),.12);
+}
+.adminDeveloperDisclosureSummary > i {
+  font-size:0;
+  transform:none;
+  transition:background .2s ease,color .2s ease;
+}
+.adminDeveloperDisclosureSummary > i::before {
+  content:"⌄";
+  font-size:21px;
+  line-height:1;
+  transform:translateY(-2px);
+}
+.adminDeveloperDisclosure[open] .adminDeveloperDisclosureSummary > i {
+  background:rgba(var(--color-accent-rgb),.12);
+  transform:none;
+}
+.adminDeveloperDisclosure[open] .adminDeveloperDisclosureSummary > i::before {
+  content:"⌃";
+  transform:translateY(2px);
+}
+
+:root[data-admin-theme="dark"] .adminTheme select {
+  color-scheme:dark;
+  border-color:#53657c;
+  background-color:#172332;
+  color:#f4fbff;
+}
+:root[data-admin-theme="dark"] .adminTheme select option,
+:root[data-admin-theme="dark"] .adminTheme select optgroup {
+  background-color:#172332;
+  color:#f4fbff;
+}
+:root[data-admin-theme="dark"] .adminTheme select:focus-visible {
+  border-color:#a8c5ee;
+  box-shadow:0 0 0 3px rgba(168,197,238,.22);
+}
+:root[data-admin-theme="dark"] .adminTheme details:not(.adminDeveloperDisclosure) > summary::after,
+:root[data-admin-theme="dark"] .adminDeveloperDisclosureSummary > i {
+  border-color:rgba(168,197,238,.52);
+  color:#c8dcff;
+}
+:root[data-admin-theme="dark"] .adminTheme details:not(.adminDeveloperDisclosure)[open] > summary::after,
+:root[data-admin-theme="dark"] .adminDeveloperDisclosure[open] .adminDeveloperDisclosureSummary > i {
+  background:rgba(168,197,238,.18);
+}

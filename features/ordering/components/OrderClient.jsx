@@ -128,8 +128,10 @@ export default function OrderClient() {
     setLoading(true);
     try {
       const issued = await orderingApi.recover({ gameId, recoveryCode });
-      window.history.replaceState(null, '', `/order?code=${encodeURIComponent(issued.orderToken)}`);
-      await load(issued.orderToken);
+      const issuedUrl = new URL(issued.orderUrl, window.location.origin);
+      const nextToken = issuedUrl.searchParams.get('code') || issued.orderToken;
+      window.history.replaceState(null, '', `${issuedUrl.pathname}${issuedUrl.search}`);
+      await load(nextToken);
       setNotice({ message: '已找回今天的點餐資料。', error: false });
       setTab('meal');
     } catch (error) { setNotice({ message: error.message, error: true }); setLoading(false); }
@@ -143,7 +145,7 @@ export default function OrderClient() {
     ...(!catalog.settings.nominationPaused ? [['nomination', '指名服務']] : []),
     ['tip', '小費'],
     ...(catalog.rooms?.length ? [['room', '訂購包廂']] : []),
-    ['cart', `本次點餐 ${cartCount || ''}`], ['orders', '我的訂單'], ['help', '請洽店員'],
+    ['cart', '購物車'], ['orders', '全部訂單'], ['help', '請洽店員'],
   ];
 
   return (
@@ -151,7 +153,7 @@ export default function OrderClient() {
       <header className="orderTopbar">
         <a href="/" className="orderBrand"><img src="/favicon.ico" alt="" /><span><strong>清醒夢</strong><small>LUCID DREAM / ORDER</small></span></a>
         <div className="orderSessionChip"><span>今日點餐</span><strong>{session.customerName}</strong><small>ID {session.gameId}</small></div>
-        <div className="orderCredit"><span>信物餐點餘額</span><strong>{money(session.remainingMealCredit)}</strong></div>
+        <div className="orderCredit"><span>可折抵餘額</span><strong>{money(session.remainingMealCredit)}</strong></div>
       </header>
       <CustomerOrderingStatus context={businessContext} session={session} />
       {catalog.settings.nominationPaused ? <div className="orderPauseBanner">目前暫停受理指名服務；一般餐點與小費仍可正常加點。</div> : null}
@@ -172,10 +174,9 @@ export default function OrderClient() {
         </div>
         <aside className="orderAside">
           <div><span>本次點餐</span><strong>{cartCount} 項</strong></div>
-          <p>餐點、包廂、指名服務與小費會在送出前集中顯示；各項服務會保留當下的價格與時段。</p>
-          <dl><div><dt>預估小計</dt><dd>{money(cartSubtotal)}</dd></div><div><dt>可折抵餐點</dt><dd>{money(Math.min(session.remainingMealCredit, cart.meals.reduce((sum, line) => sum + line.price * line.quantity, 0)))}</dd></div></dl>
-          <button type="button" onClick={() => setTab('cart')}>查看明細與送出</button>
-          <button className="isSecondary" type="button" onClick={() => setTab('orders')}>查看我的訂單</button>
+          <dl><div><dt>預估小計</dt><dd>{money(cartSubtotal)}</dd></div><div><dt>可折抵的餐點費用</dt><dd>{money(Math.min(session.remainingMealCredit, cart.meals.reduce((sum, line) => sum + line.price * line.quantity, 0)))}</dd></div></dl>
+          <button className="isSecondary" type="button" onClick={() => setTab('orders')}>查看全部訂單</button>
+          <button type="button" onClick={() => setTab('cart')}>購物車結帳</button>
         </aside>
       </section>
     </main>
@@ -232,7 +233,7 @@ function MealPage({ menu, cart, setCart }) {
   });
   return <div className="orderPage"><PageHeading kicker="FOOD & DRINK" title="一般點餐" text="信物餘額只會折抵餐點；未使用完的餘額保留到今天後續加點。" />
     <div className="orderCategoryRail">{showSets ? <button className={category === 'sets' ? 'isActive' : ''} onClick={() => setCategory('sets')}>套餐</button> : null}{(menu.categories || []).map((item) => <button className={category === item.id ? 'isActive' : ''} key={item.id} onClick={() => setCategory(item.id)}>{item.categoryName}</button>)}</div>
-    <div className="orderProductGrid">{products.map((item) => <article key={item.id} className="orderProductCard"><div className="orderProductImage">{item.imageUrl ? <img src={item.imageUrl} alt="" /> : <span>LD</span>}</div><div><small>{item.kind === 'set' ? 'SET' : 'MENU'}</small><h2>{item.name}</h2><p>{item.description || '現場供應品項'}</p>{item.kind==='set'&&<ul>{(item.items||[]).map(part=><li key={part.id}>{part.itemName} × {part.quantity}{part.isAvailable===false?' · 暫停供應':''}</li>)}</ul>}{Array.isArray(item.tags)&&<p>{item.tags.join(' · ')}</p>}</div><footer><strong>{money(item.price)}</strong><button type="button" disabled={item.isOrderable===false} aria-label={`加入 ${item.name}`} onClick={() => add(item)}><span aria-hidden="true">＋</span> {item.isOrderable===false?'暫停供應':'加入'}</button></footer></article>)}</div>
+    <div className="orderProductGrid">{products.map((item) => <article key={item.id} className="orderProductCard"><div className="orderProductImage">{item.imageUrl ? <img src={item.imageUrl} alt="" /> : <span>LD</span>}</div><div>{item.kind === 'set' ? <small>SET</small> : null}<h2>{item.name}</h2><p>{item.description || '現場供應品項'}</p>{item.kind==='set'&&<ul>{(item.items||[]).map(part=><li key={part.id}>{part.itemName} × {part.quantity}{part.isAvailable===false?' · 暫停供應':''}</li>)}</ul>}{Array.isArray(item.tags)&&<p>{item.tags.join(' · ')}</p>}</div><footer><strong>{money(item.price)}</strong><button type="button" disabled={item.isOrderable===false} aria-label={`加入 ${item.name}`} onClick={() => add(item)}><span aria-hidden="true">＋</span> {item.isOrderable===false?'暫停供應':'加入'}</button></footer></article>)}</div>
   </div>;
 }
 
@@ -275,13 +276,15 @@ function RoomBookingPage({ rooms, settings, cart, setCart, onNotice }) {
     </section>
     {selectedRoom ? <section className="nominationComposer roomBookingComposer"><div><span>02 / 選擇時段</span><h2>{selectedRoom.roomName}｜包廂使用</h2></div><div className="nominationControls">
       <label>開始時間<input type="datetime-local" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} /></label>
-      <label>節數<div className="stepper"><button type="button" onClick={() => setSegments(Math.max(1, safeSegments - 1))}>−</button><strong>{safeSegments}</strong><button type="button" onClick={() => setSegments(Math.min(72, safeSegments + 1))}>＋</button></div><small>使用 {duration} 分鐘</small></label>
+      <label>節數<div className="stepper"><button type="button" onClick={() => setSegments(Math.max(1, safeSegments - 1))}>−</button><strong>{safeSegments}</strong><button type="button" onClick={() => setSegments(Math.min(72, safeSegments + 1))}>＋</button></div></label>
+      <div className="stepperWithDuration nominationDurationField"><span>使用時間</span><strong>{duration} 分鐘</strong></div>
     </div><div className="nominationPrice"><div><span>包廂使用費</span><b>{money(selectedRoom.segmentPrice)} × {safeSegments} 節</b><strong>{money(Number(selectedRoom.segmentPrice) * safeSegments)}</strong></div><footer><span>本項合計</span><strong>{money(Number(selectedRoom.segmentPrice) * safeSegments)}</strong></footer></div><button className="orderPrimaryAction" type="button" onClick={add}>加入本次點餐</button></section> : null}
   </div>;
 }
 
 function NominationPage({ session, settings, businessContext, staff, cart, setCart, onNotice }) {
-  const available = staff.filter((person) => person.isWorkingToday && person.isNominatable && person.currentStatus !== 'busy');
+  const visibleStaff = staff.filter((person) => person.isWorkingToday && person.isNominatable);
+  const available = visibleStaff.filter((person) => person.currentStatus !== 'busy');
   const [staffId, setStaffId] = useState(available[0]?.id || '');
   const selectedStaff = staff.find((person) => person.id === staffId);
   const services = [...(selectedStaff?.commonServices || []), ...(selectedStaff?.specialServices || [])].filter((item) => item.isNominatable && item.price != null);
@@ -308,11 +311,11 @@ function NominationPage({ session, settings, businessContext, staff, cart, setCa
     onNotice({ message: mode === 'companionship' ? '純陪伴與基礎指名費已加入本次點餐；成立後仍可在原時段內追加服務。' : '指名服務與基礎指名費已分列加入本次點餐。', error: false });
   };
   return <div className="orderPage"><PageHeading kicker="STAFF FIRST" title="指名服務" text={`先選店員，再查看該店員提供的服務。每節 ${settings.segmentMinutes} 分鐘，最多同時指名 ${session.maxNominatedStaff} 人。`} />
-    <section className="nominationSection"><header><span>01</span><div><h2>選擇店員</h2><p>忙碌中的店員不可選擇；電腦版以緊密卡片顯示今日上班人員。</p></div></header>
-      <div className="nominationStaffGrid">{staff.map((person) => { const disabled = !available.some((item) => item.id === person.id); return <button key={person.id} disabled={disabled} className={staffId === person.id ? 'isActive' : ''} onClick={() => setStaffId(person.id)}><span>{person.avatarUrl ? <img src={person.avatarUrl} alt="" /> : person.displayName.slice(0, 1)}</span><strong>{person.displayName}</strong><small>{disabled ? (person.currentStatus === 'busy' ? '忙碌中' : '未開放') : '可指名'}</small></button>; })}</div>
+    <section className="nominationSection"><header><span>01</span><div><h2>選擇店員</h2><p>僅顯示今日上班且可指名的店員；忙碌中的店員不可選擇。</p></div></header>
+      <div className="nominationStaffGrid">{visibleStaff.map((person) => { const disabled = person.currentStatus === 'busy'; return <button key={person.id} disabled={disabled} className={staffId === person.id ? 'isActive' : ''} onClick={() => setStaffId(person.id)}><span>{person.avatarUrl ? <img src={person.avatarUrl} alt="" /> : person.displayName.slice(0, 1)}</span><strong>{person.displayName}</strong><small>{disabled ? '忙碌中' : '可指名'}</small></button>; })}</div>
     </section>
-    {selectedStaff ? <section className="nominationSection"><header><span>02</span><div><h2>選擇指名方式</h2><p>純陪伴只收基礎指名費；服務成立後仍可在原本時段內追加服務，不會再收一次基礎費。</p></div></header>
-      <div className="nominationModeGrid"><button type="button" className={mode === 'companionship' ? 'isActive' : ''} onClick={() => { setMode('companionship'); setServiceId(''); setSegments(1); }}><span>COMPANIONSHIP</span><strong>純陪伴</strong><p>先保留陪伴時段，稍後再視現場需求追加服務。</p></button><button type="button" className={mode === 'service' ? 'isActive' : ''} onClick={() => setMode('service')}><span>SERVICE</span><strong>加購服務</strong><p>現在就選擇服務；基礎指名費與服務費分列。</p></button></div>
+    {selectedStaff ? <section className="nominationSection"><header><span>02</span><div><h2>選擇指名方式(二擇一)</h2><p>純陪伴只收基礎指名費；服務成立後仍可在原本時段內追加服務，不會再收一次基礎費。</p></div></header>
+      <div className="nominationModeGrid"><button type="button" className={mode === 'companionship' ? 'isActive' : ''} onClick={() => { setMode('companionship'); setServiceId(''); setSegments(1); }}><span>COMPANIONSHIP</span><strong>純陪伴</strong><p>先保留陪伴時段，稍後再視現場需求追加服務。</p></button><button type="button" className={mode === 'service' ? 'isActive' : ''} onClick={() => setMode('service')}><span>SERVICE</span><strong>指名+加購服務</strong><p>現在就選擇服務；基礎指名費與服務費分列。</p></button></div>
       {mode === 'service' ? <div className="nominationServiceGrid">{services.map((item) => <button key={item.id} className={serviceId === item.id ? 'isActive' : ''} onClick={() => { setServiceId(item.id); setSegments(item.durationMinutes ? Math.ceil(item.durationMinutes / settings.segmentMinutes) : 1); }}><span>{item.serviceType === 'special' ? 'SPECIAL' : 'SERVICE'}</span><strong>{item.serviceName}</strong><p>{item.serviceDescription}</p><footer><b>{money(item.price)}</b><small>{item.durationMinutes ? `${item.durationMinutes} 分鐘／單次` : '每節計費'}</small></footer></button>)}</div> : null}
     </section> : null}
     {selectedStaff && (mode === 'companionship' || service) ? <section className="nominationComposer"><div><span>03 / 排程與節數</span><h2>{selectedStaff.displayName}｜{mode === 'companionship' ? '純陪伴' : service.serviceName}</h2>{needsCloseCoordination ? <p className="nominationCoordinationHint">此時段會超過目前預計關店時間；可以送出，但需現場協調並由店員接受後才成立。</p> : null}</div><div className="nominationControls">
@@ -399,9 +402,9 @@ function CustomerAddonComposer({ nominee, catalog, loading, onAddon }) {
 function HelpPage({ currentGameId, onRecover, loading }) {
   const [form, setForm] = useState({ gameId: currentGameId || '', recoveryCode: '' });
   return <div className="orderPage"><PageHeading kicker="STAFF ASSIST" title="請洽店員" text="點餐碼遺失時，店員可依遊戲 ID 找到今日資料並提供六位數協助碼。" />
-    <section className="helpCard"><div className="helpIndex">?</div><div><h2>找回今天的點餐碼</h2><p>為避免他人只知道遊戲 ID 就冒用點餐，仍需由店員確認後提供協助碼。</p></div><form onSubmit={(event) => { event.preventDefault(); onRecover(form.gameId.trim(), form.recoveryCode.trim()); }}><label>顧客遊戲 ID<input value={form.gameId} onChange={(event) => setForm({ ...form, gameId: event.target.value })} required /></label><label>六位數店員協助碼<input inputMode="numeric" pattern="[0-9]{6}" maxLength={6} value={form.recoveryCode} onChange={(event) => setForm({ ...form, recoveryCode: event.target.value.replace(/\D/g, '') })} required /></label><button disabled={loading} type="submit">找回並刷新點餐 UI</button></form></section>
+    <section className="helpCard"><div><h2>找回今天的點餐碼</h2><p>為避免他人只知道遊戲 ID 就冒用點餐，仍需由店員確認後提供協助碼。</p></div><form onSubmit={(event) => { event.preventDefault(); onRecover(form.gameId.trim(), form.recoveryCode.trim()); }}><label>顧客遊戲 ID<input value={form.gameId} onChange={(event) => setForm({ ...form, gameId: event.target.value })} required /></label><label>六位數店員協助碼<input inputMode="numeric" pattern="[0-9]{6}" maxLength={6} value={form.recoveryCode} onChange={(event) => setForm({ ...form, recoveryCode: event.target.value.replace(/\D/g, '') })} required /></label><button disabled={loading} type="submit">找回並刷新點餐 UI</button></form></section>
   </div>;
 }
 
 function PageHeading({ kicker, title, text }) { return <header className="orderPageHeading"><span>{kicker}</span><h1>{title}</h1><p>{text}</p></header>; }
-function EmptyState({ title, text }) { return <div className="orderEmpty"><span>LD</span><h2>{title}</h2><p>{text}</p></div>; }
+function EmptyState({ title, text }) { return <div className="orderEmpty"><span className="orderEmptyLogo"><img src="/favicon.ico" alt="清醒夢" /></span><h2>{title}</h2><p>{text}</p></div>; }

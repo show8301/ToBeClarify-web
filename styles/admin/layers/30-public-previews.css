@@ -303,8 +303,8 @@
 }
 
 /* Compact order-pass presentation: keep the URL readable without letting the
-   issued-pass panel dominate the workspace. The copy action still uses the
-   complete URL, while the visible value is intentionally shortened. */
+   issued-pass panel dominate the workspace. The API now issues a short URL,
+   while the visible value remains compact for narrow admin layouts. */
 .adminTopbarBrand {
   display: grid;
   grid-template-columns: 48px minmax(0, 1fr);

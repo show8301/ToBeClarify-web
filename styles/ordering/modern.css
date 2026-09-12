@@ -700,3 +700,65 @@
 }
 
 .orderQuoteReview{margin:20px 0;padding:24px;border:2px solid #587b70;background:#fffdf8;color:#18201d;border-radius:16px}.orderQuoteReview dl>div{display:flex;justify-content:space-between;gap:18px;padding:8px 0;border-bottom:1px solid #ddd}.orderQuoteReview p{white-space:pre-line}.orderQuoteReview button{padding:12px 18px;margin:10px 10px 0 0;background:#173e35;color:white;border-radius:8px;cursor:pointer}.orderQuoteReview button:disabled{opacity:.5;cursor:not-allowed}.orderQuoteReview :focus-visible{outline:3px solid #805f9e;outline-offset:3px}
+
+/* Keep room choices and menu cards in the same quiet card language. */
+.roomBookingSection {
+  border-color:#dfe3eb;
+  border-radius:14px;
+  background:#fbfcfd;
+  box-shadow:0 6px 20px rgba(82,87,120,.07);
+}
+.roomBookingCard {
+  border-color:#dfe3eb;
+  border-radius:12px;
+  background:#f7f8fa;
+  box-shadow:none;
+  transition:border-color .18s ease,background .18s ease;
+}
+.roomBookingCard:hover {
+  border-color:#b9c4d7;
+  transform:none;
+}
+.roomBookingCard.isActive {
+  border-color:#9fb1cf;
+  background:#e7edf6;
+  box-shadow:none;
+}
+.roomBookingImage { background:#e3e7ee; }
+.roomBookingCopy { gap:4px; padding:13px 14px 7px; }
+.roomBookingCopy small { color:#7186ad; }
+.roomBookingPrice { padding:7px 14px 12px; color:#4f5d75; }
+
+/* Remove redundant product metadata and keep the product information compact. */
+.orderProductCard>div:nth-child(2) { padding:14px 16px 10px; }
+.orderProductCard>div:nth-child(2)>h2:first-child { margin-top:0; }
+.orderProductCard p { min-height:34px; margin-top:6px; line-height:1.5; }
+
+/* Make the remaining credit easy to find without competing with the customer name. */
+.orderCredit {
+  min-width:180px;
+  padding:10px 16px;
+  border:1px solid #b9c7dc;
+  border-radius:14px;
+  background:linear-gradient(145deg,#f9fbfd,#e9eef7);
+  box-shadow:0 6px 18px rgba(82,87,120,.1);
+}
+.orderCredit span {
+  margin-bottom:5px;
+  color:#59657c;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.08em;
+}
+.orderCredit strong {
+  color:#415a86;
+  font-size:24px;
+  line-height:1;
+  letter-spacing:-.02em;
+}
+
+@media(max-width:620px){
+  .orderCredit { min-width:0; max-width:112px; padding:7px 9px; }
+  .orderCredit span { display:none; }
+  .orderCredit strong { font-size:14px; }
+}

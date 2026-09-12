@@ -214,3 +214,22 @@ test('developer can preview every operational dashboard from the admin landing p
   assert.doesNotMatch(routes, /user\?\.role === 'developer'\) navigate\('\/admin\/orders'\)/);
   assert.match(layout, /route: '\/admin', label: '營業工作台', index: '00', roles: \['developer', 'manager', 'clerk'\]/);
 });
+
+test('issued order pass URLs use the current web origin for display and copy', async () => {
+  const source = await readFile(new URL('../features/admin/orders/AdminOrdersPage.jsx', import.meta.url), 'utf8');
+
+  assert.match(source, /function publicOrderUrl\(value\)/);
+  assert.match(source, /url\.protocol = window\.location\.protocol/);
+  assert.match(source, /url\.host = window\.location\.host/);
+  assert.match(source, /const orderUrl = publicOrderUrl\(issued\.orderUrl\)/);
+  assert.match(source, /<code title=\{orderUrl\}>\{compactUrl\}<\/code>/);
+  assert.match(source, /copy\(orderUrl, 'url'\)/);
+});
+
+test('issued order pass presents the API short URL as a shareable link', async () => {
+  const source = await readFile(new URL('../features/admin/orders/AdminOrdersPage.jsx', import.meta.url), 'utf8');
+
+  assert.match(source, /複製可直接分享給顧客/);
+  assert.match(source, /code\.length > 10/);
+  assert.match(source, /copy\(orderUrl, 'url'\)/);
+});

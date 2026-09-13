@@ -9,6 +9,7 @@ export function AdminNotificationOrderRoute({orderId}) {
 import { useCallback, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
+import { AdminGuestbookPage } from '@/features/admin/guestbook/AdminGuestbookPage';
 import { AdminForgotPasswordPage } from '@/features/admin/auth/AdminForgotPasswordPage.jsx';
 import { AdminLoginPage } from '@/features/admin/auth/AdminLoginPage.jsx';
 import { AdminHomePage } from '@/features/admin/dashboard/AdminHomePage.jsx';
@@ -108,6 +109,10 @@ export function AdminEventsRoute() {
 
 export function AdminMenuRoute() {
   return <AdminProtectedRoute roles={managerRoles}><AdminMenuPage /></AdminProtectedRoute>;
+}
+
+export function AdminGuestbookRoute() {
+  return <AdminProtectedRoute><AdminGuestbookPage /></AdminProtectedRoute>;
 }
 
 export function AdminOrdersRoute() {

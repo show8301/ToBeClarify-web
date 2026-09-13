@@ -66,5 +66,5 @@ test("keeps a current API snapshot for resilient first paint", async () => {
   assert.equal(snapshot.home.shopInfo.name, "清醒夢");
   assert.ok(snapshot.albums.length > 0);
   assert.ok(snapshot.menu.categories.length > 0);
-  assert.ok(snapshot.guestbook.items.length > 0);
+  assert.equal('guestbook' in snapshot, false, 'moderated guestbook content must not be published in snapshots');
 });

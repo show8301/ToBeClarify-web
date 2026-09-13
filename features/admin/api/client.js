@@ -46,6 +46,8 @@ async function request(path, options = {}) {
   return payload?.data;
 }
 
+export { request as adminRequest };
+
 export const adminApi = {
   reorderMenu: body => request('/menu/order', {method:'PUT', body:JSON.stringify(body)}),
   login: (body, signal) => request('/auth/login', {

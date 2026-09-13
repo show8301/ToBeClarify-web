@@ -1,5 +1,5 @@
 import snapshotJson from "../../../data/snapshots/site.json";
-import type { GalleryAlbum, GalleryAlbumSummary, GuestbookPage, HomeData, HomePageVisibility, MenuData, RankingItem, SiteSnapshot } from "../types";
+import type { GalleryAlbum, GalleryAlbumSummary, HomeData, HomePageVisibility, MenuData, RankingItem, SiteSnapshot } from "../types";
 import { publicClientApiUrl } from "@/lib/server/upstream-config";
 
 const CACHE_TTL=10*60*1000;
@@ -12,7 +12,6 @@ const menuCache:CacheEntry<MenuData>={value:snapshot.menu,expiresAt:0,refresh:nu
 const albumsCache:CacheEntry<GalleryAlbumSummary[]>={value:snapshot.albums,expiresAt:0,refresh:null};
 const staffRankingCache:CacheEntry<RankingItem[]>={value:snapshot.staffRanking,expiresAt:0,refresh:null};
 const monetaryRankingCache:CacheEntry<RankingItem[]>={value:snapshot.monetaryRanking,expiresAt:0,refresh:null};
-const guestbookCache:CacheEntry<GuestbookPage>={value:snapshot.guestbook,expiresAt:0,refresh:null};
 const albumCaches=new Map<string,CacheEntry<GalleryAlbum|null>>(Object.entries(snapshot.albumDetails).map(([id,value])=>[id,{value,expiresAt:0,refresh:null}]));
 
 class PublicApiError extends Error {
@@ -92,5 +91,4 @@ export function getRankings(type:"staffRanking"|"monetaryRanking"):RankingItem[]
   const entry=type==="staffRanking"?staffRankingCache:monetaryRankingCache;
   return readCache(entry,()=>request<RankingItem[]>(`/rankings?type=${type}`));
 }
-export function getGuestbookComments():GuestbookPage{return readCache(guestbookCache,()=>request<GuestbookPage>("/guestbook/comments"))}
 export const siteSnapshotGeneratedAt=snapshot.generatedAt;

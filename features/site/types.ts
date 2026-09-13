@@ -122,5 +122,4 @@ export type SiteSnapshot = {
   albumDetails:Record<string,GalleryAlbum>;
   staffRanking:RankingItem[];
   monetaryRanking:RankingItem[];
-  guestbook:GuestbookPage;
 };

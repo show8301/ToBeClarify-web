@@ -21,6 +21,7 @@ const allGroups = [
     { route: '/admin/orders', label: '完整點單管理', index: '99', roles: ['developer', 'manager', 'clerk'] },
   ] },
   { label: '內容與設定', items: [
+    { route: '/admin/guestbook', label: '留言板管理', index: '09', roles: ['developer', 'manager', 'clerk'] },
     { route: '/admin/menu', label: '菜單設定', index: '06', roles: ['developer', 'manager'] },
     { route: '/admin/events', label: '活動設定', index: '07', roles: ['developer', 'manager'] },
     { route: '/admin/home', label: '首頁設定', index: '08', roles: ['developer', 'manager'] },

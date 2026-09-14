@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { requireBusinessDate } from "@/features/admin/shared/businessDay";
 import { adminApi } from "@/features/admin/api/client.js";
 import { useAdminAuth } from "@/features/admin/auth/AdminAuthContext.jsx";
 import { AdminButton, AdminPage } from "@/features/admin/shared/AdminShared.jsx";
@@ -93,9 +94,9 @@ function resolveDefaultDashboardRole(value: unknown, staff: OperationsStaffMembe
     || "service";
 }
 
-function dashboardRoleStorageKey(user: CurrentAdminUser, staff: OperationsStaffMember | undefined) {
+function dashboardRoleStorageKey(user: CurrentAdminUser, staff: OperationsStaffMember | undefined, contextDate: string | undefined) {
   const identity = user.id || user.staffMemberId || user.displayName;
-  const businessDate = staff?.todayWorkMode?.businessDate || today();
+  const businessDate = staff?.todayWorkMode?.businessDate || contextDate || "pending";
   return `admin-dashboard-role:${identity}:${businessDate}`;
 }
 
@@ -103,14 +104,10 @@ function errorMessage(error: unknown) {
   return error instanceof Error ? error.message : "無法讀取今日營運資料。";
 }
 
-function today() {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Taipei", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
-}
-
 function normalizeContext(value: unknown): OperationsContext | null {
   if (!isRecord(value)) return null;
   return {
-    referenceBusinessDate: stringValue(value.referenceBusinessDate, today()),
+    referenceBusinessDate: requireBusinessDate(value),
     referenceStartsAt: stringValue(value.referenceStartsAt),
     referenceEndsAt: stringValue(value.referenceEndsAt),
     periodStatus: stringValue(value.periodStatus, "scheduled"),
@@ -226,7 +223,7 @@ export function AdminRoleOperationsPage({ navigate }: { navigate: Navigate }) {
   const currentStaff = useMemo(() => state.data.staff.find((staff) => staff.id === adminUser.staffMemberId), [adminUser.staffMemberId, state.data.staff]);
   const availableRoles = useMemo(() => resolveAvailableDashboardRoles(user, currentStaff), [currentStaff, user]);
   const defaultRole = useMemo(() => resolveDefaultDashboardRole(user, currentStaff), [currentStaff, user]);
-  const roleStorageKey = useMemo(() => dashboardRoleStorageKey(adminUser, currentStaff), [adminUser, currentStaff]);
+  const roleStorageKey = useMemo(() => dashboardRoleStorageKey(adminUser, currentStaff, state.data.context?.referenceBusinessDate), [adminUser, currentStaff, state.data.context?.referenceBusinessDate]);
   const availableRoleSignature = availableRoles.join("|");
   const [selectedRole, setSelectedRole] = useState<OperationalDashboardRole | null>(null);
   useEffect(() => {
@@ -256,7 +253,7 @@ export function AdminRoleOperationsPage({ navigate }: { navigate: Navigate }) {
     setState((current) => ({ ...current, loading: true, error: "" }));
     try {
       const context = normalizeContext(await adminApi.getOrderingContext());
-      const businessDate = context?.referenceBusinessDate || today();
+      const businessDate = requireBusinessDate(context);
       const [sessionResult, roomResult, staffResult] = await Promise.allSettled([
         adminApi.getOrderSessions({ businessDate }),
         adminApi.getRoomOrders({ businessDate }),
@@ -300,7 +297,7 @@ export function AdminRoleOperationsPage({ navigate }: { navigate: Navigate }) {
     }
   }, [load]);
 
-  return <AdminPage eyebrow={`${isDeveloperPreview ? "DEVELOPER PREVIEW · " : ""}${config.label.toUpperCase()} DASHBOARD`} title={config.title} description={`${adminUser.displayName}，${isDeveloperPreview ? "可切換檢視三種營業工作台；" : ""}${config.description}`} actions={<><AdminButton variant="secondary" disabled={state.loading} onClick={() => void load()}>{state.loading ? "讀取中…" : "重新整理"}</AdminButton>{isDeveloperPreview ? <AdminButton variant="ghost" onClick={() => navigate("/admin/orders")}>完整點單管理</AdminButton> : null}</>}>
+  return <AdminPage eyebrow={`${isDeveloperPreview ? "DEVELOPER PREVIEW · " : ""}${config.label.toUpperCase()} DASHBOARD`} title={config.title} description={`${adminUser.displayName}，${isDeveloperPreview ? "可切換檢視三種營業工作台；" : ""}${config.description}`} actions={<><AdminButton variant="secondary" disabled={state.loading} onClick={() => void load()}>{state.loading ? "讀取中…" : "重新整理"}</AdminButton><AdminButton variant="ghost" onClick={() => navigate("/admin/orders")}>完整點單管理</AdminButton></>}>
     {state.error ? <div className="adminOrderMessage isError" role="alert">{state.error}</div> : null}
     {availableRoles.length > 1 ? <div className={`adminRoleSwitcher${isDeveloperPreview ? " isDeveloperPreview" : ""}`} role="group" aria-label={isDeveloperPreview ? "開發者工作台預覽切換" : "今日可用工作身分"}><span>{isDeveloperPreview ? "開發者預覽" : adminUser.role === "manager" ? "目前工作視角" : "今日可用身分"}</span>{availableRoles.map((role) => <button type="button" className={dashboardRole === role ? "isActive" : ""} aria-pressed={dashboardRole === role} key={role} onClick={() => selectDashboardRole(role)}>{dashboardRoleLabels[role]}</button>)}</div> : null}
     {!isDeveloperPreview && currentStaff?.todayWorkMode && currentStaff.todayWorkMode.isWorking && !currentStaff.todayWorkMode.activeRoles.some((role) => role === "service" || role === "designated") ? <div className="adminRoleDashboardNotice" role="status">今天尚未啟用服務員或指名人員身分，目前依今日排班顯示預設工作台；若需調整，請先確認值班規劃，再到店員設定開啟今日啟用職位。</div> : null}

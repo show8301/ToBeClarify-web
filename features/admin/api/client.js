@@ -205,6 +205,9 @@ export const adminApi = {
   finalizeSettlement: (body, signal) => request('/settlement/finalize', {
     method: 'POST', body: JSON.stringify(body), signal,
   }),
+  closeSettlement: (body, signal) => request('/settlement/close', {
+    method: 'POST', body: JSON.stringify(body), signal,
+  }),
   reopenSettlement: (body, signal) => request('/settlement/reopen', {
     method: 'POST', body: JSON.stringify(body), signal,
   }),
@@ -214,8 +217,18 @@ export const adminApi = {
   reviewSettlementAttendanceBackfill: (requestId, body, signal) => request(`/settlement/attendance/backfill/${encodeURIComponent(requestId)}/review`, {
     method: 'POST', body: JSON.stringify(body), signal,
   }),
+  getAttendance: (businessDate, signal) => request(`/attendance?businessDate=${encodeURIComponent(businessDate)}`, { signal }),
+  applyAttendance: (body, signal) => request('/attendance/actions', {
+    method: 'POST', body: JSON.stringify(body), signal,
+  }),
   adjustSettlementOrder: (orderId, body, signal) => request(`/settlement/orders/${encodeURIComponent(orderId)}/amount`, {
     method: 'PUT', body: JSON.stringify(body), signal,
+  }),
+  recordSettlementPayment: (body, signal) => request('/settlement/payments', {
+    method: 'POST', body: JSON.stringify(body), signal,
+  }),
+  recordSettlementCorrection: (body, signal) => request('/settlement/corrections', {
+    method: 'POST', body: JSON.stringify(body), signal,
   }),
   getOrderSessions: ({ businessDate, search } = {}, signal) => {
     const params = new URLSearchParams();
@@ -227,6 +240,9 @@ export const adminApi = {
   updateOrderSession: (id, body, signal) => request(`/order-sessions/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(body), signal }),
   reissueOrderSession: (id, signal) => request(`/order-sessions/${encodeURIComponent(id)}/reissue`, { method: 'POST', signal }),
   getSessionOrders: (id, signal) => request(`/order-sessions/${encodeURIComponent(id)}/orders`, { signal }),
+  getOrderingCatalog: (businessDate, signal) => request(`/ordering-catalog${businessDate ? `?businessDate=${encodeURIComponent(businessDate)}` : ''}`, { signal }),
+  quoteAssistedOrder: (sessionId, body, signal) => request(`/order-sessions/${encodeURIComponent(sessionId)}/quote`, { method: 'POST', body: JSON.stringify(body), signal }),
+  submitAssistedOrder: (sessionId, body, signal) => request(`/order-sessions/${encodeURIComponent(sessionId)}/orders`, { method: 'POST', body: JSON.stringify(body), signal }),
   getOrderingSettings: (signal) => request('/ordering-settings', { signal }),
   getOrderingContext: (signal) => request('/ordering-context', { signal }),
   openBusinessPeriod: (body, signal) => request('/business-period/open', {

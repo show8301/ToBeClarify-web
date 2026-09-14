@@ -33,6 +33,7 @@ interface Preview {
   conflicts: Array<{ unitId: string; name: string; overlapMinutes: number; startsAt?: string | null; endsAt?: string | null; status: string }>;
   canStartNow: boolean;
 }
+interface PeriodOption { id: string; businessDate: string; status: string; }
 
 function parseUnits(value: unknown): Unit[] {
   if (!value || typeof value !== "object" || !("units" in value) || !Array.isArray(value.units)) throw new Error("無法讀取接待進度。");
@@ -81,6 +82,8 @@ function UnitControls({ orderId, unit, onChanged }: { orderId: string; unit: Uni
   const [quantity, setQuantity] = useState(1);
   const [reason, setReason] = useState("");
   const [startsAt, setStartsAt] = useState("");
+  const [targetBusinessPeriodId, setTargetBusinessPeriodId] = useState("");
+  const [periods, setPeriods] = useState<PeriodOption[]>([]);
   const [actualStartsAt, setActualStartsAt] = useState("");
   const [actualEndsAt, setActualEndsAt] = useState("");
   const [restMinutes, setRestMinutes] = useState(unit.restMinutesReserved || 0);
@@ -89,6 +92,12 @@ function UnitControls({ orderId, unit, onChanged }: { orderId: string; unit: Uni
   const [preview, setPreview] = useState<Preview | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  useEffect(() => {
+    if (!unit.allowedActions.includes("reschedule")) return;
+    adminRequest(`/orders/${encodeURIComponent(orderId)}/fulfillment/period-options`)
+      .then(value => { if (Array.isArray(value)) setPeriods(value as PeriodOption[]); })
+      .catch(() => setPeriods([]));
+  }, [orderId, unit.allowedActions, unit.id]);
   type RequestBody = { operationId: string; expectedVersion: number; action: string; quantity: number; reason: string | null; scheduledStartsAt: string | null; targetBusinessPeriodId: string | null; restMinutes: number; compensationAmount: number; compensationReason: string | null; actualStartsAt: string | null; actualEndsAt: string | null };
   const [retry, setRetry] = useState<RequestBody | null>(null);
 
@@ -105,7 +114,7 @@ function UnitControls({ orderId, unit, onChanged }: { orderId: string; unit: Uni
     if (action === "backfill" && !actualStartsAt) { setError("補登請填寫實際開始時間。"); return; }
     const body: RequestBody = retry ?? { operationId: crypto.randomUUID(), expectedVersion: unit.version, action, quantity,
       reason: reason.trim() || null, scheduledStartsAt: startsAt ? `${startsAt}:00+08:00` : null,
-      targetBusinessPeriodId: null, restMinutes: action === "start_now" ? restMinutes : -1,
+      targetBusinessPeriodId: targetBusinessPeriodId || null, restMinutes: action === "start_now" ? restMinutes : -1,
       compensationAmount, compensationReason: compensationReason.trim() || null,
       actualStartsAt: actualStartsAt ? `${actualStartsAt}:00+08:00` : null,
       actualEndsAt: actualEndsAt ? `${actualEndsAt}:00+08:00` : null };
@@ -125,7 +134,7 @@ function UnitControls({ orderId, unit, onChanged }: { orderId: string; unit: Uni
     {unit.allowedActions.length > 0 && <>
       {unit.quantity > 1 && <label>本次數量<input type="number" min="1" max={unit.quantity} value={quantity} disabled={!!retry} onChange={e => setQuantity(Number(e.target.value))} /></label>}
       <label>原因（取消、改期、提早完成、補登時填寫）<input value={reason} maxLength={500} disabled={!!retry} onChange={e => setReason(e.target.value)} /></label>
-      {unit.allowedActions.includes("reschedule") && <label>改期開始時間（台灣時間）<input type="datetime-local" value={startsAt} disabled={!!retry} onChange={e => setStartsAt(e.target.value)} /></label>}
+      {unit.allowedActions.includes("reschedule") && <><label>改期開始時間（台灣時間）<input type="datetime-local" value={startsAt} disabled={!!retry} onChange={e => setStartsAt(e.target.value)} /></label><label>履約營業期（跨期時選擇）<select value={targetBusinessPeriodId} disabled={!!retry} onChange={e => setTargetBusinessPeriodId(e.target.value)}><option value="">沿用原營業期</option>{periods.map(period => <option key={period.id} value={period.id}>{period.businessDate}（{period.status === "coordination" ? "協調" : "營業中"}）</option>)}</select></label></>}
       {unit.allowedActions.includes("backfill") && <div><label>實際開始<input type="datetime-local" value={actualStartsAt} disabled={!!retry} onChange={e => setActualStartsAt(e.target.value)} /></label><label>實際結束（已完成才填）<input type="datetime-local" value={actualEndsAt} disabled={!!retry} onChange={e => setActualEndsAt(e.target.value)} /></label></div>}
       {unit.allowedActions.includes("start_now") && <div><p>現在接待設定</p><label><input type="radio" checked={restMinutes === unit.restMinutesReserved} disabled={!!retry} onChange={() => setRestMinutes(unit.restMinutesReserved)} />保留原休息 {unit.restMinutesReserved} 分鐘</label><label><input type="radio" checked={restMinutes === 0} disabled={!!retry} onChange={() => setRestMinutes(0)} />本次不占休息（可折讓）</label><label>折讓金額<input type="number" min="0" value={compensationAmount} disabled={!!retry} onChange={e => setCompensationAmount(Math.max(0, Number(e.target.value)))} /></label><label>折讓／待確認原因<input value={compensationReason} maxLength={500} disabled={!!retry} onChange={e => setCompensationReason(e.target.value)} /></label></div>}
       {preview && <div role="status"><p>現在接待：{showTime(preview.effectiveStartsAt)} 開始，服務至 {showTime(preview.effectiveEndsAt)}，購買 {preview.purchasedMinutes} 分鐘。</p>{preview.conflicts.length > 0 && <p>會影響：{preview.conflicts.map(c => `${c.name}（重疊 ${c.overlapMinutes} 分鐘）`).join("、")}；開始後這些單會轉待協調。</p>}{!preview.canStartNow && <p>此店員仍有進行中的服務，請先完成該服務。</p>}<button type="button" disabled={busy || !!retry || !preview.canStartNow} onClick={() => void run("start_now")}>確認現在接待</button></div>}

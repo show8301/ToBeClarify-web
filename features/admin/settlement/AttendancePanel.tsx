@@ -8,7 +8,7 @@ type Summary = {
   staffId: string; displayName: string; dutyPlanId?: string | null; scheduledStart?: string | null; scheduledEnd?: string | null;
   actualStart?: string | null; actualEnd?: string | null; scheduledMinutes: number; workedMinutes: number;
   adjustmentMinutes: number; effectiveMinutes: number; hasOpenShift: boolean; stopAcceptingNewOrders: boolean;
-  activeServiceCount: number;
+  activeServiceCount: number; affectedOrders?: Array<{ orderId: string; orderNumber: string; orderStatus: string; customerName?: string | null; requestedStart: string; requestedEnd: string }>;
 };
 
 async function fetchAttendanceRows(businessDate: string): Promise<Summary[]> {
@@ -65,6 +65,7 @@ export function AttendancePanel({ businessDate, canManage }: { businessDate: str
     {rows.length === 0 ? <p>今天沒有已核准的工作班次。</p> : <>
       {canManage ? <AdminField label="店員"><select value={selected} onChange={e => setSelected(e.target.value)}>{rows.map(row => <option key={row.staffId} value={row.staffId}>{row.displayName}</option>)}</select></AdminField> : null}
       {current ? <div className="adminSettlementSummary"><div><span>班表分鐘</span><strong>{current.scheduledMinutes}</strong></div><div><span>有效工時</span><strong>{current.effectiveMinutes}</strong></div><div><span>增減補正</span><strong>{current.adjustmentMinutes >= 0 ? "+" : ""}{current.adjustmentMinutes}</strong></div><div><span>狀態</span><strong>{current.stopAcceptingNewOrders ? "停止新單" : current.hasOpenShift ? "進行中" : "可接單"}</strong></div></div> : null}
+      {current?.affectedOrders?.length ? <div className="adminAttendanceAffected"><strong>停止新單後的協調清單</strong>{current.affectedOrders.map(order => <div key={order.orderId}><span>{order.orderNumber}{order.customerName ? `｜${order.customerName}` : ""}</span><small>{new Date(order.requestedStart).toLocaleString("zh-TW")} ～ {new Date(order.requestedEnd).toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" })} · {order.orderStatus}</small></div>)}</div> : null}
       <div className="adminFormGrid"><AdminField label="操作"><select value={action} onChange={e => setAction(e.target.value as typeof action)}><option value="clock_in">人工上班</option><option value="clock_out">人工下班</option><option value="add_minutes">增加分鐘</option><option value="subtract_minutes">減少分鐘</option><option value="set_times">修改實際上下班</option><option value="stop_orders">提前離店／停止新單</option><option value="resume_orders">恢復接單</option></select></AdminField><AdminField label="上班時間（修改時）"><input type="datetime-local" value={start} onChange={e => setStart(e.target.value)} /></AdminField><AdminField label="下班時間（修改時）"><input type="datetime-local" value={end} onChange={e => setEnd(e.target.value)} /></AdminField>{(action === "add_minutes" || action === "subtract_minutes") ? <AdminField label="分鐘"><input type="number" min="1" value={minutes} onChange={e => setMinutes(Number(e.target.value) || 1)} /></AdminField> : null}<AdminField label="原因"><input value={reason} maxLength={500} onChange={e => setReason(e.target.value)} placeholder="可選；例如服務延後下班" /></AdminField></div>
       <AdminButton onClick={() => void apply()} disabled={busy || !selected}>保存出勤操作</AdminButton>
       {message ? <p role="status">{message}</p> : null}

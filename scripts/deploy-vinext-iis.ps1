@@ -735,6 +735,26 @@ if ($publicHealthCheckUrl -ieq $siblingPublicHealthCheckUrl) {
     throw 'The target and sibling health check URLs must be different.'
 }
 
+$guestbookConfigPath = Join-Path (Join-Path $deployParent 'ToBeClarify_Config') 'guestbook.json'
+if (-not (Test-Path -LiteralPath $guestbookConfigPath -PathType Leaf)) {
+    throw "The server-only guestbook configuration was not found: $guestbookConfigPath"
+}
+try {
+    $guestbookConfig = Get-Content -LiteralPath $guestbookConfigPath -Raw | ConvertFrom-Json
+}
+catch {
+    throw "The server-only guestbook configuration is not valid JSON: $guestbookConfigPath"
+}
+$guestbookProxySecret = [string]$guestbookConfig.proxySecret
+$guestbookTrustedIpHeader = [string]$guestbookConfig.trustedIpHeader
+if ($guestbookProxySecret.Length -lt 32) {
+    throw 'The server-only guestbook proxySecret must contain at least 32 characters.'
+}
+if ($guestbookTrustedIpHeader -notmatch '^[A-Za-z0-9-]+$') {
+    throw 'The server-only guestbook trustedIpHeader is invalid.'
+}
+$guestbookPublicOrigin = ([System.Uri]$publicHealthCheckUrl).GetLeftPart([System.UriPartial]::Authority)
+
 $siblingDeployRoot = Get-NormalizedPath -Path (Join-Path $deployParent $SiblingDeployLeaf)
 if ($deployRoot -ieq $siblingDeployRoot) {
     throw 'The target and sibling deployment directories must be different.'
@@ -893,6 +913,9 @@ if (-not [string]::IsNullOrWhiteSpace($PublicClientApiBaseUrl)) {
 if (-not [string]::IsNullOrWhiteSpace($OrderingApiBaseUrl)) {
     $runtimeConfig.ORDERING_API_BASE_URL = $OrderingApiBaseUrl.TrimEnd('/')
 }
+$runtimeConfig.GUESTBOOK_PROXY_SECRET = $guestbookProxySecret
+$runtimeConfig.GUESTBOOK_TRUSTED_IP_HEADER = $guestbookTrustedIpHeader
+$runtimeConfig.GUESTBOOK_PUBLIC_ORIGIN = $guestbookPublicOrigin
 $runtimeConfig | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $stagingRoot 'runtime-config.json') -Encoding UTF8
 
 # Never stop a pre-existing manager unless its identity is bound to this

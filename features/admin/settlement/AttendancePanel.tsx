@@ -11,6 +11,11 @@ type Summary = {
   activeServiceCount: number;
 };
 
+async function fetchAttendanceRows(businessDate: string): Promise<Summary[]> {
+  const next = await adminApi.getAttendance(businessDate);
+  return next?.staff || [];
+}
+
 export function AttendancePanel({ businessDate, canManage }: { businessDate: string; canManage: boolean }) {
   const [rows, setRows] = useState<Summary[]>([]);
   const [selected, setSelected] = useState("");
@@ -21,8 +26,30 @@ export function AttendancePanel({ businessDate, canManage }: { businessDate: str
   const [reason, setReason] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
-  const load = async () => { if (!businessDate) return; try { const next = await adminApi.getAttendance(businessDate); const values = next?.staff || []; setRows(values); setSelected(current => current || values[0]?.staffId || ""); } catch (error) { setMessage(error instanceof Error ? error.message : "無法讀取出勤狀態"); } };
-  useEffect(() => { void load(); }, [businessDate]);
+  const load = async () => {
+    if (!businessDate) return;
+    try {
+      const values = await fetchAttendanceRows(businessDate);
+      setRows(values);
+      setSelected(current => current || values[0]?.staffId || "");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "無法讀取出勤狀態");
+    }
+  };
+  useEffect(() => {
+    if (!businessDate) return;
+    let active = true;
+    fetchAttendanceRows(businessDate)
+      .then(values => {
+        if (!active) return;
+        setRows(values);
+        setSelected(current => current || values[0]?.staffId || "");
+      })
+      .catch(error => {
+        if (active) setMessage(error instanceof Error ? error.message : "無法讀取出勤狀態");
+      });
+    return () => { active = false; };
+  }, [businessDate]);
   const current = rows.find(row => row.staffId === selected);
   const apply = async () => {
     if (!selected) return; setBusy(true); setMessage("");

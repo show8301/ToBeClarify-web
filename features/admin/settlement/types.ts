@@ -35,6 +35,16 @@ export type SettlementRun = {
   activityExpense: number;
   companyShareHours: number | null;
   activityHoursConfirmed: boolean;
+  businessPeriodId?: string | null;
+  sourceVersion?: number;
+  sourceCutoffAt?: string | null;
+  cashReceived?: number;
+  cashRefunded?: number;
+  netCash?: number;
+  retainedAmount?: number;
+  pendingFinanceCount?: number;
+  correctsSettlementId?: string | null;
+  correctionVersion?: number;
 };
 
 export type SettlementSummary = {
@@ -46,6 +56,28 @@ export type SettlementSummary = {
   companyIncome: number;
   totalPayroll: number;
   companySubsidy: number;
+  cashReceived?: number;
+  cashRefunded?: number;
+  netCash?: number;
+  retainedAmount?: number;
+  pendingFinanceCount?: number;
+};
+
+export type SettlementWorkflow = {
+  businessPeriodId?: string | null;
+  periodStatus: string;
+  intakeMode: string;
+  unfinishedOrderCount: number;
+  activeServiceCount: number;
+  cashReceived: number;
+  cashRefunded: number;
+  netCash: number;
+  retainedAmount: number;
+  pendingFinanceCount: number;
+  canStopNewOrders: boolean;
+  canClose: boolean;
+  canFinalize: boolean;
+  canCarryForward: boolean;
 };
 
 export type SettlementResult = {

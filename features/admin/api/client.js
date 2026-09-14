@@ -205,6 +205,9 @@ export const adminApi = {
   finalizeSettlement: (body, signal) => request('/settlement/finalize', {
     method: 'POST', body: JSON.stringify(body), signal,
   }),
+  closeSettlement: (body, signal) => request('/settlement/close', {
+    method: 'POST', body: JSON.stringify(body), signal,
+  }),
   reopenSettlement: (body, signal) => request('/settlement/reopen', {
     method: 'POST', body: JSON.stringify(body), signal,
   }),
@@ -220,6 +223,12 @@ export const adminApi = {
   }),
   adjustSettlementOrder: (orderId, body, signal) => request(`/settlement/orders/${encodeURIComponent(orderId)}/amount`, {
     method: 'PUT', body: JSON.stringify(body), signal,
+  }),
+  recordSettlementPayment: (body, signal) => request('/settlement/payments', {
+    method: 'POST', body: JSON.stringify(body), signal,
+  }),
+  recordSettlementCorrection: (body, signal) => request('/settlement/corrections', {
+    method: 'POST', body: JSON.stringify(body), signal,
   }),
   getOrderSessions: ({ businessDate, search } = {}, signal) => {
     const params = new URLSearchParams();

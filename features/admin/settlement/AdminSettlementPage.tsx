@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { AttendanceBackfill, SettlementResult, SettlementRule, SettlementRun, SettlementStaff, SettlementSummary } from "./types";
+import type { AttendanceBackfill, SettlementResult, SettlementRule, SettlementRun, SettlementStaff, SettlementSummary, SettlementWorkflow } from "./types";
 import { getAdminBusinessDate } from "@/features/admin/shared/businessDay";
 import { adminApi, adminRequest } from "@/features/admin/api/client.js";
 import { useAdminAuth } from "@/features/admin/auth/AdminAuthContext.jsx";
@@ -34,6 +34,7 @@ type Overview = {
   results: SettlementResult[];
   anomalies: { code: string; message: string; sourceId?: string | null }[];
   attendanceBackfillRequests: AttendanceBackfill[];
+  workflow?: SettlementWorkflow | null;
 };
 
 const money = (value: number) => Math.ceil(Number(value || 0)).toLocaleString("zh-TW");
@@ -80,6 +81,8 @@ export function AdminSettlementPage() {
   const [error, setError] = useState<Error | null>(null);
   const [message, setMessage] = useState("");
   const [backfillForm, setBackfillForm] = useState({ staffId: "", role: "designated", requestedMinutes: "", reason: "" });
+  const [paymentForm, setPaymentForm] = useState({ staffId: "", eventKind: "payout", amount: "", reason: "" });
+  const [correctionForm, setCorrectionForm] = useState({ sourceKind: "finance", sourceId: "", staffId: "", amountDelta: "", reason: "" });
 
   const loadSequence = useRef(0);
   const load = useCallback((signal?: AbortSignal) => {
@@ -195,6 +198,35 @@ export function AdminSettlementPage() {
     finally { setSaving(false); }
   };
 
+  const closeBusinessDay = async () => {
+    setSaving(true); setMessage("");
+    try {
+      const next = await adminApi.closeSettlement({ businessDate: date, operationId: crypto.randomUUID(), reason: "結束營業並停止新單" });
+      setOverview(next); setMessage("已停止新單並完成實際關店；未完成服務仍需逐筆協調。 ");
+    } catch (nextError) { setMessage((nextError as Error).message); }
+    finally { setSaving(false); }
+  };
+
+  const recordPayment = async () => {
+    if (!paymentForm.staffId || Number(paymentForm.amount) <= 0 || !paymentForm.reason.trim()) { setMessage("支付需要人員、金額與原因。"); return; }
+    setSaving(true); setMessage("");
+    try {
+      await adminApi.recordSettlementPayment({ businessDate: date, sessionNo, staffId: paymentForm.staffId, eventKind: paymentForm.eventKind, amount: Number(paymentForm.amount), operationId: crypto.randomUUID(), reason: paymentForm.reason.trim() });
+      setPaymentForm(current => ({ ...current, amount: "", reason: "" })); setMessage("支付／追回已記錄；重送同一操作不會重複入帳。");
+    } catch (nextError) { setMessage((nextError as Error).message); }
+    finally { setSaving(false); }
+  };
+
+  const recordCorrection = async () => {
+    if (!Number(correctionForm.amountDelta) || !correctionForm.reason.trim()) { setMessage("結算後更正需要非零差額與原因。"); return; }
+    setSaving(true); setMessage("");
+    try {
+      await adminApi.recordSettlementCorrection({ businessDate: date, sessionNo, sourceKind: correctionForm.sourceKind, sourceId: correctionForm.sourceId || null, staffId: correctionForm.staffId || null, amountDelta: Number(correctionForm.amountDelta), operationId: crypto.randomUUID(), reason: correctionForm.reason.trim() });
+      setCorrectionForm(current => ({ ...current, sourceId: "", amountDelta: "", reason: "" })); setMessage("結算後更正已建立差額案件，歷史快照保持不變。");
+    } catch (nextError) { setMessage((nextError as Error).message); }
+    finally { setSaving(false); }
+  };
+
   const finalize = async () => {
     if (!window.confirm("正式結算後本時段會鎖定，確定要繼續嗎？")) return;
     setSaving(true); setMessage("");
@@ -223,13 +255,19 @@ export function AdminSettlementPage() {
   const availableStaff = useMemo(() => staff.filter((item) => item.isActive !== false && (canManage || item.id === user?.staffMemberId)), [canManage, staff, user?.staffMemberId]);
   const isFinalized = overview?.run.status === "finalized";
 
-  return <AdminPage eyebrow="PAYROLL · SETTLEMENT" title="帳目／薪資結算" description="依營業日期鎖定規則版本，核對實收營業額、工時、小費與各角色薪資。" actions={<><AdminButton variant="secondary" onClick={() => { setLoading(true); void load(); }} disabled={loading || saving}>重新整理</AdminButton>{canManage && (isFinalized ? <AdminButton onClick={() => void reopen()} disabled={saving}>重新開放新時段</AdminButton> : <AdminButton onClick={finalize} disabled={flowVersion >= 2 || loading || saving || !overview || overview.anomalies.length > 0}>正式結算</AdminButton>)}</>}>
-    {flowVersion >= 2 && <p role="status">此營業日使用分項接待；薪資串接尚未開放，費用可持續記錄及後續確認，分潤先保留。</p>}
+  return <AdminPage eyebrow="PAYROLL · SETTLEMENT" title="帳目／薪資結算" description="依營業日期鎖定規則版本，核對實收營業額、工時、小費與各角色薪資。" actions={<><AdminButton variant="secondary" onClick={() => { setLoading(true); void load(); }} disabled={loading || saving}>重新整理</AdminButton>{canManage && (isFinalized ? <AdminButton onClick={() => void reopen()} disabled={saving}>重新開放新時段</AdminButton> : <AdminButton onClick={finalize} disabled={loading || saving || !overview || overview.anomalies.length > 0 || overview.workflow?.canFinalize === false}>正式結算</AdminButton>)}</>}>
+    {flowVersion >= 2 && <p role="status">分項履約、現場收退款與結算後差額已納入同一營業日；未決金額會保留分潤並可跨日結轉。</p>}
     {date ? <AttendancePanel businessDate={date} canManage={canManage} /> : null}
-    <div className="adminSettlementToolbar"><AdminField label="營業日期"><input type="date" value={date} onChange={(event) => { setLoading(true); if (event.target.value) setDate(event.target.value); }} /></AdminField><AdminField label="營業時段"><input type="number" min="1" value={sessionNo} onChange={(event) => { setLoading(true); setSessionNo(Number(event.target.value) || 1); }} /></AdminField><AdminField label="日期類型"><select value={dayType} onChange={(event) => setDayType(event.target.value)} disabled={!canManage || Boolean(overview?.run.status !== "draft")}><option value="normal">非活動日</option><option value="event">活動日</option></select></AdminField>{canManage ? <><AdminButton variant="secondary" onClick={saveInputs} disabled={loading || saving || isFinalized}>保存輸入</AdminButton><AdminButton onClick={calculate} disabled={flowVersion >= 2 || loading || saving || isFinalized}>重新計算</AdminButton></> : null}</div>
+    <div className="adminSettlementToolbar"><AdminField label="營業日期"><input type="date" value={date} onChange={(event) => { setLoading(true); if (event.target.value) setDate(event.target.value); }} /></AdminField><AdminField label="營業時段"><input type="number" min="1" value={sessionNo} onChange={(event) => { setLoading(true); setSessionNo(Number(event.target.value) || 1); }} /></AdminField><AdminField label="日期類型"><select value={dayType} onChange={(event) => setDayType(event.target.value)} disabled={!canManage || Boolean(overview?.run.status !== "draft")}><option value="normal">非活動日</option><option value="event">活動日</option></select></AdminField>{canManage ? <><AdminButton variant="secondary" onClick={saveInputs} disabled={loading || saving || isFinalized}>保存輸入</AdminButton><AdminButton onClick={calculate} disabled={loading || saving || isFinalized}>重新計算</AdminButton></> : null}</div>
     {message ? <div className="adminNotice" role="status">{message}</div> : null}
     <AdminState loading={loading} error={error} onRetry={() => void load()} />
     {!loading && !error && overview && summary ? <>
+      <AdminPanel title="關店與結算流程" description="停止新單、實際關店、核對現金，再由同一入口正式結算。未決退款與工時差額可以結轉。">
+        <div className="adminSettlementSummary"><div><span>營業狀態</span><strong>{overview.workflow?.periodStatus === "open" ? "營業中" : overview.workflow?.periodStatus === "closed" ? "已關店" : overview.workflow?.periodStatus === "settled" ? "已結算" : "尚未開店"}</strong></div><div><span>未完成訂單</span><strong>{overview.workflow?.unfinishedOrderCount ?? 0}</strong></div><div><span>淨實收</span><strong>{money(overview.workflow?.netCash ?? summary.netCash ?? 0)} G</strong></div><div><span>分潤保留</span><strong>{money(overview.workflow?.retainedAmount ?? summary.retainedAmount ?? 0)} G</strong></div></div>
+        {canManage && overview.workflow?.periodStatus === "open" ? <AdminButton variant="danger" onClick={() => void closeBusinessDay()} disabled={saving}>停止新單並完成關店</AdminButton> : null}
+        {overview.workflow?.unfinishedOrderCount ? <p>仍有未完成訂單；先在訂單工作台完成或登記實際終止，系統不會用關店抹掉履約事實。</p> : null}
+        {overview.workflow?.pendingFinanceCount ? <p>有 {overview.workflow.pendingFinanceCount} 筆費用待確認，已發生金流仍列入淨實收，受影響分潤保留。</p> : null}
+      </AdminPanel>
       {overview.anomalies.length ? <AdminPanel title="需手動處理" description="以下項目會阻止正式結算；完成輸入或修正後重新計算。" className="adminSettlementAnomalies"><ul>{overview.anomalies.map((item) => <li key={`${item.code}-${item.sourceId || ""}`}>{item.message}{item.sourceId ? `（${item.sourceId}）` : ""}</li>)}</ul></AdminPanel> : null}
       <AdminPanel title="營業額與分潤摘要" description={`第 ${overview.run.sessionNo} 時段 · 規則 ${overview.rule.effectiveFrom} 生效 · 狀態 ${overview.run.status}`}>
         <div className="adminSettlementSummary">{[["有效營業額", summary.grossRevenue], ["指名營業額基礎", summary.designatedRevenueBase], ["公司營業額", summary.companyRevenue], ["服務生／經理池", summary.serviceManagerPool], ["幕後技術池", summary.backstagePool], ["公司收入", summary.companyIncome], ["應付薪資", summary.totalPayroll], ["公司補貼尾差", summary.companySubsidy]].map(([label, value]) => <div key={label as string}><span>{label}</span><strong>{money(value as number)} G</strong></div>)}</div>
@@ -246,6 +284,10 @@ export function AdminSettlementPage() {
         <div className="adminSettlementTableWrap"><table className="adminSettlementTable"><thead><tr><th>人員</th><th>角色</th><th>分鐘</th><th>理由</th><th>狀態</th><th>處理</th></tr></thead><tbody>{(overview.attendanceBackfillRequests || []).map((item) => <tr key={item.id}><td>{item.staffName || item.staffId}</td><td>{roleLabel[item.role] || item.role}</td><td>{item.requestedMinutes}</td><td>{item.reason}</td><td>{item.status}</td><td>{canManage && item.status === "pending" ? <><AdminButton variant="secondary" onClick={() => void reviewBackfill(item.id, true)} disabled={saving}>核准</AdminButton> <AdminButton variant="secondary" onClick={() => void reviewBackfill(item.id, false)} disabled={saving}>拒絕</AdminButton></> : "—"}</td></tr>)}</tbody></table></div>
       </AdminPanel>
       <AdminPanel title="薪資明細" description="底薪與營收分成擇優，小費獨立加計；每筆金額無條件進位，尾差由公司補貼。"><div className="adminSettlementTableWrap"><table className="adminSettlementTable"><thead><tr><th>人員</th><th>角色</th><th>底薪</th><th>營收分成</th><th>指定小費</th><th>公共小費</th><th>進位後應付</th><th>異常</th></tr></thead><tbody>{overview.results.map((item, index) => <tr key={`${item.staffId || "company"}-${item.role}-${index}`}><td>{item.displayName || item.staffId || "公司"}</td><td>{roleLabel[item.role] || item.role}</td><td>{money(item.basePay)} G</td><td>{money(item.revenueShare)} G</td><td>{money(item.designatedTip)} G</td><td>{money(item.publicTip)} G</td><td><strong>{money(item.afterRounding)} G</strong></td><td>{item.anomalyStatus !== "normal" ? item.anomalyNote || item.anomalyStatus : "—"}</td></tr>)}</tbody></table></div></AdminPanel>
+      {isFinalized && canManage ? <AdminPanel title="支付與結算後更正" description="支付／追回與事後差額各自記錄；原結算快照保留，重送操作不重複入帳。">
+        <div className="adminFormGrid"><AdminField label="支付人員"><select value={paymentForm.staffId} onChange={(event) => setPaymentForm(current => ({ ...current, staffId: event.target.value }))}><option value="">選擇人員</option>{availableStaff.map(member => <option key={member.id} value={member.id}>{member.displayName}</option>)}</select></AdminField><AdminField label="類型"><select value={paymentForm.eventKind} onChange={(event) => setPaymentForm(current => ({ ...current, eventKind: event.target.value }))}><option value="payout">支付／補發</option><option value="recovery">追回</option></select></AdminField><AdminField label="金額"><input type="number" min="1" value={paymentForm.amount} onChange={(event) => setPaymentForm(current => ({ ...current, amount: event.target.value }))} /></AdminField><AdminField label="原因"><input value={paymentForm.reason} onChange={(event) => setPaymentForm(current => ({ ...current, reason: event.target.value }))} /></AdminField></div><AdminButton variant="secondary" onClick={() => void recordPayment()} disabled={saving}>記錄支付／追回</AdminButton>
+        <div className="adminFormGrid"><AdminField label="更正來源"><select value={correctionForm.sourceKind} onChange={(event) => setCorrectionForm(current => ({ ...current, sourceKind: event.target.value }))}><option value="finance">現場費用</option><option value="attendance">出勤／工時</option><option value="manual">其他</option></select></AdminField><AdminField label="原案件／紀錄編號"><input value={correctionForm.sourceId} onChange={(event) => setCorrectionForm(current => ({ ...current, sourceId: event.target.value }))} /></AdminField><AdminField label="指定人員（可留白）"><select value={correctionForm.staffId} onChange={(event) => setCorrectionForm(current => ({ ...current, staffId: event.target.value }))}><option value="">共同／待分配</option>{availableStaff.map(member => <option key={member.id} value={member.id}>{member.displayName}</option>)}</select></AdminField><AdminField label="應付差額"><input type="number" value={correctionForm.amountDelta} onChange={(event) => setCorrectionForm(current => ({ ...current, amountDelta: event.target.value }))} /></AdminField><AdminField label="原因"><input value={correctionForm.reason} onChange={(event) => setCorrectionForm(current => ({ ...current, reason: event.target.value }))} /></AdminField></div><AdminButton variant="secondary" onClick={() => void recordCorrection()} disabled={saving}>建立更正差額</AdminButton>
+      </AdminPanel> : null}
       {canManage ? <AdminPanel title="可調整規則版本" description="規則以生效日期版本化；建立新版本不會改寫已完成結算使用的快照。金額最小支付單位固定為 1 Gil，不提供調整。"><div className="adminFormGrid">{([["dayType", "日期類型", "select"], ["effectiveFrom", "生效日期", "date"], ["designatedHourlyRate", "指名時薪", "number"], ["serviceManagerHourlyRate", "服務生／經理時薪", "number"], ["designatedSharePercentage", "指名分成 %", "number"], ["publicRoomStaffPercentage", "公共包廂指名 %", "number"], ["dedicatedRoomOwnerPercentage", "專屬包廂擁有者 %", "number"], ["serviceManagerPoolPercentage", "服務生／經理池 %", "number"], ["backstagePoolPercentage", "幕後池 %", "number"], ["companyPercentage", "公司收入 %", "number"]] as const).map(([key, label, type]) => <AdminField key={key} label={label}><>{type === "select" ? <select value={ruleForm[key]} onChange={(event) => setRuleForm((current) => ({ ...current, [key]: event.target.value }))}><option value="normal">非活動日</option><option value="event">活動日</option></select> : <input type={type as "date" | "number"} min="0" value={ruleForm[key]} onChange={(event) => setRuleForm((current) => ({ ...current, [key]: type === "date" ? event.target.value : Number(event.target.value) }))} />}</></AdminField>)}</div><AdminButton variant="secondary" onClick={saveRule} disabled={saving}>建立規則版本</AdminButton></AdminPanel> : null}
     </> : null}
   </AdminPage>;

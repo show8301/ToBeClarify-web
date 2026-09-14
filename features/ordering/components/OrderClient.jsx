@@ -27,6 +27,7 @@ export default function OrderClient() {
   const [businessContext, setBusinessContext] = useState(null);
   const [catalog, setCatalog] = useState(null);
   const [orders, setOrders] = useState([]);
+  const [bill, setBill] = useState(null);
   const [tab, setTab] = useState('meal');
   const [cart, setCart] = useState({ meals: [], nominations: [], rooms: [], tips: [] });
   const [notice, setNotice] = useState({ message: '', error: false });
@@ -39,14 +40,15 @@ export default function OrderClient() {
     setLoading(true);
     setNotice({ message: '', error: false });
     try {
-      const [access, nextCatalog, nextOrders] = await Promise.all([
-        orderingApi.access(nextToken, signal), orderingApi.catalog(nextToken, signal), orderingApi.orders(nextToken, signal),
+      const [access, nextCatalog, nextOrders, nextBill] = await Promise.all([
+        orderingApi.access(nextToken, signal), orderingApi.catalog(nextToken, signal), orderingApi.orders(nextToken, signal), orderingApi.finance(nextToken, signal),
       ]);
       setToken(nextToken);
       setSession(access.session);
       setBusinessContext(access.businessContext);
       setCatalog(nextCatalog);
       setOrders(nextOrders || []);
+      setBill(nextBill || null);
       localStorage.setItem(TOKEN_KEY, nextToken);
       if (nextCatalog.settings.nominationPaused && tab === 'nomination') setTab('meal');
     } catch (error) {
@@ -54,6 +56,7 @@ export default function OrderClient() {
       setSession(null);
       setBusinessContext(null);
       setCatalog(null);
+      setBill(null);
       setNotice({ message: error.message, error: true });
     } finally {
       setLoading(false);
@@ -169,7 +172,7 @@ export default function OrderClient() {
           {tab === 'tip' ? <TipPage staff={catalog.staff} settings={catalog.settings} setCart={setCart} onAdded={() => setNotice({ message: '小費分配已加入本次點餐。', error: false })} /> : null}
           {tab==='cart'&&quote?<OrderQuoteReview quote={quote} loading={loading} onConfirm={submit} onRefresh={()=>setQuoteDraft(null)}/>:null}
           {tab === 'cart' ? <CartPage cart={cart} setCart={setCart} session={session} businessContext={businessContext} subtotal={cartSubtotal} onSubmit={()=>{if(quote){document.getElementById('order-quote-review')?.scrollIntoView({behavior:'smooth'});return;}void submit();}} loading={loading} quoteRequired={catalog.menu.contractVersion===2} /> : null}
-          {tab === 'orders' ? <MyOrders orders={orders} catalog={catalog} loading={loading} onAddon={async (body) => { setLoading(true); try { await orderingApi.submitAddon(token, body); setOrders(await orderingApi.orders(token)); setNotice({ message: '加購服務已送出，等待被指名店員確認。', error: false }); } catch (error) { setNotice({ message: error.message, error: true }); } finally { setLoading(false); } }} /> : null}
+          {tab === 'orders' ? <><CustomerBill bill={bill} /><MyOrders orders={orders} catalog={catalog} loading={loading} onAddon={async (body) => { setLoading(true); try { await orderingApi.submitAddon(token, body); setOrders(await orderingApi.orders(token)); setBill(await orderingApi.finance(token)); setNotice({ message: '加購服務已送出，等待被指名店員確認。', error: false }); } catch (error) { setNotice({ message: error.message, error: true }); } finally { setLoading(false); } }} /></> : null}
           {tab === 'help' ? <HelpPage currentGameId={session.gameId} onRecover={recover} loading={loading} /> : null}
         </div>
         <aside className="orderAside">
@@ -368,6 +371,17 @@ function CartPage({ cart, setCart, session, businessContext, subtotal, onSubmit,
 
 function CartLine({ label, title, price, onRemove, disabled, removeHint }) {
   return <article className="cartLine"><span>{label}</span><div><strong>{title}</strong>{removeHint ? <small>{removeHint}</small> : null}</div><b>{money(price)}</b><button type="button" disabled={disabled} onClick={onRemove} aria-label={`刪除 ${title}`}>×</button></article>;
+}
+
+function CustomerBill({ bill }) {
+  if (!bill) return null;
+  const labels = { charge_add: '加收', charge_reduce: '折讓', cash_receipt: '實收', cash_refund: '實退' };
+  return <section className="orderPage customerBill"><PageHeading kicker="ACCOUNT" title="今日帳單" text="顯示原始應付、每次調整與現場實收；待確認款項不會重複向您收取。" />
+    <div className="cartSummary"><dl><div><dt>原訂單應付</dt><dd>{money(bill.orderReceivable)}</dd></div><div><dt>加收／折讓後應付</dt><dd>{money(bill.receivable)}</dd></div><div><dt>現場實收</dt><dd>{money(bill.cashReceived)}</dd></div><div><dt>已實退</dt><dd>{money(bill.cashRefunded)}</dd></div><div className="isTotal"><dt>{bill.refundDue > 0 ? '待退金額' : '尚待收取'}</dt><dd>{money(bill.refundDue > 0 ? bill.refundDue : Math.max(0, bill.balance))}</dd></div></dl>
+    {bill.pendingCount > 0 ? <p>有 {bill.pendingCount} 筆款項待店員確認歸屬；現金已按實際收退計算。</p> : null}
+    {bill.hasUnresolvedCase ? <p>部分帳務已轉未決案件，處理完成後會更新分潤，不會新增第二次收退款。</p> : null}</div>
+    {bill.records?.length ? <div className="myOrderItems">{bill.records.map((record, index) => <div key={`${record.occurredAt}-${index}`}><span>{labels[record.kind] || record.kind} · {record.reason}</span><b>{money(record.amount)}{record.allocationStatus === 'pending' ? ' · 待確認' : ''}</b></div>)}</div> : null}
+  </section>;
 }
 
 function MyOrders({ orders, catalog, loading, onAddon }) {

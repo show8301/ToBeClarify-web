@@ -18,6 +18,7 @@ export interface FinanceRecord {
   holdScope: FinanceHoldScope;
   reason: string;
   reversesRecordId: string | null;
+  caseId: string | null;
   createdAt: string;
   createdBy: string;
   updatedAt: string;
@@ -72,3 +73,20 @@ export interface FinanceOperation { operationId: string; recordId: string; accou
 export interface FinancePeriodOption { id: string; businessDate: string }
 export interface FinanceOrderOption { id: string; orderNumber: string; items: { id: string; name: string }[] }
 export interface FinanceRevision { version: number; operationId: string; recordedAt: string; recordedBy: string; record: FinanceRecord }
+
+export interface AdmissionEntry {
+  id: string; sessionId: string; amount: number; discountAmount: number; creditAmount: number;
+  status: "received" | "unpaid" | "waived" | "reissue"; cashPeriodId: string | null;
+  chargeRecordId: string | null; receiptRecordId: string | null; version: number; reason: string;
+  createdAt: string; updatedAt: string;
+}
+export interface AdmissionSaveRequest {
+  operationId: string; expectedVersion: number; amount: number; discountAmount: number;
+  creditAmount: number; mode: AdmissionEntry["status"]; cashPeriodId: string | null; reason: string;
+}
+export interface FinanceCase {
+  id: string; sessionId: string; recordId: string | null; orderId: string | null; orderItemId: string | null;
+  caseKind: string; amount: number; profitScope: FinanceHoldScope; status: "open" | "resolved";
+  sourcePeriodId: string; description: string; createdAt: string; createdBy: string; updatedAt: string;
+  updatedBy: string; resolvedAt: string | null; resolvedBy: string | null; resolutionNote: string | null;
+}

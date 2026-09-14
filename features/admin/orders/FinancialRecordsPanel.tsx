@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { financeApi, financeKind, financeSource } from "./finance-api";
 import type { FinanceAccount, FinanceOrderOption, FinancePeriodOption, FinanceRecord, FinanceSaveRequest } from "./finance-types";
+import { AdmissionAndCasesPanel } from "./AdmissionAndCasesPanel";
 
 const kindLabels = { charge_add: "加收應付", charge_reduce: "折讓應付", cash_receipt: "實際收款", cash_refund: "實際退款" };
 const money = (amount: number) => `${amount.toLocaleString("zh-TW")} G`;
@@ -15,14 +16,16 @@ export function FinancialRecordsPanel({ sessionId, refreshKey }: { sessionId: st
   const [account, setAccount] = useState<FinanceAccount | null>(null);
   const [periods, setPeriods] = useState<FinancePeriodOption[]>([]);
   const [orders, setOrders] = useState<FinanceOrderOption[]>([]);
+  const [admission, setAdmission] = useState<import("./finance-types").AdmissionEntry | null>(null);
+  const [cases, setCases] = useState<import("./finance-types").FinanceCase[]>([]);
   const [revision, setRevision] = useState(0);
   const [error, setError] = useState("");
   const [editing, setEditing] = useState<FinanceRecord | null>(null);
   const [showForm, setShowForm] = useState(false);
   useEffect(() => {
     const controller = new AbortController();
-    Promise.all([financeApi.account(sessionId, controller.signal), financeApi.periods(sessionId, controller.signal), financeApi.orders(sessionId, controller.signal)])
-      .then(([a, p, o]) => { setAccount(a); setPeriods(p); setOrders(o); setError(""); })
+    Promise.all([financeApi.account(sessionId, controller.signal), financeApi.periods(sessionId, controller.signal), financeApi.orders(sessionId, controller.signal), financeApi.admission(sessionId, controller.signal), financeApi.cases(sessionId, false, controller.signal)])
+      .then(([a, p, o, admissionEntry, financeCases]) => { setAccount(a); setPeriods(p); setOrders(o); setAdmission(admissionEntry); setCases(financeCases); setError(""); })
       .catch((e: Error) => { if (!controller.signal.aborted) setError(e.message); });
     return () => controller.abort();
   }, [sessionId, revision, refreshKey]);
@@ -35,6 +38,7 @@ export function FinancialRecordsPanel({ sessionId, refreshKey }: { sessionId: st
       <p>{account.balance >= 0 ? `尚待收取 ${money(account.balance)}` : `待退 ${money(account.refundDue)}`} · 待確認 {account.pendingCount} 筆{account.holdScope !== "none" ? " · 分潤保留" : ""}</p>
       {account.balanceIsProvisional && <p>金額仍待補齊或確認。入場費須登記應付，實際收退款各自記錄。</p>}
       <p>加收／折讓會調整應付；實收／實退只記錄已發生的款項。取消餐點已自動扣除應付，請勿再登一次折讓。</p>
+      {account.canWrite && <AdmissionAndCasesPanel sessionId={sessionId} account={account} periods={periods} admission={admission} cases={cases} onSaved={() => setRevision(n => n + 1)} />}
       {!account.canWrite ? <p>此顧客沿用原營業日帳務；分項帳款在新開啟的分項接待營業日使用。</p> : <button type="button" onClick={() => { setEditing(null); setShowForm(true); }}>登記費用／收退款</button>}
       {showForm && account.canWrite && <FinanceForm key={`${sessionId}-${editing?.id ?? "new"}`} account={account} periods={periods} orders={orders} record={editing}
         onSaved={() => { setShowForm(false); setRevision(n => n + 1); }} onClose={() => setShowForm(false)} />}

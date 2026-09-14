@@ -2,6 +2,7 @@ import { adminRequest, ApiError } from "@/features/admin/api/client.js";
 import type {
   FinanceAccount, FinanceAllocation, FinanceHoldScope, FinanceKind, FinanceOperation,
   FinanceOrderOption, FinancePeriodOption, FinanceRecord, FinanceRevision, FinanceSaveRequest, FinanceSourceKind,
+  AdmissionEntry, AdmissionSaveRequest, FinanceCase,
 } from "./finance-types";
 
 function object(value: unknown): Record<string, unknown> {
@@ -48,7 +49,7 @@ function parseRecord(value: unknown): FinanceRecord {
     sourceKind: financeSource(row.sourceKind), orderId: nullable(row.orderId), orderItemId: nullable(row.orderItemId),
     sourcePeriodId: str(row.sourcePeriodId), cashPeriodId: nullable(row.cashPeriodId), occurredAt: str(row.occurredAt),
     allocationStatus: financeAllocation(row.allocationStatus), holdScope: holdScope(row.holdScope), reason: str(row.reason),
-    reversesRecordId: nullable(row.reversesRecordId), createdAt: str(row.createdAt), createdBy: str(row.createdBy),
+    reversesRecordId: nullable(row.reversesRecordId), caseId: nullable(row.caseId), createdAt: str(row.createdAt), createdBy: str(row.createdBy),
     updatedAt: str(row.updatedAt), updatedBy: str(row.updatedBy), confirmedAt: nullable(row.confirmedAt), confirmedBy: nullable(row.confirmedBy),
   };
 }
@@ -68,6 +69,23 @@ function parseAccount(value: unknown): FinanceAccount {
 function parseOperation(value: unknown): FinanceOperation {
   const row = object(value);
   return { operationId: str(row.operationId), recordId: str(row.recordId), accountVersion: num(row.accountVersion) };
+}
+function parseAdmission(value: unknown): AdmissionEntry | null {
+  if (value === null) return null;
+  const row = object(value); const status = str(row.status);
+  if (!['received','unpaid','waived','reissue'].includes(status)) throw new Error('Invalid admission status');
+  return { id:str(row.id), sessionId:str(row.sessionId), amount:num(row.amount), discountAmount:num(row.discountAmount),
+    creditAmount:num(row.creditAmount), status:status as AdmissionEntry['status'], cashPeriodId:nullable(row.cashPeriodId),
+    chargeRecordId:nullable(row.chargeRecordId), receiptRecordId:nullable(row.receiptRecordId), version:num(row.version),
+    reason:str(row.reason), createdAt:str(row.createdAt), updatedAt:str(row.updatedAt) };
+}
+function parseCase(value: unknown): FinanceCase {
+  const row = object(value); const status = str(row.status);
+  if (status !== 'open' && status !== 'resolved') throw new Error('Invalid case status');
+  return { id:str(row.id), sessionId:str(row.sessionId), recordId:nullable(row.recordId), orderId:nullable(row.orderId), orderItemId:nullable(row.orderItemId),
+    caseKind:str(row.caseKind), amount:num(row.amount), profitScope:holdScope(row.profitScope), status, sourcePeriodId:str(row.sourcePeriodId),
+    description:str(row.description), createdAt:str(row.createdAt), createdBy:str(row.createdBy), updatedAt:str(row.updatedAt), updatedBy:str(row.updatedBy),
+    resolvedAt:nullable(row.resolvedAt), resolvedBy:nullable(row.resolvedBy), resolutionNote:nullable(row.resolutionNote) };
 }
 async function request<T>(path: string, parse: (value: unknown) => T, options: RequestInit = {}): Promise<T> {
   const value: unknown = await adminRequest(path, options);
@@ -105,4 +123,15 @@ export const financeApi = {
       return result;
     }), { signal },
   ),
+  admission: (id: string, signal?: AbortSignal) => request(`${base(id)}/admission`, parseAdmission, { signal }),
+  saveAdmission: (id: string, body: AdmissionSaveRequest, signal?: AbortSignal) => request(`${base(id)}/admission`, value => {
+    const row = object(value); return { operationId:str(row.operationId), admissionId:str(row.admissionId), chargeRecordId:nullable(row.chargeRecordId), receiptRecordId:nullable(row.receiptRecordId), accountVersion:num(row.accountVersion) };
+  }, { method:'POST', body:JSON.stringify(body), signal }),
+  cases: (id: string, includeResolved = false, signal?: AbortSignal) => request(`${base(id)}/cases?includeResolved=${includeResolved}`, value => array(value, parseCase), { signal }),
+  resolveCase: (id: string, caseId: string, body: { operationId:string; expectedVersion:number; cashPeriodId:string|null; resolutionNote:string }, signal?: AbortSignal) => request(`${base(id)}/cases/${encodeURIComponent(caseId)}/resolve`, value => {
+    const row = object(value); return { operationId:str(row.operationId), caseId:str(row.caseId), accountVersion:num(row.accountVersion) };
+  }, { method:'POST', body:JSON.stringify(body), signal }),
+  departure: (id: string, body: { operationId:string; action:'depart'|'void'|'reopen'|'reissue'; reason:string }, signal?: AbortSignal) => request(`${base(id)}/departure`, value => {
+    const row = object(value); return { sessionId:str(row.sessionId), entryStatus:str(row.entryStatus), sessionStatus:str(row.sessionStatus), canOrder:bool(row.canOrder), departedAt:nullable(row.departedAt), reason:nullable(row.reason) };
+  }, { method:'POST', body:JSON.stringify(body), signal }),
 };

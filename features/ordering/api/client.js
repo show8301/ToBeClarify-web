@@ -38,6 +38,7 @@ export const orderingApi = {
   recover: (body, signal) => request('/recover', { method: 'POST', body: JSON.stringify(body), signal }),
   catalog: (token, signal) => request('/catalog', { token, signal }),
   orders: (token, signal) => request('/orders', { token, signal }),
+  finance: (token, signal) => request('/finance', { token, signal }),
   submit: (token, body, signal) => request('/orders', { token, method: 'POST', body: JSON.stringify(body), signal }),
   submitAddon: (token, body, signal) => request('/addons', { token, method: 'POST', body: JSON.stringify(body), signal }),
 };

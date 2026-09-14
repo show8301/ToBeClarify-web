@@ -214,6 +214,10 @@ export const adminApi = {
   reviewSettlementAttendanceBackfill: (requestId, body, signal) => request(`/settlement/attendance/backfill/${encodeURIComponent(requestId)}/review`, {
     method: 'POST', body: JSON.stringify(body), signal,
   }),
+  getAttendance: (businessDate, signal) => request(`/attendance?businessDate=${encodeURIComponent(businessDate)}`, { signal }),
+  applyAttendance: (body, signal) => request('/attendance/actions', {
+    method: 'POST', body: JSON.stringify(body), signal,
+  }),
   adjustSettlementOrder: (orderId, body, signal) => request(`/settlement/orders/${encodeURIComponent(orderId)}/amount`, {
     method: 'PUT', body: JSON.stringify(body), signal,
   }),

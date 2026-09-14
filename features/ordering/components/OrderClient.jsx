@@ -29,7 +29,7 @@ export default function OrderClient() {
   const [orders, setOrders] = useState([]);
   const [bill, setBill] = useState(null);
   const [tab, setTab] = useState('meal');
-  const [cart, setCart] = useState({ meals: [], nominations: [], rooms: [], tips: [] });
+  const [cart, setCart] = useState({ meals: [], nominations: [], rooms: [], tips: [], customerLocation: '', customerNote: '' });
   const [notice, setNotice] = useState({ message: '', error: false });
   const [loading, setLoading] = useState(true);
   const [quoteDraft,setQuoteDraft] = useState(null);
@@ -99,6 +99,8 @@ export default function OrderClient() {
         })),
         rooms: cart.rooms.map((line) => ({ roomId: line.roomId, segmentCount: line.segments, requestedStartsAt: new Date(line.startsAt).toISOString() })),
         tips: cart.tips.map(({ staffId, amount, staffPercentage }) => ({ staffId: staffId || null, amount, staffPercentage })),
+        customerLocation: cart.customerLocation?.trim() || null,
+        customerNote: cart.customerNote?.trim() || null,
       };
       if(catalog.menu.contractVersion===2&&!quote){
         const nextQuote=await orderingApi.quote(token,body);
@@ -106,7 +108,7 @@ export default function OrderClient() {
       }
       const submitted=await orderingApi.submit(token,{...body,...(quote?{quoteToken:quote.quoteToken}:{})});
       setQuoteDraft(null);
-      setCart({ meals: [], nominations: [], rooms: [], tips: [] });
+      setCart({ meals: [], nominations: [], rooms: [], tips: [], customerLocation: '', customerNote: '' });
       setOrders(await orderingApi.orders(token));
       const access = await orderingApi.access(token);
       setSession(access.session);
@@ -364,7 +366,7 @@ function CartPage({ cart, setCart, session, businessContext, subtotal, onSubmit,
       {cart.rooms.map((item) => <div className="cartRoomGroup" key={item.id}><header><span>{item.roomName}</span><small>{item.segments} 節 · {item.duration} 分鐘 · {new Date(item.startsAt).toLocaleString('zh-TW')}</small></header><CartLine label="包廂服務" title={`${money(item.unitPrice)} × ${item.segments} 節`} price={item.total} onRemove={() => removeRoom(item.id)} /></div>)}
       {cart.nominations.map((item) => <div className="cartNominationGroup" key={item.id}><header><span>{item.staffName}</span><small>{item.segments} 節 · {item.duration} 分鐘 · {new Date(item.startsAt).toLocaleString('zh-TW')}</small></header>{item.mode === 'service' ? (!item.serviceRemoved ? <CartLine label="服務項目" title={item.serviceName} price={item.serviceTotal} onRemove={() => removeNominationPart(item.id, 'service')} /> : <div className="cartRemoved">服務項目已刪除，現在可刪除基礎指名費。</div>) : <div className="cartCompanionship"><strong>純陪伴</strong><span>成立後可在原指名時段內附掛加購服務。</span></div>}{!item.baseRemoved ? <CartLine label="基礎指名費" title={`${money(item.baseFee)} × ${item.segments} 節`} price={item.baseTotal} disabled={item.mode === 'service' && !item.serviceRemoved} removeHint={item.mode === 'service' && !item.serviceRemoved ? '請先刪除服務項目' : ''} onRemove={() => removeNominationPart(item.id, 'base')} /> : null}</div>)}
       {cart.tips.map((item, index) => <CartLine key={item.id} label="小費" title={item.staffName ? `${item.staffName} ${item.staffPercentage}%／店家 ${100 - item.staffPercentage}%` : '店家 100%'} price={item.amount} onRemove={() => removeTip(index)} />)}
-    </div><aside className="cartSummary"><h2>{quoteRequired?'預估金額':'本次結算'}</h2>{quoteRequired&&<p>實際收費與可售內容以送出前的正式報價為準。</p>}<dl><div><dt>品項小計</dt><dd>{money(subtotal)}</dd></div><div className="isCredit"><dt>信物折抵（僅餐點）</dt><dd>− {money(credit)}</dd></div><div className="isTotal"><dt>{quoteRequired?'預估應付':'本次應付'}</dt><dd>{money(subtotal - credit)}</dd></div></dl><p>{customerSubmitBlocked ? '本次內容會保留；請洽店員從後台協助送出。' : coordination ? '目前為協調接單；送出後需店員接受才成立，指名仍需被指名店員確認。' : '指名訂單送出後仍須等待被指名店員確認。追加服務時數請另開新訂單。'}</p><button disabled={loading || customerSubmitBlocked} type="button" onClick={onSubmit}>{customerSubmitBlocked ? '請洽店員協助送出' : quoteRequired ? '取得報價／確認金額' : coordination ? '送出並等待店員確認' : '確認並送出訂單'}</button></aside></div>}
+    </div><aside className="cartSummary"><h2>{quoteRequired?'預估金額':'本次結算'}</h2>{quoteRequired&&<p>實際收費與可售內容以送出前的正式報價為準。</p>}<dl><div><dt>品項小計</dt><dd>{money(subtotal)}</dd></div><div className="isCredit"><dt>信物折抵（僅餐點）</dt><dd>− {money(credit)}</dd></div><div className="isTotal"><dt>{quoteRequired?'預估應付':'本次應付'}</dt><dd>{money(subtotal - credit)}</dd></div></dl><div className="cartCustomerDetails"><label>送餐位置（選填）<input maxLength={200} value={cart.customerLocation || ''} onChange={(event) => setCart((current) => ({ ...current, customerLocation: event.target.value }))} placeholder="例：A 區 3 號桌、吧台左側" /></label><label>給店員的備註（選填）<textarea maxLength={500} rows={3} value={cart.customerNote || ''} onChange={(event) => setCart((current) => ({ ...current, customerNote: event.target.value }))} placeholder="例：餐點請先送，指名服務照原時段。" /></label></div><p>{customerSubmitBlocked ? '本次內容會保留；請洽店員從後台協助送出。' : coordination ? '目前為協調接單；送出後需店員接受才成立，指名仍需被指名店員確認。' : '指名訂單送出後仍須等待被指名店員確認。追加服務時數請另開新訂單。'}</p><button disabled={loading || customerSubmitBlocked} type="button" onClick={onSubmit}>{customerSubmitBlocked ? '請洽店員協助送出' : quoteRequired ? '取得報價／確認金額' : coordination ? '送出並等待店員確認' : '確認並送出訂單'}</button></aside></div>}
   </div>;
 }
 

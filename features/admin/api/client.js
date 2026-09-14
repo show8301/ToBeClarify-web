@@ -240,6 +240,9 @@ export const adminApi = {
   updateOrderSession: (id, body, signal) => request(`/order-sessions/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(body), signal }),
   reissueOrderSession: (id, signal) => request(`/order-sessions/${encodeURIComponent(id)}/reissue`, { method: 'POST', signal }),
   getSessionOrders: (id, signal) => request(`/order-sessions/${encodeURIComponent(id)}/orders`, { signal }),
+  getOrderingCatalog: (businessDate, signal) => request(`/ordering-catalog${businessDate ? `?businessDate=${encodeURIComponent(businessDate)}` : ''}`, { signal }),
+  quoteAssistedOrder: (sessionId, body, signal) => request(`/order-sessions/${encodeURIComponent(sessionId)}/quote`, { method: 'POST', body: JSON.stringify(body), signal }),
+  submitAssistedOrder: (sessionId, body, signal) => request(`/order-sessions/${encodeURIComponent(sessionId)}/orders`, { method: 'POST', body: JSON.stringify(body), signal }),
   getOrderingSettings: (signal) => request('/ordering-settings', { signal }),
   getOrderingContext: (signal) => request('/ordering-context', { signal }),
   openBusinessPeriod: (body, signal) => request('/business-period/open', {

@@ -60,6 +60,7 @@ export function OrderFulfillmentPanel({ orderId, onChanged }: { orderId: string;
   const [units, setUnits] = useState<Unit[]>([]);
   const [error, setError] = useState("");
   const [revision, setRevision] = useState(0);
+  const [batchBusy, setBatchBusy] = useState(false);
   useEffect(() => {
     const controller = new AbortController();
     adminRequest(`/orders/${encodeURIComponent(orderId)}/fulfillment`, { signal: controller.signal })
@@ -67,10 +68,30 @@ export function OrderFulfillmentPanel({ orderId, onChanged }: { orderId: string;
       .catch((e: Error) => { if (!controller.signal.aborted) setError(e.message); });
     return () => controller.abort();
   }, [orderId, revision]);
+  const batchMeals = async (action: "accept" | "complete") => {
+    const candidates = units.filter(unit => unit.kind === "meal" && unit.allowedActions.includes(action));
+    if (candidates.length === 0) return;
+    setBatchBusy(true); setError("");
+    try {
+      for (const unit of candidates) {
+        const quantity = action === "accept"
+          ? unit.quantity - unit.cancelledQuantity - unit.acceptedQuantity
+          : unit.startedQuantity - unit.completedQuantity;
+        if (quantity < 1) continue;
+        await adminRequest(`/orders/${encodeURIComponent(orderId)}/fulfillment/${encodeURIComponent(unit.id)}/transition`, {
+          method: "POST",
+          body: JSON.stringify({ operationId: crypto.randomUUID(), expectedVersion: unit.version, action, quantity, reason: "批次餐點作業", restMinutes: -1, compensationAmount: 0 })
+        });
+      }
+      setRevision(n => n + 1); await onChanged();
+    } catch (e) { setError(e instanceof Error ? e.message : "批次餐點操作失敗"); }
+    finally { setBatchBusy(false); }
+  };
   return <section className="adminOrderCard" aria-label="分項接待進度">
     <h3>餐點與指名分開處理</h3>
     <p>原預約時間會保留；晚開始可在這裡保留完整購買分鐘並調整休息，折讓會同次寫入帳務。</p>
     {error && <p role="alert">{error}</p>}
+    {units.some(unit => unit.kind === "meal" && unit.allowedActions.includes("accept")) || units.some(unit => unit.kind === "meal" && unit.allowedActions.includes("complete")) ? <div className="adminPageActions"><button type="button" disabled={batchBusy} onClick={() => void batchMeals("accept")}>批次接單餐點</button><button type="button" disabled={batchBusy} onClick={() => void batchMeals("complete")}>批次送達已處理餐點</button></div> : null}
     {units.map(unit => <UnitControls key={`${unit.id}-${unit.version}`} orderId={orderId} unit={unit} onChanged={async () => {
       setRevision(n => n + 1);
       await onChanged();

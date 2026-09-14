@@ -1,5 +1,6 @@
 import { BusinessDayPlanPanel } from "./BusinessDayPlanPanel";
 import { OrderFulfillmentPanel } from "./OrderFulfillmentPanel";
+import { AdminAssistedOrderPanel } from "./AdminAssistedOrderPanel";
 import { FinancialRecordsPanel } from "./FinancialRecordsPanel";
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -57,6 +58,7 @@ export function AdminOrdersPage() {
   const [showSettings, setShowSettings] = useState(false);
   const [groupsOpen, setGroupsOpen] = useState({ attention: true, others: true });
   const [issued, setIssued] = useState(null);
+  const [showAssisted, setShowAssisted] = useState(false);
 
   const loadSessions = async (preferredId) => {
     if (!businessDate) return;
@@ -124,9 +126,10 @@ export function AdminOrdersPage() {
       </aside>
       <div className="adminOrderDetailPane">
         {!selected ? <div className="adminOrderEmpty"><span>LD</span><h2>選擇一位顧客</h2><p>使用左側搜尋或分組快速定位顧客。</p></div> : <>
-          <SessionHeader item={selected} loading={loading} onUpdate={(body) => act(() => adminApi.updateOrderSession(selectedId, body), '顧客點餐設定已更新。')} onReissue={async () => { try { setIssued(await adminApi.reissueOrderSession(selectedId)); } catch (error) { setMessage({ text: error.message, error: true }); } }} />
+          <SessionHeader item={selected} loading={loading} onUpdate={(body) => act(() => adminApi.updateOrderSession(selectedId, body), '顧客點餐設定已更新。')} onReissue={async () => { try { setIssued(await adminApi.reissueOrderSession(selectedId)); } catch (error) { setMessage({ text: error.message, error: true }); } }} onAssisted={() => setShowAssisted((value) => !value)} />
+          {showAssisted ? <AdminAssistedOrderPanel sessionId={selectedId} businessDate={businessDate} onSaved={refreshSelected} onClose={() => setShowAssisted(false)} /> : null}
           <FinancialRecordsPanel key={selectedId} sessionId={selectedId} refreshKey={orders.map(o => `${o.id}:${o.totalAmount}:${o.status}`).join("|")} />
-          <div className="adminOrderCards">{orders.length ? orders.map((order) => order.flowVersion >= 2 ? <article className="adminOrderCard" key={order.id}><h3>{order.orderNumber} · 應付 {money(order.totalAmount)}</h3><p>{order.customerNote}</p><OrderFulfillmentPanel orderId={order.id} onChanged={refreshSelected} />{order.nominees.filter(n => n.confirmationStatus === "confirmed" && (canManage || n.staffId === user.staffMemberId)).map(n => <AdminAddonComposer key={n.id} nominee={n} loading={loading} act={act} />)}</article> : <AdminOrderCard key={order.id} order={order} user={user} loading={loading} act={act} />) : <div className="adminOrderEmpty isCompact"><h2>尚未下單</h2><p>此點餐碼今天還沒有送出訂單。</p></div>}</div>
+          <div className="adminOrderCards">{orders.length ? orders.map((order) => order.flowVersion >= 2 ? <AdminFulfillmentOrderCard key={order.id} order={order} user={user} loading={loading} canManage={canManage} act={act} onChanged={refreshSelected} /> : <AdminOrderCard key={order.id} order={order} user={user} loading={loading} act={act} />) : <div className="adminOrderEmpty isCompact"><h2>尚未下單</h2><p>此點餐碼今天還沒有送出訂單。</p></div>}</div>
         </>}
       </div>
     </div>
@@ -173,10 +176,22 @@ function CustomerRow({ item, active, onClick }) {
   return <button type="button" className={`adminCustomerRow ${active ? 'isActive' : ''}`} onClick={onClick}><span><strong>{item.session.customerName}</strong><small>ID {item.session.gameId}</small></span><span><b>{item.waitingOrderCount ? `${item.waitingOrderCount} 待處理` : `${item.orderCount} 單`}</b><small>{money(item.totalAmount)}</small></span></button>;
 }
 
-function SessionHeader({ item, onUpdate, onReissue, loading }) {
+function SessionHeader({ item, onUpdate, onReissue, onAssisted, loading }) {
   const [max, setMax] = useState(item.session.maxNominatedStaff);
   useEffect(() => setMax(item.session.maxNominatedStaff), [item.session.maxNominatedStaff]);
-  return <header className="adminSelectedCustomer"><div><span>SELECTED CUSTOMER</span><h2>{item.session.customerName}</h2><p>遊戲 ID：{item.session.gameId} · 今日共 {item.orderCount} 張訂單 · {item.session.status === 'active' ? '可點餐' : '僅可查看'}</p></div><dl><div><dt>信物餐點餘額</dt><dd>{money(item.session.remainingMealCredit)}</dd></div><div><dt>今日消費</dt><dd>{money(item.totalAmount)}</dd></div></dl><div className="adminSessionControls"><label>同時可指名人數<input type="number" min="0" max="100" value={max} onChange={(event) => setMax(Number(event.target.value))} /></label><AdminButton variant="secondary" disabled={loading} onClick={() => onUpdate({ maxNominatedStaff: max })}>儲存人數</AdminButton><AdminButton variant="ghost" disabled={loading} onClick={onReissue}>尋回／重發點餐碼</AdminButton><AdminButton variant={item.session.status === 'active' ? 'danger' : 'secondary'} disabled={loading} onClick={() => onUpdate({ status: item.session.status === 'active' ? 'readonly' : 'active' })}>{item.session.status === 'active' ? '顧客離店／停止點餐' : '重新開放點餐'}</AdminButton></div></header>;
+  return <header className="adminSelectedCustomer"><div><span>SELECTED CUSTOMER</span><h2>{item.session.customerName}</h2><p>遊戲 ID：{item.session.gameId} · 今日共 {item.orderCount} 張訂單 · {item.session.status === 'active' ? '可點餐' : '僅可查看'}</p></div><dl><div><dt>信物餐點餘額</dt><dd>{money(item.session.remainingMealCredit)}</dd></div><div><dt>今日消費</dt><dd>{money(item.totalAmount)}</dd></div></dl><div className="adminSessionControls"><label>同時可指名人數<input type="number" min="0" max="100" value={max} onChange={(event) => setMax(Number(event.target.value))} /></label><AdminButton variant="secondary" disabled={loading} onClick={() => onUpdate({ maxNominatedStaff: max })}>儲存人數</AdminButton><AdminButton variant="ghost" disabled={loading} onClick={onReissue}>尋回／重發點餐碼</AdminButton><AdminButton variant="secondary" disabled={loading || item.session.status !== 'active'} onClick={onAssisted}>代客點餐</AdminButton><AdminButton variant={item.session.status === 'active' ? 'danger' : 'secondary'} disabled={loading} onClick={() => onUpdate({ status: item.session.status === 'active' ? 'readonly' : 'active' })}>{item.session.status === 'active' ? '顧客離店／停止點餐' : '重新開放點餐'}</AdminButton></div></header>;
+}
+
+function AdminFulfillmentOrderCard({ order, user, loading, canManage, act, onChanged }) {
+  const [note, setNote] = useState(order.customerNote || '');
+  const [location, setLocation] = useState(order.customerLocation || '');
+  useEffect(() => { setNote(order.customerNote || ''); setLocation(order.customerLocation || ''); }, [order.customerNote, order.customerLocation]);
+  return <article className="adminOrderCard">
+    <header className="adminOrderCardSimple"><div><h3>{order.orderNumber} · 應付 {money(order.totalAmount)}</h3><span>{order.storeConfirmationStatus === 'pending' ? '等待店員接受協調單' : labels[order.status] || order.status}</span></div><small>{new Date(order.submittedAt).toLocaleString('zh-TW')}</small></header>
+    <div className="adminOrderCustomerDetails"><label>顧客位置<input maxLength={200} value={location} onChange={(event) => setLocation(event.target.value)} placeholder="尚未提供位置" /></label><label>顧客備註<textarea maxLength={500} rows={2} value={note} onChange={(event) => setNote(event.target.value)} /></label><AdminButton variant="secondary" disabled={loading} onClick={() => act(() => adminApi.updateOrder(order.id, { customerNote: note, customerLocation: location }), '顧客位置與備註已更新。')}>儲存位置／備註</AdminButton></div>
+    <OrderFulfillmentPanel orderId={order.id} onChanged={onChanged} />
+    {order.nominees.filter(n => n.confirmationStatus === "confirmed" && (canManage || n.staffId === user.staffMemberId)).map(n => <AdminAddonComposer key={n.id} nominee={n} loading={loading} act={act} />)}
+  </article>;
 }
 
 function AdminOrderCard({ order, user, loading, act }) {

@@ -109,7 +109,7 @@ export async function guestbookProxy(request: Request, suffix = "") {
   let body: string | undefined;
   if (request.method === "POST") {
     const post = await preparePost(request, headers);
-    if (post.response) return post.response;
+    if ("response" in post) return post.response;
     body = post.body;
   }
 

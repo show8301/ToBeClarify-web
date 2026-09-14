@@ -20,7 +20,7 @@ const emptyStaff = {
   signatureSupported: false, signatureMediaId: null, signatureUrl: '', signatureFile: null, signaturePreviewUrl: '',
   roleTitle: '', shortBio: '', profileBio: '', isWorkingToday: true,
   bufferMinutes: '', isNominatable: false,
-  todayWorkMode: { businessDate: '', isWorking: true, scheduledRoles: ['service'], activeRoles: ['service'] },
+  todayWorkMode: { businessDate: '', isWorking: true, stopAcceptingNewOrders: false, scheduledRoles: ['service'], activeRoles: ['service'] },
   sortOrder: 0, isActive: true, services: [], gallery: [],
 };
 
@@ -94,6 +94,7 @@ function toEditor(value) {
     signaturePreviewUrl: '',
     todayWorkMode: {
       businessDate: sourceWorkMode.businessDate || '',
+      stopAcceptingNewOrders: sourceWorkMode.stopAcceptingNewOrders === true,
       isWorking: sourceWorkMode.isWorking ?? value?.isWorkingToday ?? true,
       scheduledRoles,
       activeRoles,
@@ -292,7 +293,7 @@ export function AdminStaffSettingsPage() {
         scheduledRoles.delete(role);
         activeRoles.delete(role);
       }
-    } else {
+    } else if (mode !== 'intake') {
       if (enabled) {
         if (!scheduledRoles.has(role)) {
           setMessage('今日啟用職位必須先包含在排班允許職位中。');
@@ -303,6 +304,7 @@ export function AdminStaffSettingsPage() {
     }
     const body = {
       isWorking: current.isWorking !== false,
+      stopAcceptingNewOrders: mode === 'intake' ? enabled : current.stopAcceptingNewOrders === true,
       scheduledRoles: [...scheduledRoles],
       activeRoles: [...activeRoles],
     };
@@ -581,6 +583,7 @@ export function AdminStaffSettingsPage() {
 
             <AdminPanel title="今日工作身分／啟用開關" description="排班允許職位決定可使用的工作台；今日啟用職位決定目前預設與可切換的工作視角。經理可臨時調整啟用，不會改掉原排班。">
               <div className="adminStaffWorkModePanel">
+                <div className="adminStaffWorkModeIntro"><AdminToggle checked={form.todayWorkMode?.stopAcceptingNewOrders === true} disabled={isReadOnly || workModeSaving} onChange={(value) => void updateTodayWorkRole(null, 'intake', value)} label="停止承接新指名" ariaLabel="停止承接新指名" /><small>提前離店或暫停接單時開啟；既有預約保留，由店員與顧客協調。</small></div>
                 <div className="adminStaffWorkModeIntro"><strong>{form.todayWorkMode?.businessDate || '今日'} 的工作身分</strong><small>「開放指名」只代表公開卡片是否接受指名，不會直接決定 dashboard。</small></div>
                 <div className="adminStaffWorkModeSections">
                   <section className="adminStaffWorkModeSection"><div className="adminStaffWorkModeSectionHeading"><strong>排班允許職位</strong><small>{canManageAll ? '經理可調整今天允許承擔的職位範圍。' : '由排班決定；若需修改請請經理處理。'}</small></div><div className="adminStaffWorkModeOptions">{dailyWorkRoleOptions.map((option) => <div className="adminStaffWorkModeOption" key={`scheduled-${option.id}`}><AdminToggle checked={(form.todayWorkMode?.scheduledRoles || []).includes(option.id)} disabled={isReadOnly || workModeSaving || !canManageAll} onChange={(value) => void updateTodayWorkRole(option.id, 'scheduled', value)} label={option.label} ariaLabel={`切換${option.label}排班允許`} /><small>{option.description}</small></div>)}</div></section>

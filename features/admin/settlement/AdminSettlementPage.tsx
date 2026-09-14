@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AttendanceBackfill, SettlementResult, SettlementRule, SettlementRun, SettlementStaff, SettlementSummary } from "./types";
-import { adminApi } from "@/features/admin/api/client.js";
+import { getAdminBusinessDate } from "@/features/admin/shared/businessDay";
+import { adminApi, adminRequest } from "@/features/admin/api/client.js";
 import { useAdminAuth } from "@/features/admin/auth/AdminAuthContext.jsx";
 import { AdminButton, AdminField, AdminPage, AdminPanel, AdminState } from "@/features/admin/shared/AdminShared.jsx";
 
@@ -34,7 +35,6 @@ type Overview = {
   attendanceBackfillRequests: AttendanceBackfill[];
 };
 
-const today = () => new Date().toLocaleDateString("en-CA");
 const money = (value: number) => Math.ceil(Number(value || 0)).toLocaleString("zh-TW");
 const roleLabel: Record<string, string> = {
   designated: "指名人員",
@@ -65,14 +65,15 @@ const emptyRule = (rule: SettlementRule | null, dayType: string, effectiveFrom: 
 export function AdminSettlementPage() {
   const { user } = useAdminAuth();
   const canManage = user?.role === "developer" || user?.role === "manager";
-  const [date, setDate] = useState(today);
+  const [date, setDate] = useState("");
+  const [flowVersion, setFlowVersion] = useState(1);
   const [sessionNo, setSessionNo] = useState(1);
   const [dayType, setDayType] = useState("normal");
   const [overview, setOverview] = useState<Overview | null>(null);
   const [staff, setStaff] = useState<SettlementStaff[]>([]);
   const [inputs, setInputs] = useState<StaffInput[]>([]);
   const [runFields, setRunFields] = useState({ publicTipAmount: 0, admissionFeeOverride: "", activityExpense: 0, companyShareHours: "", activityHoursConfirmed: false });
-  const [ruleForm, setRuleForm] = useState<Omit<SettlementRule, "id">>(emptyRule(null, "normal", today()));
+  const [ruleForm, setRuleForm] = useState<Omit<SettlementRule, "id">>(emptyRule(null, "normal", ""));
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -82,12 +83,22 @@ export function AdminSettlementPage() {
   const loadSequence = useRef(0);
   const load = useCallback((signal?: AbortSignal) => {
     const sequence = ++loadSequence.current;
+    if (!date) {
+      return getAdminBusinessDate(signal).then((businessDate) => {
+        if (!signal?.aborted && sequence === loadSequence.current) setDate(businessDate);
+      }).catch((nextError: unknown) => {
+        if (!signal?.aborted && sequence === loadSequence.current) { setError(nextError as Error); setLoading(false); }
+      });
+    }
     return Promise.all([
         adminApi.getSettlement({ businessDate: date, sessionNo }, signal),
         canManage ? adminApi.getStaffMembers(signal) : Promise.resolve([]),
-      ]).then(([nextOverview, nextStaff]) => {
+        adminRequest(`/business-day-plans/${date}/context`, { signal }),
+      ]).then(([nextOverview, nextStaff, dayContext]) => {
       if (signal?.aborted || sequence !== loadSequence.current) return;
       setError(null);
+      if (!dayContext || typeof dayContext.flowVersion !== "number") throw new Error("無法確認營業日模式。");
+      setFlowVersion(dayContext.flowVersion);
       setOverview(nextOverview);
       setDayType(nextOverview.run.dayType || "normal");
       setInputs(nextOverview.staffInputs || []);
@@ -211,8 +222,9 @@ export function AdminSettlementPage() {
   const availableStaff = useMemo(() => staff.filter((item) => item.isActive !== false && (canManage || item.id === user?.staffMemberId)), [canManage, staff, user?.staffMemberId]);
   const isFinalized = overview?.run.status === "finalized";
 
-  return <AdminPage eyebrow="PAYROLL · SETTLEMENT" title="帳目／薪資結算" description="依營業日期鎖定規則版本，核對實收營業額、工時、小費與各角色薪資。" actions={<><AdminButton variant="secondary" onClick={() => { setLoading(true); void load(); }} disabled={loading || saving}>重新整理</AdminButton>{canManage && (isFinalized ? <AdminButton onClick={() => void reopen()} disabled={saving}>重新開放新時段</AdminButton> : <AdminButton onClick={finalize} disabled={loading || saving || !overview || overview.anomalies.length > 0}>正式結算</AdminButton>)}</>}>
-    <div className="adminSettlementToolbar"><AdminField label="營業日期"><input type="date" value={date} onChange={(event) => { setLoading(true); setDate(event.target.value); }} /></AdminField><AdminField label="營業時段"><input type="number" min="1" value={sessionNo} onChange={(event) => { setLoading(true); setSessionNo(Number(event.target.value) || 1); }} /></AdminField><AdminField label="日期類型"><select value={dayType} onChange={(event) => setDayType(event.target.value)} disabled={!canManage || Boolean(overview?.run.status !== "draft")}><option value="normal">非活動日</option><option value="event">活動日</option></select></AdminField>{canManage ? <><AdminButton variant="secondary" onClick={saveInputs} disabled={loading || saving || isFinalized}>保存輸入</AdminButton><AdminButton onClick={calculate} disabled={loading || saving || isFinalized}>重新計算</AdminButton></> : null}</div>
+  return <AdminPage eyebrow="PAYROLL · SETTLEMENT" title="帳目／薪資結算" description="依營業日期鎖定規則版本，核對實收營業額、工時、小費與各角色薪資。" actions={<><AdminButton variant="secondary" onClick={() => { setLoading(true); void load(); }} disabled={loading || saving}>重新整理</AdminButton>{canManage && (isFinalized ? <AdminButton onClick={() => void reopen()} disabled={saving}>重新開放新時段</AdminButton> : <AdminButton onClick={finalize} disabled={flowVersion >= 2 || loading || saving || !overview || overview.anomalies.length > 0}>正式結算</AdminButton>)}</>}>
+    {flowVersion >= 2 && <p role="status">此營業日使用分項接待；薪資串接尚未開放，費用可持續記錄及後續確認，分潤先保留。</p>}
+    <div className="adminSettlementToolbar"><AdminField label="營業日期"><input type="date" value={date} onChange={(event) => { setLoading(true); if (event.target.value) setDate(event.target.value); }} /></AdminField><AdminField label="營業時段"><input type="number" min="1" value={sessionNo} onChange={(event) => { setLoading(true); setSessionNo(Number(event.target.value) || 1); }} /></AdminField><AdminField label="日期類型"><select value={dayType} onChange={(event) => setDayType(event.target.value)} disabled={!canManage || Boolean(overview?.run.status !== "draft")}><option value="normal">非活動日</option><option value="event">活動日</option></select></AdminField>{canManage ? <><AdminButton variant="secondary" onClick={saveInputs} disabled={loading || saving || isFinalized}>保存輸入</AdminButton><AdminButton onClick={calculate} disabled={flowVersion >= 2 || loading || saving || isFinalized}>重新計算</AdminButton></> : null}</div>
     {message ? <div className="adminNotice" role="status">{message}</div> : null}
     <AdminState loading={loading} error={error} onRetry={() => void load()} />
     {!loading && !error && overview && summary ? <>

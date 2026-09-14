@@ -1,6 +1,5 @@
 "use client";
 import {useEffect,useState} from 'react';
-import {useAdminAuth} from '@/features/admin/auth/AdminAuthContext.jsx';
 
 type OrderLookup={session:{id:string;customerName:string;businessDate:string};order:{
   orderNumber:string;status:string;storeConfirmationStatus:string;totalAmount:number;
@@ -8,7 +7,6 @@ type OrderLookup={session:{id:string;customerName:string;businessDate:string};or
   menuSnapshot?:{lines:{referenceId:string;name:string;quantity:number;components:{menuItemId:string;itemName:string;quantity:number}[]}[]};
 }};
 export function NotificationOrderPage({orderId}:{orderId:string}){
-  const {user}=useAdminAuth();
   const [result,setResult]=useState<OrderLookup|null>(null),[error,setError]=useState('');
   const [attempt,setAttempt]=useState(0);
   useEffect(()=>{
@@ -27,7 +25,7 @@ export function NotificationOrderPage({orderId}:{orderId:string}){
       <p>目前應付：{result.order.totalAmount.toLocaleString('zh-TW')} Gil</p>
       {result.order.menuSnapshot&&<details><summary>提交當時套餐內容（歷史快照）</summary>{result.order.menuSnapshot.lines.filter(line=>line.components.length>0).map((line,index)=><div key={`${line.referenceId}:${index}`}><h3>{line.name} × {line.quantity}</h3><ul>{line.components.map((part,i)=><li key={`${part.menuItemId}:${i}`}>{part.itemName} × {part.quantity}</li>)}</ul></div>)}</details>}
       <p>查看通知不會變更訂單狀態。</p>
-      {user?.role==='developer'&&<a href={`/admin/orders?session=${encodeURIComponent(result.session.id)}&date=${result.session.businessDate}`}>前往完整點單管理</a>}
+      <a href={`/admin/orders?session=${encodeURIComponent(result.session.id)}&date=${result.session.businessDate}`}>前往分項接待與現場帳款</a>
     </>}
   </section>;
 }

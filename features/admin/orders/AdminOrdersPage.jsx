@@ -1,10 +1,12 @@
+import { BusinessDayPlanPanel } from "./BusinessDayPlanPanel";
+import { OrderFulfillmentPanel } from "./OrderFulfillmentPanel";
+import { FinancialRecordsPanel } from "./FinancialRecordsPanel";
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { adminApi } from '@/features/admin/api/client.js';
 import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
 import { AdminButton } from '@/features/admin/shared/AdminShared.jsx';
 
-const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 const money = (value) => `${Number(value || 0).toLocaleString('zh-TW')} G`;
 const businessPeriodTimeFormatter = new Intl.DateTimeFormat('zh-TW', {
   timeZone: 'Asia/Taipei',
@@ -42,7 +44,7 @@ export function AdminOrdersPage() {
   const searchParams = useSearchParams();
   const canManage = user.role === 'developer' || user.role === 'manager';
   const requestedDate = searchParams.get('date');
-  const [businessDate, setBusinessDate] = useState(() => /^\d{4}-\d{2}-\d{2}$/.test(requestedDate || '') ? requestedDate : today());
+  const [businessDate, setBusinessDate] = useState(() => /^\d{4}-\d{2}-\d{2}$/.test(requestedDate || '') ? requestedDate : '');
   const [search, setSearch] = useState('');
   const [sessions, setSessions] = useState([]);
   const [selectedId, setSelectedId] = useState('');
@@ -57,6 +59,7 @@ export function AdminOrdersPage() {
   const [issued, setIssued] = useState(null);
 
   const loadSessions = async (preferredId) => {
+    if (!businessDate) return;
     setLoading(true);
     try {
       const data = await adminApi.getOrderSessions({ businessDate, search: search.trim() });
@@ -76,7 +79,7 @@ export function AdminOrdersPage() {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(requestedDate || '')) setBusinessDate(value.referenceBusinessDate);
     return value;
   };
-  useEffect(() => { loadBusinessContext().catch(() => {}); }, []);
+  useEffect(() => { loadBusinessContext().catch(error => setMessage({ text: error.message, error: true })); }, []);
   useEffect(() => { if (canManage) adminApi.getOrderingSettings().then(setSettings).catch(() => {}); }, [canManage]);
   useEffect(() => { if (searchParams.get('focus') === 'create') setShowCreate(true); }, [searchParams]);
 
@@ -106,9 +109,10 @@ export function AdminOrdersPage() {
   };
 
   return <section className="adminPage adminOrdersPage">
-    <header className="adminPageHeading"><div><p className="eyebrow">DEVELOPER ORDER CONTROL</p><h1>完整點單管理</h1><p>開發者工具：查看所有顧客與訂單、檢查狀態並處理需要完整資料視角的例外作業。</p></div><div className="adminPageActions"><AdminButton variant="secondary" onClick={() => loadSessions(selectedId)}>重新整理</AdminButton><AdminButton variant="secondary" onClick={() => router.push('/admin/rooms/service')}>包廂服務排程</AdminButton>{canManage ? <AdminButton variant="ghost" onClick={() => setShowSettings(!showSettings)}>營運參數</AdminButton> : null}<AdminButton onClick={() => setShowCreate(!showCreate)}>＋ 開立點餐碼</AdminButton></div></header>
+    <header className="adminPageHeading"><div><p className="eyebrow">ORDER CONTROL</p><h1>點餐與現場帳款</h1><p>查看顧客訂單、逐項接待，並記錄現場收款、退款及待確認費用。</p></div><div className="adminPageActions"><AdminButton variant="secondary" onClick={() => loadSessions(selectedId)}>重新整理</AdminButton><AdminButton variant="secondary" onClick={() => router.push('/admin/rooms/service')}>包廂服務排程</AdminButton>{canManage ? <AdminButton variant="ghost" onClick={() => setShowSettings(!showSettings)}>營運參數</AdminButton> : null}<AdminButton onClick={() => setShowCreate(!showCreate)}>＋ 開立點餐碼</AdminButton></div></header>
     {message.text ? <div className={message.error ? 'adminOrderMessage isError' : 'adminOrderMessage'} role="status">{message.text}<button onClick={() => setMessage({ text: '', error: false })}>×</button></div> : null}
     {businessContext ? <BusinessOperationsBar context={businessContext} canManage={canManage} onChanged={(value, text) => { setBusinessContext(value); setBusinessDate(value.referenceBusinessDate); setMessage({ text, error: false }); }} onError={(error) => setMessage({ text: error.message, error: true })} /> : null}
+    {canManage && businessContext ? <BusinessDayPlanPanel businessDate={businessContext.referenceBusinessDate} onOpened={loadBusinessContext} /> : null}
     {showCreate ? <CreateSessionPanel onClose={() => setShowCreate(false)} onIssued={(result) => { setIssued(result); setShowCreate(false); loadSessions(result.session.id); }} /> : null}
     {issued ? <IssuedPanel issued={issued} onClose={() => setIssued(null)} /> : null}
     {canManage && showSettings && settings ? <SettingsPanel settings={settings} onSaved={(value) => { setSettings(value); setMessage({ text: '營運參數已更新。', error: false }); }} /> : null}
@@ -121,7 +125,8 @@ export function AdminOrdersPage() {
       <div className="adminOrderDetailPane">
         {!selected ? <div className="adminOrderEmpty"><span>LD</span><h2>選擇一位顧客</h2><p>使用左側搜尋或分組快速定位顧客。</p></div> : <>
           <SessionHeader item={selected} loading={loading} onUpdate={(body) => act(() => adminApi.updateOrderSession(selectedId, body), '顧客點餐設定已更新。')} onReissue={async () => { try { setIssued(await adminApi.reissueOrderSession(selectedId)); } catch (error) { setMessage({ text: error.message, error: true }); } }} />
-          <div className="adminOrderCards">{orders.length ? orders.map((order) => <AdminOrderCard key={order.id} order={order} user={user} loading={loading} act={act} />) : <div className="adminOrderEmpty isCompact"><h2>尚未下單</h2><p>此點餐碼今天還沒有送出訂單。</p></div>}</div>
+          <FinancialRecordsPanel key={selectedId} sessionId={selectedId} refreshKey={orders.map(o => `${o.id}:${o.totalAmount}:${o.status}`).join("|")} />
+          <div className="adminOrderCards">{orders.length ? orders.map((order) => order.flowVersion >= 2 ? <article className="adminOrderCard" key={order.id}><h3>{order.orderNumber} · 應付 {money(order.totalAmount)}</h3><p>{order.customerNote}</p><OrderFulfillmentPanel orderId={order.id} onChanged={refreshSelected} />{order.nominees.filter(n => n.confirmationStatus === "confirmed" && (canManage || n.staffId === user.staffMemberId)).map(n => <AdminAddonComposer key={n.id} nominee={n} loading={loading} act={act} />)}</article> : <AdminOrderCard key={order.id} order={order} user={user} loading={loading} act={act} />) : <div className="adminOrderEmpty isCompact"><h2>尚未下單</h2><p>此點餐碼今天還沒有送出訂單。</p></div>}</div>
         </>}
       </div>
     </div>
@@ -144,10 +149,9 @@ function BusinessOperationsBar({ context, canManage, onChanged, onError }) {
     base.setMinutes(base.getMinutes() + minutes);
     const next = localDateTimeValue(base.toISOString());
     setProjectedClose(next);
-    run(() => adminApi.applyBusinessPeriodAction({ action: 'set_projected_close', projectedCloseAt: next, reason }), `${minutes > 0 ? '延後' : '提早'} ${Math.abs(minutes)} 分鐘關店。`);
+    run(() => adminApi.applyBusinessPeriodAction({ action: 'set_projected_close', projectedCloseAt: next, reason, businessDate: context.referenceBusinessDate, expectedVersion: context.version, operationId: crypto.randomUUID() }), `${minutes > 0 ? '延後' : '提早'} ${Math.abs(minutes)} 分鐘關店。`);
   };
-  const openNow = () => run(() => adminApi.openBusinessPeriod({ businessDate: context.referenceBusinessDate, projectedCloseAt: projectedClose || null, reason }), '已執行現在開店，顧客點餐資格可開始使用。');
-  const applyAction = (action, extra, success) => run(() => adminApi.applyBusinessPeriodAction({ action, reason, ...extra }), success);
+  const applyAction = (action, extra, success) => run(() => adminApi.applyBusinessPeriodAction({ action, reason, businessDate: context.referenceBusinessDate, expectedVersion: context.version, operationId: crypto.randomUUID(), ...extra }), success);
   const periodLabel = context.periodStatus === 'open' ? '營業中' : context.periodStatus === 'closed' ? '已關店／待結算' : context.periodStatus === 'settled' ? '已結算' : '尚未開店';
   const now = Date.now();
   const untilOpen = Math.ceil((new Date(context.referenceStartsAt).getTime() - now) / 60000);
@@ -158,7 +162,7 @@ function BusinessOperationsBar({ context, canManage, onChanged, onError }) {
   return <section className={`adminBusinessOperations mode-${context.intakeMode || 'staff_only'}`}>
     <header><div><span>BUSINESS DAY / {context.referenceBusinessDate}</span><h2>{periodLabel} · {intakeLabels[context.intakeMode] || '尚未接單'}</h2><p>{reminder}</p></div><dl><div><dt>實際開店</dt><dd>{context.actualOpenedAt ? new Date(context.actualOpenedAt).toLocaleString('zh-TW') : '尚未執行'}</dd></div><div><dt>預計關店</dt><dd>{new Date(context.projectedCloseAt || context.referenceEndsAt).toLocaleString('zh-TW')}</dd></div><div><dt>待處理／未完成</dt><dd>{context.waitingOrderCount || 0}／{context.unfinishedOrderCount || 0} 張</dd></div></dl></header>
     {context.latestCommittedBusyUntil ? <p className="adminBusinessCommitment">已成立服務最晚占用至 {new Date(context.latestCommittedBusyUntil).toLocaleString('zh-TW')}</p> : null}
-    {canManage ? <div className="adminBusinessOperationsControls"><label>本次操作原因<input value={reason} maxLength="500" onChange={(event) => setReason(event.target.value)} /></label>{context.periodStatus === 'scheduled' ? <><label>本日預計關店<input type="datetime-local" value={projectedClose} onChange={(event) => setProjectedClose(event.target.value)} /></label><AdminButton disabled={busy || !projectedClose} onClick={openNow}>現在開店</AdminButton></> : null}{context.periodStatus === 'open' ? <><div className="adminBusinessModeButtons" role="group" aria-label="接單模式">{['normal', 'coordination', 'staff_only'].map((mode) => <button type="button" key={mode} className={context.intakeMode === mode ? 'isActive' : ''} disabled={busy} onClick={() => applyAction('set_intake_mode', { intakeMode: mode }, `已切換為${intakeLabels[mode]}。`)}>{intakeLabels[mode]}</button>)}</div><div className="adminBusinessQuickClose"><button type="button" disabled={busy} onClick={() => adjustClose(-30)}>提早 30 分</button><button type="button" disabled={busy} onClick={() => adjustClose(30)}>延後 30 分</button><label>自訂時間<input type="datetime-local" value={projectedClose} onChange={(event) => setProjectedClose(event.target.value)} /></label><button type="button" disabled={busy || !projectedClose} onClick={() => applyAction('set_projected_close', { projectedCloseAt: projectedClose }, '本日預計關店時間已更新。')}>套用</button></div><AdminButton variant="danger" disabled={busy || context.unfinishedOrderCount > 0} onClick={() => applyAction('close', {}, '已執行實際關店；點餐碼保留查看功能。')}>實際關店</AdminButton>{context.unfinishedOrderCount > 0 ? <small>仍有未完成訂單，請先切換僅店員接單並完成處理。</small> : null}</> : null}{context.periodStatus === 'closed' ? <><AdminButton variant="secondary" disabled={busy} onClick={() => applyAction('reopen', {}, '營業日已重開，預設採協調接單。')}>誤關重開</AdminButton><AdminButton disabled={busy || context.unfinishedOrderCount > 0} onClick={() => applyAction('settle', {}, '營業日已完成結算。')}>完成結算</AdminButton></> : null}</div> : <p className="adminBusinessReadOnly">營業日時間與全店接單模式僅店經理／開發者可調整；所有店員仍可處理協調單。</p>}
+    {canManage ? <div className="adminBusinessOperationsControls"><label>本次操作原因<input value={reason} maxLength="500" onChange={(event) => setReason(event.target.value)} /></label>{context.periodStatus === 'open' ? <><div className="adminBusinessModeButtons" role="group" aria-label="接單模式">{['normal', 'coordination', 'staff_only'].map((mode) => <button type="button" key={mode} className={context.intakeMode === mode ? 'isActive' : ''} disabled={busy} onClick={() => applyAction('set_intake_mode', { intakeMode: mode }, `已切換為${intakeLabels[mode]}。`)}>{intakeLabels[mode]}</button>)}</div><div className="adminBusinessQuickClose"><button type="button" disabled={busy} onClick={() => adjustClose(-30)}>提早 30 分</button><button type="button" disabled={busy} onClick={() => adjustClose(30)}>延後 30 分</button><label>自訂時間<input type="datetime-local" value={projectedClose} onChange={(event) => setProjectedClose(event.target.value)} /></label><button type="button" disabled={busy || !projectedClose} onClick={() => applyAction('set_projected_close', { projectedCloseAt: projectedClose }, '本日預計關店時間已更新。')}>套用</button></div><AdminButton variant="danger" disabled={busy || context.unfinishedOrderCount > 0} onClick={() => applyAction('close', {}, '已執行實際關店；點餐碼保留查看功能。')}>實際關店</AdminButton>{context.unfinishedOrderCount > 0 ? <small>仍有未完成訂單，請先切換僅店員接單並完成處理。</small> : null}</> : null}{context.periodStatus === 'closed' ? <><AdminButton variant="secondary" disabled={busy} onClick={() => applyAction('reopen', {}, '營業日已重開，預設採協調接單。')}>誤關重開</AdminButton><AdminButton disabled={busy || context.flowVersion >= 2 || context.unfinishedOrderCount > 0} onClick={() => applyAction('settle', {}, '營業日已完成結算。')}>完成結算</AdminButton>{context.flowVersion >= 2 ? <p>分項接待薪資串接尚未開放；未決費用可結轉，分潤先保留。</p> : null}</> : null}</div> : <p className="adminBusinessReadOnly">營業日時間與全店接單模式僅店經理／開發者可調整；所有店員仍可處理協調單。</p>}
   </section>;
 }
 

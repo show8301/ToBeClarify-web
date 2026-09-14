@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { getAdminBusinessDate } from "@/features/admin/shared/businessDay";
 import { adminApi } from "@/features/admin/api/client.js";
 import { useAdminAuth } from "@/features/admin/auth/AdminAuthContext.jsx";
 import { AdminButton, AdminField, AdminPage, AdminPanel, AdminToggle } from "@/features/admin/shared/AdminShared.jsx";
@@ -18,6 +19,8 @@ type DutyPlan = {
   endTime?: string | null;
   scheduledRoles: DutyRole[];
   approvalStatus: ApprovalStatus;
+  startsAt?: string | null;
+  endsAt?: string | null;
   submittedAt?: string;
   approvalNote?: string | null;
 };
@@ -52,17 +55,15 @@ const approvalLabels: Record<ApprovalStatus, string> = {
   rejected: "已退回",
 };
 
-function today() {
-  return new Date().toLocaleDateString("sv-SE");
-}
-
 function addDays(value: string, days: number) {
+  if (!value) return "";
   const date = new Date(`${value}T12:00:00`);
   date.setDate(date.getDate() + days);
   return date.toLocaleDateString("sv-SE");
 }
 
 function displayDate(value: string) {
+  if (!value) return "讀取營業日中…";
   const date = new Date(`${value}T12:00:00`);
   return date.toLocaleDateString("zh-TW", { month: "numeric", day: "numeric", weekday: "short" });
 }
@@ -83,9 +84,18 @@ function normalizePlan(value: Record<string, unknown>): DutyPlan | null {
     endTime: value.endTime ? String(value.endTime) : null,
     scheduledRoles: roles,
     approvalStatus: status,
+    startsAt: typeof value.startsAt === "string" ? value.startsAt : null,
+    endsAt: typeof value.endsAt === "string" ? value.endsAt : null,
     submittedAt: value.submittedAt ? String(value.submittedAt) : undefined,
     approvalNote: value.approvalNote ? String(value.approvalNote) : null,
   };
+}
+
+function shiftLabel(plan: DutyPlan) {
+  if (!plan.isWorking) return "休假／不值班";
+  if (!plan.startsAt || !plan.endsAt) return `${plan.businessDate} ${plan.startTime} ～ ${plan.endTime}`;
+  const formatter = new Intl.DateTimeFormat("zh-TW", { timeZone: "Asia/Taipei", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false });
+  return `${formatter.format(new Date(plan.startsAt))} ～ ${formatter.format(new Date(plan.endsAt))}`;
 }
 
 function roleLabel(role: DutyRole) {
@@ -99,7 +109,8 @@ function emptyDraft(staffId: string, businessDate: string): DutyPlanDraft {
 export function AdminDutyPlanningPage({ navigate }: { navigate: Navigate }) {
   const { user } = useAdminAuth();
   const canManageAll = user?.role === "manager" || user?.role === "developer";
-  const [rangeStart, setRangeStart] = useState(today);
+  const [businessDate, setBusinessDate] = useState("");
+  const [rangeStart, setRangeStart] = useState("");
   const rangeEnd = useMemo(() => addDays(rangeStart, 13), [rangeStart]);
   const [plans, setPlans] = useState<DutyPlan[]>([]);
   const [staff, setStaff] = useState<StaffOption[]>([]);
@@ -110,14 +121,24 @@ export function AdminDutyPlanningPage({ navigate }: { navigate: Navigate }) {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  const load = useCallback(async () => {
+  const loadSequence = useRef(0);
+  const load = useCallback(async (signal?: AbortSignal) => {
+    const sequence = ++loadSequence.current;
     setLoading(true);
     setError("");
     try {
+      const currentBusinessDate = await getAdminBusinessDate(signal);
+      if (signal?.aborted || sequence !== loadSequence.current) return;
+      setBusinessDate(currentBusinessDate);
+      if (!rangeStart) {
+        setRangeStart(currentBusinessDate);
+        return;
+      }
       const [planResult, staffResult] = await Promise.all([
-        adminApi.getDutyPlans({ from: rangeStart, to: rangeEnd }),
-        adminApi.getStaffMembers(),
+        adminApi.getDutyPlans({ from: rangeStart, to: rangeEnd }, signal),
+        adminApi.getStaffMembers(signal),
       ]);
+      if (signal?.aborted || sequence !== loadSequence.current) return;
       const nextPlans = (Array.isArray(planResult) ? planResult : [])
         .map((value: Record<string, unknown>) => normalizePlan(value))
         .filter((value: DutyPlan | null): value is DutyPlan => Boolean(value));
@@ -127,15 +148,17 @@ export function AdminDutyPlanningPage({ navigate }: { navigate: Navigate }) {
       setStaff(nextStaff);
       setDraft((current) => current && nextStaff.some((item) => item.id === current.staffId) ? current : null);
     } catch (loadError) {
+      if (signal?.aborted || sequence !== loadSequence.current) return;
       setError(loadError instanceof Error ? loadError.message : "值班規劃載入失敗。請稍後再試。");
     } finally {
-      setLoading(false);
+      if (!signal?.aborted && sequence === loadSequence.current) setLoading(false);
     }
   }, [rangeEnd, rangeStart]);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => { void load(); }, 0);
-    return () => window.clearTimeout(timer);
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => { void load(controller.signal); }, 0);
+    return () => { window.clearTimeout(timer); controller.abort(); };
   }, [load]);
 
   const ownStaff = staff.find((item) => item.id === user?.staffMemberId);
@@ -227,7 +250,7 @@ export function AdminDutyPlanningPage({ navigate }: { navigate: Navigate }) {
     }
   };
 
-  return <AdminPage eyebrow="DUTY PLANNING" title="值班規劃" description="先填寫未來可上班日期、時段與職位，再由經理核准；已核准的今日規劃會帶入營業工作台。" actions={<><AdminButton variant="secondary" disabled={loading} onClick={() => void load()}>重新整理</AdminButton><AdminButton onClick={() => startNew()}>＋ 新增值班規劃</AdminButton></>}>
+  return <AdminPage eyebrow="DUTY PLANNING" title="值班規劃" description="先填寫未來可上班日期、時段與職位，再由經理核准；已核准的今日規劃會帶入營業工作台。" actions={<><AdminButton variant="secondary" disabled={loading} onClick={() => void load()}>重新整理</AdminButton><AdminButton disabled={!businessDate || loading} onClick={() => startNew()}>＋ 新增值班規劃</AdminButton></>}>
     {error ? <div className="adminOrderMessage isError" role="alert">{error}</div> : null}
     {message ? <div className="adminOrderMessage" role="status">{message}</div> : null}
 
@@ -239,18 +262,18 @@ export function AdminDutyPlanningPage({ navigate }: { navigate: Navigate }) {
     </section>
 
     <div className="adminDutyPlanningToolbar">
-      <AdminField label="從哪一天開始顯示"><input type="date" min={today()} value={rangeStart} onChange={(event) => setRangeStart(event.target.value || today())} /></AdminField>
+      <AdminField label="從哪一天開始顯示"><input type="date" min={businessDate} value={rangeStart} onChange={(event) => setRangeStart(event.target.value || businessDate)} /></AdminField>
       <div className="adminDutyPlanningToolbarNote"><strong>{canManageAll ? "經理／開發者視角" : "個人值班規劃"}</strong><small>{canManageAll ? "可查看、編輯與核准所有店員的規劃。" : "可預先填寫自己的日期與時段，送出後由經理核准。"}</small></div>
     </div>
 
     <div className="adminDutyPlanningLayout">
       <div className="adminDutyPlanningList">
         {loading ? <div className="adminInlineState">載入值班規劃中…</div> : null}
-        {!loading && groupedPlans.length === 0 ? <AdminPanel title="目前尚無值班規劃" description="先新增一筆未來日期的規劃，讓經理可以安排與核准。"><AdminButton onClick={() => startNew()}>建立第一筆規劃</AdminButton></AdminPanel> : null}
+        {!loading && groupedPlans.length === 0 ? <AdminPanel title="目前尚無值班規劃" description="先新增一筆未來日期的規劃，讓經理可以安排與核准。"><AdminButton disabled={!businessDate || loading} onClick={() => startNew()}>建立第一筆規劃</AdminButton></AdminPanel> : null}
         {groupedPlans.map(([date, datePlans]) => <AdminPanel key={date} className="adminDutyDatePanel" title={displayDate(date)} description={`${datePlans.length} 位店員已填寫規劃`}>
           <div className="adminDutyPlanList">
             {datePlans.map((plan) => <article className={`adminDutyPlanCard is-${plan.approvalStatus}`} key={plan.id}>
-              <div className="adminDutyPlanIdentity"><strong>{plan.staffName}</strong><small>{plan.isWorking ? `${plan.startTime} ～ ${plan.endTime}` : "休假／不值班"}</small></div>
+              <div className="adminDutyPlanIdentity"><strong>{plan.staffName}</strong><small>{shiftLabel(plan)}</small></div>
               <div className="adminDutyPlanRoles">{plan.scheduledRoles.length ? plan.scheduledRoles.map((role) => <span key={role}>{roleLabel(role)}</span>) : <span>無啟用職位</span>}</div>
               <div className="adminDutyPlanStatus"><b>{approvalLabels[plan.approvalStatus]}</b>{plan.approvalNote ? <small>{plan.approvalNote}</small> : null}</div>
               <div className="adminDutyPlanActions"><AdminButton variant="ghost" onClick={() => editPlan(plan)} disabled={!canManageAll && plan.staffId !== user?.staffMemberId}>編輯</AdminButton>{canManageAll && plan.approvalStatus !== "approved" ? <><AdminButton variant="secondary" disabled={reviewingId === plan.id} onClick={() => void review(plan, "approve")}>核准</AdminButton><AdminButton variant="danger" disabled={reviewingId === plan.id} onClick={() => void review(plan, "reject")}>退回</AdminButton></> : null}</div>
@@ -262,12 +285,13 @@ export function AdminDutyPlanningPage({ navigate }: { navigate: Navigate }) {
       <AdminPanel className="adminDutyPlanEditor" title={draft ? (draft.id ? "編輯值班規劃" : "新增值班規劃") : "先選擇一筆規劃"} description={draft ? (canManageAll ? "經理／開發者儲存後會直接視為已核准。" : "送出後會進入待核准狀態，核准前不會影響今日 dashboard。") : "從左側編輯既有規劃，或新增一筆日期與時段。"}>
         {draft ? <div className="adminDutyPlanForm">
           {canManageAll ? <AdminField label="店員"><select value={draft.staffId} onChange={(event) => setDraft((current) => current ? { ...current, staffId: event.target.value } : current)}><option value="">請選擇店員</option>{editableStaff.map((item) => <option key={item.id} value={item.id}>{item.displayName}{item.roleTitle ? `｜${item.roleTitle}` : ""}</option>)}</select></AdminField> : <div className="adminDutyPlanReadonly"><span>店員</span><strong>{ownStaff?.displayName || "目前帳號尚未綁定店員"}</strong></div>}
-          <AdminField label="值班日期"><input type="date" min={today()} value={draft.businessDate} onChange={(event) => setDraft((current) => current ? { ...current, businessDate: event.target.value } : current)} /></AdminField>
+          <AdminField label="值班日期"><input type="date" min={businessDate} value={draft.businessDate} onChange={(event) => setDraft((current) => current ? { ...current, businessDate: event.target.value } : current)} /></AdminField>
           <AdminField label="當天狀態"><select value={draft.isWorking ? "working" : "off"} onChange={(event) => setDraft((current) => current ? { ...current, isWorking: event.target.value === "working" } : current)}><option value="working">有上班</option><option value="off">休假／不值班</option></select></AdminField>
           {draft.isWorking ? <div className="adminDutyPlanTimeGrid"><AdminField label="開始時間"><input type="text" inputMode="numeric" maxLength={5} placeholder="例如 20:00" value={draft.startTime} onChange={(event) => setDraft((current) => current ? { ...current, startTime: event.target.value } : current)} /></AdminField><AdminField label="結束時間"><input type="text" inputMode="numeric" maxLength={5} placeholder="例如 24:00" value={draft.endTime} onChange={(event) => setDraft((current) => current ? { ...current, endTime: event.target.value } : current)} /></AdminField></div> : null}
+          {draft.isWorking ? <small>時間使用台北時區；結束時間早於開始時間代表翌日，例如 20:00 ～ 03:00。跨午夜仍歸原營業日。</small> : null}
           <fieldset className="adminDutyRoleChoices"><legend>排班職位</legend>{dutyRoleOptions.map((option) => <div className="adminDutyRoleChoice" key={option.id}><AdminToggle checked={draft.scheduledRoles.includes(option.id)} disabled={!draft.isWorking} onChange={() => toggleRole(option.id)} label={option.label} ariaLabel={`切換${option.label}排班職位`} /><small>{option.description}</small></div>)}</fieldset>
           <div className="adminDutyPlanEditorActions"><AdminButton variant="ghost" onClick={() => setDraft(null)}>取消</AdminButton><AdminButton onClick={() => void save()} disabled={saving}>{saving ? "儲存中…" : draft.id ? "儲存修改" : "送出規劃"}</AdminButton></div>
-        </div> : <div className="adminDutyPlanEditorEmpty"><span aria-hidden="true">✦</span><p>值班規劃會保留日期、時段、職位與核准紀錄，讓營業工作台有穩定的當日依據。</p><AdminButton variant="secondary" onClick={() => startNew()}>新增規劃</AdminButton></div>}
+        </div> : <div className="adminDutyPlanEditorEmpty"><span aria-hidden="true">✦</span><p>值班規劃會保留日期、時段、職位與核准紀錄，讓營業工作台有穩定的當日依據。</p><AdminButton variant="secondary" disabled={!businessDate || loading} onClick={() => startNew()}>新增規劃</AdminButton></div>}
       </AdminPanel>
     </div>
 

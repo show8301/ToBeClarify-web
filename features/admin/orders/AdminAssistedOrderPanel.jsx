@@ -8,7 +8,11 @@ const nextStart = () => {
   const pad = (part) => String(part).padStart(2, '0');
   return `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}T${pad(value.getHours())}:${pad(value.getMinutes())}`;
 };
-const iso = (value) => value ? new Date(value).toISOString() : null;
+const iso = (value) => {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isFinite(date.getTime()) ? date.toISOString() : null;
+};
 
 export function AdminAssistedOrderPanel({ sessionId, businessDate, onSaved, onClose }) {
   const [catalog, setCatalog] = useState(null);

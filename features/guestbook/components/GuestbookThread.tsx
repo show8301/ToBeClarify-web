@@ -62,34 +62,44 @@ export function GuestbookThread({ message, busy, cooldown, name, submit }: Guest
   return (
     <article className={`guest-note${message.isPinned ? " pinned" : ""}`}>
       <header>
-        <span>{message.isPinned ? "PINNED NOTE" : "TRAVELER NOTE"}</span>
+        <h2>
+          {message.displayName}{" "}
+          {message.authorType !== "customer" ? <small className="guest-official">店家發言</small> : null}
+        </h2>
         <time dateTime={message.createdAt}>{guestbookDateLabel(message.createdAt)}</time>
       </header>
-      <h2>
-        {message.displayName}{" "}
-        {message.authorType !== "customer" ? <small className="guest-official">店家發言</small> : null}
-      </h2>
       <GuestbookMessageText message={message} />
-      {message.replyCount > 0 || replies ? (
-        <button
-          className="guest-reply-toggle"
-          aria-expanded={expanded}
-          aria-controls={`replies-${message.id}`}
-          onClick={toggleReplies}
-        >
-          {expanded ? "收起回覆" : `查看 ${message.replyCount} 則回覆`} <i>{expanded ? "−" : "+"}</i>
-        </button>
+      {message.replyCount > 0 || replies || message.allowReplies ? (
+        <div className="guest-note-actions">
+          {message.replyCount > 0 || replies ? (
+            <button
+              className="guest-reply-toggle"
+              aria-expanded={expanded}
+              aria-controls={`replies-${message.id}`}
+              onClick={toggleReplies}
+            >
+              {expanded ? "收起回覆" : `查看 ${message.replyCount} 則回覆`} <i>{expanded ? "−" : "+"}</i>
+            </button>
+          ) : null}
+          {message.allowReplies ? (
+            <button className="guest-reply-toggle" aria-expanded={replying} onClick={() => setReplying((value) => !value)}>
+              {replying ? "取消回覆" : "留下回覆"} <i>↗</i>
+            </button>
+          ) : null}
+        </div>
       ) : null}
       {expanded ? (
         <div className="guest-replies" id={`replies-${message.id}`}>
           {replies?.items.map((reply) => (
             <blockquote key={reply.id}>
-              <span>
-                {reply.displayName}{" "}
-                {reply.authorType !== "customer" ? <b className="guest-official">店家回覆</b> : null}
-              </span>
+              <div className="guest-reply-meta">
+                <span>
+                  {reply.displayName}{" "}
+                  {reply.authorType !== "customer" ? <b className="guest-official">店家回覆</b> : null}
+                </span>
+                <time dateTime={reply.createdAt}>{guestbookDateLabel(reply.createdAt)}</time>
+              </div>
               <GuestbookMessageText message={reply} />
-              <time>{guestbookDateLabel(reply.createdAt)}</time>
             </blockquote>
           ))}
           {loading ? <p role="status">正在載入回覆…</p> : null}
@@ -105,11 +115,7 @@ export function GuestbookThread({ message, busy, cooldown, name, submit }: Guest
           ) : null}
         </div>
       ) : null}
-      {message.allowReplies ? (
-        <button className="guest-reply-toggle" aria-expanded={replying} onClick={() => setReplying((value) => !value)}>
-          {replying ? "取消回覆" : "留下回覆"} <i>↗</i>
-        </button>
-      ) : <p className="guest-closed">此留言串已關閉回覆</p>}
+      {!message.allowReplies ? <p className="guest-closed">此留言串已關閉回覆</p> : null}
       {replying && message.allowReplies ? (
         <GuestbookComposer
           reply

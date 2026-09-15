@@ -48,7 +48,7 @@ export function GuestbookComposer({ onSubmit, busy, cooldown, initialName, reply
           onChange={(event) => setContent(event.target.value)}
           required
           maxLength={2000}
-          placeholder="寫下不含現實個資的感想…"
+          placeholder="説説這次夢境的心得..."
         />
       </label>
       <div className="guest-honeypot" aria-hidden="true">

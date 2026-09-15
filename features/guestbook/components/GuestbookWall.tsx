@@ -157,7 +157,7 @@ export default function GuestbookWall() {
           <span>LEAVE A NOTE · 留言</span>
           <h2>讓這個夜晚<br />多留一會。</h2>
           <GuestbookComposer initialName="" busy={busy} cooldown={cooldown} onSubmit={submit} />
-          <p>名字不經身分驗證。每次留言或回覆後需等待 3 分鐘。</p>
+          <p>※每次留言或回覆之間需間隔 3 分鐘。</p>
           <p role="status" aria-live="polite">{status}</p>
         </aside>
         <div className="guestbook-feed">

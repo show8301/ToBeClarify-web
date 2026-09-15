@@ -7,6 +7,19 @@
 .guest-inline-reply input:focus-visible, .guestbook-page button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 .guest-replies p { white-space: pre-wrap; overflow-wrap: anywhere; }
 .guest-note h2 { overflow-wrap: anywhere; }
+.guest-note>header { align-items: baseline; justify-content: flex-start; flex-wrap: wrap; margin-bottom: 12px; }
+.guest-note>header h2 { margin: 0; color: var(--ink); }
+.guest-note>header time, .guest-reply-meta time { white-space: nowrap; }
+.guest-reply-meta { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; }
+.guest-reply-meta span { overflow-wrap: anywhere; }
+.guest-note-actions { display: flex; gap: 16px; margin-top: 24px; border-top: 1px solid var(--ink); }
+.guest-note-actions .guest-reply-toggle { flex: 1; width: auto; min-width: 0; margin-top: 0; border-top: 0; gap: 8px; }
+.guest-note-actions .guest-reply-toggle + .guest-reply-toggle { border-left: 1px solid var(--line); padding-left: 16px; }
+@media (max-width: 460px) {
+  .guest-note>header { flex-direction: row; }
+  .guest-note-actions { gap: 10px; }
+  .guest-note-actions .guest-reply-toggle + .guest-reply-toggle { padding-left: 10px; }
+}
 .guest-official { display: inline-block; padding: 4px 9px; border: 1px solid var(--line); border-radius: 999px; font-size: 12px; font-weight: 600; background: linear-gradient(115deg,var(--dream-violet),var(--dream-blue)); color: var(--ink); vertical-align: middle; }
 .guest-edited { display: block; margin-top: 10px; color: var(--ink); opacity: .75; font-size: 12px; }
 .guest-note .guest-closed { margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 13px; }

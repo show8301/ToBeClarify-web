@@ -180,7 +180,10 @@ export default function SiteChrome({navigation,shopInfo,pageVisibility,menuHidde
     <div className="site-parallax-bubbles site-bubbles-near" aria-hidden="true"><i/><i/></div>
     <div className="site-parallax-mist" aria-hidden="true"/>
     <header className="site-header">
-      <a className="site-brand" href="/" onClick={(event)=>navigate(event,"/")}><strong>{shopInfo.name||"清醒夢"}</strong><span>LUCID DREAM</span></a>
+      <a className="site-brand" href="/" onClick={(event)=>navigate(event,"/")}>
+        <img className="site-brand-mark" src="/favicon.ico" alt="" aria-hidden="true" />
+        <span className="site-brand-copy"><strong>{shopInfo.name||"清醒夢"}</strong><small>LUCID DREAM</small></span>
+      </a>
       <span className="site-header-note">WAKING DREAM · EORZEA SALON</span>
       <button className={`site-menu-toggle${open?" is-open":""}`} onClick={()=>setOpen(value=>!value)} aria-expanded={open} aria-controls="site-navigation"><span/><span/><b>{open?"CLOSE":"MENU"}</b></button>
     </header>

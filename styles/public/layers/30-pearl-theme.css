@@ -31,7 +31,7 @@ body{background-image:radial-gradient(circle at 8% 8%,rgba(184,187,216,.78),tran
 .site-content,.site-footer{position:relative;z-index:1}
 
 .site-header{border-color:rgba(255,255,255,.72);background:rgba(239,241,248,.76);color:var(--ink);box-shadow:0 12px 34px rgba(101,120,159,.12);}
-.site-brand span,.site-header-note{color:var(--hair-shadow)}
+.site-brand-copy small,.site-header-note{color:var(--hair-shadow)}
 .site-menu-toggle span{background:var(--ink)}
 .site-header nav{background:rgba(244,245,251,.9);border-color:rgba(255,255,255,.9);box-shadow:0 24px 65px rgba(101,120,159,.22),inset 0 1px rgba(255,255,255,.9);border-radius:24px;overflow:hidden;}
 .site-header nav a{background:rgba(223,226,240,.48);border-color:rgba(49,51,74,.12)}

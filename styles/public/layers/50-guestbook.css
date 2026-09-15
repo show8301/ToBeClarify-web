@@ -1,5 +1,7 @@
 /* Guestbook interactions inherit the existing pearl palette and card treatments. */
 .guest-honeypot { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.guestbook-feed { width: 100%; max-width: 760px; }
+@media (min-width: 801px) { .guest-note { padding: 24px; } }
 .guest-inline-reply { position: relative; border-radius: 14px; }
 .guest-inline-reply input { width: 100%; padding: 13px 12px; border: 1px solid rgba(255,255,255,.9); border-radius: 14px; background: rgba(247,247,251,.7); color: var(--ink); font: inherit; }
 .guest-inline-reply input:focus-visible, .guestbook-page button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }

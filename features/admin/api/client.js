@@ -260,6 +260,7 @@ export const adminApi = {
   }),
   saveOrderingSettings: (body, signal) => request('/ordering-settings', { method: 'PUT', body: JSON.stringify(body), signal }),
   pauseNomination: (minutes, signal) => request('/ordering-settings/pause-nomination', { method: 'POST', body: JSON.stringify({ minutes }), signal }),
+  expireWaitingOrders: (signal) => request('/ordering-maintenance/expire-waiting', { method: 'POST', signal }),
   confirmNominee: (orderId, signal) => request(`/orders/${encodeURIComponent(orderId)}/confirm-nominee`, { method: 'POST', signal }),
   decideStoreConfirmation: (orderId, decision, reason, signal) => request(`/orders/${encodeURIComponent(orderId)}/store-confirmation`, {
     method: 'POST', body: JSON.stringify({ decision, reason: reason || null }), signal,

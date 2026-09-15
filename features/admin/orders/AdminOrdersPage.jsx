@@ -361,6 +361,8 @@ function SettingsPanel({ settings, onSaved }) {
   const [overrideBusy, setOverrideBusy] = useState(false);
   const [overrideMessage, setOverrideMessage] = useState('');
   const [overrideError, setOverrideError] = useState('');
+  const [expiryBusy, setExpiryBusy] = useState(false);
+  const [expiryMessage, setExpiryMessage] = useState('');
   const tipPresetAmounts = normalizeTipPresetAmounts(form.tipPresetAmounts);
 
   useEffect(() => {
@@ -379,6 +381,14 @@ function SettingsPanel({ settings, onSaved }) {
 
   const save = async () => onSaved(await adminApi.saveOrderingSettings({ minimumMealCredit: form.minimumMealCredit, baseNominationFee: form.baseNominationFee, tipPresetAmounts, segmentMinutes: form.segmentMinutes, reminderAfterMinutes: form.reminderAfterMinutes, escalateAfterMinutes: form.escalateAfterMinutes, expireAfterMinutes: form.expireAfterMinutes, businessDayStartMinute: form.businessDayStartMinute, businessDayEndMinute: form.businessDayEndMinute, businessDayEndsNextDay: form.businessDayEndsNextDay }));
   const pauseNow = async () => onSaved(await adminApi.pauseNomination(pause));
+  const runExpiry = async () => {
+    setExpiryBusy(true); setExpiryMessage('');
+    try {
+      const count = await adminApi.expireWaitingOrders();
+      setExpiryMessage(`已依目前逾時設定檢查等待單，這次失效 ${Number(count || 0)} 筆。`);
+    } catch (error) { setExpiryMessage(error.message); }
+    finally { setExpiryBusy(false); }
+  };
   const addDate = (value) => {
     const [year, month, day] = value.split('-').map(Number);
     return new Date(Date.UTC(year, month - 1, day + 1)).toISOString().slice(0, 10);
@@ -421,5 +431,6 @@ function SettingsPanel({ settings, onSaved }) {
     </div>
     <div className="adminOrderingSettingsGrid"><label>低消／信物可折抵金額<input type="number" min="0" value={form.minimumMealCredit} onChange={(event) => setForm({ ...form, minimumMealCredit: Number(event.target.value) })} /></label><label>每節基礎指名費<input type="number" min="0" value={form.baseNominationFee} onChange={(event) => setForm({ ...form, baseNominationFee: Number(event.target.value) })} /></label>{tipPresetAmounts.map((value, index) => <label key={`tip-preset-${index}`}>小費按鈕 {index + 1}（Gil）<input type="number" min="1" max="1000000" value={value} onChange={(event) => setForm({ ...form, tipPresetAmounts: tipPresetAmounts.map((current, currentIndex) => currentIndex === index ? Number(event.target.value) : current) })} /></label>)}<label>每節分鐘<input type="number" min="1" value={form.segmentMinutes} onChange={(event) => setForm({ ...form, segmentMinutes: Number(event.target.value) })} /></label><label>提醒（分鐘）<input type="number" min="1" value={form.reminderAfterMinutes} onChange={(event) => setForm({ ...form, reminderAfterMinutes: Number(event.target.value) })} /></label><label>升級（分鐘）<input type="number" min="1" value={form.escalateAfterMinutes} onChange={(event) => setForm({ ...form, escalateAfterMinutes: Number(event.target.value) })} /></label><label>失效（分鐘）<input type="number" min="1" value={form.expireAfterMinutes} onChange={(event) => setForm({ ...form, expireAfterMinutes: Number(event.target.value) })} /></label></div>
     <div className="adminNominationPause"><label>暫停指名分鐘<input type="number" min="0" max="1440" value={pause} onChange={(event) => setPause(Number(event.target.value))} /></label><AdminButton variant="secondary" onClick={pauseNow}>{pause === 0 ? '立即解除暫停' : `暫停 ${pause} 分鐘`}</AdminButton><span>{settings.nominationPaused ? `目前暫停至 ${new Date(settings.nominationPausedUntil).toLocaleString('zh-TW')}` : '目前開放指名'}</span></div>
+    <div className="adminOrderingMaintenance"><div><strong>等待單逾時處理</strong><small>依目前「失效（分鐘）」與排程規則執行一次；不會提前使尚未到期的訂單失效。</small></div><AdminButton variant="secondary" disabled={expiryBusy} onClick={runExpiry}>{expiryBusy ? '處理中…' : '立即檢查逾時等待單'}</AdminButton>{expiryMessage ? <p role="status">{expiryMessage}</p> : null}</div>
   </div>;
 }

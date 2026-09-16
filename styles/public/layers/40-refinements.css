@@ -205,7 +205,7 @@
 .dreamer-file-number{left:auto;right:13px;top:13px;min-width:34px;height:27px;padding-inline:8px;background:rgba(247,247,251,.76);font-size:8px}
 .dreamer-duty{left:auto;right:14px;top:auto;bottom:14px;max-width:62%;min-height:32px;padding:5px 9px;background:rgba(247,247,251,.76)}
 .dreamer-duty small{font-size:6px}.dreamer-duty b{font-size:9px}
-.dreamer-card-body{min-height:0;padding:5px 22px;align-items:center;text-align:center;background:linear-gradient(150deg,rgba(193,185,223,.24),rgba(169,199,234,.28) 58%,rgba(232,199,218,.2))}
+.dreamer-card-body{min-height:0;padding:0 22px 5px;align-items:center;text-align:center;background:linear-gradient(150deg,rgba(193,185,223,.24),rgba(169,199,234,.28) 58%,rgba(232,199,218,.2))}
 .dreamer-card-heading{width:100%}.dreamer-card-heading>strong{font-size:clamp(22px,1.65vw,26px);font-weight:620;line-height:1.2}
 .dreamer-card-heading>em{margin-top:10px;color:rgba(49,51,74,.62);font:normal 10px/1.45 var(--font-geist-mono),monospace}
 .dreamer-card-bio{margin-top:20px;max-width:35ch;font-size:12px;line-height:1.8;-webkit-line-clamp:3}
@@ -684,17 +684,17 @@ body{animation:none;background-attachment:scroll}
 /* Share the original artwork footprint with its control so cards keep their height. */
 .dreamer-card-name{
   width:100%;height:126px;flex:0 0 126px;
-  display:grid;grid-template-columns:26px minmax(0,1fr) 26px;gap:6px;align-items:start;
+  display:grid;grid-template-columns:26px minmax(0,1fr) 26px;gap:6px;align-items:center;
 }
 .dreamer-card-name-face{
   grid-column:2;justify-self:center;
-  min-width:0;min-height:0;width:min(190px,100%);height:100%;display:grid;place-items:start center;
+  min-width:0;min-height:0;width:min(190px,100%);height:100%;display:grid;place-items:center;
 }
 .dreamer-card-name-face>strong{
   max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   font-size:clamp(22px,1.65vw,26px);font-weight:620;line-height:1.2;letter-spacing:-.018em;
 }
-.dreamer-card-signature{display:block;width:100%;height:100%;min-height:0;object-fit:contain;object-position:center top}
+.dreamer-card-signature{display:block;width:100%;height:100%;min-height:0;object-fit:contain}
 .dreamer-card-heading.has-signature>em{margin-top:4px}
 .dreamer-card-bio{white-space:pre-line}
 .dreamer-card-footer{width:100%;margin-top:auto;display:flex;flex-direction:column;gap:14px}

@@ -149,8 +149,7 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
             const showTextName = textNameIds.has(person.id);
             return (
               <article key={person.id} className="dreamer-card">
-                <a href={`/staff/${person.id}`} onClick={(event) => openProfile(event, `/staff/${person.id}`)} className="dreamer-card-main" aria-label={`查看 ${person.displayName} 的完整介紹`}>
-                <span className="dreamer-card-photo">
+                <a href={`/staff/${person.id}`} onClick={(event) => openProfile(event, `/staff/${person.id}`)} className="dreamer-card-photo" aria-label={`查看 ${person.displayName} 的完整介紹`} tabIndex={-1}>
                   <img src={person.avatarUrl || fallbackPortrait} alt={`${person.displayName} 的店員照片`} loading={index < 2 ? "eager" : "lazy"} decoding="async"/>
                   <span className="dreamer-role-ribbon" title={person.roleTitle || "DREAM STAFF"}>
                     <i>✦</i><b>{person.roleTitle || "DREAM STAFF"}</b><i>✦</i>
@@ -162,11 +161,26 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
                     </span>
                     {canBeNominated && <span className="dreamer-nomination" aria-label="此店員可以指名"><i aria-hidden="true">✦</i><b>可以指名</b></span>}
                   </span>
-                </span>
+                </a>
                 <span className="dreamer-card-body">
                   <span className={`dreamer-card-heading${person.signatureUrl ? " has-signature" : ""}`}>
-                    {person.signatureUrl && !showTextName
-                      ? <img className="dreamer-card-signature" src={person.signatureUrl} alt={`${person.displayName} 的簽名`}/>
+                    {person.signatureUrl
+                      ? <span className="dreamer-card-name">
+                          <span className="dreamer-card-name-face">
+                            {showTextName
+                              ? <strong>{person.displayName}</strong>
+                              : <img className="dreamer-card-signature" src={person.signatureUrl} alt={`${person.displayName} 的簽名`}/>}
+                          </span>
+                          <button
+                            type="button"
+                            className="dreamer-card-signature-toggle"
+                            aria-label={`${showTextName ? "翻回簽名" : "翻至文字"}：${person.displayName}`}
+                            onClick={() => toggleNameDisplay(person.id)}
+                          >
+                            <RotateCcw aria-hidden="true" />
+                            <span>{showTextName ? "翻回簽名" : "翻至文字"}</span>
+                          </button>
+                        </span>
                       : <strong>{person.displayName}</strong>}
                     {person.nickname && <em>✦ 暱稱｜{person.nickname} ✦</em>}
                   </span>
@@ -176,11 +190,11 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
                       {services.slice(0,2).map((service,serviceIndex)=><b key={service.id}><img src={`/assets/staff-card-chip-icon-${serviceIndex===0?"a":"b"}.png`} alt="" aria-hidden="true"/>{service.serviceName}</b>)}
                       {services.length > 2 && <i><img src="/assets/staff-card-chip-icon-c.png" alt="" aria-hidden="true"/>+{services.length-2}</i>}
                     </span>}
-                    <span className="dreamer-card-link"><small>FILE · {fileNumber}</small><b>VIEW PROFILE <ArrowUpRight aria-hidden="true"/></b></span>
+                    <a href={`/staff/${person.id}`} onClick={(event) => openProfile(event, `/staff/${person.id}`)} className="dreamer-card-link" aria-label={`查看 ${person.displayName} 的完整介紹`}>
+                      <small>FILE · {fileNumber}</small><b>VIEW PROFILE <ArrowUpRight aria-hidden="true"/></b>
+                    </a>
                   </span>
                 </span>
-                </a>
-                {person.signatureUrl && <button type="button" className="dreamer-card-signature-toggle" aria-label={showTextName ? `顯示${person.displayName}簽名圖` : `顯示${person.displayName}文字名稱`} aria-pressed={showTextName} title={showTextName ? "顯示簽名圖" : "顯示文字名稱"} onClick={() => toggleNameDisplay(person.id)}><RotateCcw aria-hidden="true" /></button>}
               </article>
             );
         })}

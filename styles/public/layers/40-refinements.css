@@ -678,32 +678,53 @@ body{animation:none;background-attachment:scroll}
 .dreamer-card-heading{min-height:104px;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .dreamer-card-heading>strong{margin-top:0}
 .dreamer-card-heading.has-signature{min-height:126px}
-.dreamer-card-signature{display:block;width:min(190px,88%);aspect-ratio:3/2;object-fit:contain}
+/* Share the original artwork footprint with its control so cards keep their height. */
+.dreamer-card-name{
+  width:min(190px,88%);aspect-ratio:3/2;flex-shrink:0;
+  display:grid;grid-template-rows:minmax(0,1fr) auto;gap:2px;justify-items:center;
+}
+.dreamer-card-name-face{
+  min-width:0;min-height:0;width:100%;display:grid;place-items:center;
+}
+.dreamer-card-name-face>strong{
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-size:clamp(22px,1.65vw,26px);font-weight:620;line-height:1.2;letter-spacing:-.018em;
+}
+.dreamer-card-signature{display:block;width:100%;height:100%;min-height:0;object-fit:contain}
 .dreamer-card-heading.has-signature>em{margin-top:4px}
 .dreamer-card-bio{white-space:pre-line}
 .dreamer-card-footer{width:100%;margin-top:auto;display:flex;flex-direction:column;gap:14px}
 .dreamer-card-footer .dreamer-services{margin-top:0}
 .dreamer-card-footer .dreamer-card-link{margin-top:0}
-.dreamer-card-main{
-  grid-column:1;grid-row:1/-1;min-width:0;min-height:0;display:grid;grid-template-rows:inherit;
-  color:inherit;text-decoration:none
+.dreamer-card-body{position:relative;isolation:isolate}
+.dreamer-card-link{color:inherit;text-decoration:none}
+/* Keep the body clickable while leaving the signature control independent. */
+.dreamer-card-link::after{
+  content:"";position:absolute;inset:0;z-index:1;
 }
 .dreamer-card-signature-toggle{
-  position:relative;z-index:5;grid-column:1;grid-row:2;justify-self:end;align-self:start;margin:77px 11px 0 0;
-  width:28px;height:28px;padding:0;
-  display:grid;place-items:center;border:1px solid rgba(255,255,255,.9);border-radius:50%;
-  background:rgba(247,247,251,.72);color:var(--ink);box-shadow:0 5px 14px rgba(49,51,74,.12);
-  cursor:pointer;transition:background .2s ease,color .2s ease,transform .2s ease
+  position:relative;z-index:2;max-width:100%;min-height:36px;padding:4px 12px;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  border:1px solid rgba(255,255,255,.9);border-radius:999px;
+  background:rgba(247,247,251,.72);color:var(--ink);box-shadow:0 3px 10px rgba(49,51,74,.08);
+  font:inherit;font-size:11px;font-weight:650;line-height:1.3;
+  cursor:pointer;touch-action:manipulation;transition:background .2s ease,color .2s ease;
 }
-.dreamer-card-signature-toggle:hover,.dreamer-card-signature-toggle:focus-visible{background:var(--ink);color:white;transform:scale(1.06)}
-.dreamer-card-signature-toggle svg{width:13px;height:13px;stroke-width:1.8}
-.dreamer-card-signature-toggle[aria-pressed="true"] svg{transform:rotate(180deg)}
-.dreamer-card-main:focus-visible{outline:2px solid var(--hair-blue);outline-offset:4px}
+.dreamer-card-signature-toggle:hover,.dreamer-card-signature-toggle:focus-visible{background:var(--ink);color:white}
+.dreamer-card-signature-toggle:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.dreamer-card-signature-toggle svg{flex-shrink:0;width:13px;height:13px;stroke-width:1.8}
+.dreamer-card-link:focus-visible{outline:none}
+.dreamer-card-link:focus-visible::after{outline:2px solid var(--ink);outline-offset:-4px}
+@media(prefers-reduced-motion:reduce){
+  .dreamer-card-signature-toggle{transition:none}
+}
 
 /* Keep the status strip stable while it is being inspected; the card lift and portrait zoom otherwise make its hit area appear to shake. */
 @media (hover:hover){
   .dreamer-card:has(.dreamer-photo-statuses:hover){transform:none}
   .dreamer-card:has(.dreamer-photo-statuses:hover) .dreamer-card-photo img{transform:none}
+  .dreamer-card:has(.dreamer-card-signature-toggle:hover){transform:none}
+  .dreamer-card:has(.dreamer-card-signature-toggle:hover) .dreamer-card-photo img{transform:none}
 }
 @media(max-width:620px){
   .dreamer-photo-statuses{min-height:48px;padding-inline:12px}
@@ -712,10 +733,10 @@ body{animation:none;background-attachment:scroll}
   .dreamer-nomination{min-height:28px;padding-inline:9px;font-size:9px}
   .dreamer-card-heading{min-height:92px}
   .dreamer-card-heading.has-signature{min-height:112px}
-  .dreamer-card-signature{width:min(170px,86%)}
+  .dreamer-card-name{width:min(170px,86%)}
+  .dreamer-card-name-face>strong{font-size:23px}
   .dreamer-card-footer{gap:12px}
   .dreamer-card-footer .dreamer-services{margin:0}
-  .dreamer-card-signature-toggle{margin:66px 10px 0 0;width:27px;height:27px}
 }
 
 /* Ordering modal embeds profile content without duplicate page navigation. */

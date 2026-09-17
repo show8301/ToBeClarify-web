@@ -201,17 +201,16 @@
   background:linear-gradient(90deg,rgba(129,124,190,.9),rgba(163,161,216,.86));color:white;
   font-size:12px;font-weight:680;letter-spacing:.04em
 }
-.dreamer-role-ribbon i{font-size:9px;font-style:normal;opacity:.9}
 .dreamer-file-number{left:auto;right:13px;top:13px;min-width:34px;height:27px;padding-inline:8px;background:rgba(247,247,251,.76);font-size:8px}
 .dreamer-duty{left:auto;right:14px;top:auto;bottom:14px;max-width:62%;min-height:32px;padding:5px 9px;background:rgba(247,247,251,.76)}
 .dreamer-duty small{font-size:6px}.dreamer-duty b{font-size:9px}
 .dreamer-card-body{min-height:0;padding:0 22px 5px;align-items:center;text-align:center;background:linear-gradient(150deg,rgba(193,185,223,.24),rgba(169,199,234,.28) 58%,rgba(232,199,218,.2))}
 .dreamer-card-heading{width:100%}.dreamer-card-heading>strong{font-size:clamp(22px,1.65vw,26px);font-weight:620;line-height:1.2}
-.dreamer-card-heading>em{margin-top:10px;color:rgba(49,51,74,.62);font:normal 10px/1.45 var(--font-geist-mono),monospace}
+.dreamer-card-heading>em{margin-top:10px;color:rgba(49,51,74,.62);font:normal 11px/1.25 var(--font-geist-mono),monospace}
 .dreamer-card-bio{margin-top:20px;max-width:35ch;font-size:12px;line-height:1.8;-webkit-line-clamp:3}
 .dreamer-card-bio::after{content:"";display:block;width:52px;margin:20px auto 0;border-top:1px solid rgba(255,255,255,.72)}
-.dreamer-services{width:100%;margin-top:20px;justify-content:center;flex-wrap:wrap;overflow:visible}
-.dreamer-services>b,.dreamer-services>i{background:rgba(255,255,255,.3);font-size:9px}
+.dreamer-services{width:100%;margin-top:20px;justify-content:center;flex-wrap:wrap;gap:4px;overflow:visible}
+.dreamer-services>b,.dreamer-services>i{padding:5px 7px;background:rgba(255,255,255,.3);font-size:10px;line-height:1.15}
 .dreamer-card-link{width:100%;margin-top:auto;padding-top:14px}.dreamer-card-link>small{font-size:7px!important}.dreamer-card-link>b{font-size:8px!important}
 
 @media(max-width:1180px){
@@ -233,7 +232,7 @@
   .dreamer-duty{left:auto;right:12px;top:auto;bottom:12px;max-width:62%}
   .dreamer-duty small{display:block}
   .dreamer-card-body{min-height:0;padding:24px 20px 18px}
-  .dreamer-card-heading>strong{font-size:23px}.dreamer-card-heading>em{font-size:9px}
+  .dreamer-card-heading>strong{font-size:23px}.dreamer-card-heading>em{font-size:10px;line-height:1.25}
   .dreamer-card-bio{margin-top:17px;font-size:12px;line-height:1.75;-webkit-line-clamp:3}
   .dreamer-services{margin-top:16px;align-items:center}.dreamer-services>b,.dreamer-services>i{font-size:9px}
   .dreamer-card-link{align-items:center}.dreamer-card-link>b{font-size:8px!important}.dreamer-card-link svg{width:12px;height:12px;margin-left:5px}
@@ -296,7 +295,6 @@
   background:rgba(133,130,196,.84);box-shadow:none;font-size:12px
 }
 .dreamer-role-ribbon>b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:inherit}
-.dreamer-role-ribbon>i{flex:0 0 auto}
 .dreamer-file-number{
   right:15px;top:22px;min-width:0;height:auto;padding:0;
   border:0;border-radius:0;background:transparent;box-shadow:none;
@@ -372,7 +370,7 @@ body.modal-open .site-frame::before,body.modal-open .site-frame::after,body.moda
 
 /* Decorative service-chip symbols supplied by the venue. */
 .dreamer-services>b,.dreamer-services>i{
-  display:inline-flex;align-items:center;gap:5px;
+  display:inline-flex;align-items:center;gap:4px;
   border-radius:999px;
   color:#31334a;
   border-color:rgba(116,122,170,.42);

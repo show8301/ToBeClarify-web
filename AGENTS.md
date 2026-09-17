@@ -28,3 +28,10 @@
 - All Web code and configuration changes go to `dev` before production. Pushing `dev` deploys the change to `https://www-dev.marchgroup.net` for user verification.
 - Do not promote a feature branch directly to `main`. After the user confirms the development deployment, open the production pull request from `dev` to `main` and merge it manually.
 - A `main` push is a production release and must not be used to test an unconfirmed change. Production deployment is therefore gated by the user's confirmation and the manual `dev` → `main` promotion.
+
+## Screen-only iterative UI workflow
+
+- When a Web change only adjusts presentation, layout, styling, or interaction presentation and does not change the API, data model, API contract, permissions, or server behavior, start by showing the affected page from the local development server.
+- Keep visual refinements on the local version while the user reviews them. Accumulate the related adjustments before moving the change to the test environment, rather than deploying every small visual revision separately.
+- After the local result is accepted, commit and promote the accumulated Web change to `dev`, then use the normal test-environment checks and user confirmation required by the Web promotion flow.
+- Do not deploy the API for a screen-only change. If the change includes API, data, permission, or server behavior work, follow the applicable Web/API development and release flow for that scope.

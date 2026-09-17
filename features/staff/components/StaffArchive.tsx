@@ -152,7 +152,7 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
                 <a href={`/staff/${person.id}`} onClick={(event) => openProfile(event, `/staff/${person.id}`)} className="dreamer-card-photo" aria-label={`查看 ${person.displayName} 的完整介紹`} tabIndex={-1}>
                   <img src={person.avatarUrl || fallbackPortrait} alt={`${person.displayName} 的店員照片`} loading={index < 2 ? "eager" : "lazy"} decoding="async"/>
                   <span className="dreamer-role-ribbon" title={person.roleTitle || "DREAM STAFF"}>
-                    <i>✦</i><b>{person.roleTitle || "DREAM STAFF"}</b><i>✦</i>
+                    <b>{person.roleTitle || "DREAM STAFF"}</b>
                   </span>
                   <span className="dreamer-file-number">{fileNumber}</span>
                   <span className="dreamer-photo-statuses">

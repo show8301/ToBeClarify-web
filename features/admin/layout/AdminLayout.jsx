@@ -13,6 +13,8 @@ const allGroups = [
   ] },
   { label: '查詢與管理', items: [
     { route: '/admin/order-list', label: '訂單查詢', index: '10', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin/customers', label: '歷史顧客', index: '14', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin/deliveries', label: '繪圖／簽繪交付', index: '15', roles: ['developer', 'manager', 'clerk'] },
     { route: '/admin/notifications', label: '通知中心', index: '13', roles: ['developer','manager','clerk'] },
     { route: '/admin/staff', label: '店員資料設定', index: '11', roles: ['developer', 'manager', 'clerk'] },
     { route: '/admin/rooms', label: '包廂內容管理', index: '12', roles: ['developer', 'manager', 'clerk'] },

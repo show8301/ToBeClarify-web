@@ -1,0 +1,59 @@
+.adminCustomers { display: grid; gap: 22px; min-width: 0; }
+.adminCustomerFilters { display: flex; align-items: end; flex-wrap: wrap; gap: 14px; }
+.adminCustomerFilters .adminField { flex: 1 1 200px; }
+.adminCustomerActions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-block: 16px; }
+.adminCustomerForm { display: grid; gap: 16px; max-width: 900px; }
+.adminCustomerForm textarea { resize: vertical; }
+.adminCustomerForm > .adminButton { justify-self: start; }
+.adminCustomerHint { color: var(--color-fg-soft); font-size: 13px; line-height: 1.8; overflow-wrap: anywhere; }
+.adminCustomerFeedback { padding: 16px; border: 1px solid var(--color-border-strong); border-radius: var(--radius-md); background: var(--color-surface); overflow-wrap: anywhere; }
+.adminCustomerFeedback.isError { border-color: #b65158; }
+.adminIdentityCandidates { display: grid; gap: 10px; margin: 0; padding: 14px; border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+.adminIdentityCandidates legend { padding-inline: 6px; color: var(--color-fg-soft); font-size: 12px; }
+.adminIdentityCandidates > label { display: flex; align-items: flex-start; gap: 10px; padding: 10px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); cursor: pointer; }
+.adminIdentityCandidates > label span { display: grid; gap: 4px; min-width: 0; }
+.adminIdentityCandidates > label small { color: var(--color-fg-soft); line-height: 1.5; }
+.adminCustomerTableWrap { overflow-x: auto; }
+.adminCustomerTable { width: 100%; border-collapse: collapse; font-size: 13px; }
+.adminCustomerTable th { text-align: left; color: var(--color-fg-soft); font-size: 12px; white-space: nowrap; }
+.adminCustomerTable th, .adminCustomerTable td { padding: 14px 12px; border-bottom: 1px solid var(--color-border); vertical-align: top; }
+.adminCustomerTable td { min-width: 130px; }
+.adminCustomerTable strong, .adminCustomerTable small { display: block; overflow-wrap: anywhere; }
+.adminCustomerTable small { margin-top: 6px; color: var(--color-fg-soft); line-height: 1.7; }
+.adminCustomerUid { padding: 0; margin-top: 8px; border: 0; background: transparent; color: inherit; font: inherit; text-decoration: underline; cursor: pointer; overflow-wrap: anywhere; text-align: left; }
+.adminCustomerRowActions { display: grid; justify-items: start; gap: 8px; min-width: 150px; }
+.adminCustomerMetrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-block: 18px; }
+.adminCustomerMetrics > div { padding: 16px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); }
+.adminCustomerMetrics dt { font-size: 12px; color: var(--color-fg-soft); }
+.adminCustomerMetrics dd { margin: 8px 0 0; font-size: 20px; font-weight: 650; }
+.adminCustomerVisitList { display: grid; gap: 10px; }
+.adminCustomerVisitList article { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--color-border); }
+.adminCustomerVisitList article > strong { flex: 1 1 200px; }
+.adminDeliveryList { display: grid; gap: 14px; }
+.adminDeliveryList > article { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 18px; padding: 20px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); }
+.adminDeliveryList > article.isSelected { outline: 2px solid var(--color-border-strong); }
+.adminDeliveryList h3 { margin: 10px 0; overflow-wrap: anywhere; }
+.adminDeliveryList p { margin-block: 6px; }
+.adminDeliveryList > article > div:last-child { display: grid; align-content: center; justify-items: start; gap: 10px; }
+.adminDeliveryList small { color: var(--color-fg-soft); }
+.adminDeliveryStatus { display: inline-block; border: 1px solid var(--color-border-strong); border-radius: 999px; padding: 4px 10px; font-size: 12px; }
+.adminDeliveryStatus.is-ready { border-color: #54856c; }
+.adminDeliveryStatus.is-cancelled { text-decoration: line-through; }
+.adminDeliveryAssets { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--color-border-strong); }
+.adminDeliveryAssetGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 16px; }
+.adminDeliveryAssetGrid > article { display: grid; align-content: start; gap: 10px; border: 1px solid var(--color-border); padding: 16px; border-radius: var(--radius-md); min-width: 0; }
+.adminDeliveryAssetGrid > article > img { width: 100%; height: 200px; object-fit: contain; background: var(--color-surface); }
+.adminDeliveryAssetGrid strong { overflow-wrap: anywhere; }
+.adminDeliveryAssetGrid small { color: var(--color-fg-soft); }
+.adminDeliveryLinkMark { font-size: 40px; }
+.adminDeliveryUpload { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 22px; padding: 20px; border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+.adminDeliveryUpload > .adminField { grid-column: 1 / -1; }
+.adminDeliveryUpload form { align-content: start; }
+.adminDeliveryUploadPreview { max-width: 100%; max-height: 240px; object-fit: contain; }
+@media (max-width: 680px) {
+  .adminCustomerFilters { align-items: stretch; }
+  .adminCustomerFilters .adminField { flex-basis: 100%; }
+  .adminCustomerActions .adminButton { flex: 1 1 auto; }
+  .adminDeliveryUpload { grid-template-columns: 1fr; padding: 14px; }
+  .adminDeliveryList > article { padding: 14px; }
+}

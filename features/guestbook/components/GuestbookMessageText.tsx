@@ -16,6 +16,14 @@ export function GuestbookMessageText({ message }: { message: GuestbookMessage })
   return (
     <>
       <p>{message.content}</p>
+      {message.customerUid ? <small className="guest-verified">使用顧客 UID 留言</small> : null}
+      {message.imageId ? (
+        <a href={`/api/guestbook/images/${encodeURIComponent(message.imageId)}`} target="_blank" rel="noopener noreferrer" className="guest-message-image">
+          {/* Protected media is served through the same-origin route without image optimization caching. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={`/api/guestbook/images/${encodeURIComponent(message.imageId)}`} alt={`${message.displayName} 分享的留言圖片`} loading="lazy" />
+        </a>
+      ) : null}
       {message.editedAt ? <small className="guest-edited">此留言曾由店家編輯</small> : null}
     </>
   );

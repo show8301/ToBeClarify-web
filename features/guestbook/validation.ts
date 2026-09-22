@@ -63,6 +63,8 @@ export function parseGuestbookMessage(value: unknown): GuestbookMessage {
     version: integerValue(value, "version"),
     createdAt: stringValue(value, "createdAt"),
     editedAt: nullableString(value, "editedAt"),
+    customerUid: value.customerUid === undefined ? null : nullableString(value, "customerUid"),
+    imageId: value.imageId === undefined ? null : nullableString(value, "imageId"),
   };
 }
 

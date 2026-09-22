@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { adminApi } from '@/features/admin/api/client.js';
 import { AdminButton } from '@/features/admin/shared/AdminShared.jsx';
 
@@ -14,21 +16,28 @@ const statusLabels = {
 };
 
 export function AdminOrderListPage() {
-  const [businessDate, setBusinessDate] = useState(today);
+  const searchParams = useSearchParams();
+  const requestedDate = searchParams.get('date');
+  const [businessDate, setBusinessDate] = useState(() => /^\d{4}-\d{2}-\d{2}$/.test(requestedDate || '') ? requestedDate : today());
+  const [sessionFilter, setSessionFilter] = useState(() => searchParams.get('session') || '');
   const [keyword, setKeyword] = useState('');
   const [status, setStatus] = useState('all');
   const [orders, setOrders] = useState([]);
-  const [selectedId, setSelectedId] = useState('');
+  const [selectedId, setSelectedId] = useState(() => searchParams.get('order') || '');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const loadController = useRef(null);
 
   const loadOrders = async () => {
+    loadController.current?.abort();
+    const controller = new AbortController();
+    loadController.current = controller;
     setLoading(true);
     setError('');
     try {
-      const sessions = await adminApi.getOrderSessions({ businessDate });
-      const groups = await Promise.all((sessions || []).map(async (item) => {
-        const sessionOrders = await adminApi.getSessionOrders(item.session.id);
+      const sessions = await adminApi.getOrderSessions({ businessDate }, controller.signal);
+      const groups = await Promise.all((sessions || []).filter((item) => !sessionFilter || item.session.id === sessionFilter).map(async (item) => {
+        const sessionOrders = await adminApi.getSessionOrders(item.session.id, controller.signal);
         return sessionOrders.map((order) => ({
           ...order,
           sessionId: item.session.id,
@@ -36,18 +45,23 @@ export function AdminOrderListPage() {
           gameId: item.session.gameId,
         }));
       }));
+      if (controller.signal.aborted) return;
       const next = groups.flat().sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
       setOrders(next);
       setSelectedId((current) => next.some((order) => order.id === current) ? current : '');
     } catch (reason) {
+      if (controller.signal.aborted) return;
       setError(reason.message);
       setOrders([]);
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) setLoading(false);
     }
   };
 
-  useEffect(() => { loadOrders(); }, [businessDate]);
+  useEffect(() => {
+    loadOrders();
+    return () => loadController.current?.abort();
+  }, [businessDate, sessionFilter]);
 
   const visibleOrders = useMemo(() => {
     const normalized = keyword.trim().toLocaleLowerCase('zh-TW');
@@ -64,15 +78,17 @@ export function AdminOrderListPage() {
   return <section className="adminPage adminOrderListPage">
     <header className="adminPageHeading">
       <div><p className="eyebrow">ORDER QUERY</p><h1>訂單查詢</h1><p>營業結束後依日期、關鍵字或狀態查詢訂單，核對問題並作為後續營運調整參考。</p></div>
-      <div className="adminPageActions"><AdminButton variant="secondary" disabled={loading} onClick={loadOrders}>重新整理</AdminButton></div>
+      <div className="adminPageActions"><Link className="adminButton adminButton-secondary" href="/admin/customers">歷史顧客</Link><AdminButton variant="secondary" disabled={loading} onClick={loadOrders}>重新整理</AdminButton></div>
     </header>
 
     <section className="adminOrderListFilters" aria-label="訂單查詢條件">
-      <label><span>營業日</span><input type="date" value={businessDate} onChange={(event) => setBusinessDate(event.target.value)} /></label>
+      <label><span>營業日</span><input type="date" value={businessDate} onChange={(event) => { setBusinessDate(event.target.value); setSessionFilter(''); }} /></label>
       <label className="adminOrderListKeyword"><span>關鍵字</span><input value={keyword} onChange={(event) => setKeyword(event.target.value)} placeholder="訂單編號、顧客名稱或遊戲 ID" /></label>
       <label><span>訂單狀態</span><select value={status} onChange={(event) => setStatus(event.target.value)}><option value="all">全部狀態</option><option value="submitted">等待確認</option><option value="partially_confirmed">部分確認</option><option value="needs_reschedule">需重新排程</option><option value="confirmed">已成立</option><option value="in_service">服務中</option><option value="completed">已完成</option><option value="cancelled">已取消</option><option value="expired">已失效</option><option value="rejected">已退回</option></select></label>
       <div className="adminOrderListCount"><span>查詢結果</span><strong>{visibleOrders.length}</strong><small>筆訂單</small></div>
     </section>
+
+    {sessionFilter ? <p className="adminCustomerActions">目前只顯示指定入場紀錄的訂單。<button type="button" className="adminButton adminButton-ghost" onClick={() => setSessionFilter('')}>查看當日全部顧客</button></p> : null}
 
     {error ? <div className="adminOrderMessage isError" role="alert">{error}</div> : null}
     <div className="adminOrderListLayout">
@@ -86,16 +102,17 @@ export function AdminOrderListPage() {
       </section>
 
       <aside className="adminOrderListDetail">
-        {selected ? <OrderDetail order={selected} onClose={() => setSelectedId('')} /> : <div className="adminOrderListDetailEmpty"><span>訂單明細</span><strong>選擇一筆訂單</strong><p>點選左側資料列即可核對內容。</p></div>}
+        {selected ? <OrderDetail order={selected} businessDate={businessDate} onClose={() => setSelectedId('')} /> : <div className="adminOrderListDetailEmpty"><span>訂單明細</span><strong>選擇一筆訂單</strong><p>點選左側資料列即可核對內容。</p></div>}
       </aside>
     </div>
   </section>;
 }
 
-function OrderDetail({ order, onClose }) {
+function OrderDetail({ order, businessDate, onClose }) {
   return <>
     <header><div><span>訂單明細</span><h2>{order.orderNumber || '附掛加購服務單'}</h2></div><button type="button" aria-label="關閉訂單明細" onClick={onClose}>×</button></header>
     <dl className="adminOrderDetailSummary"><div><dt>顧客</dt><dd>{order.customerName}<small>ID {order.gameId}</small></dd></div><div><dt>狀態</dt><dd><span className={`adminOrderStatus is-${order.status}`}>{statusLabels[order.status] || order.status}</span></dd></div><div><dt>送出時間</dt><dd>{new Date(order.submittedAt).toLocaleString('zh-TW')}</dd></div><div><dt>訂單金額</dt><dd>{money(order.totalAmount)}</dd></div></dl>
+    <div className="adminCustomerActions"><Link className="adminButton adminButton-secondary" href={`/admin/deliveries?${new URLSearchParams({ session: order.sessionId, order: order.id, date: businessDate, create: '1' })}`}>建立後續作品交付</Link><Link className="adminButton adminButton-ghost" href={`/admin/orders?${new URLSearchParams({ session: order.sessionId, date: businessDate })}`}>開啟完整點單管理</Link></div>
     <section className="adminOrderDetailItems"><h3>訂購項目</h3>{order.items?.length ? order.items.map((item) => <div key={item.id}><span><strong>{item.name}</strong><small>{item.quantity > 1 ? `數量 ${item.quantity}` : item.itemType}</small></span><b>{money(item.lineTotal)}</b></div>) : <p>此訂單沒有一般品項。</p>}</section>
     {order.roomBookings?.length ? <section className="adminOrderDetailItems"><h3>包廂時段</h3>{order.roomBookings.map((item) => <div key={item.id}><span><strong>{item.roomName}</strong><small>{new Date(item.startsAt).toLocaleString('zh-TW')} ～ {new Date(item.endsAt).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })} · {item.segmentCount} 節</small></span><b>{money(item.totalAmount)}</b></div>)}</section> : null}
     {order.nominees?.length ? <section className="adminOrderDetailItems"><h3>指名服務</h3>{order.nominees.map((item) => <div key={item.id}><span><strong>{item.staffName} · {item.serviceName}</strong><small>{new Date(item.requestedStartsAt).toLocaleString('zh-TW')} · {item.segmentCount} 節</small></span><b>{statusLabels[item.confirmationStatus] || item.confirmationStatus}</b></div>)}</section> : null}

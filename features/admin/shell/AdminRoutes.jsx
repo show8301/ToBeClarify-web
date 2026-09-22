@@ -7,9 +7,11 @@ export function AdminNotificationOrderRoute({orderId}) {
 }
 
 import { useCallback, useEffect } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
 import { AdminGuestbookPage } from '@/features/admin/guestbook/AdminGuestbookPage';
+import { AdminCustomersPage } from '@/features/admin/customers/AdminCustomersPage';
+import { AdminDeliveriesPage } from '@/features/admin/deliveries/AdminDeliveriesPage';
 import { AdminForgotPasswordPage } from '@/features/admin/auth/AdminForgotPasswordPage.jsx';
 import { AdminLoginPage } from '@/features/admin/auth/AdminLoginPage.jsx';
 import { AdminHomePage } from '@/features/admin/dashboard/AdminHomePage.jsx';
@@ -119,8 +121,18 @@ export function AdminOrdersRoute() {
   return <AdminProtectedRoute><AdminOrdersPage /></AdminProtectedRoute>;
 }
 
+export function AdminCustomersRoute() {
+  return <AdminProtectedRoute><AdminCustomersPage /></AdminProtectedRoute>;
+}
+
+export function AdminDeliveriesRoute() {
+  const searchParams = useSearchParams();
+  return <AdminProtectedRoute><AdminDeliveriesPage key={searchParams.toString()} /></AdminProtectedRoute>;
+}
+
 export function AdminOrderListRoute() {
-  return <AdminProtectedRoute><AdminOrderListPage /></AdminProtectedRoute>;
+  const searchParams = useSearchParams();
+  return <AdminProtectedRoute><AdminOrderListPage key={searchParams.toString()} /></AdminProtectedRoute>;
 }
 
 export function AdminLoginRoute() {

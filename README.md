@@ -43,6 +43,7 @@ node --experimental-strip-types ./node_modules/vinext/dist/cli.js build
 - [程式編寫規則](docs/coding-standards.md)：開發前閱讀，涵蓋型別、目錄、API、權限、互動、樣式與發布。
 - [2026-09-12 盤點紀錄](docs/coding-standards-audit-20260912.md)：現況、規則差異與尚未完成的整理項目。
 - [架構說明](docs/architecture.md)：執行方式、模組責任與資料流。
+- [顧客 UID 與委託交付](docs/customer-commissions.md)：歷史顧客、CRM 口徑、免登入領取、圖片留言與部署步驟。
 
 ## 目錄
 

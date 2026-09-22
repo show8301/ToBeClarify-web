@@ -4,9 +4,11 @@ import { AdminAssistedOrderPanel } from "./AdminAssistedOrderPanel";
 import { FinancialRecordsPanel } from "./FinancialRecordsPanel";
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { adminApi } from '@/features/admin/api/client.js';
 import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
 import { AdminButton } from '@/features/admin/shared/AdminShared.jsx';
+import { customerApi } from '@/features/admin/customers/api';
 
 const money = (value) => `${Number(value || 0).toLocaleString('zh-TW')} G`;
 const businessPeriodTimeFormatter = new Intl.DateTimeFormat('zh-TW', {
@@ -115,7 +117,7 @@ export function AdminOrdersPage() {
     {message.text ? <div className={message.error ? 'adminOrderMessage isError' : 'adminOrderMessage'} role="status">{message.text}<button onClick={() => setMessage({ text: '', error: false })}>×</button></div> : null}
     {businessContext ? <BusinessOperationsBar context={businessContext} canManage={canManage} onChanged={(value, text) => { setBusinessContext(value); setBusinessDate(value.referenceBusinessDate); setMessage({ text, error: false }); }} onError={(error) => setMessage({ text: error.message, error: true })} /> : null}
     {canManage && businessContext ? <BusinessDayPlanPanel businessDate={businessContext.referenceBusinessDate} onOpened={loadBusinessContext} /> : null}
-    {showCreate ? <CreateSessionPanel onClose={() => setShowCreate(false)} onIssued={(result) => { setIssued(result); setShowCreate(false); loadSessions(result.session.id); }} /> : null}
+    {showCreate ? <CreateSessionPanel canManage={canManage} onClose={() => setShowCreate(false)} onIssued={(result) => { setIssued(result); setShowCreate(false); loadSessions(result.session.id); }} /> : null}
     {issued ? <IssuedPanel issued={issued} onClose={() => setIssued(null)} /> : null}
     {canManage && showSettings && settings ? <SettingsPanel settings={settings} onSaved={(value) => { setSettings(value); setMessage({ text: '營運參數已更新。', error: false }); }} /> : null}
     <div className="adminOrderWorkspace">
@@ -127,6 +129,11 @@ export function AdminOrdersPage() {
       <div className="adminOrderDetailPane">
         {!selected ? <div className="adminOrderEmpty"><span>LD</span><h2>選擇一位顧客</h2><p>使用左側搜尋或分組快速定位顧客。</p></div> : <>
           <SessionHeader item={selected} loading={loading} onUpdate={(body) => act(() => adminApi.updateOrderSession(selectedId, body), '顧客點餐設定已更新。')} onReissue={async () => { try { setIssued(await adminApi.reissueOrderSession(selectedId)); } catch (error) { setMessage({ text: error.message, error: true }); } }} onAssisted={() => setShowAssisted((value) => !value)} />
+          <div className="adminCustomerActions">
+            <Link className="adminButton adminButton-secondary" href={`/admin/deliveries?${new URLSearchParams({ session: selectedId, date: selected.session.businessDate, create: '1' })}`}>建立繪圖／簽繪交付</Link>
+            <Link className="adminButton adminButton-ghost" href={`/admin/deliveries?${new URLSearchParams({ session: selectedId, date: selected.session.businessDate })}`}>查看此顧客的作品交付</Link>
+            <Link className="adminButton adminButton-ghost" href={`/admin/order-list?${new URLSearchParams({ session: selectedId, date: selected.session.businessDate })}`}>查看此顧客歷史訂單</Link>
+          </div>
           {showAssisted ? <AdminAssistedOrderPanel sessionId={selectedId} businessDate={businessDate} onSaved={refreshSelected} onClose={() => setShowAssisted(false)} /> : null}
           <FinancialRecordsPanel key={selectedId} sessionId={selectedId} refreshKey={orders.map(o => `${o.id}:${o.totalAmount}:${o.status}`).join("|")} />
           <div className="adminOrderCards">{orders.length ? orders.map((order) => order.flowVersion >= 2 ? <AdminFulfillmentOrderCard key={order.id} order={order} user={user} loading={loading} canManage={canManage} act={act} onChanged={refreshSelected} /> : <AdminOrderCard key={order.id} order={order} user={user} loading={loading} act={act} />) : <div className="adminOrderEmpty isCompact"><h2>尚未下單</h2><p>此點餐碼今天還沒有送出訂單。</p></div>}</div>
@@ -303,12 +310,28 @@ function AdminOrderItemRow({ orderId, item, loading, act }) {
   </div>;
 }
 
-function CreateSessionPanel({ onClose, onIssued }) {
-  const [form, setForm] = useState({ gameId: '', customerName: '', maxNominatedStaff: 1 });
+function CreateSessionPanel({ canManage, onClose, onIssued }) {
+  const [form, setForm] = useState({ gameId: '', customerName: '', customerUid: '', maxNominatedStaff: 1 });
+  const [candidates, setCandidates] = useState([]);
+  const [candidateLoading, setCandidateLoading] = useState(false);
+  const [candidateError, setCandidateError] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  useEffect(() => {
+    const gameId = form.gameId.trim();
+    if (!gameId) { setCandidates([]); setCandidateError(''); return undefined; }
+    const controller = new AbortController();
+    setCandidateLoading(true);
+    customerApi.candidates(gameId, controller.signal).then((result) => {
+      setCandidates(result.items || []);
+      setCandidateError('');
+    }).catch((reason) => {
+      if (reason?.name !== 'AbortError') setCandidateError(reason.message || '無法查詢歷史 UID。');
+    }).finally(() => setCandidateLoading(false));
+    return () => controller.abort();
+  }, [form.gameId]);
   const submit = async (event) => { event.preventDefault(); setLoading(true); try { onIssued(await adminApi.createOrderSession({ ...form, customerName: form.customerName || null })); } catch (reason) { setError(reason.message); setLoading(false); } };
-  return <div className="adminOrderInlinePanel"><header><div><span>NEW ORDER PASS</span><h2>開立今日點餐碼</h2></div><button onClick={onClose}>×</button></header><form onSubmit={submit}><label>顧客遊戲 ID<input value={form.gameId} onChange={(event) => setForm({ ...form, gameId: event.target.value })} required /></label><label>顧客顯示名稱（選填）<input value={form.customerName} onChange={(event) => setForm({ ...form, customerName: event.target.value })} /></label><label>可同時指名人數<input type="number" min="0" max="100" value={form.maxNominatedStaff} onChange={(event) => setForm({ ...form, maxNominatedStaff: Number(event.target.value) })} /></label><AdminButton type="submit" disabled={loading}>{loading ? '開立中…' : '產生點餐網址'}</AdminButton></form>{error ? <p className="adminFormError">{error}</p> : null}</div>;
+  return <div className="adminOrderInlinePanel"><header><div><span>NEW ORDER PASS</span><h2>開立今日點餐碼</h2></div><button onClick={onClose}>×</button></header><form onSubmit={submit}><label>顧客遊戲 ID<input value={form.gameId} onChange={(event) => setForm({ ...form, gameId: event.target.value, customerUid: '' })} required /></label>{candidateLoading ? <small>正在查詢相同遊戲 ID 的歷史 UID…</small> : null}{candidateError ? <p className="adminFormError">{candidateError}</p> : null}{candidates.length ? <fieldset className="adminIdentityCandidates"><legend>歷史 UID 候選</legend><p>選擇既有 UID 會把本次入場歸戶；不選則沿用唯一候選，或在多候選時先不歸戶。</p>{canManage ? candidates.map((candidate) => <label key={candidate.uid}><input type="radio" name="customerUid" checked={form.customerUid === candidate.uid} onChange={() => setForm({ ...form, customerUid: candidate.uid })} /><span><strong>{candidate.uid}</strong> · {candidate.displayName || '未命名'}<small>最近來店 {candidate.lastVisitAt ? new Date(candidate.lastVisitAt).toLocaleDateString('zh-TW') : '—'} · {candidate.visitCount} 次入場 · {candidate.orderCount} 張訂單</small></span></label>) : <p className="adminCustomerHint">此帳號可查看候選，但既有 UID 歸戶需由店經理核對。唯一候選會由系統自動沿用。</p>}{canManage ? <button type="button" className="adminButton adminButton-ghost" onClick={() => setForm({ ...form, customerUid: '' })}>不選 UID，稍後由歷史顧客核對</button> : null}</fieldset> : form.gameId.trim() && !candidateLoading ? <p className="adminCustomerHint">尚無相同遊戲 ID 的 UID；建立後會產生新的 UID。</p> : null}<label>顧客顯示名稱（選填）<input value={form.customerName} onChange={(event) => setForm({ ...form, customerName: event.target.value })} /></label><label>可同時指名人數<input type="number" min="0" max="100" value={form.maxNominatedStaff} onChange={(event) => setForm({ ...form, maxNominatedStaff: Number(event.target.value) })} /></label><AdminButton type="submit" disabled={loading}>{loading ? '開立中…' : '產生點餐網址'}</AdminButton></form>{error ? <p className="adminFormError">{error}</p> : null}</div>;
 }
 
 function IssuedPanel({ issued, onClose }) {

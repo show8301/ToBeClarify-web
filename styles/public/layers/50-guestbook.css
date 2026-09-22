@@ -25,3 +25,13 @@
 .guest-note .guest-closed { margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 13px; }
 .guestbook-page button:disabled { cursor: not-allowed; opacity: .55; }
 .guest-empty { padding-block: 24px; line-height: 1.8; }
+
+.guest-identity-options { margin: 18px 0; padding: 14px; border: 1px solid var(--line); border-radius: 14px; }
+.guest-identity-options .guest-identity-check { display: flex; align-items: center; gap: 10px; }
+.guest-identity-options .guest-identity-check input { width: 18px; height: 18px; flex: 0 0 auto; }
+.guest-identity-options p { font-size: 12px; line-height: 1.7; }
+.guest-identity-options a { text-decoration: underline; }
+.guest-image-preview img, .guest-message-image img { width: auto; max-width: 100%; max-height: 420px; object-fit: contain; border-radius: 12px; }
+.guest-message-image { display: block; margin-top: 14px; }
+.guest-image-preview { margin-top: 14px; }
+.guest-verified { display: block; font-size: 12px; opacity: .75; }

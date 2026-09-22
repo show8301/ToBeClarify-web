@@ -1,0 +1,61 @@
+.collectionPage {
+  width: min(1120px, calc(100% - 40px));
+  margin: 64px auto 100px;
+  color: #483c48;
+}
+.collectionHero { max-width: 730px; margin: 0 0 36px; }
+.collectionEyebrow { color: #897186; font-size: 11px; font-weight: 700; letter-spacing: .24em; }
+.collectionHero h1 { font-size: clamp(36px, 6vw, 64px); font-weight: 500; letter-spacing: .06em; margin: 10px 0 18px; }
+.collectionHero p, .collectionPanel p, .collectionHelp p { color: #766975; line-height: 1.9; }
+.collectionEntry { display: grid; grid-template-columns: 1.2fr .8fr; gap: 24px; align-items: start; }
+.collectionPanel, .collectionHelp, .collectionWork { border: 1px solid #d9cdd7; border-radius: 22px; background: #fffcfae8; padding: 28px; }
+.collectionPanel h2, .collectionHelp h2, .collectionResults h2 { font-size: 22px; font-weight: 600; margin: 0 0 12px; }
+.collectionTabs { display: flex; gap: 8px; border-bottom: 1px solid #e3dbe1; padding-bottom: 16px; margin-bottom: 22px; }
+.collectionPage button, .collectionButton { border: 1px solid #796577; background: #796577; color: #fff; padding: 11px 18px; border-radius: 10px; font-size: 14px; cursor: pointer; line-height: 1.5; text-align: center; text-decoration: none; display: inline-flex; justify-content: center; align-items: center; gap: 8px; }
+.collectionPage button:disabled { opacity: .5; cursor: wait; }
+.collectionPage .collectionSecondary { background: transparent; color: #6b5567; border-color: #cbbac8; }
+.collectionTabs button { background: transparent; border-color: transparent; color: #766975; }
+.collectionTabs button[aria-pressed="true"] { background: #f2e9f0; border-color: #d4c3d0; color: #533e50; }
+.collectionForm { display: grid; gap: 18px; }
+.collectionForm label { display: grid; gap: 8px; font-size: 14px; font-weight: 600; }
+.collectionForm input:not([type="checkbox"]) { border: 1px solid #cdbfca; background: #fffdfc; color: #483c48; border-radius: 9px; padding: 12px; width: 100%; min-width: 0; font: inherit; }
+.collectionForm .collectionRemember { grid-template-columns: auto 1fr; align-items: start; font-weight: 400; }
+.collectionRemember input { width: 17px; height: 17px; margin-top: 3px; accent-color: #796577; }
+.collectionNotice > .collectionRemember { display: flex; align-items: flex-start; gap: 10px; }
+.collectionNotice > .collectionRemember input { flex-shrink: 0; }
+.collectionPage :is(button, a, input):focus-visible { outline: 3px solid #a982a2; outline-offset: 4px; }
+.collectionHelp ol { padding-left: 22px; line-height: 1.9; margin: 12px 0 20px; }
+.collectionHelp li { margin-bottom: 12px; }
+.collectionHelp strong { display: block; font-weight: 600; }
+.collectionFineprint { font-size: 13px; line-height: 1.8; color: #827280; }
+.collectionNotice { margin: 20px 0; padding: 16px 18px; border-radius: 12px; background: #ece5ed; line-height: 1.8; }
+.collectionNotice.isError { background: #f8e6e7; color: #803b46; }
+.collectionRemembered { margin: 18px 0; padding-top: 16px; border-top: 1px solid #e3dbe1; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.collectionRemembered p { width: 100%; margin: 0; overflow-wrap: anywhere; }
+.collectionResults { margin-top: 36px; }
+.collectionResultsHead { display: flex; gap: 16px; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+.collectionResultsHead h2 { margin: 0; }
+.collectionWorkList { display: grid; gap: 20px; }
+.collectionWorkHead { display: flex; gap: 16px; justify-content: space-between; align-items: flex-start; }
+.collectionWorkHead h3 { margin: 0 0 10px; font-size: 23px; }
+.collectionStatus { flex: 0 0 auto; border-radius: 20px; padding: 6px 12px; font-size: 12px; background: #ece7ec; }
+.collectionStatus.isReady { background: #e3eddf; color: #486044; }
+.collectionMeta { margin: 0; display: flex; flex-wrap: wrap; gap: 7px 20px; color: #827280; font-size: 13px; }
+.collectionDescription { line-height: 1.9; white-space: pre-wrap; margin: 20px 0; }
+.collectionAssets { display: grid; gap: 16px; margin: 22px 0; }
+.collectionAsset { padding: 16px; background: #f5f0f3; border-radius: 14px; }
+.collectionAsset img { display: block; width: 100%; max-height: 620px; object-fit: contain; border-radius: 8px; margin-bottom: 12px; background: #e7e0e6; }
+.collectionAsset p { margin: 8px 0; overflow-wrap: anywhere; }
+.collectionImagePlaceholder { min-height: 120px; display: flex; align-items: center; }
+.collectionActions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; align-items: center; }
+.collectionConfirm { margin-top: 18px; padding: 20px; border: 1px solid #bc9ab1; border-radius: 12px; }
+.collectionConfirm p { line-height: 1.8; }
+.collectionEmpty { padding: 32px; background: #f4eef2; border-radius: 18px; line-height: 1.9; }
+@media (max-width: 720px) {
+  .collectionPage { width: calc(100% - 28px); margin: 36px auto 64px; }
+  .collectionEntry { grid-template-columns: 1fr; }
+  .collectionPanel, .collectionHelp, .collectionWork { padding: 21px; border-radius: 17px; }
+  .collectionWorkHead { flex-wrap: wrap; }
+  .collectionResultsHead { flex-wrap: wrap; }
+  .collectionTabs button { flex: 1; padding-inline: 9px; }
+}

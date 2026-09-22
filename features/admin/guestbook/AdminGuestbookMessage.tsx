@@ -33,6 +33,12 @@ export function AdminGuestbookMessage(props: AdminGuestbookMessageProps) {
         <time>{adminGuestbookTime(message.createdAt)}</time>
       </header>
       <p>{message.content}</p>
+      {message.customerUid ? <p>顧客 UID：{message.customerUid}</p> : null}
+      {message.imageId ? <a href={`/api/admin/guestbook/images/${encodeURIComponent(message.imageId)}`} target="_blank" rel="noopener noreferrer">
+        {/* Authenticated media must bypass shared optimizer caches. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={`/api/admin/guestbook/images/${encodeURIComponent(message.imageId)}`} alt="留言附件" loading="lazy" style={{ maxWidth: "100%", maxHeight: 280, objectFit: "contain" }} />
+      </a> : null}
       <div className="adminGuestbookMeta">
         {!message.isVisible ? <span>已隱藏{root ? "整串" : ""}</span> : null}
         {root && !message.allowReplies ? <span>已關閉回覆</span> : null}

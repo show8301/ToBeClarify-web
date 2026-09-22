@@ -1,4 +1,11 @@
 export type GuestbookAuthor = "customer" | "staff" | "mascot" | "anonymous_staff";
+export type GuestbookSubmission = {
+  displayName: string;
+  content: string;
+  website: string;
+  customerUid?: string;
+  imageBase64?: string;
+};
 export type GuestbookMessage = {
   id: string;
   threadId: string;
@@ -13,6 +20,8 @@ export type GuestbookMessage = {
   version: number;
   createdAt: string;
   editedAt: string | null;
+  customerUid: string | null;
+  imageId: string | null;
 };
 export type GuestbookList = {
   page: number;

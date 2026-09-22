@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { guestbookRequest, guestbookUrl } from "@/features/guestbook/api/client";
 import { GuestbookComposer } from "@/features/guestbook/components/GuestbookComposer";
 import { GuestbookMessageText, guestbookDateLabel } from "@/features/guestbook/components/GuestbookMessageText";
-import type { GuestbookMessage, GuestbookReplies } from "@/features/guestbook/types";
+import type { GuestbookMessage, GuestbookReplies, GuestbookSubmission } from "@/features/guestbook/types";
 import { parseGuestbookReplies } from "@/features/guestbook/validation";
 
 type GuestbookThreadProps = {
@@ -12,7 +12,7 @@ type GuestbookThreadProps = {
   busy: boolean;
   cooldown: number;
   name: string;
-  submit: (name: string, content: string, website: string, id?: string) => Promise<boolean>;
+  submit: (input: GuestbookSubmission, id?: string) => Promise<boolean>;
 };
 
 export function GuestbookThread({ message, busy, cooldown, name, submit }: GuestbookThreadProps) {
@@ -122,8 +122,8 @@ export function GuestbookThread({ message, busy, cooldown, name, submit }: Guest
           initialName={name}
           busy={busy}
           cooldown={cooldown}
-          onSubmit={async (displayName, content, website) => {
-            const success = await submit(displayName, content, website, message.id);
+          onSubmit={async (input) => {
+            const success = await submit(input, message.id);
             if (success) {
               setReplying(false);
               setExpanded(true);

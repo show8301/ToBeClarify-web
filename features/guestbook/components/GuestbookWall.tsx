@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { GuestbookError, guestbookRequest, guestbookUrl } from "@/features/guestbook/api/client";
 import { GuestbookComposer } from "@/features/guestbook/components/GuestbookComposer";
 import { GuestbookThread } from "@/features/guestbook/components/GuestbookThread";
-import type { GuestbookList, GuestbookMessage } from "@/features/guestbook/types";
+import type { GuestbookList, GuestbookMessage, GuestbookSubmission } from "@/features/guestbook/types";
 import { parseGuestbookList, parseGuestbookMessage } from "@/features/guestbook/validation";
 
 const COOLDOWN_MILLISECONDS = 180_000;
@@ -83,7 +83,7 @@ export default function GuestbookWall() {
     };
   }, [load]);
 
-  const submit = async (displayName: string, content: string, website: string, id?: string) => {
+  const submit = async (input: GuestbookSubmission, id?: string) => {
     if (submitting.current || Date.now() < deadline.current) return false;
     submitting.current = true;
     setBusy(true);
@@ -96,13 +96,13 @@ export default function GuestbookWall() {
         parseGuestbookMessage,
         {
           method: "POST",
-          body: JSON.stringify({ displayName, content, website }),
+          body: JSON.stringify(input),
           signal: controller.signal,
         },
       );
       deadline.current = Date.now() + COOLDOWN_MILLISECONDS;
       setCooldown(COOLDOWN_MILLISECONDS / 1000);
-      setName(displayName);
+      setName(input.displayName);
       setStatus(id ? "回覆已留下。" : "留言已送出，謝謝你為今晚留下紀錄。");
       if (id) {
         const increaseReplyCount = (item: GuestbookMessage) => item.id === id

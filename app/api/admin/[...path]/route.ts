@@ -73,6 +73,9 @@ async function proxy(request: Request, { params }: RouteContext) {
 
     const responseHasBody = method !== "HEAD" && !BODYLESS_RESPONSE_STATUSES.has(upstream.status);
     const responseHeaders = new Headers({ "Cache-Control": "no-store" });
+    responseHeaders.set("X-Content-Type-Options", "nosniff");
+    const disposition = upstream.headers.get("content-disposition");
+    if (disposition) responseHeaders.set("Content-Disposition", disposition);
     if (responseHasBody) {
       responseHeaders.set(
         "Content-Type",

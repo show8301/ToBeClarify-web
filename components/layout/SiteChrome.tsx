@@ -28,6 +28,7 @@ const pageNumbers:Record<string,string> = {
   "/liveupdate": "05",
   "/staffRanking": "06",
   "/monetaryRanking": "07",
+  "/collection": "08",
 };
 const pageEnglishLabels:Record<string,string> = {
   "/": "HOME",
@@ -39,6 +40,7 @@ const pageEnglishLabels:Record<string,string> = {
   "/liveupdate": "LIVE TONIGHT",
   "/staffRanking": "STAFF RANKING",
   "/monetaryRanking": "SUPPORT RANKING",
+  "/collection": "YOUR COLLECTION",
 };
 
 type MenuLinkProps = {
@@ -170,6 +172,10 @@ export default function SiteChrome({navigation,shopInfo,pageVisibility,menuHidde
     ...((!visibility || visibility.home !== false)?[{id:"site-home",label:"首頁",routePath:"/"}]:[]),
     ...items.map((item)=>({id:item.id,label:item.label,routePath:resolvePath(item.routePath)})),
   ];
+  // Claim links remain reachable independently of promotional page visibility.
+  if (!menuEntries.some((item) => item.routePath === "/collection")) {
+    menuEntries.push({ id: "site-collection", label: "作品領取", routePath: "/collection" });
+  }
   if ((!visibility || visibility.menu !== false) && (!visibility || visibility.rooms !== false) && !menuEntries.some((item)=>item.routePath==="/menu/rooms")) {
     const menuIndex=menuEntries.findIndex((item)=>item.routePath==="/menu");
     menuEntries.splice(menuIndex<0?menuEntries.length:menuIndex+1,0,{id:"site-menu-rooms",label:"包廂介紹",routePath:"/menu/rooms"});

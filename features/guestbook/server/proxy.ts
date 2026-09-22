@@ -27,7 +27,7 @@ async function readBoundedJson(request: Request) {
       const chunk = await reader.read();
       if (chunk.done) break;
       size += chunk.value.byteLength;
-      if (size > 16_384) {
+      if (size > 3 * 1024 * 1024) {
         await reader.cancel();
         return { response: fail("留言內容過長。", 413) };
       }
@@ -75,8 +75,13 @@ async function preparePost(request: Request, headers: Headers) {
     typeof input.displayName !== "string"
     || typeof input.content !== "string"
     || (input.website !== undefined && typeof input.website !== "string")
+    || (input.customerUid !== undefined && (typeof input.customerUid !== "string" || input.customerUid.length > 40))
+    || (input.imageBase64 !== undefined && (typeof input.imageBase64 !== "string" || input.imageBase64.length > 2_796_204))
   ) {
     return { response: fail("請填寫名字與留言內容。", 400) };
+  }
+  if (input.imageBase64 !== undefined && !input.customerUid) {
+    return { response: fail("圖片留言需要顧客 UID。", 403) };
   }
 
   // Configure this only for an edge/IIS header overwritten by the trusted proxy.
@@ -100,8 +105,36 @@ async function preparePost(request: Request, headers: Headers) {
       displayName: input.displayName,
       content: input.content,
       website: input.website ?? "",
+      customerUid: input.customerUid,
+      imageBase64: input.imageBase64,
     }),
   };
+}
+
+export async function guestbookImageProxy(request: Request, id: string) {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+    return fail("找不到留言圖片。", 404);
+  }
+  try {
+    const upstream = await fetch(publicClientApiUrl(`/guestbook/images/${encodeURIComponent(id)}`), {
+      cache: "no-store",
+      redirect: "manual",
+      headers: { Accept: "image/webp" },
+      signal: AbortSignal.any([request.signal, AbortSignal.timeout(10_000)]),
+    });
+    if (!upstream.ok) return fail("留言圖片目前無法顯示。", upstream.status === 404 ? 404 : 502);
+    if (upstream.headers.get("content-type")?.split(";")[0] !== "image/webp") {
+      return fail("圖片格式不正確。", 502);
+    }
+    return new Response(upstream.body, { headers: {
+      "Content-Type": "image/webp",
+      "Cache-Control": "no-store",
+      "X-Content-Type-Options": "nosniff",
+      "Content-Security-Policy": "default-src 'none'; sandbox",
+    } });
+  } catch {
+    return fail("留言圖片服務暫時無法連線。", 502);
+  }
 }
 
 export async function guestbookProxy(request: Request, suffix = "") {

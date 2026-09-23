@@ -167,12 +167,12 @@ export function AdminGuestbookPage() {
     success: string,
     after?: () => void,
     savingPins = false,
-  ) => {
+  ): Promise<boolean> => {
     if (pinsDirty && !savingPins) {
       setError("請先儲存或放棄置頂排序，再進行其他操作。");
-      return;
+      return false;
     }
-    if (mutationBusy.current) return;
+    if (mutationBusy.current) return false;
     mutationBusy.current = true;
     setBusy(true);
     setError("");
@@ -181,11 +181,12 @@ export function AdminGuestbookPage() {
     mutationController.current = controller;
     try {
       await operation(controller.signal);
-      if (controller.signal.aborted) return;
+      if (controller.signal.aborted) return false;
       after?.();
       setStatus(success);
       await load(true);
       if (expanded) await loadReplies(expanded);
+      return true;
     } catch (cause) {
       if (!controller.signal.aborted) {
         const fallback = cause instanceof ApiError && cause.code === "VERSION_CONFLICT"
@@ -193,6 +194,7 @@ export function AdminGuestbookPage() {
           : "操作失敗。";
         setError(errorText(cause, fallback));
       }
+      return false;
     } finally {
       mutationBusy.current = false;
       if (!controller.signal.aborted) setBusy(false);
@@ -281,6 +283,7 @@ export function AdminGuestbookPage() {
           </p>
         ) : null}
         <AdminGuestbookComposer
+          key={composeTarget?.id ?? "new-thread"}
           target={composeTarget}
           settings={settings}
           staffDisplayName={user?.displayName}
@@ -291,11 +294,10 @@ export function AdminGuestbookPage() {
           onRoleChange={setRole}
           onContentChange={setContent}
           onCancelReply={() => setComposeTarget(null)}
-          onSubmit={(event) => {
-            event.preventDefault();
+          onSubmit={(imageBase64) => {
             const endpoint = composeTarget ? `/threads/${encodeURIComponent(composeTarget.id)}/replies` : "/threads";
-            void mutate(
-              (signal) => request(endpoint, parseGuestbookMessage, { method: "POST", body: JSON.stringify({ authorType: role, content }), signal }),
+            return mutate(
+              (signal) => request(endpoint, parseGuestbookMessage, { method: "POST", body: JSON.stringify({ authorType: role, content, ...(imageBase64 ? { imageBase64 } : {}) }), signal }),
               "店家留言已公開。",
               () => { setContent(""); setComposeTarget(null); },
             );

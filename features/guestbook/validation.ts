@@ -65,6 +65,8 @@ export function parseGuestbookMessage(value: unknown): GuestbookMessage {
     editedAt: nullableString(value, "editedAt"),
     customerUid: value.customerUid === undefined ? null : nullableString(value, "customerUid"),
     imageId: value.imageId === undefined ? null : nullableString(value, "imageId"),
+    likeCount: value.likeCount === undefined ? 0 : integerValue(value, "likeCount"),
+    viewerLiked: value.viewerLiked === undefined ? false : booleanValue(value, "viewerLiked"),
   };
 }
 
@@ -120,4 +122,12 @@ export function parseGuestbookHistory(value: unknown): GuestbookHistoryEntry[] {
 export function parseTrue(value: unknown): true {
   if (value !== true) throw new Error("留言操作回應格式不正確。");
   return true;
+}
+
+export function parseGuestbookLikeResult(value: unknown) {
+  if (!isRecord(value)) throw new Error("點讚回應格式不正確。");
+  return {
+    likeCount: integerValue(value, "likeCount"),
+    liked: booleanValue(value, "liked"),
+  };
 }

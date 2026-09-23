@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { guestbookRequest, guestbookUrl } from "@/features/guestbook/api/client";
 import { GuestbookComposer } from "@/features/guestbook/components/GuestbookComposer";
 import { GuestbookMessageText, guestbookDateLabel } from "@/features/guestbook/components/GuestbookMessageText";
+import { GuestbookEngagementActions } from "@/features/guestbook/components/GuestbookEngagementActions";
 import type { GuestbookMessage, GuestbookReplies, GuestbookSubmission } from "@/features/guestbook/types";
-import { parseGuestbookReplies } from "@/features/guestbook/validation";
+import { parseGuestbookMessage, parseGuestbookReplies } from "@/features/guestbook/validation";
 
 type GuestbookThreadProps = {
   message: GuestbookMessage;
@@ -13,19 +14,22 @@ type GuestbookThreadProps = {
   cooldown: number;
   name: string;
   submit: (input: GuestbookSubmission, id?: string) => Promise<boolean>;
+  initialExpanded?: boolean;
+  targetReplyId?: string | null;
+  initialReplies?: GuestbookReplies | null;
 };
 
-export function GuestbookThread({ message, busy, cooldown, name, submit }: GuestbookThreadProps) {
-  const [expanded, setExpanded] = useState(false);
+export function GuestbookThread({ message, busy, cooldown, name, submit, initialExpanded = false, targetReplyId = null, initialReplies = null }: GuestbookThreadProps) {
+  const [expanded, setExpanded] = useState(initialExpanded);
   const [replying, setReplying] = useState(false);
-  const [replies, setReplies] = useState<GuestbookReplies | null>(null);
+  const [replies, setReplies] = useState<GuestbookReplies | null>(initialReplies);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const controller = useRef<AbortController | null>(null);
 
   useEffect(() => () => controller.current?.abort(), []);
 
-  const load = async (page = 1, cursor?: string | null) => {
+  const load = useCallback(async (page = 1, cursor?: string | null) => {
     controller.current?.abort();
     const current = new AbortController();
     controller.current = current;
@@ -38,13 +42,28 @@ export function GuestbookThread({ message, busy, cooldown, name, submit }: Guest
         { signal: current.signal },
       );
       if (current.signal.aborted) return;
+      let items = result.items;
+      if (page === 1 && targetReplyId && !items.some((item) => item.id === targetReplyId)) {
+        try {
+          const target = await guestbookRequest(
+            guestbookUrl(`/${encodeURIComponent(message.id)}/replies/${encodeURIComponent(targetReplyId)}`),
+            parseGuestbookMessage,
+            { signal: current.signal },
+          );
+          if (!current.signal.aborted) {
+            items = [...items, target].sort((left, right) => left.createdAt.localeCompare(right.createdAt));
+          }
+        } catch {
+          if (!current.signal.aborted) setError("此回覆目前無法顯示，可能已被隱藏。");
+        }
+      }
       setReplies((previous) => ({
         ...result,
         items: page === 1
-          ? result.items
+          ? items
           : [
               ...(previous?.items ?? []),
-              ...result.items.filter((item) => !previous?.items.some((old) => old.id === item.id)),
+              ...items.filter((item) => !previous?.items.some((old) => old.id === item.id)),
             ],
       }));
     } catch (cause) {
@@ -52,7 +71,12 @@ export function GuestbookThread({ message, busy, cooldown, name, submit }: Guest
     } finally {
       if (!current.signal.aborted) setLoading(false);
     }
-  };
+  }, [message.id, targetReplyId]);
+
+  useEffect(() => {
+    if (!expanded || !targetReplyId || !replies?.items.some((item) => item.id === targetReplyId)) return;
+    document.getElementById(`guest-reply-${targetReplyId}`)?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [expanded, replies, targetReplyId]);
 
   const toggleReplies = () => {
     setExpanded((current) => !current);
@@ -67,9 +91,11 @@ export function GuestbookThread({ message, busy, cooldown, name, submit }: Guest
           {message.authorType !== "customer" ? <small className="guest-official">店家發言</small> : null}
         </h2>
         <time dateTime={message.createdAt}>{guestbookDateLabel(message.createdAt)}</time>
+        {message.isPinned ? <span className="guest-pin-label">置頂留言</span> : null}
       </header>
       <GuestbookMessageText message={message} />
-      {message.replyCount > 0 || replies || message.allowReplies ? (
+      <GuestbookEngagementActions message={message} replying={replying} onReply={() => setReplying((value) => !value)} />
+      {message.replyCount > 0 || replies ? (
         <div className="guest-note-actions">
           {message.replyCount > 0 || replies ? (
             <button
@@ -81,17 +107,12 @@ export function GuestbookThread({ message, busy, cooldown, name, submit }: Guest
               {expanded ? "收起回覆" : `查看 ${message.replyCount} 則回覆`} <i>{expanded ? "−" : "+"}</i>
             </button>
           ) : null}
-          {message.allowReplies ? (
-            <button className="guest-reply-toggle" aria-expanded={replying} onClick={() => setReplying((value) => !value)}>
-              {replying ? "取消回覆" : "留下回覆"} <i>↗</i>
-            </button>
-          ) : null}
         </div>
       ) : null}
       {expanded ? (
         <div className="guest-replies" id={`replies-${message.id}`}>
           {replies?.items.map((reply) => (
-            <blockquote key={reply.id}>
+            <blockquote key={reply.id} id={`guest-reply-${reply.id}`}>
               <div className="guest-reply-meta">
                 <span>
                   {reply.displayName}{" "}
@@ -100,6 +121,7 @@ export function GuestbookThread({ message, busy, cooldown, name, submit }: Guest
                 <time dateTime={reply.createdAt}>{guestbookDateLabel(reply.createdAt)}</time>
               </div>
               <GuestbookMessageText message={reply} />
+              <GuestbookEngagementActions key={reply.id + "-" + reply.likeCount + "-" + reply.viewerLiked} message={reply} />
             </blockquote>
           ))}
           {loading ? <p role="status">正在載入回覆…</p> : null}

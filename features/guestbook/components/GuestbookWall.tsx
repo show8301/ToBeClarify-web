@@ -17,6 +17,7 @@ export default function GuestbookWall() {
   const [error, setError] = useState("");
   const [name, setName] = useState("");
   const [cooldown, setCooldown] = useState(0);
+  const [activeFeed, setActiveFeed] = useState<"recent" | "pinned">("recent");
   const deadline = useRef(0);
   const submitting = useRef(false);
   const listController = useRef<AbortController | null>(null);
@@ -132,10 +133,9 @@ export default function GuestbookWall() {
     }
   };
 
-  const total = (list?.totalCount ?? 0) + (list?.pinnedItems.length ?? 0);
   const renderThread = (message: GuestbookMessage) => (
     <GuestbookThread
-      key={message.id}
+      key={message.id + "-" + message.likeCount + "-" + message.viewerLiked}
       message={message}
       busy={busy}
       cooldown={cooldown}
@@ -149,7 +149,6 @@ export default function GuestbookWall() {
       <section className="guestbook-hero">
         <span>WORDS LEFT BETWEEN WAKING AND DREAM</span>
         <h1>AFTER<br /><i>GLOW</i></h1>
-        <div><b>{list ? String(total).padStart(2, "0") : "—"}</b><p>則旅人留言<br />留在夢境之後</p></div>
         <p>寫下今晚的片段、給店員的一句話，或下一次想實現的夢。請不要留下現實世界的個人資料。</p>
       </section>
       <section className="guestbook-layout">
@@ -163,16 +162,20 @@ export default function GuestbookWall() {
         <div className="guestbook-feed">
           {error ? <p role="alert">{error} <button className="guest-reply-toggle" onClick={() => void load()}>重新載入</button></p> : null}
           {loading ? <p role="status">正在載入留言…</p> : null}
+          <nav className="guest-feed-tabs" aria-label="留言分類">
+            <button type="button" aria-pressed={activeFeed === "recent"} onClick={() => setActiveFeed("recent")}>最新</button>
+            <button type="button" aria-pressed={activeFeed === "pinned"} disabled={!list?.pinnedItems.length} onClick={() => setActiveFeed("pinned")}>置頂</button>
+          </nav>
           {list?.pinnedItems.length ? (
-            <section className="guest-pinned">
-              <header><span>PINNED NOTES</span><b>{list.pinnedItems.length} PINNED</b></header>
+            <section className={"guest-pinned" + (activeFeed === "pinned" ? " is-active" : "")}>
+              <header><span>PINNED NOTES</span><b>置頂留言</b></header>
               {list.pinnedItems.map(renderThread)}
             </section>
           ) : null}
-          <section className="guest-notes">
-            <header><span>RECENT AFTERGLOW</span><b>{list?.items.length ?? 0} / {list?.totalCount ?? 0}</b></header>
+          <section className={"guest-notes" + (activeFeed === "recent" ? " is-active" : "")}>
+            <header><span>RECENT AFTERGLOW</span></header>
             {list?.items.map(renderThread)}
-            {list && total === 0 ? <p className="guest-empty">還沒有留言，留下今晚的第一段回憶吧。</p> : null}
+            {list && !list.items.length && !list.pinnedItems.length ? <p className="guest-empty">還沒有留言，留下今晚的第一段回憶吧。</p> : null}
           </section>
           {list?.nextCursor ? (
             <button className="guest-load-more" disabled={loading || busy} onClick={() => void load(list.page + 1, true, list.nextCursor)}>

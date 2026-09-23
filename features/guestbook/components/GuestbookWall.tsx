@@ -149,15 +149,14 @@ export default function GuestbookWall() {
       <section className="guestbook-hero">
         <span>WORDS LEFT BETWEEN WAKING AND DREAM</span>
         <h1>AFTER<br /><i>GLOW</i></h1>
-        <p>寫下今晚的片段、給店員的一句話，或下一次想實現的夢。請不要留下現實世界的個人資料。</p>
+        <p>留下今晚的片段、給店員的一句話，<br />或下一次想實現的夢。請不要留下現實世界的個人資料。</p>
       </section>
       <section className="guestbook-layout">
         <aside className="guest-composer">
-          <span>LEAVE A NOTE · 留言</span>
-          <h2>讓這個夜晚<br />多留一會。</h2>
+          <h2>留言區</h2>
           <GuestbookComposer initialName="" busy={busy} cooldown={cooldown} onSubmit={submit} />
           <p>※每次留言或回覆之間需間隔 3 分鐘。</p>
-          <p role="status" aria-live="polite">{status}</p>
+          {status ? <p role="status" aria-live="polite">{status}</p> : null}
         </aside>
         <div className="guestbook-feed">
           {error ? <p role="alert">{error} <button className="guest-reply-toggle" onClick={() => void load()}>重新載入</button></p> : null}
@@ -167,23 +166,24 @@ export default function GuestbookWall() {
             <button type="button" aria-pressed={activeFeed === "pinned"} disabled={!list?.pinnedItems.length} onClick={() => setActiveFeed("pinned")}>置頂</button>
           </nav>
           {list?.pinnedItems.length ? (
-            <section className={"guest-pinned" + (activeFeed === "pinned" ? " is-active" : "")}>
+            <section className="guest-pinned">
               <header><span>PINNED NOTES</span><b>置頂留言</b></header>
               {list.pinnedItems.map(renderThread)}
             </section>
           ) : null}
           <section className={"guest-notes" + (activeFeed === "recent" ? " is-active" : "")}>
-            <header><span>RECENT AFTERGLOW</span></header>
+            <header><span>RECENT AFTERGLOW</span><b>訪客留言</b></header>
             {list?.items.map(renderThread)}
             {list && !list.items.length && !list.pinnedItems.length ? <p className="guest-empty">還沒有留言，留下今晚的第一段回憶吧。</p> : null}
           </section>
           {list?.nextCursor ? (
-            <button className="guest-load-more" disabled={loading || busy} onClick={() => void load(list.page + 1, true, list.nextCursor)}>
+            <button className={"guest-load-more" + (activeFeed === "recent" ? " is-active" : "")} disabled={loading || busy} onClick={() => void load(list.page + 1, true, list.nextCursor)}>
               載入更多留言 ＋
             </button>
           ) : null}
         </div>
       </section>
+      <p className="guestbook-signoff" aria-hidden="true">— AFTERGLOW —</p>
     </div>
   );
 }

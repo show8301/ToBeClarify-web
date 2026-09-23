@@ -19,6 +19,21 @@ export class GuestbookError extends Error {
   }
 }
 
+const VISITOR_STORAGE_KEY = "guestbook-visitor-id";
+
+function guestbookVisitorId() {
+  if (typeof window === "undefined") return "";
+  try {
+    const stored = window.localStorage.getItem(VISITOR_STORAGE_KEY);
+    if (stored && /^[0-9a-f-]{36}$/i.test(stored)) return stored;
+    const created = window.crypto.randomUUID();
+    window.localStorage.setItem(VISITOR_STORAGE_KEY, created);
+    return created;
+  } catch {
+    return window.crypto.randomUUID();
+  }
+}
+
 function isEnvelope(value: unknown): value is ApiEnvelope {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -38,12 +53,14 @@ export async function guestbookRequest<T>(
   options: RequestInit = {},
 ): Promise<T> {
   let response: Response;
+  const visitorId = guestbookVisitorId();
   try {
     response = await fetch(url, {
       ...options,
       cache: "no-store",
       headers: {
         Accept: "application/json",
+        ...(visitorId ? { "X-Guestbook-Visitor-Id": visitorId } : {}),
         ...(options.body ? { "Content-Type": "application/json" } : {}),
         ...options.headers,
       },

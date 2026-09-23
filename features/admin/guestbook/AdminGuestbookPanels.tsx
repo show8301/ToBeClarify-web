@@ -1,7 +1,8 @@
-import type { FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { AdminDialog, AdminField, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
 import { ACTION_LABELS, SECONDARY_BUTTON_CLASS, adminGuestbookTime } from "@/features/admin/guestbook/presentation";
 import type { GuestbookAuthor, GuestbookHistoryEntry, GuestbookMessage, GuestbookSettings } from "@/features/guestbook/types";
+import { compressGuestbookImage } from "@/lib/guestbook-image";
 
 type StaffRole = Exclude<GuestbookAuthor, "customer">;
 
@@ -15,14 +16,54 @@ type ComposerProps = {
   busy: boolean;
   onRoleChange: (role: StaffRole) => void;
   onContentChange: (content: string) => void;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onSubmit: (imageBase64: string | null) => Promise<boolean>;
   onCancelReply: () => void;
 };
 
 export function AdminGuestbookComposer(props: ComposerProps) {
+  const [image, setImage] = useState<{ base64: string; previewUrl: string; size: number } | null>(null);
+  const [imageError, setImageError] = useState("");
+  const [processing, setProcessing] = useState(false);
+  const requestId = useRef(0);
+  const fileInput = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => () => { requestId.current += 1; }, []);
+
+  const chooseImage = async (file?: File) => {
+    const current = ++requestId.current;
+    setImage(null);
+    setImageError("");
+    if (!file) {
+      setProcessing(false);
+      return;
+    }
+    setProcessing(true);
+    try {
+      const result = await compressGuestbookImage(file);
+      if (requestId.current === current) setImage(result);
+    } catch (cause) {
+      if (requestId.current === current) {
+        setImageError(cause instanceof Error ? cause.message : "圖片處理失敗，請重新選擇。");
+        if (fileInput.current) fileInput.current.value = "";
+      }
+    } finally {
+      if (requestId.current === current) setProcessing(false);
+    }
+  };
+
   return (
     <AdminPanel title={props.target ? `回覆 ${props.target.displayName} 的留言串` : "新增店家留言"}>
-      <form id="admin-guestbook-composer" className="adminGuestbookForm" onSubmit={props.onSubmit}>
+      <form id="admin-guestbook-composer" className="adminGuestbookForm" onSubmit={(event) => {
+        event.preventDefault();
+        void props.onSubmit(image?.base64 ?? null).then((success) => {
+          if (success) {
+            setImage(null);
+            setImageError("");
+            requestId.current += 1;
+            if (fileInput.current) fileInput.current.value = "";
+          }
+        });
+      }}>
         <AdminField label="發言身分">
           <select value={props.role} onChange={(event) => props.onRoleChange(event.target.value as StaffRole)}>
             <option value="staff" disabled={!props.hasStaff}>店員本人{props.staffDisplayName ? ` · ${props.staffDisplayName}` : ""}</option>
@@ -33,13 +74,25 @@ export function AdminGuestbookComposer(props: ComposerProps) {
         <AdminField label="留言內容">
           <textarea required maxLength={2000} value={props.content} onChange={(event) => props.onContentChange(event.target.value)} rows={4} />
         </AdminField>
+        <AdminField label="附上圖片（選填，送出前會自動壓縮）">
+          <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" disabled={props.busy || processing} onChange={(event) => void chooseImage(event.target.files?.[0])} />
+        </AdminField>
+        {processing ? <p role="status">正在壓縮圖片…</p> : null}
+        {imageError ? <p className="adminFormError" role="alert">{imageError}</p> : null}
+        {image ? <div className="adminGuestbookImagePreview">
+          {/* The compressed data URL is temporary and removed after a successful post. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={image.previewUrl} alt="留言附件預覽" />
+          <span>已壓縮至 {(image.size / 1024).toFixed(0)} KB</span>
+          <button className={SECONDARY_BUTTON_CLASS} type="button" disabled={props.busy} onClick={() => { void chooseImage(); if (fileInput.current) fileInput.current.value = ""; }}>移除圖片</button>
+        </div> : null}
         <div className="adminGuestbookActions">
           <button
             className="adminButton adminButton-primary"
-            disabled={props.busy || !props.content.trim() || (props.role === "staff" && !props.hasStaff)}
+            disabled={props.busy || processing || !props.content.trim() || (props.role === "staff" && !props.hasStaff)}
             type="submit"
           >
-            {props.busy ? "處理中…" : "公開送出"}
+            {processing ? "圖片處理中…" : props.busy ? "處理中…" : "公開送出"}
           </button>
           {props.target ? <button className={SECONDARY_BUTTON_CLASS} type="button" disabled={props.busy} onClick={props.onCancelReply}>改為新增留言串</button> : null}
         </div>

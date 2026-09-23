@@ -16,6 +16,39 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+function validateOrigin(request: Request) {
+  const origin = request.headers.get("origin");
+  // IIS may expose an internal http URL to Node. Trust only an explicitly
+  // configured external origin, never an arbitrary forwarded-host header.
+  const expectedOrigin = process.env.GUESTBOOK_PUBLIC_ORIGIN || new URL(request.url).origin;
+  return Boolean(origin && origin === expectedOrigin && request.headers.get("sec-fetch-site") !== "cross-site");
+}
+
+function attachTrustedVisitor(request: Request, headers: Headers, requireIp: boolean, requireVisitor: boolean) {
+  const visitorId = request.headers.get("x-guestbook-visitor-id")?.trim() || "";
+  if (visitorId && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(visitorId)) {
+    return fail("留言來源驗證失敗。", 400);
+  }
+  if (requireVisitor && !visitorId) return fail("請重新載入留言板後再試。", 400);
+  if (!visitorId && !requireIp) return null;
+
+  // Configure this only for an edge/IIS header overwritten by the trusted proxy.
+  const ipHeader = process.env.GUESTBOOK_TRUSTED_IP_HEADER;
+  const ip = ipHeader ? request.headers.get(ipHeader)?.trim() : "";
+  const secret = process.env.GUESTBOOK_PROXY_SECRET || "";
+  if (!ip || !isIP(ip) || secret.length < 32) {
+    return requireIp ? fail("留言功能暫時無法送出，請稍後再試。", 503) : null;
+  }
+
+  const time = Math.floor(Date.now() / 1000).toString();
+  headers.set("X-Guestbook-IP", ip);
+  headers.set("X-Guestbook-Time", time);
+  if (visitorId) headers.set("X-Guestbook-Visitor-Id", visitorId);
+  const signedValue = visitorId ? `${time}\n${ip}\n${visitorId}` : `${time}\n${ip}`;
+  headers.set("X-Guestbook-Signature", createHmac("sha256", secret).update(signedValue).digest("hex"));
+  return null;
+}
+
 async function readBoundedJson(request: Request) {
   const reader = request.body?.getReader();
   if (!reader) return { response: fail("請輸入留言。", 400) };
@@ -57,11 +90,7 @@ async function readBoundedJson(request: Request) {
 }
 
 async function preparePost(request: Request, headers: Headers) {
-  const origin = request.headers.get("origin");
-  // IIS may expose an internal http URL to Node. Trust only an explicitly
-  // configured external origin, never an arbitrary forwarded-host header.
-  const expectedOrigin = process.env.GUESTBOOK_PUBLIC_ORIGIN || new URL(request.url).origin;
-  if (!origin || origin !== expectedOrigin || request.headers.get("sec-fetch-site") === "cross-site") {
+  if (!validateOrigin(request)) {
     return { response: fail("請由本網站送出留言。", 403) };
   }
   if (!request.headers.get("content-type")?.startsWith("application/json")) {
@@ -84,21 +113,8 @@ async function preparePost(request: Request, headers: Headers) {
     return { response: fail("圖片留言需要顧客 UID。", 403) };
   }
 
-  // Configure this only for an edge/IIS header overwritten by the trusted proxy.
-  const ipHeader = process.env.GUESTBOOK_TRUSTED_IP_HEADER;
-  const ip = ipHeader ? request.headers.get(ipHeader)?.trim() : "";
-  const secret = process.env.GUESTBOOK_PROXY_SECRET || "";
-  if (!ip || !isIP(ip) || secret.length < 32) {
-    return { response: fail("留言功能暫時無法送出，請稍後再試。", 503) };
-  }
-
-  const time = Math.floor(Date.now() / 1000).toString();
-  headers.set("X-Guestbook-IP", ip);
-  headers.set("X-Guestbook-Time", time);
-  headers.set(
-    "X-Guestbook-Signature",
-    createHmac("sha256", secret).update(`${time}\n${ip}`).digest("hex"),
-  );
+  const identityError = attachTrustedVisitor(request, headers, true, false);
+  if (identityError) return { response: identityError };
   headers.set("Content-Type", "application/json");
   return {
     body: JSON.stringify({
@@ -109,6 +125,37 @@ async function preparePost(request: Request, headers: Headers) {
       imageBase64: input.imageBase64,
     }),
   };
+}
+
+export async function guestbookLikeProxy(request: Request, id: string) {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+    return fail("找不到留言。", 404);
+  }
+  if (!validateOrigin(request)) return fail("請由本網站送出操作。", 403);
+  if (!request.headers.get("content-type")?.startsWith("application/json")) return fail("不支援的請求格式。", 415);
+  const result = await readBoundedJson(request);
+  if (result.response) return result.response;
+  if (typeof result.value.liked !== "boolean") return fail("點讚資料格式不正確。", 400);
+
+  const headers = new Headers({ Accept: "application/json", "Content-Type": "application/json" });
+  const identityError = attachTrustedVisitor(request, headers, true, true);
+  if (identityError) return identityError;
+  try {
+    const upstream = await fetch(publicClientApiUrl(`/guestbook/items/${encodeURIComponent(id)}/like`), {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ liked: result.value.liked }),
+      cache: "no-store",
+      redirect: "manual",
+      signal: AbortSignal.any([request.signal, AbortSignal.timeout(10_000)]),
+    });
+    return new Response(await upstream.arrayBuffer(), {
+      status: upstream.status,
+      headers: { "Cache-Control": "no-store", "Content-Type": upstream.headers.get("content-type") || "application/json; charset=utf-8" },
+    });
+  } catch {
+    return fail("留言服務暫時無法連線，請稍後再試。", 502);
+  }
 }
 
 export async function guestbookImageProxy(request: Request, id: string) {
@@ -144,6 +191,9 @@ export async function guestbookProxy(request: Request, suffix = "") {
     const post = await preparePost(request, headers);
     if ("response" in post) return post.response;
     body = post.body;
+  } else {
+    const visitorError = attachTrustedVisitor(request, headers, false, false);
+    if (visitorError) return visitorError;
   }
 
   const url = new URL(publicClientApiUrl(`/guestbook/threads${suffix}`));

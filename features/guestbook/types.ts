@@ -22,7 +22,10 @@ export type GuestbookMessage = {
   editedAt: string | null;
   customerUid: string | null;
   imageId: string | null;
+  likeCount: number;
+  viewerLiked: boolean;
 };
+export type GuestbookLikeResult = { likeCount: number; liked: boolean };
 export type GuestbookList = {
   page: number;
   pageSize: number;

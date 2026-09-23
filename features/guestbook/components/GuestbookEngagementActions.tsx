@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Heart, Link, MessageCircle } from "lucide-react";
 import { guestbookRequest, guestbookUrl } from "@/features/guestbook/api/client";
 import { parseGuestbookLikeResult } from "@/features/guestbook/validation";
 import type { GuestbookMessage } from "@/features/guestbook/types";
@@ -64,10 +65,10 @@ export function GuestbookEngagementActions({ message, onReply, replying = false 
   return (
     <div className="guest-engagement">
       <button type="button" className="guest-engagement-button" aria-pressed={liked} disabled={likeBusy} onClick={() => void toggleLike()}>
-        <span aria-hidden="true">{liked ? "♥" : "♡"}</span> 喜歡 <span>{likeCount}</span>
+        <Heart aria-hidden="true" size={20} fill={liked ? "currentColor" : "none"} /> 喜歡 <span>{likeCount}</span>
       </button>
-      {onReply ? <button type="button" className="guest-engagement-button" aria-expanded={replying} onClick={onReply}>{replying ? "取消回覆" : "回覆"}</button> : null}
-      <button type="button" className="guest-engagement-button" onClick={() => void share()}>分享連結</button>
+      {onReply ? <button type="button" className="guest-engagement-button" aria-expanded={replying} onClick={onReply}><MessageCircle aria-hidden="true" size={20} />{replying ? "取消回覆" : "回覆"}</button> : null}
+      <button type="button" className="guest-engagement-button" onClick={() => void share()}><Link aria-hidden="true" size={20} />分享連結</button>
       <span className="guest-engagement-status" role="status" aria-live="polite">{shareStatus}</span>
     </div>
   );

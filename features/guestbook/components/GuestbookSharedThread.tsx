@@ -109,8 +109,7 @@ export function GuestbookSharedThread({ message, targetReplyId, initialReplies }
       <p className="guest-shared-back"><Link href="/guestbook">← 返回留言板</Link></p>
       <section className="guestbook-layout guestbook-shared-layout">
         <aside className="guest-composer">
-          <span>LEAVE A NOTE · 留言</span>
-          <h2>讓這個夜晚<br />多留一會。</h2>
+          <h2>留言區</h2>
           <GuestbookComposer initialName={name} busy={busy} cooldown={cooldown} onSubmit={submit} />
           <p>※每次留言或回覆之間需間隔 3 分鐘。</p>
           <p role="status" aria-live="polite">{status}</p>

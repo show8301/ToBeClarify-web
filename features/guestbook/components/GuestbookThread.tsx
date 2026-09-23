@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ChevronDown, ChevronUp, Pin } from "lucide-react";
 import { guestbookRequest, guestbookUrl } from "@/features/guestbook/api/client";
 import { GuestbookComposer } from "@/features/guestbook/components/GuestbookComposer";
 import { GuestbookMessageText, guestbookDateLabel } from "@/features/guestbook/components/GuestbookMessageText";
@@ -91,10 +92,10 @@ export function GuestbookThread({ message, busy, cooldown, name, submit, initial
           {message.authorType !== "customer" ? <small className="guest-official">店家發言</small> : null}
         </h2>
         <time dateTime={message.createdAt}>{guestbookDateLabel(message.createdAt)}</time>
-        {message.isPinned ? <span className="guest-pin-label">置頂留言</span> : null}
+        {message.isPinned ? <span className="guest-pin-label"><Pin aria-hidden="true" size={14} />置頂留言</span> : null}
       </header>
       <GuestbookMessageText message={message} />
-      <GuestbookEngagementActions message={message} replying={replying} onReply={() => setReplying((value) => !value)} />
+      <GuestbookEngagementActions message={message} replying={replying} onReply={message.allowReplies ? () => setReplying((value) => !value) : undefined} />
       {message.replyCount > 0 || replies ? (
         <div className="guest-note-actions">
           {message.replyCount > 0 || replies ? (
@@ -104,7 +105,7 @@ export function GuestbookThread({ message, busy, cooldown, name, submit, initial
               aria-controls={`replies-${message.id}`}
               onClick={toggleReplies}
             >
-              {expanded ? "收起回覆" : `查看 ${message.replyCount} 則回覆`} <i>{expanded ? "−" : "+"}</i>
+              {expanded ? "收起回覆" : `展開回覆 ${message.replyCount}`} {expanded ? <ChevronUp aria-hidden="true" size={16} /> : <ChevronDown aria-hidden="true" size={16} />}
             </button>
           ) : null}
         </div>

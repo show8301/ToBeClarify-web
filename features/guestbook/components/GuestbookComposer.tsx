@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, ImagePlus, Send } from "lucide-react";
+import { ImagePlus, Send } from "lucide-react";
 import { compressGuestbookImage } from "@/lib/guestbook-image";
 import type { GuestbookSubmission } from "@/features/guestbook/types";
 
@@ -23,7 +23,14 @@ export function GuestbookComposer({ onSubmit, busy, cooldown, initialName, reply
   const [reading, setReading] = useState(false);
   const imageRequest = useRef(0);
   const fileInput = useRef<HTMLInputElement | null>(null);
-  const buttonLabel = busy ? "正在送出…" : cooldown > 0 ? "請等待 " + cooldown + " 秒" : reply ? "留下回覆" : "發佈留言";
+  const attachmentOptions = useRef<HTMLDetailsElement | null>(null);
+  const buttonLabel = busy
+    ? "正在送出…"
+    : cooldown > 0
+      ? "請等待 " + cooldown + " 秒"
+      : reply
+        ? image ? "發佈回覆與圖片" : "留下回覆"
+        : image ? "發佈留言與圖片" : "發佈留言";
 
   useEffect(() => () => { imageRequest.current += 1; }, []);
 
@@ -36,7 +43,10 @@ export function GuestbookComposer({ onSubmit, busy, cooldown, initialName, reply
     setReading(true);
     try {
       const compressed = await compressGuestbookImage(file);
-      if (requestId === imageRequest.current) setImage(compressed);
+      if (requestId === imageRequest.current) {
+        setImage(compressed);
+        if (attachmentOptions.current) attachmentOptions.current.open = true;
+      }
     } catch (cause) {
       if (requestId === imageRequest.current) {
         setImageError(cause instanceof Error ? cause.message : "圖片處理失敗，請重新選擇。");
@@ -52,7 +62,7 @@ export function GuestbookComposer({ onSubmit, busy, cooldown, initialName, reply
       event.preventDefault();
       const uid = customerUid.trim();
       if (image && !uid) {
-        setImageError("附圖留言需要顧客 UID。文字留言可以留空 UID 匿名送出。");
+        setImageError("附圖需要顧客 UID；補上 UID，或移除圖片後送出文字留言。");
         return;
       }
       const success = await onSubmit({
@@ -64,6 +74,7 @@ export function GuestbookComposer({ onSubmit, busy, cooldown, initialName, reply
       if (success) {
         setContent("");
         setImage(null);
+        setCustomerUid("");
         if (fileInput.current) fileInput.current.value = "";
       }
     }}>
@@ -71,28 +82,28 @@ export function GuestbookComposer({ onSubmit, busy, cooldown, initialName, reply
         {!reply ? <h3>免登入留言</h3> : null}
         <label><span>旅人名字</span><input value={name} onChange={(event) => setName(event.target.value)} maxLength={60} autoComplete="nickname" placeholder="如何稱呼你？（可不填）" /></label>
         <label><span>{reply ? "回覆內容" : "留言內容"}</span><textarea value={content} onChange={(event) => setContent(event.target.value)} required maxLength={2000} placeholder={reply ? "回覆內容..." : "說說這次夢境的心得..."} /></label>
-        <button className="guest-submit" disabled={busy || reading || cooldown > 0}>{reading ? "正在讀取圖片…" : buttonLabel}{!reply ? <Send size={16} aria-hidden="true" /> : null}</button>
+        <details className="guest-identity-options" ref={attachmentOptions}>
+          <summary>加入圖片（選填）</summary>
+          <p>圖片會與這則{reply ? "回覆" : "留言"}一起發佈；附圖需填寫顧客 UID。</p>
+          <label className="guest-uid-field"><span>顧客 UID（附圖必填）</span><input aria-invalid={Boolean(imageError && image && !customerUid.trim())} value={customerUid} onChange={(event) => { setCustomerUid(event.target.value); setImageError(""); }} maxLength={40} autoComplete="off" placeholder="輸入顧客 UID" /></label>
+          <div className="guest-upload-controls">
+            <button className="guest-upload-zone" type="button" disabled={busy || reading} onClick={() => fileInput.current?.click()} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); if (!busy && !reading) void chooseImage(event.dataTransfer.files[0]); }}>
+              <ImagePlus size={22} aria-hidden="true" /><span>{image ? "更換圖片" : "選擇圖片或拖曳至此"}<small>支援 JPG、PNG、WebP</small></span>
+            </button>
+            <input className="guest-sr-only" aria-label="選擇留言圖片" ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" disabled={busy || reading} tabIndex={-1} onChange={(event) => void chooseImage(event.target.files?.[0])} />
+          </div>
+          {image ? <div className="guest-image-preview">
+            {/* Local data URL is a temporary, bounded preview. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={image.previewUrl} alt="即將公開的留言附件預覽" />
+            <button type="button" disabled={busy} onClick={() => { void chooseImage(); if (fileInput.current) fileInput.current.value = ""; }}>移除圖片</button>
+            <p>圖片尚未發佈，壓縮後 {(image.size / 1024).toFixed(0)} KB，送出後會與{reply ? "回覆" : "留言"}一起公開。</p>
+          </div> : null}
+          {reading ? <p role="status">正在壓縮圖片…</p> : null}
+          {imageError ? <p role="alert">{imageError}</p> : null}
+        </details>
       </div>
-      <details className="guest-identity-options" open={reply ? undefined : true}>
-        <summary>{reply ? "附上圖片（選填）" : "圖片上傳 · 持顧客 UID 者"}</summary>
-        <div className="guest-upload-controls">
-          <button className="guest-upload-zone" type="button" disabled={busy || reading} onClick={() => fileInput.current?.click()} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); if (!busy && !reading) void chooseImage(event.dataTransfer.files[0]); }}>
-            <ImagePlus size={32} aria-hidden="true" /><span>點擊或拖曳上傳圖片<small>附圖需填寫顧客 UID</small></span>
-          </button>
-          <label className="guest-uid-field"><span className="guest-sr-only">顧客 UID（附圖必填）</span><input value={customerUid} onChange={(event) => { setCustomerUid(event.target.value); setImageError(""); }} maxLength={40} autoComplete="off" placeholder="輸入顧客 UID" /></label>
-          <button className="guest-upload-pick" type="button" aria-label="選擇留言圖片" disabled={busy || reading} onClick={() => fileInput.current?.click()}><ArrowRight size={20} aria-hidden="true" /></button>
-          <input className="guest-sr-only" aria-label="附上圖片" ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" disabled={busy || reading} tabIndex={-1} onChange={(event) => void chooseImage(event.target.files?.[0])} />
-        </div>
-        {image ? <div className="guest-image-preview">
-          {/* Local data URL is a temporary, bounded preview. */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={image.previewUrl} alt="即將公開的留言附件預覽" />
-          <button type="button" disabled={busy} onClick={() => { void chooseImage(); if (fileInput.current) fileInput.current.value = ""; }}>移除圖片</button>
-          <p>已壓縮至 {(image.size / 1024).toFixed(0)} KB，送出後圖片會隨留言公開。</p>
-        </div> : null}
-        {reading ? <p role="status">正在壓縮圖片…</p> : null}
-        {imageError ? <p role="alert">{imageError}</p> : null}
-      </details>
+      <button className="guest-submit" disabled={busy || reading || cooldown > 0}>{reading ? "正在讀取圖片…" : buttonLabel}<Send size={16} aria-hidden="true" /></button>
       <div className="guest-honeypot" aria-hidden="true"><label>Website<input name="website" value={website} onChange={(event) => setWebsite(event.target.value)} tabIndex={-1} autoComplete="off" maxLength={200} /></label></div>
     </form>
   );

@@ -60,6 +60,7 @@ export function parseGuestbookMessage(value: unknown): GuestbookMessage {
     sortOrder: integerValue(value, "sortOrder"),
     allowReplies: booleanValue(value, "allowReplies"),
     replyCount: integerValue(value, "replyCount"),
+    hiddenReplyCount: value.hiddenReplyCount === undefined ? 0 : integerValue(value, "hiddenReplyCount"),
     version: integerValue(value, "version"),
     createdAt: stringValue(value, "createdAt"),
     editedAt: nullableString(value, "editedAt"),

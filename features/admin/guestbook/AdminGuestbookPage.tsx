@@ -48,6 +48,9 @@ export function AdminGuestbookPage() {
   const [settings, setSettings] = useState<GuestbookSettings | null>(null);
   const [mascotName, setMascotName] = useState("");
   const [filter, setFilter] = useState("all");
+  const [searchDraft, setSearchDraft] = useState("");
+  const [search, setSearch] = useState("");
+  const [hasImage, setHasImage] = useState("all");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -71,6 +74,7 @@ export function AdminGuestbookPage() {
   const loadRequestId = useRef(0);
   const mutationBusy = useRef(false);
   const mascotDirty = useRef(false);
+  const canReorderPins = filter === "all" && !search && hasImage === "all";
 
   const applyLoadedData = useCallback((data: GuestbookList, config: GuestbookSettings) => {
     setList(data);
@@ -93,7 +97,7 @@ export function AdminGuestbookPage() {
     setLoading(true);
     try {
       const [data, config] = await Promise.all([
-        request(adminGuestbookPath("/threads", { page, filter }), parseGuestbookList, { signal: controller.signal }),
+        request(adminGuestbookPath("/threads", { page, filter, search, hasImage }), parseGuestbookList, { signal: controller.signal }),
         request("/settings", parseGuestbookSettings, { signal: controller.signal }),
       ]);
       if (controller.signal.aborted || requestId !== loadRequestId.current) return;
@@ -104,14 +108,14 @@ export function AdminGuestbookPage() {
     } finally {
       if (!controller.signal.aborted && requestId === loadRequestId.current) setLoading(false);
     }
-  }, [applyLoadedData, filter, page, pinsDirty]);
+  }, [applyLoadedData, filter, hasImage, page, pinsDirty, search]);
 
   useEffect(() => {
     const controller = new AbortController();
     const requestId = ++loadRequestId.current;
     loadController.current = controller;
     Promise.all([
-      request(adminGuestbookPath("/threads", { page, filter }), parseGuestbookList, { signal: controller.signal }),
+      request(adminGuestbookPath("/threads", { page, filter, search, hasImage }), parseGuestbookList, { signal: controller.signal }),
       request("/settings", parseGuestbookSettings, { signal: controller.signal }),
     ]).then(([data, config]) => {
       if (controller.signal.aborted || requestId !== loadRequestId.current) return;
@@ -123,7 +127,7 @@ export function AdminGuestbookPage() {
       if (!controller.signal.aborted && requestId === loadRequestId.current) setLoading(false);
     });
     return () => controller.abort();
-  }, [applyLoadedData, filter, page]);
+  }, [applyLoadedData, filter, hasImage, page, search]);
 
   useEffect(() => () => {
     loadController.current?.abort();
@@ -213,6 +217,16 @@ export function AdminGuestbookPage() {
     }),
     "留言狀態已更新。",
   );
+  const removeImage = (message: GuestbookMessage) => {
+    if (!message.imageId || !window.confirm("確定永久移除這張圖片？客戶端將不再顯示，並會留下操作紀錄。")) return;
+    void mutate(
+      (signal) => request(adminGuestbookPath(messagePath(message) + "/image", { version: message.version }), parseGuestbookMessage, {
+        method: "DELETE",
+        signal,
+      }),
+      "留言圖片已移除。",
+    );
+  };
   const movePin = (index: number, direction: number) => {
     if (!list || loading) return;
     const pins = [...list.pinnedItems];
@@ -256,6 +270,7 @@ export function AdminGuestbookPage() {
       replyError={replyError}
       onEdit={startEdit}
       onModerate={moderate}
+      onRemoveImage={removeImage}
       onReply={openReplyComposer}
       onToggleReplies={toggleReplies}
       onReloadReplies={(target) => void loadReplies(target.id)}
@@ -344,15 +359,75 @@ export function AdminGuestbookPage() {
               <option value="all">所有留言（含隱藏）</option>
               <option value="hidden">隱藏的留言串</option>
               <option value="locked">已關閉回覆</option>
+              <option value="hidden-replies">含隱藏回覆的留言串</option>
             </select>
           </AdminField>
+          <form
+            className="adminGuestbookFilters"
+            onSubmit={(event) => {
+              event.preventDefault();
+              const nextSearch = searchDraft.trim();
+              setLoading(true);
+              setPage(1);
+              setExpanded(null);
+              replyController.current?.abort();
+              if (nextSearch === search && page === 1) void load(true);
+              else setSearch(nextSearch);
+            }}
+          >
+            <AdminField label="搜尋姓名、內容或 UID">
+              <input
+                maxLength={100}
+                value={searchDraft}
+                disabled={busy || loading || pinsDirty}
+                onChange={(event) => setSearchDraft(event.target.value)}
+              />
+            </AdminField>
+            <div className="adminGuestbookActions">
+              <button className="adminButton adminButton-primary" type="submit" disabled={busy || loading || pinsDirty}>搜尋</button>
+              <button
+                className={SECONDARY_BUTTON_CLASS}
+                type="button"
+                disabled={busy || loading || pinsDirty || (!search && !searchDraft)}
+                onClick={() => {
+                  setSearchDraft("");
+                  setLoading(true);
+                  setPage(1);
+                  setExpanded(null);
+                  replyController.current?.abort();
+                  if (!search && page === 1) void load(true);
+                  else setSearch("");
+                }}
+              >
+                清除搜尋
+              </button>
+            </div>
+          </form>
+          <AdminField label="圖片篩選">
+            <select
+              disabled={busy || loading || pinsDirty}
+              value={hasImage}
+              onChange={(event) => {
+                setLoading(true);
+                setHasImage(event.target.value);
+                setPage(1);
+                setExpanded(null);
+                replyController.current?.abort();
+              }}
+            >
+              <option value="all">全部留言串</option>
+              <option value="yes">含圖片（留言或回覆）</option>
+              <option value="no">不含圖片</option>
+            </select>
+          </AdminField>
+          <p className="adminGuestbookFilterHint">搜尋姓名、內容與 UID 會檢查留言串及回覆；結果以留言串顯示。圖片篩選也會檢查整串。</p>
           {loading ? <p role="status">正在讀取留言…</p> : null}
           {list?.pinnedItems.length ? (
             <section className="adminGuestbookPins">
               <h3>置頂留言</h3>
               {list.pinnedItems.map((message, index) => (
                 <div key={message.id}>
-                  {filter === "all" ? (
+                  {canReorderPins ? (
                     <div className="adminGuestbookActions">
                       <span>置頂順序 {index + 1}</span>
                       <button className={SECONDARY_BUTTON_CLASS} disabled={busy || loading || index === 0} aria-label={`將 ${message.displayName} 的留言上移`} onClick={() => movePin(index, -1)}>↑ 上移</button>
@@ -362,7 +437,7 @@ export function AdminGuestbookPage() {
                   {messageView(message)}
                 </div>
               ))}
-              {filter === "all" ? (
+              {canReorderPins ? (
                 <button
                   className="adminButton adminButton-primary"
                   disabled={busy || !pinsDirty}

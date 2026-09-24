@@ -17,6 +17,7 @@ export type GuestbookMessage = {
   sortOrder: number;
   allowReplies: boolean;
   replyCount: number;
+  hiddenReplyCount: number;
   version: number;
   createdAt: string;
   editedAt: string | null;

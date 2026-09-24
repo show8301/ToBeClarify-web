@@ -10,6 +10,7 @@ export const AUTHOR_LABELS: Record<GuestbookAuthor, string> = {
 export const ACTION_LABELS: Record<string, string> = {
   create: "新增留言",
   edit: "編輯留言",
+  image_remove: "移除留言圖片",
   moderate: "調整顯示／回覆／置頂狀態",
   reorder: "調整置頂順序",
   settings: "更新設定",

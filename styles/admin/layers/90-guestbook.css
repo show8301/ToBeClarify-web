@@ -17,6 +17,9 @@
 .adminGuestbookHistory summary { cursor: pointer; }
 .adminGuestbookHistory pre { white-space: pre-wrap; overflow-wrap: anywhere; padding: 12px; background: var(--color-surface); font-size: 12px; }
 .adminGuestbookFeedback { padding: 16px; border: 1px solid var(--color-border-strong); border-radius: var(--radius-md); }
+.adminGuestbookFilters { display: grid; grid-template-columns: minmax(220px, 1fr) auto; align-items: end; gap: 12px; }
+.adminGuestbookFilterHint, .adminGuestbookActionStatus { color: var(--color-fg-soft); font-size: 12px; }
+.adminGuestbookMessage a.adminButton { display: inline-flex; align-items: center; text-decoration: none; }
 .adminGuestbookImagePreview { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .adminGuestbookImagePreview img { width: min(100%, 360px); max-height: 240px; object-fit: contain; border: 1px solid var(--color-border); border-radius: var(--radius-md); }
-@media (max-width: 600px) { .adminGuestbookMessage { padding: 14px; } .adminGuestbookActions .adminButton { flex: 1 1 auto; } }
+@media (max-width: 600px) { .adminGuestbookMessage { padding: 14px; } .adminGuestbookActions .adminButton { flex: 1 1 auto; } .adminGuestbookFilters { grid-template-columns: 1fr; } }

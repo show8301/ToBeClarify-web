@@ -1172,3 +1172,137 @@
     margin-bottom:12px;
   }
 }
+
+/* Give staff selection the visual priority: larger portraits, clearer names,
+   and availability moved into the card corner instead of a separate row. */
+.nominationStaffGrid {
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+}
+.nominationStaffGrid>button {
+  position:relative;
+  min-height:164px;
+  padding:12px;
+  display:grid;
+  grid-template-rows:auto auto;
+  align-content:start;
+  justify-items:center;
+  border-radius:14px;
+  background:#f7f8fa;
+  text-align:center;
+}
+.nominationStaffGrid>button>span {
+  width:100%;
+  height:auto;
+  aspect-ratio:4 / 5;
+  margin:0 auto 11px;
+  overflow:hidden;
+  border-radius:10px;
+  background:#e3e7ee;
+}
+.nominationStaffGrid>button>span img {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center center;
+}
+.nominationStaffGrid>button>strong {
+  max-width:100%;
+  overflow:hidden;
+  font-size:16px;
+  line-height:1.3;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.nominationStaffGrid>button>small {
+  position:absolute;
+  top:10px;
+  right:10px;
+  max-width:calc(100% - 20px);
+  margin:0;
+  overflow:hidden;
+  padding:5px 8px;
+  border:1px solid rgba(255,255,255,.88);
+  border-radius:999px;
+  background:rgba(255,255,255,.9);
+  color:#3c8c70;
+  font-size:10px;
+  line-height:1;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  box-shadow:0 3px 10px rgba(82,87,120,.1);
+}
+.nominationStaffGrid>button.isActive {
+  border-color:#8196bb;
+  background:#e8eef7;
+}
+.nominationStaffGrid>button.isActive::before {
+  position:absolute;
+  z-index:2;
+  top:10px;
+  left:10px;
+  width:22px;
+  height:22px;
+  display:grid;
+  place-items:center;
+  border:2px solid #fff;
+  border-radius:50%;
+  background:#7186ad;
+  color:#fff;
+  content:"✓";
+  font-size:11px;
+  font-weight:800;
+}
+
+/* Keep the step marker size and circle geometry, but make the sequence number
+   readable at a glance. */
+.nominationSection>header>span {
+  font-size:14px;
+  font-weight:800;
+  letter-spacing:-.04em;
+}
+
+/* Let the two nomination modes fit their copy instead of reserving a tall,
+   mostly empty panel. */
+.nominationModeGrid>button {
+  min-height:0;
+  height:auto;
+  padding:14px 16px 15px;
+  gap:8px;
+  align-content:start;
+}
+.nominationModeGrid>button>strong {
+  font-size:18px;
+  line-height:1.35;
+}
+.nominationModeGrid>button>p {
+  margin:0;
+  font-size:14px;
+  line-height:1.6;
+}
+
+@media(max-width:860px){
+  .nominationStaffGrid {
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+}
+
+@media(max-width:620px){
+  .nominationStaffGrid {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px;
+  }
+  .nominationStaffGrid>button {
+    min-height:150px;
+    padding:10px;
+  }
+  .nominationStaffGrid>button>span {
+    margin-bottom:9px;
+  }
+  .nominationStaffGrid>button>strong {
+    font-size:15px;
+  }
+  .nominationSection>header>span {
+    font-size:13px;
+  }
+}

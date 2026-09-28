@@ -46,7 +46,7 @@ test('customer ordering hides unavailable staff and keeps the ordering UI concis
 
   assert.match(source, /const visibleStaff = staff\.filter\(\(person\) => person\.isWorkingToday && person\.isNominatable\)/);
   assert.match(source, /visibleStaff\.map/);
-  assert.match(source, /僅顯示今日上班且可指名的店員/);
+  assert.match(source, /顯示開放指名人員；目前忙碌仍可選擇班內稍後的空檔/);
   assert.match(source, /選擇指名方式\(二擇一\)/);
   assert.match(source, /指名\+加購服務/);
   assert.match(source, /<span>可折抵餘額<\/span>/);

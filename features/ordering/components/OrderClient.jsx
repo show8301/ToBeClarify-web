@@ -315,7 +315,7 @@ function NominationPage({ session, settings, businessContext, staff, cart, setCa
     onNotice({ message: mode === 'companionship' ? '純陪伴與基礎指名費已加入本次點餐；成立後仍可在原時段內追加服務。' : '指名服務與基礎指名費已分列加入本次點餐。', error: false });
   };
   return <div className="orderPage"><PageHeading kicker="STAFF FIRST" title="指名服務" text={`先選店員，再查看該店員提供的服務。每節 ${settings.segmentMinutes} 分鐘，最多同時指名 ${session.maxNominatedStaff} 人。`} />
-    <section className="nominationSection"><header><span>01</span><div><h2>選擇店員</h2><p>顯示今天有核准班次且開放指名的人員；目前忙碌仍可選擇班內稍後的空檔。</p></div></header>
+    <section className="nominationSection"><header><span>01</span><div><h2>選擇店員</h2><p>顯示開放指名人員；目前忙碌仍可選擇班內稍後的空檔。</p></div></header>
       <div className="nominationStaffGrid">{visibleStaff.map((person) => { const label = person.currentStatus === 'busy' ? '目前忙碌，可選未來空檔' : person.isWorkingToday ? '可指名' : '班內可預約'; return <button key={person.id} className={staffId === person.id ? 'isActive' : ''} onClick={() => setStaffId(person.id)}><span>{person.avatarUrl ? <img src={person.avatarUrl} alt="" /> : person.displayName.slice(0, 1)}</span><strong>{person.displayName}</strong><small>{label}</small></button>; })}</div>
     </section>
     {selectedStaff ? <section className="nominationSection"><header><span>02</span><div><h2>選擇指名方式(二擇一)</h2><p>純陪伴只收基礎指名費；服務成立後仍可在原本時段內追加服務，不會再收一次基礎費。</p></div></header>

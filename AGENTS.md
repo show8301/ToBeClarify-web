@@ -31,6 +31,9 @@
 
 ## Screen-only iterative UI workflow
 
+- Before opening or handing off a local Web preview, read and follow [`docs/local-ui-preview.md`](docs/local-ui-preview.md). Recheck after a restart, branch switch, or build-mode change.
+- Confirm the intended checkout, all applicable CSS imports, generated font variables and font-face rules, and the affected elements' computed styles and rendered fonts. An HTTP 200 or matching class names alone do not establish visual parity.
+- If development-mode font injection is missing, follow the documented local build-preview fallback and verify it before using the page for UI sizing. Do not compensate with arbitrary font-size overrides or hard-coded production CSS hashes. Report unverified rendering explicitly.
 - When a Web change only adjusts presentation, layout, styling, or interaction presentation and does not change the API, data model, API contract, permissions, or server behavior, start by showing the affected page from the local development server.
 - Keep visual refinements on the local version while the user reviews them. Accumulate the related adjustments before moving the change to the test environment, rather than deploying every small visual revision separately.
 - After the local result is accepted, commit and promote the accumulated Web change to `dev`, then use the normal test-environment checks and user confirmation required by the Web promotion flow.

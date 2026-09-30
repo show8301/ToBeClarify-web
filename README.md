@@ -4,6 +4,8 @@
 
 ## 本機開發
 
+每次開啟本地畫面前，先依[本地 UI 預覽：CSS 與字型載入標準](docs/local-ui-preview.md)確認樣式入口、字型變數及實際渲染。文件包含字型注入缺失時的本機 build 預覽方式；CSS 回應成功本身不代表畫面與正式站一致。
+
 需求：Node.js `>=22.13.0`。使用 npm 與已提交的 `package-lock.json`。
 
 Linux／具 POSIX shell 的環境：

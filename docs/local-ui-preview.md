@@ -26,9 +26,16 @@
 @import "./layers/40-refinements.css";
 @import "./layers/50-guestbook.css";
 @import "./layers/60-collection.css";
+@import "./layers/70-section-spacing.css";
 ```
 
 只保留入口匯入，不把這段另貼到頁面重複載入。實際順序以目前分支的入口檔為準；新增或調整入口時同步更新本文件，不得漏載後段覆寫，也不得因檔名包含 `history` 就跳過。
+
+### 公開頁面大區塊留白
+
+`70-section-spacing.css` 統一公開頁面的主要區段間距，沿用已確認的首頁基準：桌機上下各 `clamp(30px, 4vw, 62px)`；820px 以下上 34px、下 58px。共用變數為 `--public-section-space-start` 與 `--public-section-space-end`，新增公開頁面時將主要區段加入該檔的明確 selector 清單。
+
+適用首頁、店員名單、活動相簿、菜單、包廂、即時動態、排行榜、留言牆／分享頁及作品領取頁；店員個人頁調整頁面外圍留白並保留工具列空間。頁首、頁尾、搜尋列、跑馬燈、卡片內距、相片燈箱及點餐嵌入面板不套用大區塊間距。頁首沿用既有高度，頁尾上下各 14px。
 
 | 頁面範圍 | 額外樣式入口 | 載入規則 |
 | --- | --- | --- |

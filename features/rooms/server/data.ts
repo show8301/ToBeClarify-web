@@ -29,6 +29,15 @@ export function getRoomsData():RoomsData{
   return roomsCache.value;
 }
 
+// Match the room-photo catalog to live room IDs on the first render, too.
+// Reuse the existing bounded refresh and snapshot fallback without changing
+// the stale-while-revalidate behavior of other room pages.
+export async function getRoomsDataForLivePage():Promise<RoomsData>{
+  getRoomsData();
+  if(roomsRefresh)await roomsRefresh;
+  return roomsCache.value;
+}
+
 export async function getRoomStatuses(from:string,to:string):Promise<RoomStatus[]>{
   try{
     return await request<RoomStatus[]>(`/rooms/status?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);

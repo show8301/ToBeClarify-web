@@ -1,6 +1,5 @@
 import { AdminRefreshButton } from "@/features/admin/shared/AdminRefreshButton";
 import { useEffect, useMemo, useRef, useState } from 'react';
-import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { adminApi } from '@/features/admin/api/client.js';
 
@@ -78,7 +77,7 @@ export function AdminOrderListPage() {
   return <section className="adminPage adminOrderListPage">
     <header className="adminPageHeading">
       <div><p className="eyebrow">ORDER QUERY</p><h1>訂單查詢</h1><p>營業結束後依日期、關鍵字或狀態查詢訂單，核對問題並作為後續營運調整參考。</p></div>
-      <div className="adminPageActions"><Link className="adminButton adminButton-secondary" href="/admin/customers">歷史顧客</Link><AdminRefreshButton disabled={loading} onClick={loadOrders} /></div>
+      <div className="adminPageActions"><a className="adminButton adminButton-secondary" href="/admin/customers">歷史顧客</a><AdminRefreshButton disabled={loading} onClick={loadOrders} /></div>
     </header>
 
     <section className="adminOrderListFilters" aria-label="訂單查詢條件">
@@ -112,7 +111,7 @@ function OrderDetail({ order, businessDate, onClose }) {
   return <>
     <header><div><span>訂單明細</span><h2>{order.orderNumber || '附掛加購服務單'}</h2></div><button type="button" aria-label="關閉訂單明細" onClick={onClose}>×</button></header>
     <dl className="adminOrderDetailSummary"><div><dt>顧客</dt><dd>{order.customerName}<small>ID {order.gameId}</small></dd></div><div><dt>狀態</dt><dd><span className={`adminOrderStatus is-${order.status}`}>{statusLabels[order.status] || order.status}</span></dd></div><div><dt>送出時間</dt><dd>{new Date(order.submittedAt).toLocaleString('zh-TW')}</dd></div><div><dt>訂單金額</dt><dd>{money(order.totalAmount)}</dd></div></dl>
-    <div className="adminCustomerActions"><Link className="adminButton adminButton-secondary" href={`/admin/deliveries?${new URLSearchParams({ session: order.sessionId, order: order.id, date: businessDate, create: '1' })}`}>建立後續作品交付</Link><Link className="adminButton adminButton-ghost" href={`/admin/orders?${new URLSearchParams({ session: order.sessionId, date: businessDate })}`}>開啟完整點單管理</Link></div>
+    <div className="adminCustomerActions"><a className="adminButton adminButton-secondary" href={`/admin/deliveries?${new URLSearchParams({ session: order.sessionId, order: order.id, date: businessDate, create: '1' })}`}>建立後續作品交付</a><a className="adminButton adminButton-ghost" href={`/admin/orders?${new URLSearchParams({ session: order.sessionId, date: businessDate })}`}>開啟完整點單管理</a></div>
     <section className="adminOrderDetailItems"><h3>訂購項目</h3>{order.items?.length ? order.items.map((item) => <div key={item.id}><span><strong>{item.name}</strong><small>{item.quantity > 1 ? `數量 ${item.quantity}` : item.itemType}</small></span><b>{money(item.lineTotal)}</b></div>) : <p>此訂單沒有一般品項。</p>}</section>
     {order.roomBookings?.length ? <section className="adminOrderDetailItems"><h3>包廂時段</h3>{order.roomBookings.map((item) => <div key={item.id}><span><strong>{item.roomName}</strong><small>{new Date(item.startsAt).toLocaleString('zh-TW')} ～ {new Date(item.endsAt).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })} · {item.segmentCount} 節</small></span><b>{money(item.totalAmount)}</b></div>)}</section> : null}
     {order.nominees?.length ? <section className="adminOrderDetailItems"><h3>指名服務</h3>{order.nominees.map((item) => <div key={item.id}><span><strong>{item.staffName} · {item.serviceName}</strong><small>{new Date(item.requestedStartsAt).toLocaleString('zh-TW')} · {item.segmentCount} 節</small></span><b>{statusLabels[item.confirmationStatus] || item.confirmationStatus}</b></div>)}</section> : null}

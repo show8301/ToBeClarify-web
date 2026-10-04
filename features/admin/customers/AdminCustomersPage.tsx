@@ -1,7 +1,6 @@
 "use client";
 
 import { AdminRefreshButton } from "@/features/admin/shared/AdminRefreshButton";
-import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useAdminAuth } from "@/features/admin/auth/AdminAuthContext.jsx";
 import { AdminDialog, AdminField, AdminPage, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
@@ -28,7 +27,7 @@ export function AdminCustomersPage() {
     setRevision((value) => value + 1);
   }
 
-  return <AdminPage eyebrow="CUSTOMER HISTORY" title="歷史顧客" description="依營業日找回入場紀錄、訂單與作品交付；以長期 UID 累積跨日紀錄。" actions={<Link className="adminButton adminButton-secondary" href="/admin/deliveries">作品交付管理</Link>}>
+  return <AdminPage eyebrow="CUSTOMER HISTORY" title="歷史顧客" description="依營業日找回入場紀錄、訂單與作品交付；以長期 UID 累積跨日紀錄。" actions={<a className="adminButton adminButton-secondary" href="/admin/deliveries">作品交付管理</a>}>
     <div className="adminCustomers">
       <AdminPanel title="查詢入場紀錄" description="營業日留空可跨日查詢。填寫 ID 是顧客自填資料；同名或同 ID 的紀錄不會自動合併 UID。">
         <form className="adminCustomerFilters" onSubmit={(event) => { event.preventDefault(); setQuery({ businessDate: dateInput, search: searchInput.trim(), page: 1 }); }}>
@@ -51,8 +50,8 @@ export function AdminCustomersPage() {
             <td><strong>{visit.hasCashRecords ? formatMoney(visit.netReceived) : "尚無收退款紀錄"}</strong><small>依帳款紀錄扣除退款</small></td>
             <td><strong>{visit.gameIdVisitCount} 次入場</strong><small>{formatMoney(visit.gameIdOrderAmount)} 訂單金額</small><small>自填 ID 群組，未驗證身分</small></td>
             <td><div className="adminCustomerRowActions">
-              <Link className="adminButton adminButton-secondary" href={queryPath("/admin/order-list", { date: visit.businessDate.slice(0, 10), session: visit.sessionId })}>歷史訂單</Link>
-              <Link className="adminButton adminButton-secondary" href={queryPath("/admin/deliveries", { session: visit.sessionId, date: visit.businessDate.slice(0, 10), create: "1" })}>建立作品交付</Link>
+              <a className="adminButton adminButton-secondary" href={queryPath("/admin/order-list", { date: visit.businessDate.slice(0, 10), session: visit.sessionId })}>歷史訂單</a>
+              <a className="adminButton adminButton-secondary" href={queryPath("/admin/deliveries", { session: visit.sessionId, date: visit.businessDate.slice(0, 10), create: "1" })}>建立作品交付</a>
               {!visit.customerUid ? <button className="adminButton adminButton-ghost" type="button" onClick={() => setSelectedVisit(visit)}>建立／綁定 UID</button> : null}
             </div></td>
           </tr>)}</tbody>
@@ -120,7 +119,7 @@ function CustomerDetails({ uid, onClose, onViewHistory }: { uid: string; onClose
         <strong>{visit.businessDate.slice(0, 10)} · {visit.customerName}</strong>
         <span>{visit.gameId} · {visit.orderCount} 單 · {formatMoney(visit.orderAmount)}</span>
         <small>{visit.hasRecoveryCode ? "找回碼已建立，第 " + visit.recoveryCodeVersion + " 版" + (visit.recoveryCodeIssuedAt ? " · " + formatCustomerTime(visit.recoveryCodeIssuedAt) : "") : "尚未建立找回碼"}</small>
-        <Link className="adminButton adminButton-secondary" href={queryPath("/admin/order-list", { date: visit.businessDate.slice(0, 10), session: visit.sessionId })}>查看當日訂單</Link>
+        <a className="adminButton adminButton-secondary" href={queryPath("/admin/order-list", { date: visit.businessDate.slice(0, 10), session: visit.sessionId })}>查看當日訂單</a>
       </article>)}</div>
     </> : null}
   </AdminPanel>;

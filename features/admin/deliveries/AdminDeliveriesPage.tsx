@@ -1,7 +1,6 @@
 "use client";
 
 import { AdminRefreshButton } from "@/features/admin/shared/AdminRefreshButton";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useState } from "react";
 import { useAdminAuth } from "@/features/admin/auth/AdminAuthContext.jsx";
@@ -42,7 +41,7 @@ export function AdminDeliveriesPage() {
     changed(value.delivery);
   }
 
-  return <AdminPage eyebrow="ART DELIVERY" title="繪圖／簽繪交付" description="將當日消費與日後作品分開追蹤，作品完成後再開放顧客領取。" actions={<Link className="adminButton adminButton-secondary" href="/admin/customers">從歷史顧客建立</Link>}>
+  return <AdminPage eyebrow="ART DELIVERY" title="繪圖／簽繪交付" description="將當日消費與日後作品分開追蹤，作品完成後再開放顧客領取。" actions={<a className="adminButton adminButton-secondary" href="/admin/customers">從歷史顧客建立</a>}>
     <div className="adminCustomers">
       {issued ? <IssuedClaimCode key={issued.claimCode} title={`單筆領取碼 · ${issued.delivery.title}`} value={issued.claimCode} collectionLink onClose={() => setIssued(null)} /> : null}
       {requestedSession && showCreate ? <CreateDeliveryPanel sessionId={requestedSession} orderId={requestedOrder} businessDate={requestedDate} onIssued={onIssued} onClose={() => setShowCreate(false)} /> : null}
@@ -86,7 +85,7 @@ function CreateDeliveryPanel({ sessionId, orderId, businessDate, onIssued, onClo
       <AdminField label="顧客可見說明"><textarea rows={3} maxLength={2000} value={description} onChange={(event) => setDescription(event.target.value)} placeholder="交付內容、尺寸或其他顧客需要知道的事項" /></AdminField>
       <AdminField label="預計交付日"><input type="date" value={dueDate} onChange={(event) => setDueDate(event.target.value)} /></AdminField>
       {error ? <p className="adminCustomerFeedback isError" role="alert">{error} 若是連線中斷，請先重新整理交付清單確認是否已建立；領取碼未保存時可由店經理補發。</p> : null}
-      <div className="adminCustomerActions"><button type="submit" className="adminButton adminButton-primary" disabled={busy || !title.trim()}>{busy ? "建立中…" : "建立作品並產生領取碼"}</button><Link className="adminButton adminButton-ghost" href={queryPath("/admin/order-list", { session: sessionId, date: businessDate, order: orderId })}>核對來源顧客</Link></div>
+      <div className="adminCustomerActions"><button type="submit" className="adminButton adminButton-primary" disabled={busy || !title.trim()}>{busy ? "建立中…" : "建立作品並產生領取碼"}</button><a className="adminButton adminButton-ghost" href={queryPath("/admin/order-list", { session: sessionId, date: businessDate, order: orderId })}>核對來源顧客</a></div>
     </form>
   </AdminPanel>;
 }

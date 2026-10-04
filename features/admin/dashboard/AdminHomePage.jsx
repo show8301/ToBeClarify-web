@@ -1,3 +1,4 @@
+import { AdminRefreshButton } from "@/features/admin/shared/AdminRefreshButton";
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/features/admin/api/client.js';
 import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
@@ -137,13 +138,13 @@ export function AdminHomePage({ navigate }) {
   const closeTime = context?.projectedCloseAt || context?.referenceEndsAt;
 
   return (
-    <AdminPage eyebrow="OPERATIONS OVERVIEW" title="營運總覽" description={`${user.displayName}，這裡集中顯示今日需要處理的資訊。`} actions={<AdminButton variant="secondary" disabled={operations.loading} onClick={loadOperations}>重新整理</AdminButton>}>
+    <AdminPage eyebrow="OPERATIONS OVERVIEW" title="營運總覽" description={`${user.displayName}，這裡集中顯示今日需要處理的資訊。`} actions={<AdminRefreshButton disabled={operations.loading} onClick={loadOperations} />}>
       <section className="adminOperationsOverview">
         <header><div><span>今日營業</span><h2>{operations.loading ? '讀取中…' : periodLabel}</h2><p>{context ? `${intakeLabel}${closeTime ? ` · 預計 ${new Date(closeTime).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })} 結束` : ''}` : operations.error || '尚無營運資料'}</p></div><div className="adminOperationsActions"><AdminButton onClick={() => navigate('/admin')}>前往營業工作台</AdminButton><AdminButton variant="secondary" onClick={() => navigate('/admin/order-list')}>查詢訂單</AdminButton></div></header>
         <div className="adminOperationsMetrics"><article><span>等待處理</span><strong>{context?.waitingOrderCount ?? '—'}</strong><small>筆訂單</small></article><article><span>尚未完成</span><strong>{context?.unfinishedOrderCount ?? '—'}</strong><small>筆訂單</small></article><article><span>接單模式</span><strong className="isText">{context ? intakeLabel : '—'}</strong><small>目前狀態</small></article><article><span>店員管理</span><strong className="isText">工作狀態</strong><button type="button" onClick={() => navigate('/admin/staff')}>前往管理 <span aria-hidden="true">›</span></button></article></div>
       </section>
 
-      {canManageAll ? <section className="adminOverviewSettings"><header><div><h2>內容與系統設定</h2><p>低頻設定集中在這裡，不干擾現場操作。</p></div></header><div><button type="button" onClick={() => navigate('/admin/menu')}><strong>菜單設定</strong><span>品項、分類與價格</span><i>›</i></button><button type="button" onClick={() => navigate('/admin/events')}><strong>活動設定</strong><span>活動內容與檔期</span><i>›</i></button><button type="button" onClick={() => navigate('/admin/home')}><strong>首頁設定</strong><span>店舖介紹與輪播</span><i>›</i></button></div></section> : null}
+      {canManageAll ? <section className="adminOverviewSettings"><header><div><h2>公開網站內容設定</h2><p>依公開官網順序集中管理首頁、店員、活動、菜單與包廂內容。</p></div></header><div><button type="button" onClick={() => navigate('/admin/home')}><strong>首頁設定</strong><span>店舖介紹與輪播</span><i>›</i></button><button type="button" onClick={() => navigate('/admin/staff')}><strong>店員資料設定</strong><span>公開店員介紹與相簿</span><i>›</i></button><button type="button" onClick={() => navigate('/admin/events')}><strong>活動頁設定</strong><span>活動內容與 Gallery 週報</span><i>›</i></button><button type="button" onClick={() => navigate('/admin/menu')}><strong>菜單設定</strong><span>品項、分類與價格</span><i>›</i></button><button type="button" onClick={() => navigate('/admin/rooms')}><strong>包廂內容管理</strong><span>公開包廂介紹與照片</span><i>›</i></button></div></section> : null}
       {canManageAll ? <div className="adminDeveloperTools">
         <DeveloperDisclosure
           title="帳號安全工具"

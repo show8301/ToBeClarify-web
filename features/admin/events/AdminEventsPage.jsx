@@ -168,7 +168,7 @@ export function AdminEventsPage() {
   };
 
   return (
-    <AdminPage eyebrow="Eorzea Weekly" title="活動設定" description="維護艾歐澤亞週報、封面與內頁圖片。首頁輪播會從這裡選擇週報；拖曳卡片調整順序，點擊卡片開啟編輯。" actions={<><AdminButton variant="secondary" onClick={createReport}>新增週報</AdminButton><AdminButton onClick={saveOrder} disabled={!orderDirty || orderSaving}>{orderSaving ? '儲存中…' : '儲存週報順序'}</AdminButton></>}>
+    <AdminPage eyebrow="Eorzea Weekly · Gallery" title="活動頁設定" description="維護艾歐澤亞週報、封面與內頁圖片。首頁輪播會從這裡選擇週報；拖曳卡片調整順序，點擊卡片開啟編輯。" actions={<><AdminButton variant="secondary" onClick={createReport}>新增週報</AdminButton><AdminButton onClick={saveOrder} disabled={!orderDirty || orderSaving}>{orderSaving ? '儲存中…' : '儲存週報順序'}</AdminButton></>}>
       {message ? <div className="adminNotice">{message}</div> : null}
       <AdminState loading={state.loading} error={state.error} onRetry={load} />
       {!state.loading && !state.error ? <AdminPanel title="週報列表" description="公開的週報會同時顯示於艾歐澤亞週報頁與首頁輪播選擇器。">

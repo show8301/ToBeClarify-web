@@ -49,8 +49,8 @@
 .adminButton-secondary { border-color: rgba(var(--color-accent-rgb), .28); background: rgba(var(--color-accent-rgb), .1); }
 .adminButton-ghost { border-color: var(--color-border-strong); background: var(--color-surface); }
 .adminButton-danger { border-color: rgba(255, 107, 107, .3); background: rgba(255, 107, 107, .08); color: #ffabab; }
-.adminPanel { margin-bottom: 18px; padding: 20px; border: 1px solid var(--color-border); border-radius: 18px; background: rgba(13, 34, 50, .68); box-shadow: 0 12px 34px rgba(0,0,0,.14); }
-.adminPanelHeader { display: flex; justify-content: space-between; gap: 18px; margin-bottom: 18px; }
+.adminPanel { margin-bottom: var(--admin-space-block); padding: 20px; border: 1px solid var(--color-border); border-radius: 18px; background: rgba(13, 34, 50, .68); box-shadow: 0 12px 34px rgba(0,0,0,.14); }
+.adminPanelHeader { display: flex; justify-content: space-between; gap: var(--admin-space-inline); margin-bottom: var(--admin-space-block); }
 .adminPanelHeader h2 { margin: 0; font-family: var(--font-display); font-size: 22px; }
 .adminPanelHeader p { margin: 5px 0 0; color: var(--color-fg-mute); font-size: 13px; }
 .adminFormGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
@@ -75,7 +75,7 @@
 .adminEditableRow { display: grid; grid-template-columns: minmax(160px, 2fr) minmax(130px, 1.5fr) 90px auto auto; gap: 12px; align-items: end; }
 .adminServiceRow { grid-template-columns: 110px minmax(130px, 1fr) 150px minmax(220px, 2fr) auto auto; }
 .adminCarouselRow .adminFormGrid { margin: 0; }
-.adminSelectorRow { display: flex; align-items: end; gap: 18px; }
+.adminSelectorRow { display: flex; align-items: end; gap: var(--admin-space-inline); }
 .adminSelectorRow .adminField { width: min(420px, 100%); }
 .adminSelectionHint { padding-bottom: 10px; color: var(--color-accent-soft); font-size: 13px; }
 .adminNotice { margin-bottom: 16px; padding: 11px 14px; border: 1px solid rgba(var(--color-accent-2-rgb), .3); border-radius: 10px; background: rgba(var(--color-accent-2-rgb), .08); color: var(--color-accent-2); }
@@ -96,7 +96,7 @@
 .adminInlineState { display: grid; justify-items: start; gap: 10px; margin-bottom: 18px; padding: 16px; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface); color: var(--color-fg-soft); }
 .adminInlineState p { margin: 0; }
 .adminInlineStateError { border-color: rgba(255,107,107,.28); color: #ffabab; }
-.adminSplitView { display: grid; grid-template-columns: minmax(220px, .34fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.adminSplitView { display: grid; grid-template-columns: minmax(220px, .34fr) minmax(0, 1fr); gap: var(--admin-space-inline); align-items: start; }
 .adminListPanel { position: sticky; top: 18px; }
 .adminSelectList { display: grid; gap: 6px; max-height: 650px; overflow: auto; }
 .adminSelectList button { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 12px; border: 1px solid transparent; border-radius: 10px; background: transparent; color: var(--color-fg-soft); text-align: left; }
@@ -115,7 +115,7 @@
 .adminSubheading { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--color-fg-soft); }
 .adminSetItemRow { display: grid; grid-template-columns: minmax(0, 1fr) 130px 80px auto; gap: 8px; align-items: center; }
 .adminDangerZone { display: flex; justify-content: flex-end; margin: 22px 0; }
-.adminDashboardCards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.adminDashboardCards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--admin-space-inline); }
 .adminDashboardCards .adminPanel { margin: 0; }
 .adminModuleStatus.isReady { display: inline-flex; margin: 0; background: rgba(var(--color-accent-2-rgb), .1); color: var(--color-accent-2); }
 .adminDeveloperTools { margin-top: 18px; }

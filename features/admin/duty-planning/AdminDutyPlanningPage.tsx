@@ -1,5 +1,6 @@
 "use client";
 
+import { AdminRefreshButton } from "@/features/admin/shared/AdminRefreshButton";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getAdminBusinessDate } from "@/features/admin/shared/businessDay";
 import { adminApi } from "@/features/admin/api/client.js";
@@ -250,7 +251,7 @@ export function AdminDutyPlanningPage({ navigate }: { navigate: Navigate }) {
     }
   };
 
-  return <AdminPage eyebrow="DUTY PLANNING" title="值班規劃" description="先填寫未來可上班日期、時段與職位，再由經理核准；已核准的今日規劃會帶入營業工作台。" actions={<><AdminButton variant="secondary" disabled={loading} onClick={() => void load()}>重新整理</AdminButton><AdminButton disabled={!businessDate || loading} onClick={() => startNew()}>＋ 新增值班規劃</AdminButton></>}>
+  return <AdminPage eyebrow="DUTY PLANNING" title="值班規劃" description="先填寫未來可上班日期、時段與職位，再由經理核准；已核准的今日規劃會帶入營業工作台。" actions={<><AdminRefreshButton disabled={loading} onClick={() => void load()} /><AdminButton disabled={!businessDate || loading} onClick={() => startNew()}>＋ 新增值班規劃</AdminButton></>}>
     {error ? <div className="adminOrderMessage isError" role="alert">{error}</div> : null}
     {message ? <div className="adminOrderMessage" role="status">{message}</div> : null}
 

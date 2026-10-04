@@ -123,6 +123,20 @@
 .adminPageHeading h1 { color: var(--color-fg); font: 850 clamp(38px, 4.4vw, 60px)/.98 var(--font-display); letter-spacing: -.055em; }
 .adminPageHeading p:not(.eyebrow) { max-width: 760px; margin-top: 13px; font-size: 14px; line-height: 1.7; }
 .adminPageActions { justify-content: flex-end; }
+.adminTheme .adminRefreshFloating {
+  position: fixed;
+  top: calc(max(20px, env(safe-area-inset-top)) + 56px);
+  right: max(24px, env(safe-area-inset-right));
+  z-index: 590;
+  min-height: 42px;
+  padding: 9px 14px;
+  flex: 0 0 auto;
+  gap: 3px;
+  width: auto;
+  white-space: nowrap;
+  border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.18);
+}
 
 .adminPanel,
 .adminOrderInlinePanel,
@@ -490,7 +504,7 @@
 .adminOperationsWorkbenchMetrics article>small { display:block; color:var(--color-fg-mute); font-size:10px; }
 .adminOperationsWorkbenchMetrics article>strong { display:block; overflow:hidden; margin:8px 0 5px; color:var(--color-fg); font:820 27px/1.1 var(--font-display); text-overflow:ellipsis; white-space:nowrap; }
 .adminOperationsWorkbenchMetrics article>small { line-height:1.45; }
-.adminOperationsDashboardGrid { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(300px,.8fr); gap:18px; margin-bottom:18px; }
+.adminOperationsDashboardGrid { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(300px,.8fr); gap:var(--admin-space-inline); margin-bottom:var(--admin-space-block); }
 .adminOperationsDashboardGrid .adminPanel { min-width:0; margin:0; }
 .adminOperationsFocusList { display:grid; gap:8px; }
 .adminOperationsFocusList article { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:13px 14px; border:1px solid rgba(49,51,74,.11); border-radius:11px; background:rgba(255,255,255,.38); }
@@ -672,14 +686,78 @@
 }
 
 /* Phase 2: role-specific operational dashboards. */
-.adminRoleDashboard { display:grid; gap:18px; }
+.adminRoleDashboard { display:grid; gap:var(--admin-space-block); }
+.adminRoleDashboard > .adminPanel { margin-bottom:0; }
 .adminRoleDashboardMetrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); overflow:hidden; border:1px solid rgba(49,51,74,.13); border-radius:16px; background:rgba(250,250,253,.92); box-shadow:0 6px 20px rgba(82,87,120,.055); }
 .adminRoleDashboardMetrics article { min-width:0; padding:18px 20px; border-right:1px solid rgba(49,51,74,.09); }
 .adminRoleDashboardMetrics article:last-child { border-right:0; }
 .adminRoleDashboardMetrics span,.adminRoleDashboardMetrics small { display:block; color:var(--color-fg-mute); font-size:10px; }
 .adminRoleDashboardMetrics strong { display:block; overflow:hidden; margin:8px 0 5px; color:var(--color-fg); font:820 25px/1.1 var(--font-display); text-overflow:ellipsis; white-space:nowrap; }
 .adminRoleDashboardMetrics small { line-height:1.45; }
-.adminRoleDashboardGrid { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(300px,.8fr); gap:18px; }
+/* Service metrics: topic and detail on the left, quantity centered on the right. */
+.adminRoleDashboard-service .adminRoleDashboardMetrics {
+  grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr));
+  gap: var(--admin-space-inline);
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.adminRoleDashboard-service .adminRoleDashboardMetrics article {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(2ch, max-content);
+  grid-template-rows: minmax(36px, auto) minmax(28px, auto);
+  grid-template-areas: "topic quantity" "detail quantity";
+  align-content: center;
+  align-items: center;
+  gap: 4px 12px;
+  min-height: 112px;
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface-strong);
+}
+.adminRoleDashboard-service .adminRoleDashboardMetrics article:first-child {
+  border-color: rgba(var(--color-accent-2-rgb), .5);
+  background: linear-gradient(115deg, rgba(var(--color-accent-2-rgb), .14), var(--color-surface-strong));
+}
+.adminRoleDashboard-service .adminRoleDashboardMetrics span {
+  grid-area: topic;
+  min-width: 0;
+  color: var(--color-fg);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.adminRoleDashboard-service .adminRoleDashboardMetrics article:first-child span {
+  font-size: 26px;
+}
+.adminRoleDashboard-service .adminRoleDashboardMetrics strong {
+  grid-area: quantity;
+  justify-self: end;
+  overflow: visible;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.adminRoleDashboard-service .adminRoleDashboardMetrics article:first-child strong {
+  color: var(--color-accent-2);
+  font-size: 22px;
+}
+.adminRoleDashboard-service .adminRoleDashboardMetrics small {
+  grid-area: detail;
+  min-width: 0;
+  color: var(--color-fg-soft);
+  font-size: 14px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.adminRoleDashboardGrid { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(300px,.8fr); gap:var(--admin-space-inline); }
 .adminRoleDashboardGrid .adminPanel { min-width:0; margin:0; }
 .adminRoleDashboardRows { display:grid; gap:8px; }
 .adminRoleDashboardRow { display:grid; grid-template-columns:minmax(150px,1fr) minmax(150px,1.1fr) auto auto; align-items:center; gap:12px; padding:12px 13px; border:1px solid rgba(49,51,74,.11); border-radius:11px; background:rgba(255,255,255,.42); }
@@ -698,13 +776,28 @@
 .adminRoleSwitcher > span { margin:0 4px 0 3px; color:var(--color-fg-mute); font-size:11px; font-weight:750; }
 .adminRoleSwitcher button { min-height:34px; padding:7px 11px; border:1px solid rgba(101,120,159,.22); border-radius:8px; background:rgba(255,255,255,.64); color:var(--color-fg-soft); font-size:11px; font-weight:750; }
 .adminRoleSwitcher button.isActive { border-color:rgba(101,120,159,.46); background:#65789f; color:#fff; }
-.adminRoleSwitcher.isDeveloperPreview { border-color:rgba(101,120,159,.28); background:linear-gradient(105deg,rgba(234,239,250,.86),rgba(245,247,252,.86)); }
+.adminRoleSwitcher.isDeveloperPreview { margin-bottom:var(--admin-space-block); border-color:rgba(101,120,159,.28); background:linear-gradient(105deg,rgba(234,239,250,.86),rgba(245,247,252,.86)); }
 .adminRoleSwitcher.isDeveloperPreview > span { color:#59698e; }
-.adminRoleDashboardPrimaryAction { margin:0; border-color:rgba(61,130,122,.25); background:linear-gradient(115deg,rgba(224,244,239,.74),rgba(234,238,249,.76)); }
+.adminRoleDashboardServiceActionRow { display:grid; grid-template-columns:minmax(220px,.7fr) minmax(0,1.3fr); gap:var(--admin-space-inline); align-items:stretch; }
+.adminRoleDashboardServiceActionRow > .adminPanel { min-width:0; margin:0; }
+.adminRoleDashboardPrimaryAction { display:flex; align-items:center; justify-content:center; margin:0; border-color:rgba(61,130,122,.25); background:linear-gradient(115deg,rgba(224,244,239,.74),rgba(234,238,249,.76)); }
+.adminRoleDashboardPrimaryAction > .adminButton { min-width:min(100%,180px); }
+.adminRoleDashboardServiceCoordination { margin:0; }
 .adminRoleDashboardPrimaryActionBody { display:flex; align-items:center; justify-content:space-between; gap:18px; }
 .adminRoleDashboardPrimaryActionBody > div { display:grid; gap:5px; }
 .adminRoleDashboardPrimaryActionBody strong { color:var(--color-fg); font-size:15px; }
 .adminRoleDashboardPrimaryActionBody small { color:var(--color-fg-mute); font-size:11px; line-height:1.5; }
+.adminOrderPassDrawer { position:fixed; inset:0; z-index:1000; display:flex; justify-content:flex-end; background:rgba(8,18,24,.52); }
+.adminOrderPassDrawerBackdrop { position:absolute; inset:0; width:100%; height:100%; border:0; border-radius:0; background:transparent; cursor:default; }
+.adminOrderPassDrawerPanel { position:relative; z-index:1; width:min(600px,100%); height:100%; overflow:auto; padding:clamp(22px,4vw,42px); border-left:1px solid var(--color-border-strong); background:var(--color-surface-strong); box-shadow:-18px 0 48px rgba(7,17,23,.24); animation:adminOrderPassDrawerIn .22s ease-out both; }
+.adminOrderPassDrawerPanel>.adminOrderInlinePanel,.adminOrderPassDrawerPanel>.adminIssuedPanel { margin:0; padding:0; border:0; background:transparent; box-shadow:none; }
+.adminOrderPassDrawerPanel .adminOrderInlinePanel form { grid-template-columns:1fr; align-items:stretch; }
+.adminOrderPassDrawerPanel .adminOrderInlinePanel form>small,
+.adminOrderPassDrawerPanel .adminOrderInlinePanel form>.adminFormError,
+.adminOrderPassDrawerPanel .adminOrderInlinePanel form>.adminCustomerHint,
+.adminOrderPassDrawerPanel .adminOrderInlinePanel form>.adminIdentityCandidates { grid-column:1; }
+.adminOrderPassDrawerPanel .adminOrderInlinePanel form>.adminButton { width:100%; }
+@keyframes adminOrderPassDrawerIn { from { opacity:0; transform:translateX(24px); } to { opacity:1; transform:translateX(0); } }
 .adminRoleDashboardQuickLinks { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
 .adminRoleDashboardQuickLinks .adminButton { min-height:42px; }
 .adminRoleDashboardControlHint { display:block; margin-top:12px; color:var(--color-fg-mute); font-size:11px; }
@@ -790,6 +883,9 @@
 .adminDutyPlanningNote i { color:#2d9d76; font-style:normal; }
 .adminDutyPlanningLinks { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
 :root[data-admin-theme="dark"] .adminRoleDashboardMetrics { background:#142229; border-color:rgba(255,255,255,.13); }
+:root[data-admin-theme="dark"] .adminRoleDashboard-service .adminRoleDashboardMetrics {
+  background: transparent;
+}
 :root[data-admin-theme="dark"] .adminRoleDashboardRow { background:rgba(25,40,47,.72); border-color:rgba(255,255,255,.12); }
 :root[data-admin-theme="dark"] .adminRoleDashboardNotice { background:rgba(91,72,39,.36); color:#ead7ae; }
 :root[data-admin-theme="dark"] .adminRoleSwitcher { background:rgba(20,34,40,.9); border-color:rgba(255,255,255,.13); }
@@ -797,6 +893,7 @@
 :root[data-admin-theme="dark"] .adminRoleSwitcher.isDeveloperPreview { background:linear-gradient(105deg,rgba(38,53,79,.9),rgba(25,42,52,.9)); border-color:rgba(145,166,220,.38); }
 :root[data-admin-theme="dark"] .adminRoleSwitcher.isDeveloperPreview > span { color:#b5c4e8; }
 :root[data-admin-theme="dark"] .adminRoleDashboardPrimaryAction { background:linear-gradient(115deg,rgba(34,75,70,.62),rgba(32,51,72,.74)); border-color:rgba(117,201,184,.24); }
+:root[data-admin-theme="dark"] .adminOrderPassDrawerPanel { border-left-color:rgba(218,234,244,.24); background:#10212b; box-shadow:-18px 0 48px rgba(0,0,0,.42); }
 :root[data-admin-theme="dark"] .adminCoordinationAccept { color:#b8f1e2; }
 :root[data-admin-theme="dark"] .adminCoordinationReject { color:#ffc0ca; }
 :root[data-admin-theme="dark"] .adminManagerControls>label input { background:#1b2c34; color:#eef4f5; border-color:rgba(255,255,255,.15); }
@@ -811,15 +908,28 @@
 :root[data-admin-theme="dark"] .is-approved .adminDutyPlanStatus b { color:#91ddc3; }
 :root[data-admin-theme="dark"] .is-rejected .adminDutyPlanStatus b { color:#efb4c7; }
 
+@media(max-width:1200px){
+  .adminRoleDashboard-service .adminRoleDashboardMetrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
 @media(max-width:820px){
   .adminRoleDashboardGrid { grid-template-columns:1fr; }
+  .adminRoleDashboardServiceActionRow { grid-template-columns:1fr; }
   .adminDutyPlanningLayout { grid-template-columns:1fr; }
   .adminDutyPlanEditor { position:static; }
 }
 @media(max-width:680px){
+  .adminOrderPassDrawerPanel { width:100%; padding:22px 18px; }
   .adminRoleDashboardMetrics { grid-template-columns:1fr 1fr; }
   .adminRoleDashboardMetrics article:nth-child(2) { border-right:0; }
   .adminRoleDashboardMetrics article:nth-child(-n+2) { border-bottom:1px solid rgba(49,51,74,.09); }
+  .adminRoleDashboard-service .adminRoleDashboardMetrics article {
+    border: 1px solid var(--color-border);
+  }
+  .adminRoleDashboard-service .adminRoleDashboardMetrics article:first-child {
+    border-bottom-color: rgba(var(--color-accent-2-rgb), .5);
+  }
   .adminRoleDashboardRow { grid-template-columns:1fr auto; align-items:start; }
   .adminRoleDashboardRowCopy { grid-column:1/-1; }
   .adminRoleDashboardRow .adminButton { justify-self:start; }
@@ -838,6 +948,12 @@
   .adminDutyPlanActions { grid-column:1 / -1; justify-content:flex-start; }
 }
 
+@media(max-width:560px){
+  .adminRoleDashboard-service .adminRoleDashboardMetrics {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Improve the login hierarchy without changing the card's outer layout. */
 .adminLoginShell .adminLoginBrand {
   transform:scale(1.1);
@@ -853,3 +969,28 @@
   font-size:14px;
   font-weight:700;
 }
+
+.adminRoleDashboard .adminPanelActions { display:flex; flex-wrap:wrap; gap:8px; }
+.adminRoomServicePreview { display:flex; flex-wrap:wrap; align-items:center; gap:8px 18px; padding:10px 12px; border:1px solid rgba(var(--color-accent-2-rgb),.34); border-radius:10px; background:rgba(var(--color-accent-2-rgb),.1); color:var(--color-fg-soft); font-size:12px; }
+.adminRoomServicePreview strong { color:var(--color-fg); font:750 12px/1.2 var(--font-mono); }
+.adminRoomServicePreview small { flex-basis:100%; color:var(--color-fg-mute); font-size:10px; }
+:root[data-admin-theme="dark"] .adminRoomServicePreview { border-color:rgba(117,201,184,.3); background:rgba(50,103,99,.2); color:rgba(237,244,247,.8); }
+:root[data-admin-theme="dark"] .adminRoomServicePreview strong { color:#f4fbfd; }
+:root[data-admin-theme="dark"] .adminRoomServicePreview small { color:rgba(237,244,247,.72); }
+.adminAttendanceQuickBody { display:flex; align-items:center; justify-content:space-between; gap:18px; padding:14px 16px; border:1px solid var(--color-border); border-radius:13px; background:rgba(255,255,255,.32); }
+.adminAttendanceQuickStatus { display:grid; gap:3px; }
+.adminAttendanceQuickStatus span { color:var(--color-fg-mute); font-size:11px; font-weight:700; }
+.adminAttendanceQuickStatus strong { color:var(--color-fg); font:800 25px/1 var(--font-display); letter-spacing:-.035em; }
+.adminAttendanceQuickStatus small { color:var(--color-fg-mute); font-size:11px; }
+.adminAttendanceQuickStatus.isWorking strong { color:#347d76; }
+.adminAttendanceQuickMessage { margin:10px 0 0; padding:9px 11px; border-radius:9px; font-size:12px; }
+.adminAttendanceQuickMessage.isSuccess { border:1px solid rgba(77,145,132,.3); background:rgba(112,185,187,.13); color:#347d76; }
+.adminAttendanceQuickMessage.isInfo { border:1px solid rgba(var(--color-accent-rgb),.3); background:rgba(var(--color-accent-rgb),.12); color:var(--color-fg-soft); }
+.adminAttendanceQuickMessage.isError { border:1px solid rgba(142,95,124,.3); background:rgba(232,199,218,.24); color:#884c63; }
+:root[data-admin-theme="dark"] .adminAttendanceQuickBody { border-color:rgba(218,234,244,.34); background:rgba(35,61,78,.72); }
+:root[data-admin-theme="dark"] .adminAttendanceQuickStatus strong { color:#f4fbfd; }
+:root[data-admin-theme="dark"] .adminAttendanceQuickStatus.isWorking strong { color:#b8f1e2; }
+:root[data-admin-theme="dark"] .adminAttendanceQuickMessage.isSuccess { color:#b8f1e2; }
+:root[data-admin-theme="dark"] .adminAttendanceQuickMessage.isInfo { color:#c7d7f0; }
+:root[data-admin-theme="dark"] .adminAttendanceQuickMessage.isError { color:#ffc0ca; }
+@media(max-width:560px){.adminAttendanceQuickBody{align-items:stretch; flex-direction:column}.adminAttendanceQuickBody .adminButton{width:100%}}

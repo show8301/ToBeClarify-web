@@ -5,28 +5,30 @@ import { AdminButton } from '@/features/admin/shared/AdminShared.jsx';
 
 const allGroups = [
   { label: '營運', items: [
-    { route: '/admin', label: '營業工作台', index: '00', roles: ['developer', 'manager', 'clerk'] },
-    { route: '/admin/rooms/service', label: '包廂服務排程', index: '01', roles: ['developer', 'manager', 'clerk'] },
-    { route: '/admin/duty-planning', label: '值班規劃', index: '04', roles: ['developer', 'manager', 'clerk'] },
-    { route: '/admin/overview', label: '營運總覽', index: '02', roles: ['developer', 'manager', 'clerk'] },
-    { route: '/admin/settlement', label: '帳目／薪資結算', index: '03', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin', label: '營業工作台', index: '01', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin/order-list', label: '訂單查詢', index: '02', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin/rooms/service', label: '包廂服務排程', index: '03', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin/notifications', label: '通知中心', index: '04', roles: ['developer','manager','clerk'] },
   ] },
-  { label: '查詢與管理', items: [
-    { route: '/admin/order-list', label: '訂單查詢', index: '10', roles: ['developer', 'manager', 'clerk'] },
-    { route: '/admin/customers', label: '歷史顧客', index: '14', roles: ['developer', 'manager', 'clerk'] },
-    { route: '/admin/deliveries', label: '繪圖／簽繪交付', index: '15', roles: ['developer', 'manager', 'clerk'] },
-    { route: '/admin/notifications', label: '通知中心', index: '13', roles: ['developer','manager','clerk'] },
-    { route: '/admin/staff', label: '店員資料設定', index: '11', roles: ['developer', 'manager', 'clerk'] },
-    { route: '/admin/rooms', label: '包廂內容管理', index: '12', roles: ['developer', 'manager', 'clerk'] },
+  { label: '營運管理', items: [
+    { route: '/admin/overview', label: '營運總覽', index: '11', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin/duty-planning', label: '值班規劃', index: '12', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin/settlement', label: '帳目／薪資結算', index: '14', roles: ['developer', 'manager', 'clerk'] },
   ] },
-  { label: '系統工具', items: [
+  { label: '顧客與互動', items: [
+    { route: '/admin/customers', label: '歷史顧客', index: '21', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin/deliveries', label: '繪圖／簽繪交付', index: '22', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin/guestbook', label: '留言板管理', index: '23', roles: ['developer', 'manager', 'clerk'] },
+  ] },
+  { label: '公開網站內容', items: [
+    { route: '/admin/home', label: '首頁設定', index: '31', roles: ['developer', 'manager'] },
+    { route: '/admin/staff', label: '店員資料設定', index: '32', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin/events', label: '活動頁設定', index: '33', roles: ['developer', 'manager'] },
+    { route: '/admin/menu', label: '菜單設定', index: '34', roles: ['developer', 'manager'] },
+    { route: '/admin/rooms', label: '包廂內容管理', index: '35', roles: ['developer', 'manager', 'clerk'] },
+  ] },
+  { label: '進階工具', items: [
     { route: '/admin/orders', label: '完整點單管理', index: '99', roles: ['developer', 'manager', 'clerk'] },
-  ] },
-  { label: '內容與設定', items: [
-    { route: '/admin/guestbook', label: '留言板管理', index: '09', roles: ['developer', 'manager', 'clerk'] },
-    { route: '/admin/menu', label: '菜單設定', index: '06', roles: ['developer', 'manager'] },
-    { route: '/admin/events', label: '活動設定', index: '07', roles: ['developer', 'manager'] },
-    { route: '/admin/home', label: '首頁設定', index: '08', roles: ['developer', 'manager'] },
   ] },
 ];
 

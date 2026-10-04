@@ -1,3 +1,4 @@
+import { AdminRefreshButton } from "@/features/admin/shared/AdminRefreshButton";
 import { useEffect, useMemo, useState } from 'react';
 import { adminApi } from '@/features/admin/api/client.js';
 import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
@@ -133,7 +134,7 @@ export function AdminRoomsPage() {
 
   const activeCount = useMemo(() => rooms.filter((room) => room.isActive).length, [rooms]);
 
-  return <AdminPage eyebrow="ROOM CONTENT" title="包廂內容管理" description="管理公開包廂介紹、照片與內容。營業期間的預約與服務狀態請至包廂服務排程；價格、包廂歸屬與刪除僅開發者／經理可調整。" actions={<><AdminButton variant="secondary" disabled={loading || deleting} onClick={() => load(form.id)}>重新整理</AdminButton><AdminButton onClick={startNew}>＋ 新增包廂</AdminButton></>}>
+  return <AdminPage eyebrow="ROOM CONTENT" title="包廂內容管理" description="管理公開包廂介紹、照片與內容。營業期間的預約與服務狀態請至包廂服務排程；價格、包廂歸屬與刪除僅開發者／經理可調整。" actions={<><AdminRefreshButton disabled={loading || deleting} onClick={() => load(form.id)} /><AdminButton onClick={startNew}>＋ 新增包廂</AdminButton></>}>
     {message.text ? <div className={message.error ? 'adminRoomMessage isError' : 'adminRoomMessage'} role="status">{message.text}</div> : null}
     <AdminState loading={loading} error={null} />
     <div className="adminRoomLayout">

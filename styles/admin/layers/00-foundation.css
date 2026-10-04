@@ -21,6 +21,9 @@
   --radius-md: 12px;
   --radius-lg: 18px;
   --radius-pill: 999px;
+  /* Shared outer spacing for admin sections and adjacent panels. */
+  --admin-space-block: 18px;
+  --admin-space-inline: 18px;
   --font-display: Arial, "Noto Sans TC", sans-serif;
   --font-mono: "SFMono-Regular", Consolas, monospace;
   min-height: 100vh;

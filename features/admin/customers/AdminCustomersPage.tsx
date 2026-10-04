@@ -1,5 +1,6 @@
 "use client";
 
+import { AdminRefreshButton } from "@/features/admin/shared/AdminRefreshButton";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useAdminAuth } from "@/features/admin/auth/AdminAuthContext.jsx";
@@ -34,7 +35,7 @@ export function AdminCustomersPage() {
           <AdminField label="營業日"><input type="date" value={dateInput} onChange={(event) => setDateInput(event.target.value)} /></AdminField>
           <AdminField label="顧客名稱／填寫 ID／UID"><input value={searchInput} maxLength={100} onChange={(event) => setSearchInput(event.target.value)} placeholder="輸入顧客線索" /></AdminField>
           <button type="submit" className="adminButton adminButton-primary" disabled={loading}>查詢</button>
-          <button type="button" className="adminButton adminButton-secondary" disabled={loading} onClick={() => setRevision((value) => value + 1)}>重新整理</button>
+          <AdminRefreshButton disabled={loading} onClick={() => setRevision((value) => value + 1)} />
         </form>
       </AdminPanel>
       {error ? <div className="adminCustomerFeedback isError" role="alert">{error}</div> : null}

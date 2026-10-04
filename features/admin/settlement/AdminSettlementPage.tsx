@@ -1,5 +1,6 @@
 "use client";
 
+import { AdminRefreshButton } from "@/features/admin/shared/AdminRefreshButton";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AttendanceBackfill, SettlementResult, SettlementRule, SettlementRun, SettlementStaff, SettlementSummary, SettlementWorkflow } from "./types";
 import { getAdminBusinessDate } from "@/features/admin/shared/businessDay";
@@ -255,7 +256,7 @@ export function AdminSettlementPage() {
   const availableStaff = useMemo(() => staff.filter((item) => item.isActive !== false && (canManage || item.id === user?.staffMemberId)), [canManage, staff, user?.staffMemberId]);
   const isFinalized = overview?.run.status === "finalized";
 
-  return <AdminPage eyebrow="PAYROLL · SETTLEMENT" title="帳目／薪資結算" description="依營業日期鎖定規則版本，核對實收營業額、工時、小費與各角色薪資。" actions={<><AdminButton variant="secondary" onClick={() => { setLoading(true); void load(); }} disabled={loading || saving}>重新整理</AdminButton>{canManage && (isFinalized ? <AdminButton onClick={() => void reopen()} disabled={saving}>重新開放新時段</AdminButton> : <AdminButton onClick={finalize} disabled={loading || saving || !overview || overview.anomalies.length > 0 || overview.workflow?.canFinalize === false}>正式結算</AdminButton>)}</>}>
+  return <AdminPage eyebrow="PAYROLL · SETTLEMENT" title="帳目／薪資結算" description="依營業日期鎖定規則版本，核對實收營業額、工時、小費與各角色薪資。" actions={<><AdminRefreshButton onClick={() => { setLoading(true); void load(); }} disabled={loading || saving} />{canManage && (isFinalized ? <AdminButton onClick={() => void reopen()} disabled={saving}>重新開放新時段</AdminButton> : <AdminButton onClick={finalize} disabled={loading || saving || !overview || overview.anomalies.length > 0 || overview.workflow?.canFinalize === false}>正式結算</AdminButton>)}</>}>
     {flowVersion >= 2 && <p role="status">分項履約、現場收退款與結算後差額已納入同一營業日；未決金額會保留分潤並可跨日結轉。</p>}
     {date ? <AttendancePanel businessDate={date} canManage={canManage} /> : null}
     <div className="adminSettlementToolbar"><AdminField label="營業日期"><input type="date" value={date} onChange={(event) => { setLoading(true); if (event.target.value) setDate(event.target.value); }} /></AdminField><AdminField label="營業時段"><input type="number" min="1" value={sessionNo} onChange={(event) => { setLoading(true); setSessionNo(Number(event.target.value) || 1); }} /></AdminField><AdminField label="日期類型"><select value={dayType} onChange={(event) => setDayType(event.target.value)} disabled={!canManage || Boolean(overview?.run.status !== "draft")}><option value="normal">非活動日</option><option value="event">活動日</option></select></AdminField>{canManage ? <><AdminButton variant="secondary" onClick={saveInputs} disabled={loading || saving || isFinalized}>保存輸入</AdminButton><AdminButton onClick={calculate} disabled={loading || saving || isFinalized}>重新計算</AdminButton></> : null}</div>

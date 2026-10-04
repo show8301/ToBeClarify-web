@@ -1,5 +1,6 @@
 "use client";
 
+import { AdminRefreshButton } from "@/features/admin/shared/AdminRefreshButton";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { adminApi } from "@/features/admin/api/client.js";
 import { useAdminAuth } from "@/features/admin/auth/AdminAuthContext.jsx";
@@ -152,7 +153,7 @@ export function AdminOperationsPage({ navigate }: { navigate: Navigate }) {
       eyebrow="LIVE OPERATIONS"
       title="營業工作台"
       description={`${user?.displayName || "目前登入者"}，這裡會依當日職位集中顯示營業期間需要關注的工作。`}
-      actions={<AdminButton variant="secondary" disabled={state.loading} onClick={load}>重新整理</AdminButton>}
+      actions={<AdminRefreshButton disabled={state.loading} onClick={load} />}
     >
       <section className={`adminOperationsWorkbench adminOperationsWorkbench-${dashboardRole}`}>
         <header className="adminOperationsWorkbenchHeader">

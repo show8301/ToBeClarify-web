@@ -1,5 +1,6 @@
 "use client";
 
+import { AdminRefreshButton } from "@/features/admin/shared/AdminRefreshButton";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError } from "@/features/admin/api/client.js";
 import { useAdminAuth } from "@/features/admin/auth/AdminAuthContext.jsx";
@@ -287,7 +288,6 @@ export function AdminGuestbookPage() {
         {error ? (
           <p className="adminGuestbookFeedback" role="alert">
             {error}
-            <button className={SECONDARY_BUTTON_CLASS} disabled={busy} onClick={() => { setError(""); void load(); }}>重新整理</button>
           </p>
         ) : null}
         <p role="status" aria-live="polite">{status}</p>
@@ -343,7 +343,7 @@ export function AdminGuestbookPage() {
         />
         <AdminPanel
           title="留言清單"
-          actions={<button className={SECONDARY_BUTTON_CLASS} disabled={busy || loading} onClick={() => void load()}>重新整理</button>}
+          actions={<AdminRefreshButton disabled={busy || loading} onClick={() => void load()} />}
         >
           <AdminField label="顯示範圍">
             <select

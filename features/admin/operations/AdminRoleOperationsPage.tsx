@@ -1,5 +1,6 @@
 "use client";
 
+import { AdminRefreshButton } from "@/features/admin/shared/AdminRefreshButton";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { requireBusinessDate } from "@/features/admin/shared/businessDay";
 import { adminApi } from "@/features/admin/api/client.js";
@@ -10,6 +11,8 @@ import {
   AdminManagerDashboard,
   AdminServiceDashboard,
 } from "./AdminOperationsDashboards";
+import { AdminCreateOrderPassDrawer } from "./AdminCreateOrderPassDrawer.jsx";
+import { AdminCreateRoomServiceDrawer } from "./AdminCreateRoomServiceDrawer.jsx";
 import { booleanValue, isRecord, numberValue, stringValue } from "./operationsFormat";
 import type {
   CurrentAdminUser,
@@ -37,6 +40,13 @@ const dashboardConfigs: Record<OperationalDashboardRole, { label: string; title:
 };
 
 const developerPreviewRoles: OperationalDashboardRole[] = ["service", "designated", "manager"];
+
+const todayBusinessDate = () => new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Taipei",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+}).format(new Date());
 
 function toAdminUser(value: unknown): CurrentAdminUser {
   const record = isRecord(value) ? value : {};
@@ -220,6 +230,9 @@ export function AdminRoleOperationsPage({ navigate }: { navigate: Navigate }) {
   const adminUser = useMemo(() => toAdminUser(user), [user]);
   const [state, setState] = useState({ loading: true, data: emptyData, error: "" });
   const [actionState, setActionState] = useState<OperationsActionState>({ busyId: "", message: "", error: "" });
+  const [createPassOpen, setCreatePassOpen] = useState(false);
+  const [issuedPass, setIssuedPass] = useState<unknown>(null);
+  const [createRoomServiceOpen, setCreateRoomServiceOpen] = useState(false);
   const currentStaff = useMemo(() => state.data.staff.find((staff) => staff.id === adminUser.staffMemberId), [adminUser.staffMemberId, state.data.staff]);
   const availableRoles = useMemo(() => resolveAvailableDashboardRoles(user, currentStaff), [currentStaff, user]);
   const defaultRole = useMemo(() => resolveDefaultDashboardRole(user, currentStaff), [currentStaff, user]);
@@ -248,6 +261,7 @@ export function AdminRoleOperationsPage({ navigate }: { navigate: Navigate }) {
   const dashboardRole = selectedRole && availableRoles.includes(selectedRole) ? selectedRole : defaultRole;
   const config = dashboardConfigs[dashboardRole];
   const isDeveloperPreview = adminUser.role === "developer";
+  const canManage = adminUser.role === "developer" || adminUser.role === "manager";
 
   const load = useCallback(async () => {
     setState((current) => ({ ...current, loading: true, error: "" }));
@@ -297,12 +311,36 @@ export function AdminRoleOperationsPage({ navigate }: { navigate: Navigate }) {
     }
   }, [load]);
 
-  return <AdminPage eyebrow={`${isDeveloperPreview ? "DEVELOPER PREVIEW · " : ""}${config.label.toUpperCase()} DASHBOARD`} title={config.title} description={`${adminUser.displayName}，${isDeveloperPreview ? "可切換檢視三種營業工作台；" : ""}${config.description}`} actions={<><AdminButton variant="secondary" disabled={state.loading} onClick={() => void load()}>{state.loading ? "讀取中…" : "重新整理"}</AdminButton><AdminButton variant="ghost" onClick={() => navigate("/admin/orders")}>完整點單管理</AdminButton></>}>
+  const openCreatePass = useCallback(() => {
+    setIssuedPass(null);
+    setCreatePassOpen(true);
+  }, []);
+  const closeCreatePass = useCallback(() => {
+    setCreatePassOpen(false);
+    setIssuedPass(null);
+  }, []);
+  const handleCreatePassIssued = useCallback(async (result: unknown) => {
+    setCreatePassOpen(false);
+    setIssuedPass(result);
+    await load();
+  }, [load]);
+  const openCreateRoomService = useCallback(() => setCreateRoomServiceOpen(true), []);
+  const closeCreateRoomService = useCallback(() => setCreateRoomServiceOpen(false), []);
+  const handleRoomServiceCreated = useCallback(async (result: unknown) => {
+    const roomName = isRecord(result) ? stringValue(result.roomName) : "";
+    setCreateRoomServiceOpen(false);
+    setActionState({ busyId: "", message: `${roomName || "包廂服務"}已建立。`, error: "" });
+    await load();
+  }, [load]);
+
+  return <AdminPage eyebrow={`${isDeveloperPreview ? "DEVELOPER PREVIEW · " : ""}${config.label.toUpperCase()} DASHBOARD`} title={config.title} description={`${adminUser.displayName}，${isDeveloperPreview ? "可切換檢視三種營業工作台；" : ""}${config.description}`} actions={<><AdminRefreshButton disabled={state.loading} onClick={() => void load()} /><AdminButton variant="ghost" onClick={() => navigate("/admin/orders")}>完整點單管理</AdminButton></>}>
     {state.error ? <div className="adminOrderMessage isError" role="alert">{state.error}</div> : null}
     {availableRoles.length > 1 ? <div className={`adminRoleSwitcher${isDeveloperPreview ? " isDeveloperPreview" : ""}`} role="group" aria-label={isDeveloperPreview ? "開發者工作台預覽切換" : "今日可用工作身分"}><span>{isDeveloperPreview ? "開發者預覽" : adminUser.role === "manager" ? "目前工作視角" : "今日可用身分"}</span>{availableRoles.map((role) => <button type="button" className={dashboardRole === role ? "isActive" : ""} aria-pressed={dashboardRole === role} key={role} onClick={() => selectDashboardRole(role)}>{dashboardRoleLabels[role]}</button>)}</div> : null}
     {!isDeveloperPreview && currentStaff?.todayWorkMode && currentStaff.todayWorkMode.isWorking && !currentStaff.todayWorkMode.activeRoles.some((role) => role === "service" || role === "designated") ? <div className="adminRoleDashboardNotice" role="status">今天尚未啟用服務員或指名人員身分，目前依今日排班顯示預設工作台；若需調整，請先確認值班規劃，再到店員設定開啟今日啟用職位。</div> : null}
-    {dashboardRole === "designated" ? <AdminDesignatedDashboard data={state.data} user={adminUser} navigate={navigate} runAction={runAction} actionState={actionState} /> : null}
-    {dashboardRole === "service" ? <AdminServiceDashboard data={state.data} navigate={navigate} runAction={runAction} actionState={actionState} /> : null}
-    {dashboardRole === "manager" ? <AdminManagerDashboard data={state.data} navigate={navigate} runAction={runAction} actionState={actionState} /> : null}
+    {dashboardRole === "designated" ? <AdminDesignatedDashboard data={state.data} user={adminUser} navigate={navigate} runAction={runAction} actionState={actionState} onOpenCreatePass={openCreatePass} onOpenCreateRoomService={openCreateRoomService} /> : null}
+    {dashboardRole === "service" ? <AdminServiceDashboard data={state.data} user={adminUser} navigate={navigate} runAction={runAction} actionState={actionState} onOpenCreatePass={openCreatePass} onOpenCreateRoomService={openCreateRoomService} /> : null}
+    {dashboardRole === "manager" ? <AdminManagerDashboard data={state.data} user={adminUser} navigate={navigate} runAction={runAction} actionState={actionState} onOpenCreatePass={openCreatePass} onOpenCreateRoomService={openCreateRoomService} /> : null}
+    {(createPassOpen || issuedPass) ? <AdminCreateOrderPassDrawer canManage={canManage} issued={issuedPass} onClose={closeCreatePass} onIssued={handleCreatePassIssued} /> : null}
+    {createRoomServiceOpen ? <AdminCreateRoomServiceDrawer businessDate={state.data.context?.referenceBusinessDate || todayBusinessDate()} onClose={closeCreateRoomService} onCreated={handleRoomServiceCreated} /> : null}
   </AdminPage>;
 }

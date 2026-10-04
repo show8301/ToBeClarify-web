@@ -1,4 +1,5 @@
 "use client";
+import { AdminRefreshButton } from "@/features/admin/shared/AdminRefreshButton";
 import {useEffect,useState} from 'react';
 
 type OrderLookup={session:{id:string;customerName:string;businessDate:string};order:{
@@ -17,7 +18,7 @@ export function NotificationOrderPage({orderId}:{orderId:string}){
       .catch(e=>{if(!controller.signal.aborted)setError(e instanceof Error?e.message:'無法讀取訂單');});
     return()=>controller.abort();
   },[orderId,attempt]);
-  return <section className="adminPage"><h1>通知訂單明細</h1><button onClick={()=>{setResult(null);setError('');setAttempt(x=>x+1);}}>重新整理</button>
+  return <section className="adminPage"><h1>通知訂單明細</h1><AdminRefreshButton onClick={()=>{setResult(null);setError('');setAttempt(x=>x+1);}} />
     {error?<p role="alert">{error}</p>:!result?<p role="status">讀取中…</p>:<>
       <h2>{result.order.orderNumber} · {result.session.customerName}</h2>
       <p>目前狀態：{({pending:'等待確認',confirmed:'已成立',preparing:'準備中',serving:'服務中',completed:'已完成',cancelled:'已取消',expired:'已過期'} as Record<string,string>)[result.order.status]||result.order.status}{result.order.storeConfirmationStatus==='pending'?' · 待店內確認':''}</p>

@@ -1,15 +1,10 @@
 "use client";
 
+import { AdminRefreshButton } from "@/features/admin/shared/AdminRefreshButton";
 import { useCallback, useEffect, useState } from "react";
 import { adminApi } from "@/features/admin/api/client.js";
 import { AdminButton, AdminPage } from "@/features/admin/shared/AdminShared.jsx";
-
-type Room = {
-  id: string;
-  roomName: string;
-  segmentPrice?: number;
-  isActive?: boolean;
-};
+import { AdminRoomServiceCreateForm } from "./AdminRoomServiceCreateForm.jsx";
 
 type RoomOrder = {
   id: string;
@@ -20,13 +15,6 @@ type RoomOrder = {
   note?: string | null;
   totalAmount?: number;
   status: "scheduled" | "in_service" | "completed" | "cancelled" | string;
-};
-
-type RoomServiceForm = {
-  roomId: string;
-  startsAt: string;
-  segmentCount: number;
-  note: string;
 };
 
 const today = () => new Intl.DateTimeFormat("en-CA", {
@@ -69,27 +57,14 @@ export function AdminRoomServicePage() {
 
 function AdminRoomServicePanel({ onMessage }: { onMessage: (text: string, error?: boolean) => void }) {
   const [date, setDate] = useState(today);
-  const [rooms, setRooms] = useState<Room[]>([]);
   const [orders, setOrders] = useState<RoomOrder[]>([]);
-  const [form, setForm] = useState<RoomServiceForm>({ roomId: "", startsAt: `${today()}T20:00`, segmentCount: 1, note: "" });
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [roomData, orderData] = await Promise.all([
-        adminApi.getRooms(),
-        adminApi.getRoomOrders({ businessDate: date }),
-      ]);
-      const nextRooms = (roomData || []) as Room[];
-      setRooms(nextRooms);
+      const orderData = await adminApi.getRoomOrders({ businessDate: date });
       setOrders((orderData || []) as RoomOrder[]);
-      setForm((current) => ({
-        ...current,
-        roomId: current.roomId || nextRooms[0]?.id || "",
-        startsAt: current.startsAt.startsWith(date) ? current.startsAt : `${date}T20:00`,
-      }));
     } catch (error) {
       onMessage(errorMessage(error), true);
     } finally {
@@ -101,27 +76,6 @@ function AdminRoomServicePanel({ onMessage }: { onMessage: (text: string, error?
     const timer = window.setTimeout(() => { void load(); }, 0);
     return () => window.clearTimeout(timer);
   }, [load]);
-
-  const create = async () => {
-    if (!form.roomId || !form.startsAt) return;
-    setSaving(true);
-    try {
-      await adminApi.createRoomOrder({
-        roomId: form.roomId,
-        businessDate: date,
-        startsAt: form.startsAt,
-        segmentCount: Number(form.segmentCount),
-        note: form.note.trim() || null,
-      });
-      setForm((current) => ({ ...current, note: "" }));
-      onMessage("包廂服務訂單已建立。");
-      await load();
-    } catch (error) {
-      onMessage(errorMessage(error), true);
-    } finally {
-      setSaving(false);
-    }
-  };
 
   const updateStatus = async (id: string, status: string) => {
     try {
@@ -141,17 +95,10 @@ function AdminRoomServicePanel({ onMessage }: { onMessage: (text: string, error?
           <h2>營業中的包廂服務</h2>
           <p>這裡同時顯示顧客自助訂購與後台代客建立的包廂時段，每節時間依營運參數計算。</p>
         </div>
-        <AdminButton variant="ghost" onClick={() => void load()} disabled={loading}>重新整理</AdminButton>
+        <AdminRefreshButton onClick={() => void load()} disabled={loading} />
       </header>
 
-      <div className="adminRoomServiceForm">
-        <label>營業日<input type="date" value={date} onChange={(event) => setDate(event.target.value)} /></label>
-        <label>選擇包廂<select value={form.roomId} onChange={(event) => setForm({ ...form, roomId: event.target.value })}><option value="">請選擇</option>{rooms.filter((room) => room.isActive).map((room) => <option key={room.id} value={room.id}>{room.roomName} · {money(room.segmentPrice)}</option>)}</select></label>
-        <label>節數<input type="number" min="1" max="72" value={form.segmentCount} onChange={(event) => setForm({ ...form, segmentCount: Number(event.target.value) || 1 })} /></label>
-        <label>開始時間<input type="datetime-local" value={form.startsAt} onChange={(event) => setForm({ ...form, startsAt: event.target.value })} /></label>
-        <label>備註<input value={form.note} maxLength={500} onChange={(event) => setForm({ ...form, note: event.target.value })} placeholder="選填" /></label>
-        <AdminButton disabled={saving || loading || !form.roomId} onClick={() => void create()}>{saving ? "建立中…" : "建立包廂服務"}</AdminButton>
-      </div>
+      <AdminRoomServiceCreateForm date={date} onDateChange={setDate} showDate onCreated={async () => { onMessage("包廂服務訂單已建立。"); await load(); }} />
 
       <div className="adminRoomServiceRows">
         {orders.map((order) => (

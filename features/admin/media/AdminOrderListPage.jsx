@@ -1,8 +1,8 @@
+import { AdminRefreshButton } from "@/features/admin/shared/AdminRefreshButton";
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { adminApi } from '@/features/admin/api/client.js';
-import { AdminButton } from '@/features/admin/shared/AdminShared.jsx';
 
 const today = () => new Intl.DateTimeFormat('en-CA', {
   timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit',
@@ -78,7 +78,7 @@ export function AdminOrderListPage() {
   return <section className="adminPage adminOrderListPage">
     <header className="adminPageHeading">
       <div><p className="eyebrow">ORDER QUERY</p><h1>訂單查詢</h1><p>營業結束後依日期、關鍵字或狀態查詢訂單，核對問題並作為後續營運調整參考。</p></div>
-      <div className="adminPageActions"><Link className="adminButton adminButton-secondary" href="/admin/customers">歷史顧客</Link><AdminButton variant="secondary" disabled={loading} onClick={loadOrders}>重新整理</AdminButton></div>
+      <div className="adminPageActions"><Link className="adminButton adminButton-secondary" href="/admin/customers">歷史顧客</Link><AdminRefreshButton disabled={loading} onClick={loadOrders} /></div>
     </header>
 
     <section className="adminOrderListFilters" aria-label="訂單查詢條件">

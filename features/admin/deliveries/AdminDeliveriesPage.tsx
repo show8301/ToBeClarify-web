@@ -1,5 +1,6 @@
 "use client";
 
+import { AdminRefreshButton } from "@/features/admin/shared/AdminRefreshButton";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useState } from "react";
@@ -50,7 +51,7 @@ export function AdminDeliveriesPage() {
           <AdminField label="搜尋作品／顧客／填寫 ID"><input value={searchInput} maxLength={100} onChange={(event) => setSearchInput(event.target.value)} placeholder="輸入作品或顧客線索" /></AdminField>
           <AdminField label="交付狀態"><select value={query.status} onChange={(event) => setQuery((value) => ({ ...value, status: event.target.value, page: 1 }))}><option value="">全部狀態</option>{Object.entries(DELIVERY_STATUS_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></AdminField>
           <button type="submit" className="adminButton adminButton-primary" disabled={loading}>搜尋</button>
-          <button type="button" className="adminButton adminButton-secondary" disabled={loading} onClick={() => setRevision((value) => value + 1)}>重新整理清單</button>
+          <AdminRefreshButton disabled={loading} onClick={() => setRevision((value) => value + 1)} />
         </form>
         {sessionId ? <div className="adminCustomerActions"><span>目前顯示指定入場紀錄的委託。</span><button type="button" className="adminButton adminButton-ghost" onClick={() => { setSessionId(""); setQuery((value) => ({ ...value, page: 1 })); }}>查看全部顧客</button>{!showCreate ? <button type="button" className="adminButton adminButton-secondary" onClick={() => setShowCreate(true)}>新增這位顧客的委託</button> : null}</div> : null}
       </AdminPanel>

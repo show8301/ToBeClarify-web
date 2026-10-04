@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { AdminDialog, AdminField, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
@@ -73,7 +72,7 @@ export function DeliveryEditor({ initial, canManage, onChanged, onIssued, onClos
 
   return <AdminPanel title={`交付管理 · ${delivery.title}`} description={`${delivery.customerName} · ${delivery.businessDate.slice(0, 10)} · ${delivery.orderNumber || "入場紀錄"}`} actions={<button type="button" className="adminButton adminButton-ghost" disabled={busy} onClick={onClose}>收合</button>}>
     <div className="adminCustomerActions">
-      <Link className="adminButton adminButton-secondary" href={queryPath("/admin/order-list", { date: delivery.businessDate.slice(0, 10), session: delivery.sessionId, order: delivery.orderId })}>核對歷史訂單</Link>
+      <a className="adminButton adminButton-secondary" href={queryPath("/admin/order-list", { date: delivery.businessDate.slice(0, 10), session: delivery.sessionId, order: delivery.orderId })}>核對歷史訂單</a>
       {canManage ? <button type="button" className="adminButton adminButton-secondary" disabled={busy} onClick={() => setConfirmation({ kind: "code" })}>重發單筆領取碼</button> : <span className="adminCustomerHint">重發領取碼需由店經理處理。</span>}
     </div>
     {error ? <p className="adminCustomerFeedback isError" role="alert">{error} 若資料已被其他人更新，請收合後重新整理清單再開啟。</p> : null}

@@ -5,7 +5,6 @@ import { AdminAssistedOrderPanel } from "./AdminAssistedOrderPanel";
 import { FinancialRecordsPanel } from "./FinancialRecordsPanel";
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
 import { adminApi } from '@/features/admin/api/client.js';
 import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
 import { AdminButton } from '@/features/admin/shared/AdminShared.jsx';
@@ -131,9 +130,9 @@ export function AdminOrdersPage() {
         {!selected ? <div className="adminOrderEmpty"><span>LD</span><h2>選擇一位顧客</h2><p>使用左側搜尋或分組快速定位顧客。</p></div> : <>
           <SessionHeader item={selected} loading={loading} onUpdate={(body) => act(() => adminApi.updateOrderSession(selectedId, body), '顧客點餐設定已更新。')} onReissue={async () => { try { setIssued(await adminApi.reissueOrderSession(selectedId)); } catch (error) { setMessage({ text: error.message, error: true }); } }} onAssisted={() => setShowAssisted((value) => !value)} />
           <div className="adminCustomerActions">
-            <Link className="adminButton adminButton-secondary" href={`/admin/deliveries?${new URLSearchParams({ session: selectedId, date: selected.session.businessDate, create: '1' })}`}>建立繪圖／簽繪交付</Link>
-            <Link className="adminButton adminButton-ghost" href={`/admin/deliveries?${new URLSearchParams({ session: selectedId, date: selected.session.businessDate })}`}>查看此顧客的作品交付</Link>
-            <Link className="adminButton adminButton-ghost" href={`/admin/order-list?${new URLSearchParams({ session: selectedId, date: selected.session.businessDate })}`}>查看此顧客歷史訂單</Link>
+            <a className="adminButton adminButton-secondary" href={`/admin/deliveries?${new URLSearchParams({ session: selectedId, date: selected.session.businessDate, create: '1' })}`}>建立繪圖／簽繪交付</a>
+            <a className="adminButton adminButton-ghost" href={`/admin/deliveries?${new URLSearchParams({ session: selectedId, date: selected.session.businessDate })}`}>查看此顧客的作品交付</a>
+            <a className="adminButton adminButton-ghost" href={`/admin/order-list?${new URLSearchParams({ session: selectedId, date: selected.session.businessDate })}`}>查看此顧客歷史訂單</a>
           </div>
           {showAssisted ? <AdminAssistedOrderPanel sessionId={selectedId} businessDate={businessDate} onSaved={refreshSelected} onClose={() => setShowAssisted(false)} /> : null}
           <FinancialRecordsPanel key={selectedId} sessionId={selectedId} refreshKey={orders.map(o => `${o.id}:${o.totalAmount}:${o.status}`).join("|")} />

@@ -1,0 +1,70 @@
+/* Compact icon-only actions. Text buttons, switches and disclosure controls
+   intentionally do not participate in this shared geometry. */
+:root {
+  --icon-action-size: 36px;
+  --icon-action-glyph-size: 24px;
+  --icon-action-radius: 8px;
+}
+
+:root body :is(
+  .iconActionButton,
+  .notification-sound-button,
+  .notification-preview-button,
+  .notification-icon-button,
+  .notification-sound-delete,
+  .notification-reorder > button,
+  .adminIconButton,
+  .adminCopyIconButton,
+  .zoom-photo-controls > button,
+  .cartLine > button
+) {
+  display: inline-grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: var(--icon-action-size);
+  height: var(--icon-action-size);
+  min-width: var(--icon-action-size);
+  min-height: var(--icon-action-size);
+  flex: 0 0 auto;
+  padding: 0;
+  border-radius: var(--icon-action-radius);
+  font-size: var(--icon-action-glyph-size);
+  line-height: 1;
+}
+
+:root body :is(
+  .iconActionButton,
+  .notification-sound-button,
+  .notification-preview-button,
+  .notification-icon-button,
+  .notification-sound-delete,
+  .notification-reorder > button,
+  .adminIconButton,
+  .adminCopyIconButton,
+  .zoom-photo-controls > button,
+  .cartLine > button
+) svg {
+  display: block;
+  width: var(--icon-action-glyph-size);
+  height: var(--icon-action-glyph-size);
+  flex-shrink: 0;
+}
+
+:root body .zoom-photo-controls {
+  height: auto;
+  min-height: calc(var(--icon-action-size) + 8px);
+}
+
+:root body .cartLine {
+  grid-template-columns: 86px minmax(0, 1fr) auto var(--icon-action-size);
+}
+
+@media (max-width: 620px) {
+  :root body .cartLine {
+    grid-template-columns: 64px minmax(0, 1fr) var(--icon-action-size);
+  }
+}
+
+@media (any-pointer: coarse) {
+  :root { --icon-action-size: 44px; }
+}

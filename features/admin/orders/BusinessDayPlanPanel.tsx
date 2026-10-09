@@ -48,19 +48,25 @@ export function BusinessDayPlanPanel({ businessDate, onOpened }: { businessDate:
     } finally { setBusy(false); }
   };
   return <section className="adminBusinessOperations">
-    <h3>每日營業計畫與開店</h3>
-    <p>時間以台灣時間填寫，跨午夜請選正確的結束日期。計畫不會自動開店。</p>
+    <header className="adminBusinessPlanHeader">
+      <h3>每日營業計畫與開店</h3>
+      <p>時間以台灣時間填寫，跨午夜請選正確的結束日期。計畫不會自動開店。</p>
+    </header>
     <fieldset disabled={busy || !!retry} className="adminBusinessOperationsControls">
-      <label>營業日<input type="date" value={date} onChange={e => { setPlan(null); setDate(e.target.value); }} /></label>
-      <label>預定開始<input type="datetime-local" value={startsAt} disabled={plan?.isOpened} onChange={e => setStartsAt(e.target.value)} /></label>
-      <label>預定結束<input type="datetime-local" value={endsAt} disabled={plan?.isOpened} onChange={e => setEndsAt(e.target.value)} /></label>
-      {plan && !plan.isOpened && <>
-        <button type="button" disabled={!startsAt || !endsAt} onClick={() => void run("save")}>儲存計畫</button>
-        <label><input type="checkbox" checked={flow2} onChange={e => setFlow2(e.target.checked)} />本營業日使用分項接待及現場帳款</label>
-        {flow2 && <p>分項接待與現場帳款可用；關店後由帳目／薪資結算入口核對實收、保留分潤並完成正式結算。</p>}
-        <button type="button" disabled={!plan.isSaved || startsAt !== inputTime(plan.startsAt) || endsAt !== inputTime(plan.endsAt)} onClick={() => void run("open")}>現在開店</button>
-      </>}
-      {plan?.isOpened && <p>此營業日已開過店，原始計畫保留。請由營業控制調整關店時間。</p>}
+      <div className="adminBusinessPlanFields">
+        <label>營業日<input type="date" value={date} onChange={e => { setPlan(null); setDate(e.target.value); }} /></label>
+        <label>預定開始<input type="datetime-local" value={startsAt} disabled={plan?.isOpened} onChange={e => setStartsAt(e.target.value)} /></label>
+        <label>預定結束<input type="datetime-local" value={endsAt} disabled={plan?.isOpened} onChange={e => setEndsAt(e.target.value)} /></label>
+      </div>
+      <div className="adminBusinessPlanActions">
+        {plan && !plan.isOpened && <>
+          <button className="adminButton adminButton-secondary adminBusinessPlanSave" type="button" disabled={!startsAt || !endsAt} onClick={() => void run("save")}>儲存計畫</button>
+          <label className="adminBusinessPlanOption"><input type="checkbox" checked={flow2} onChange={e => setFlow2(e.target.checked)} /><span>本營業日使用分項接待及現場帳款</span></label>
+          {flow2 && <p className="adminBusinessPlanHint">分項接待與現場帳款可用；關店後由帳目／薪資結算入口核對實收、保留分潤並完成正式結算。</p>}
+          <button className="adminButton adminButton-primary adminBusinessPlanOpen" type="button" disabled={!plan.isSaved || startsAt !== inputTime(plan.startsAt) || endsAt !== inputTime(plan.endsAt)} onClick={() => void run("open")}>現在開店</button>
+        </>}
+      </div>
+      {plan?.isOpened && <p className="adminBusinessPlanStatus">此營業日已開過店，原始計畫保留。請由營業控制調整關店時間。</p>}
     </fieldset>
     {message && <p role="status">{message}</p>}
     {retry && <button type="button" disabled={busy} onClick={() => void run(retry.action)}>查回／重試同一筆操作</button>}

@@ -10,6 +10,10 @@ import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
 import { AdminButton } from '@/features/admin/shared/AdminShared.jsx';
 import { CreateSessionPanel, IssuedPanel } from './AdminOrderPassPanels.jsx';
 
+const today = () => new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit',
+}).format(new Date());
+
 const money = (value) => `${Number(value || 0).toLocaleString('zh-TW')} G`;
 const businessPeriodTimeFormatter = new Intl.DateTimeFormat('zh-TW', {
   timeZone: 'Asia/Taipei',
@@ -54,6 +58,7 @@ export function AdminOrdersPage() {
   const [orders, setOrders] = useState([]);
   const [settings, setSettings] = useState(null);
   const [businessContext, setBusinessContext] = useState(null);
+  const [settingsError, setSettingsError] = useState('');
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ text: '', error: false });
   const [showCreate, setShowCreate] = useState(() => searchParams.get('focus') === 'create');
@@ -84,7 +89,13 @@ export function AdminOrdersPage() {
     return value;
   };
   useEffect(() => { loadBusinessContext().catch(error => setMessage({ text: error.message, error: true })); }, []);
-  useEffect(() => { if (canManage) adminApi.getOrderingSettings().then(setSettings).catch(() => {}); }, [canManage]);
+  useEffect(() => {
+    if (!canManage) return;
+    setSettingsError('');
+    adminApi.getOrderingSettings()
+      .then(setSettings)
+      .catch((error) => setSettingsError(error.message || '營運參數載入失敗，請稍後再試。'));
+  }, [canManage]);
   useEffect(() => { if (searchParams.get('focus') === 'create') setShowCreate(true); }, [searchParams]);
 
   const selected = sessions.find((item) => item.session.id === selectedId);
@@ -119,7 +130,8 @@ export function AdminOrdersPage() {
     {canManage && businessContext ? <BusinessDayPlanPanel businessDate={businessContext.referenceBusinessDate} onOpened={loadBusinessContext} /> : null}
     {showCreate ? <CreateSessionPanel canManage={canManage} onClose={() => setShowCreate(false)} onIssued={(result) => { setIssued(result); setShowCreate(false); loadSessions(result.session.id); }} /> : null}
     {issued ? <IssuedPanel issued={issued} onClose={() => setIssued(null)} /> : null}
-    {canManage && showSettings && settings ? <SettingsPanel settings={settings} onSaved={(value) => { setSettings(value); setMessage({ text: '營運參數已更新。', error: false }); }} /> : null}
+    {canManage && showSettings && settings ? <SettingsPanel settings={settings} onSaved={(value) => { setSettings(value); setSettingsError(''); setMessage({ text: '營運參數已更新。', error: false }); }} /> : null}
+    {canManage && showSettings && settingsError ? <div className="adminOrderMessage isError" role="alert">營運參數載入失敗：{settingsError}</div> : null}
     <div className="adminOrderWorkspace">
       <aside className="adminCustomerPane">
         <div className="adminCustomerToolbar"><label>營業日<input type="date" value={businessDate} onChange={(event) => setBusinessDate(event.target.value)} /></label>{businessContext ? <p className={businessContext.orderingOpen ? 'adminBusinessPeriod isOpen' : 'adminBusinessPeriod'}><strong>{businessContext.orderingOpen ? '目前營業中' : '目前非營業時段'}</strong><span>{formatBusinessPeriodTime(businessContext.referenceStartsAt)} ～ {formatBusinessPeriodTime(businessContext.referenceEndsAt)}</span></p> : null}<form onSubmit={(event) => { event.preventDefault(); loadSessions(); }}><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="搜尋顧客名稱或遊戲 ID" /><button type="submit">搜尋</button></form><div><span>本營業日顧客</span><strong>{sessions.length}</strong></div></div>

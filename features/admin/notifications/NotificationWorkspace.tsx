@@ -115,6 +115,18 @@ export function NotificationWorkspace({ settings, broadcast, busy, dirty, labels
   };
 
   return (
+    <>
+    <section className="notification-card notification-settings-toolbar" aria-label={broadcast ? '店內廣播規則儲存' : '我的通知規則儲存'} aria-busy={busy}>
+      <div className="notification-settings-scope">
+        <h2>{broadcast ? '店內廣播設定' : '我的通知設定'}</h2>
+        <p>儲存此頁籤的全部規則變更，包括啟用狀態、新增、移除與編輯。</p>
+      </div>
+      <div className="notification-save-actions">
+        <span className="notification-settings-state" role="status">{busy ? '處理中…' : dirty ? '有未儲存的變更' : '所有規則已儲存'}</span>
+        <AdminButton variant="ghost" disabled={busy || !dirty} onClick={onDiscard}>放棄變更</AdminButton>
+        <AdminButton disabled={busy || !dirty} onClick={onSave}>{busy && dirty ? '儲存中…' : '儲存設定'}</AdminButton>
+      </div>
+    </section>
     <div className="notification-workspace" aria-busy={busy}>
       <section className="notification-card notification-rule-list-panel" aria-labelledby="notification-rules-title">
         <header className="notification-card-heading">
@@ -138,12 +150,32 @@ export function NotificationWorkspace({ settings, broadcast, busy, dirty, labels
             const Icon = ruleIcons[rule.ruleType] || Bell;
             return <li key={rule.id} className={`notification-rule-row ${selected?.id === rule.id ? 'is-selected' : ''}`}>
               <button type="button" className="notification-rule-select" disabled={busy} aria-pressed={selected?.id === rule.id} aria-controls="notification-rule-editor" onClick={() => select(rule.id)}>
-                <span className="notification-rule-icon"><Icon size={22} strokeWidth={1.8} aria-hidden="true" /></span>
+                <span className="notification-rule-icon"><Icon size={24} strokeWidth={1.8} aria-hidden="true" /></span>
                 <span className="notification-rule-copy"><strong>{rule.name || labels[rule.ruleType] || rule.ruleType}</strong><small>{ruleDescription(rule, staff)}</small></span>
               </button>
-              <span className="notification-rule-status"><span className={`notification-status-dot ${rule.isEnabled ? 'is-enabled' : ''}`} />{rule.isEnabled ? '已啟用' : '未啟用'}</span>
-              <AdminToggle label="" ariaLabel={`${rule.name || labels[rule.ruleType]}（規則 ${settings.rules.indexOf(rule) + 1}）啟用`} checked={rule.isEnabled} disabled={busy} onChange={(enabled: boolean) => onRulesChange(rules => rules.map(item => item.id === rule.id ? { ...item, isEnabled: enabled } : item))} />
-              <ChevronRight className="notification-rule-chevron" size={18} aria-hidden="true" />
+              <div className="notification-rule-controls">
+                <span className={`notification-rule-status ${rule.isEnabled ? 'is-enabled' : ''}`}>
+                  <span className="notification-status-dot" aria-hidden="true" />
+                  {rule.isEnabled ? '已啟用' : '未啟用'}
+                </span>
+                <AdminToggle
+                  label=""
+                  ariaLabel={`${rule.name || labels[rule.ruleType]}（規則 ${settings.rules.indexOf(rule) + 1}）啟用`}
+                  checked={rule.isEnabled}
+                  disabled={busy}
+                  onChange={(enabled: boolean) => onRulesChange(rules => rules.map(item => item.id === rule.id ? { ...item, isEnabled: enabled } : item))}
+                />
+              </div>
+              <button
+                type="button"
+                className="notification-rule-edit"
+                disabled={busy}
+                aria-label={`編輯${rule.name || labels[rule.ruleType] || rule.ruleType}規則`}
+                aria-controls="notification-rule-editor"
+                onClick={() => select(rule.id)}
+              >
+                <ChevronRight className="notification-rule-chevron" size={16} aria-hidden="true" />
+              </button>
             </li>;
           })}
         </ul>
@@ -151,14 +183,19 @@ export function NotificationWorkspace({ settings, broadcast, busy, dirty, labels
         <p className="notification-list-note">{settings.rules.length >= 20 ? '已達 20 條上限；請編輯或移除現有規則。' : broadcast ? '套用至廣播受眾；僅經理與開發者可管理。' : '只影響自己的通知，可新增同類型、不同條件的規則。'}</p>
       </section>
       <div className="notification-editor-column">
-        <section className="notification-card notification-editor" id="notification-rule-editor" aria-labelledby="notification-editor-title" tabIndex={-1} ref={editor}>
+        <section className="notification-card notification-editor" id="notification-rule-editor" aria-labelledby={selected ? 'notification-editor-title notification-editor-rule-name' : 'notification-editor-title'} tabIndex={-1} ref={editor}>
           <header className="notification-card-heading">
             <h2 id="notification-editor-title">編輯規則</h2>
+            {selected && (
+              <div className="notification-editor-rule-name">
+                <span className="adminVisuallyHidden">規則名稱：</span>
+                <strong id="notification-editor-rule-name">{selected.name || labels[selected.ruleType] || selected.ruleType}</strong>
+              </div>
+            )}
             {selected && <span className={`notification-editor-status ${selected.isEnabled ? 'is-enabled' : ''}`}><span className={`notification-status-dot ${selected.isEnabled ? 'is-enabled' : ''}`} />{selected.isEnabled ? '已啟用' : '未啟用'}</span>}
             <span className="notification-editor-position">{selected ? `規則 ${selectedIndex + 1} / ${settings.rules.length}` : '尚未選取'}</span>
           </header>
           {selected ? <>
-            <div className="notification-event"><span>通知事件</span><strong>{labels[selected.ruleType] || selected.ruleType}</strong></div>
             <fieldset disabled={busy} className="notification-editor-fields" key={selected.id}><legend className="adminVisuallyHidden">{selected.name || labels[selected.ruleType]}的通知條件</legend>{renderFields(selected, selectedIndex)}</fieldset>
           </> : <div className="notification-empty"><Bell size={32} aria-hidden="true" /><strong>選擇一個通知事件</strong><p>新增規則後，在這裡設定彈窗方式、音效與提醒時間。</p></div>}
           <footer className="notification-editor-footer">
@@ -167,12 +204,11 @@ export function NotificationWorkspace({ settings, broadcast, busy, dirty, labels
               <AdminButton variant="danger" disabled={busy || !selected} onClick={remove}><Trash2 size={17} aria-hidden="true" />移除規則</AdminButton>
               {!broadcast && selected && <div className="notification-reorder"><button type="button" aria-label="規則上移" title="規則上移" disabled={busy || selectedIndex === 0} onClick={() => move(-1)}><ArrowUp size={17} /></button><button type="button" aria-label="規則下移" title="規則下移" disabled={busy || selectedIndex === settings.rules.length - 1} onClick={() => move(1)}><ArrowDown size={17} /></button></div>}
             </div>
-            <div className="notification-save-actions"><AdminButton variant="ghost" disabled={busy || !dirty} onClick={onDiscard}>放棄變更</AdminButton><AdminButton disabled={busy || !dirty} onClick={onSave}>{busy && dirty ? '儲存中…' : '儲存設定'}</AdminButton></div>
-            <p className="notification-save-note" role="status">{dirty ? '有未儲存的變更；儲存會套用此頁籤的所有規則變更。' : '啟用狀態與規則調整，按「儲存設定」後生效。'}</p>
           </footer>
         </section>
         {soundLibrary}
       </div>
     </div>
+    </>
   );
 }

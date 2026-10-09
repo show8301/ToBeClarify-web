@@ -2,6 +2,7 @@ import { AdminRefreshButton } from "@/features/admin/shared/AdminRefreshButton";
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { adminApi } from '@/features/admin/api/client.js';
+import { Dialog } from '@base-ui/react/dialog';
 
 const today = () => new Intl.DateTimeFormat('en-CA', {
   timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit',
@@ -26,6 +27,11 @@ export function AdminOrderListPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const loadController = useRef(null);
+  const detailReturnFocus = useRef(null);
+  const openDetail = (id, element) => {
+    detailReturnFocus.current = element;
+    setSelectedId(id);
+  };
 
   const loadOrders = async () => {
     loadController.current?.abort();
@@ -84,7 +90,6 @@ export function AdminOrderListPage() {
       <label><span>營業日</span><input type="date" value={businessDate} onChange={(event) => { setBusinessDate(event.target.value); setSessionFilter(''); }} /></label>
       <label className="adminOrderListKeyword"><span>關鍵字</span><input value={keyword} onChange={(event) => setKeyword(event.target.value)} placeholder="訂單編號、顧客名稱或遊戲 ID" /></label>
       <label><span>訂單狀態</span><select value={status} onChange={(event) => setStatus(event.target.value)}><option value="all">全部狀態</option><option value="submitted">等待確認</option><option value="partially_confirmed">部分確認</option><option value="needs_reschedule">需重新排程</option><option value="confirmed">已成立</option><option value="in_service">服務中</option><option value="completed">已完成</option><option value="cancelled">已取消</option><option value="expired">已失效</option><option value="rejected">已退回</option></select></label>
-      <div className="adminOrderListCount"><span>查詢結果</span><strong>{visibleOrders.length}</strong><small>筆訂單</small></div>
     </section>
 
     {sessionFilter ? <p className="adminCustomerActions">目前只顯示指定入場紀錄的訂單。<button type="button" className="adminButton adminButton-ghost" onClick={() => setSessionFilter('')}>查看當日全部顧客</button></p> : null}
@@ -92,24 +97,32 @@ export function AdminOrderListPage() {
     {error ? <div className="adminOrderMessage isError" role="alert">{error}</div> : null}
     <div className="adminOrderListLayout">
       <section className="adminOrderListTableWrap" aria-busy={loading}>
+        <header className="adminOrderListResultsHeading"><h2>查詢結果 <span>· 共 {loading ? '—' : visibleOrders.length} 筆</span></h2><p>點選訂單查看明細</p></header>
         <table className="adminOrderListTable">
-          <thead><tr><th>訂單編號</th><th>顧客</th><th>送出時間</th><th>狀態</th><th>金額</th><th aria-label="開啟訂單明細" /></tr></thead>
-          <tbody>{visibleOrders.map((order) => <tr key={order.id} className={order.id === selectedId ? 'isSelected' : ''} onClick={() => setSelectedId(order.id)}><td data-label="訂單編號"><strong>{order.orderNumber || '附掛加購服務單'}</strong></td><td data-label="顧客"><strong>{order.customerName}</strong><small>ID {order.gameId}</small></td><td data-label="送出時間">{new Date(order.submittedAt).toLocaleString('zh-TW')}</td><td data-label="狀態"><span className={`adminOrderStatus is-${order.status}`}>{statusLabels[order.status] || order.status}</span></td><td data-label="金額"><strong>{money(order.totalAmount)}</strong></td><td><button type="button" aria-label={`查看訂單 ${order.orderNumber || ''}`} onClick={(event) => { event.stopPropagation(); setSelectedId(order.id); }}><span aria-hidden="true">›</span></button></td></tr>)}</tbody>
+          <thead><tr><th>訂單編號</th><th>顧客</th><th>送出時間</th><th>狀態</th><th>金額</th></tr></thead>
+          <tbody>{visibleOrders.map((order) => <tr key={order.id} className={order.id === selectedId ? 'isSelected' : ''} onClick={(event) => openDetail(order.id, event.currentTarget.querySelector('button'))}><td data-label="訂單編號"><button className="adminOrderListOpenButton" type="button" aria-haspopup="dialog" onClick={(event) => { event.stopPropagation(); openDetail(order.id, event.currentTarget); }}>{order.orderNumber || '附掛加購服務單'}</button></td><td data-label="顧客"><strong>{order.customerName}</strong><small>ID {order.gameId}</small></td><td data-label="送出時間">{new Date(order.submittedAt).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' })}</td><td data-label="狀態"><span className={`adminOrderStatus is-${order.status}`}>{statusLabels[order.status] || order.status}</span></td><td data-label="金額"><strong>{money(order.totalAmount)}</strong></td></tr>)}</tbody>
         </table>
         {!loading && !visibleOrders.length ? <div className="adminOrderListEmpty"><strong>沒有符合條件的訂單</strong><p>請調整營業日、關鍵字或狀態。</p></div> : null}
         {loading ? <div className="adminOrderListEmpty"><strong>正在載入訂單…</strong></div> : null}
       </section>
 
-      <aside className="adminOrderListDetail">
-        {selected ? <OrderDetail order={selected} businessDate={businessDate} onClose={() => setSelectedId('')} /> : <div className="adminOrderListDetailEmpty"><span>訂單明細</span><strong>選擇一筆訂單</strong><p>點選左側資料列即可核對內容。</p></div>}
-      </aside>
     </div>
+    <Dialog.Root open={Boolean(selected)} onOpenChange={(open) => { if (!open) setSelectedId(''); }}>
+      {selected ? <Dialog.Portal>
+        <div className="adminTheme">
+          <Dialog.Backdrop className="adminOrderListDrawerBackdrop" />
+          <Dialog.Popup className="adminOrderListDetail adminOrderListDrawer" finalFocus={detailReturnFocus}>
+            <OrderDetail order={selected} businessDate={businessDate} />
+          </Dialog.Popup>
+        </div>
+      </Dialog.Portal> : null}
+    </Dialog.Root>
   </section>;
 }
 
-function OrderDetail({ order, businessDate, onClose }) {
+function OrderDetail({ order, businessDate }) {
   return <>
-    <header><div><span>訂單明細</span><h2>{order.orderNumber || '附掛加購服務單'}</h2></div><button type="button" aria-label="關閉訂單明細" onClick={onClose}>×</button></header>
+    <header><div><span>訂單明細</span><Dialog.Title>{order.orderNumber || '附掛加購服務單'}</Dialog.Title></div><Dialog.Close aria-label="關閉訂單明細">×</Dialog.Close></header>
     <dl className="adminOrderDetailSummary"><div><dt>顧客</dt><dd>{order.customerName}<small>ID {order.gameId}</small></dd></div><div><dt>狀態</dt><dd><span className={`adminOrderStatus is-${order.status}`}>{statusLabels[order.status] || order.status}</span></dd></div><div><dt>送出時間</dt><dd>{new Date(order.submittedAt).toLocaleString('zh-TW')}</dd></div><div><dt>訂單金額</dt><dd>{money(order.totalAmount)}</dd></div></dl>
     <div className="adminCustomerActions"><a className="adminButton adminButton-secondary" href={`/admin/deliveries?${new URLSearchParams({ session: order.sessionId, order: order.id, date: businessDate, create: '1' })}`}>建立後續作品交付</a><a className="adminButton adminButton-ghost" href={`/admin/orders?${new URLSearchParams({ session: order.sessionId, date: businessDate })}`}>開啟完整點單管理</a></div>
     <section className="adminOrderDetailItems"><h3>訂購項目</h3>{order.items?.length ? order.items.map((item) => <div key={item.id}><span><strong>{item.name}</strong><small>{item.quantity > 1 ? `數量 ${item.quantity}` : item.itemType}</small></span><b>{money(item.lineTotal)}</b></div>) : <p>此訂單沒有一般品項。</p>}</section>

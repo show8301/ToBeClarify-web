@@ -23,7 +23,7 @@
   list-style:none;
 }
 .adminTheme details > summary::-webkit-details-marker { display:none; }
-.adminTheme details:not(.adminDeveloperDisclosure) > summary::after,
+.adminTheme details:not(.adminDeveloperDisclosure):not(.adminOrderBusinessDisclosure):not(.notification-rule-name) > summary::after,
 .adminDeveloperDisclosureSummary > i {
   display:grid;
   flex:0 0 34px;
@@ -37,34 +37,37 @@
   font-style:normal;
   line-height:1;
 }
-.adminTheme details:not(.adminDeveloperDisclosure) > summary::after {
+.adminTheme details:not(.adminDeveloperDisclosure):not(.adminOrderBusinessDisclosure):not(.notification-rule-name) > summary::after {
   content:"⌄";
   transform:translateY(-2px);
   transition:background .2s ease,color .2s ease;
 }
-.adminTheme details:not(.adminDeveloperDisclosure)[open] > summary::after {
+.adminTheme details:not(.adminDeveloperDisclosure):not(.adminOrderBusinessDisclosure):not(.notification-rule-name)[open] > summary::after {
   content:"⌃";
   transform:translateY(2px);
   background:rgba(var(--color-accent-rgb),.12);
 }
 .adminDeveloperDisclosureSummary > i {
+  box-sizing:border-box;
+  border-color:var(--color-border-strong);
+  background-color:var(--color-surface-input);
   font-size:0;
   transform:none;
   transition:background .2s ease,color .2s ease;
 }
 .adminDeveloperDisclosureSummary > i::before {
-  content:"⌄";
-  font-size:21px;
-  line-height:1;
-  transform:translateY(-2px);
+  content:"";
+  display:block;
+  width:16px;
+  height:16px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m4 6 4 4 4-4' fill='none' stroke='%237d8f9c' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 16px 16px no-repeat;
 }
 .adminDeveloperDisclosure[open] .adminDeveloperDisclosureSummary > i {
   background:rgba(var(--color-accent-rgb),.12);
   transform:none;
 }
 .adminDeveloperDisclosure[open] .adminDeveloperDisclosureSummary > i::before {
-  content:"⌃";
-  transform:translateY(2px);
+  transform:rotate(180deg);
 }
 
 :root[data-admin-theme="dark"] .adminTheme select {
@@ -82,12 +85,16 @@
   border-color:#a8c5ee;
   box-shadow:0 0 0 3px rgba(168,197,238,.22);
 }
-:root[data-admin-theme="dark"] .adminTheme details:not(.adminDeveloperDisclosure) > summary::after,
+:root[data-admin-theme="dark"] .adminTheme details:not(.adminDeveloperDisclosure):not(.adminOrderBusinessDisclosure):not(.notification-rule-name) > summary::after,
 :root[data-admin-theme="dark"] .adminDeveloperDisclosureSummary > i {
   border-color:rgba(168,197,238,.52);
   color:#c8dcff;
 }
-:root[data-admin-theme="dark"] .adminTheme details:not(.adminDeveloperDisclosure)[open] > summary::after,
+:root[data-admin-theme="dark"] .adminTheme details:not(.adminDeveloperDisclosure):not(.adminOrderBusinessDisclosure):not(.notification-rule-name)[open] > summary::after,
 :root[data-admin-theme="dark"] .adminDeveloperDisclosure[open] .adminDeveloperDisclosureSummary > i {
   background:rgba(168,197,238,.18);
+}
+
+.adminTheme .adminDeveloperDisclosureSummary:is(:hover,:focus-visible) > i {
+  border-color:var(--color-accent);
 }

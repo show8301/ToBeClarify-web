@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="260" viewBox="0 0 960 260">
+  <rect width="960" height="260" rx="18" fill="#101d23"/>
+  <g font-family="Arial, Microsoft JhengHei, sans-serif" fill="#edf6fa">
+    <text x="30" y="40" font-size="20" font-weight="700">營業控制 · 展開按鈕參考</text>
+    <text x="30" y="81" font-size="15">A　控制圖示＋單一箭頭（目前套用）</text>
+    <text x="350" y="81" font-size="15">B　文字＋方形箭頭</text>
+    <text x="670" y="81" font-size="15">C　文字連結＋箭頭</text>
+    <rect x="30" y="110" width="240" height="52" rx="10" fill="#182b34" stroke="#587080"/>
+    <g stroke="#cbe3f2" stroke-width="2" fill="none" stroke-linecap="round">
+      <path d="M49 128h20m-20 8h20m-20 8h20"/><path d="M55 125v6m8 2v6m-10 2v6"/>
+      <path d="m237 133 6 6 6-6"/>
+    </g>
+    <text x="82" y="142" font-size="18" font-weight="700">營業控制</text>
+    <rect x="350" y="110" width="240" height="52" rx="10" fill="#1d3540"/>
+    <rect x="545" y="120" width="32" height="32" rx="7" fill="#294a59"/>
+    <path d="m555 133 6 6 6-6" stroke="#cbe3f2" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <text x="370" y="142" font-size="18" font-weight="700">營業控制</text>
+    <text x="685" y="142" font-size="18" font-weight="700" fill="#a2ccef">營業控制</text>
+    <path d="m792 133 6 6 6-6" stroke="#a2ccef" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <text x="30" y="210" font-size="14" fill="#adbdc8">控制辨識明確，適合目前後台</text>
+    <text x="350" y="210" font-size="14" fill="#adbdc8">較醒目，適合主要展開入口</text>
+    <text x="670" y="210" font-size="14" fill="#adbdc8">最精簡，適合次要控制</text>
+  </g>
+</svg>

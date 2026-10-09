@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
-import { Menu } from '@base-ui/react/menu';
-import { CirclePlay, CircleStop, MoreVertical, Music2, Search, Trash2, Upload } from 'lucide-react';
+import { CirclePlay, CircleStop, Music2, Search, Trash2, Upload } from 'lucide-react';
 import { AdminButton, AdminDialog, AdminField } from '@/features/admin/shared/AdminShared.jsx';
 import { notificationRequest, notificationSoundUrl } from '@/features/admin/notifications/api';
 import type { NotificationSound } from '@/features/admin/notifications/types';
@@ -94,10 +93,16 @@ export function NotificationSoundLibrary({ sounds, developer, busy, canUpload, s
         <tbody>{filtered.map(sound => <tr key={sound.id}>
           <td><div className="notification-sound-name"><button type="button" className="notification-preview-button" aria-label={`${playingId === sound.id ? '停止' : '試聽'}「${sound.name}」`} onClick={() => void preview(sound)}>{playingId === sound.id ? <CircleStop size={23} aria-hidden="true" /> : <CirclePlay size={23} aria-hidden="true" />}</button><span>{sound.name}</span></div></td>
           <td><span title={`${sound.durationMs / 1000} 秒`}>{durationLabel(sound.durationMs)}</span></td>
-          <td><Menu.Root><Menu.Trigger className="notification-icon-button" aria-label={`「${sound.name}」的更多操作`}><MoreVertical size={19} aria-hidden="true" /></Menu.Trigger><Menu.Portal><Menu.Positioner sideOffset={6} align="end" className="notification-menu-positioner"><Menu.Popup className="notification-action-menu" aria-label={`${sound.name}的操作`}>
-            <Menu.Item onClick={() => void preview(sound)}><CirclePlay size={16} aria-hidden="true" />{playingId === sound.id ? '停止試聽' : '試聽音效'}</Menu.Item>
-            {sound.canDelete ? <Menu.Item className="is-danger" disabled={busy} onClick={() => void deleteSound(sound)}><Trash2 size={16} aria-hidden="true" />刪除音效</Menu.Item> : <Menu.Item disabled>此音效無法刪除</Menu.Item>}
-          </Menu.Popup></Menu.Positioner></Menu.Portal></Menu.Root></td>
+          <td>
+            <AdminButton
+              variant="danger"
+              className="notification-sound-delete"
+              disabled={busy || !sound.canDelete}
+              aria-label={`刪除音效「${sound.name}」`}
+              title={sound.canDelete ? '刪除前會要求確認；仍被引用時由後端阻擋。' : '目前帳號無刪除權限，或此音效受系統保護。'}
+              onClick={() => void deleteSound(sound)}
+            ><Trash2 size={16} aria-hidden="true" /></AdminButton>
+          </td>
         </tr>)}</tbody>
       </table></div>
       {!filtered.length && <div className="notification-empty"><Music2 size={28} aria-hidden="true" /><strong>{sounds.length ? '找不到符合的音效' : '尚無可用音效'}</strong><p>{sounds.length ? '試著使用其他名稱搜尋。' : '上傳 MP3，為不同提醒設定專屬音效。'}</p></div>}

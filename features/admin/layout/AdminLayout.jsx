@@ -71,43 +71,45 @@ export function AdminLayout({ route, navigate, children }) {
   return (
     <main className="adminShell">
       <header className={`adminTopbar ${isMenuOpen ? 'isMenuOpen' : ''}`.trim()}>
-        <div className="adminTopbarBrand">
-          <span className="adminTopbarMark"><img src="/favicon.ico" alt="" /></span>
-          <span className="adminTopbarBrandCopy"><strong>清醒夢</strong><small>LUCID DREAM</small></span>
-          <button className="adminBackToSite adminBrandSiteLink" type="button" onClick={() => handleNavigate('/home')}>↗ 公開網站</button>
-        </div>
-        <button
-          className="adminMenuButton"
-          type="button"
-          aria-label="切換後台導覽選單"
-          aria-expanded={isMenuOpen}
-          onClick={() => setIsMenuOpen((current) => !current)}
-        >
-          <span />
-          <span />
-          <span />
-        </button>
-        <nav className={`adminNav ${isMenuOpen ? 'isOpen' : ''}`} aria-label="後台功能選單">
-          {groups.map((group) => <section className="adminNavGroup" key={group.label}>
-            <p className="adminNavLabel">{group.label}</p>
-            {group.items.map((item) => <button key={item.route} className={route === item.route ? 'isActive' : ''} aria-current={route === item.route ? 'page' : undefined} type="button" onClick={() => handleNavigate(item.route)}><span className="adminNavIndex">{item.index}</span><span className="adminNavText">{item.label}</span></button>)}
-          </section>)}
-        </nav>
-        <div className="adminTopbarUtilities"><AdminNotificationBell/>
-          <div className="adminAccount">
-            <div className="adminAccountIdentity"><small>目前登入</small><strong>{user.displayName}</strong><span>{user.roleLabel}</span></div>
-            <AdminButton
-              variant="ghost"
-              className="adminThemeToggle"
-              aria-pressed={isDarkMode}
-              aria-label={isDarkMode ? '切換為淺色模式' : '切換為暗色模式'}
-              title={isDarkMode ? '切換為淺色模式' : '切換為暗色模式'}
-              disabled={!themeReady}
-              onClick={() => setIsDarkMode((current) => !current)}
-            >
-              {isDarkMode ? '☀' : '☾'}
-            </AdminButton>
-            <AdminButton variant="ghost" onClick={handleLogout}>登出</AdminButton>
+        <div className="adminTopbarScroll">
+          <div className="adminTopbarBrand">
+            <span className="adminTopbarMark"><img src="/favicon.ico" alt="" /></span>
+            <span className="adminTopbarBrandCopy"><strong>清醒夢</strong><small>LUCID DREAM</small></span>
+            <button className="adminBackToSite adminBrandSiteLink" type="button" onClick={() => handleNavigate('/home')}>↗ 公開網站</button>
+          </div>
+          <button
+            className="adminMenuButton"
+            type="button"
+            aria-label="切換後台導覽選單"
+            aria-expanded={isMenuOpen}
+            onClick={() => setIsMenuOpen((current) => !current)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+          <nav className={`adminNav ${isMenuOpen ? 'isOpen' : ''}`} aria-label="後台功能選單">
+            {groups.map((group) => <section className="adminNavGroup" key={group.label}>
+              <p className="adminNavLabel">{group.label}</p>
+              {group.items.map((item) => <button key={item.route} className={route === item.route ? 'isActive' : ''} aria-current={route === item.route ? 'page' : undefined} type="button" onClick={() => handleNavigate(item.route)}><span className="adminNavIndex">{item.index}</span><span className="adminNavText">{item.label}</span></button>)}
+            </section>)}
+          </nav>
+          <div className="adminTopbarUtilities"><AdminNotificationBell/>
+            <div className="adminAccount">
+              <div className="adminAccountIdentity"><small>目前登入</small><strong>{user.displayName}</strong><span>{user.roleLabel}</span></div>
+              <AdminButton
+                variant="ghost"
+                className="adminThemeToggle"
+                aria-pressed={isDarkMode}
+                aria-label={isDarkMode ? '切換為淺色模式' : '切換為暗色模式'}
+                title={isDarkMode ? '切換為淺色模式' : '切換為暗色模式'}
+                disabled={!themeReady}
+                onClick={() => setIsDarkMode((current) => !current)}
+              >
+                {isDarkMode ? '☀' : '☾'}
+              </AdminButton>
+              <AdminButton variant="ghost" onClick={handleLogout}>登出</AdminButton>
+            </div>
           </div>
         </div>
       </header>

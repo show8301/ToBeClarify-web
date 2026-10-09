@@ -1,0 +1,21 @@
+/* Shared single-select geometry. Preserve each surface's colors and borders.
+   The attribute exclusions also outrank legacy scoped background shorthands. */
+:root body select:not([multiple]):is(:not([size]), [size="1"]):not([data-native-select]) {
+  appearance: none;
+  -webkit-appearance: none;
+  min-height: 44px;
+  padding-right: 44px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m4 6 4 4 4-4' fill='none' stroke='%237d8f9c' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px 16px;
+}
+
+/* System-rendered controls remain legible in high-contrast mode. */
+@media (forced-colors: active) {
+  :root body select:not([multiple]):is(:not([size]), [size="1"]):not([data-native-select]) {
+    appearance: auto;
+    -webkit-appearance: auto;
+    background-image: none;
+  }
+}

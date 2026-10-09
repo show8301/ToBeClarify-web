@@ -1,0 +1,135 @@
+/* Gate viewport styling on the mounted admin surface, not the saved theme.
+   Admin styles can remain loaded after client navigation to public pages. */
+:root:has(.adminTheme) {
+  --admin-scrollbar-size: 8px;
+  --admin-scrollbar-track: #e8edf2;
+  --admin-scrollbar-thumb: #8a99ac;
+  --admin-scrollbar-thumb-hover: #657b98;
+  color-scheme: light;
+}
+
+:root[data-admin-theme="dark"]:has(.adminTheme) {
+  --admin-scrollbar-track: #101a1e;
+  --admin-scrollbar-thumb: #526978;
+  --admin-scrollbar-thumb-hover: #829bb0;
+  color-scheme: dark;
+}
+
+:root:has(.adminTheme),
+.adminTheme,
+.adminTheme * {
+  scrollbar-width: thin;
+  scrollbar-color: var(--admin-scrollbar-thumb) var(--admin-scrollbar-track);
+}
+
+/* Blink/WebKit use the native scrollbar parts for exact sizing and hover.
+   Non-auto standard properties would take precedence over these parts. */
+@supports selector(::-webkit-scrollbar) {
+  :root:has(.adminTheme),
+  .adminTheme,
+  .adminTheme * {
+    scrollbar-width: auto;
+    scrollbar-color: auto;
+  }
+
+  :root:has(.adminTheme)::-webkit-scrollbar,
+  .adminTheme::-webkit-scrollbar,
+  .adminTheme *::-webkit-scrollbar {
+    width: var(--admin-scrollbar-size);
+    height: var(--admin-scrollbar-size);
+  }
+
+  :root:has(.adminTheme)::-webkit-scrollbar-track,
+  .adminTheme::-webkit-scrollbar-track,
+  .adminTheme *::-webkit-scrollbar-track {
+    border-radius: 999px;
+    background-color: var(--admin-scrollbar-track);
+  }
+
+  :root:has(.adminTheme)::-webkit-scrollbar-thumb,
+  .adminTheme::-webkit-scrollbar-thumb,
+  .adminTheme *::-webkit-scrollbar-thumb {
+    min-height: 32px;
+    border: 1px solid var(--admin-scrollbar-track);
+    border-radius: 999px;
+    background-color: var(--admin-scrollbar-thumb);
+    background-clip: padding-box;
+  }
+
+  :root:has(.adminTheme)::-webkit-scrollbar-thumb:hover,
+  .adminTheme::-webkit-scrollbar-thumb:hover,
+  .adminTheme *::-webkit-scrollbar-thumb:hover {
+    background-color: var(--admin-scrollbar-thumb-hover);
+  }
+
+  :root:has(.adminTheme)::-webkit-scrollbar-button,
+  .adminTheme::-webkit-scrollbar-button,
+  .adminTheme *::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  :root:has(.adminTheme)::-webkit-scrollbar-corner,
+  .adminTheme::-webkit-scrollbar-corner,
+  .adminTheme *::-webkit-scrollbar-corner {
+    background-color: var(--admin-scrollbar-track);
+  }
+}
+
+/* Keep the existing content insets while reserving a real gap between the
+   scrollport and the sidebar's rounded border, including in Firefox. */
+.adminTopbar:has(> .adminTopbarScroll) {
+  display: flex;
+  padding: 12px 6px 12px 0;
+  overflow: hidden;
+  scrollbar-gutter: auto;
+}
+
+.adminTopbarScroll {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  padding: 6px 8px 2px 14px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.adminTopbarScroll > * {
+  flex-shrink: 0;
+}
+
+@media (max-width: 1020px) {
+  .adminTopbar:has(> .adminTopbarScroll) {
+    padding: 8px 6px;
+  }
+
+  .adminTopbarScroll {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas: "brand menu utilities" "nav nav nav";
+    align-items: center;
+    padding: 1px 4px;
+  }
+}
+
+/* Use system colors and a wider target in high-contrast mode. */
+@media (forced-colors: active) {
+  :root:has(.adminTheme),
+  .adminTheme,
+  .adminTheme * {
+    scrollbar-width: auto;
+    scrollbar-color: auto;
+  }
+
+  :root:has(.adminTheme) {
+    --admin-scrollbar-size: 16px;
+    --admin-scrollbar-track: Canvas;
+    --admin-scrollbar-thumb: ButtonText;
+    --admin-scrollbar-thumb-hover: Highlight;
+  }
+}

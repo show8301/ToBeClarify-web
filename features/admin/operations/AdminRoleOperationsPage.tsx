@@ -1,16 +1,16 @@
 "use client";
 
 import { AdminRefreshButton } from "@/features/admin/shared/AdminRefreshButton";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { requireBusinessDate } from "@/features/admin/shared/businessDay";
-import { adminApi } from "@/features/admin/api/client.js";
+import { adminApi, adminRequest, ApiError } from "@/features/admin/api/client.js";
 import { useAdminAuth } from "@/features/admin/auth/AdminAuthContext.jsx";
 import { AdminButton, AdminPage } from "@/features/admin/shared/AdminShared.jsx";
 import {
-  AdminDesignatedDashboard,
   AdminManagerDashboard,
   AdminServiceDashboard,
 } from "./AdminOperationsDashboards";
+import { AdminDesignatedWorkbench } from "./AdminDesignatedWorkbench";
 import { AdminCreateOrderPassDrawer } from "./AdminCreateOrderPassDrawer.jsx";
 import { AdminCreateRoomServiceDrawer } from "./AdminCreateRoomServiceDrawer.jsx";
 import { booleanValue, isRecord, numberValue, stringValue } from "./operationsFormat";
@@ -118,6 +118,7 @@ function normalizeContext(value: unknown): OperationsContext | null {
   if (!isRecord(value)) return null;
   return {
     referenceBusinessDate: requireBusinessDate(value),
+    businessPeriodId: stringValue(value.businessPeriodId),
     referenceStartsAt: stringValue(value.referenceStartsAt),
     referenceEndsAt: stringValue(value.referenceEndsAt),
     periodStatus: stringValue(value.periodStatus, "scheduled"),
@@ -142,6 +143,8 @@ function normalizeSession(value: unknown): OperationsSession | null {
     customerName: stringValue(session.customerName, "未命名顧客"),
     gameId: stringValue(session.gameId, "—"),
     status: stringValue(session.status),
+    businessPeriodId: stringValue(session.businessPeriodId),
+    entryStatus: stringValue(session.entryStatus, "open"),
     orderCount: numberValue(value.orderCount),
     waitingOrderCount: numberValue(value.waitingOrderCount),
     confirmedOrderCount: numberValue(value.confirmedOrderCount),
@@ -164,6 +167,10 @@ function normalizeNominee(value: unknown): OperationsNominee | null {
     requestedServiceEndsAt: stringValue(value.requestedServiceEndsAt),
     busyUntil: stringValue(value.busyUntil),
     confirmationStatus: stringValue(value.confirmationStatus),
+    reservedMinutes: numberValue(value.reservedMinutes),
+    bufferMinutes: numberValue(value.bufferMinutes),
+    segmentMinutes: numberValue(value.segmentMinutes, 20),
+    minimumSegments: numberValue(value.minimumSegmentCount, 1),
   };
 }
 
@@ -171,7 +178,7 @@ function normalizeAddon(value: unknown): OperationsAddon | null {
   if (!isRecord(value)) return null;
   const id = stringValue(value.id);
   if (!id) return null;
-  return { id, staffId: stringValue(value.staffId), staffName: stringValue(value.staffName, "未指定店員"), serviceName: stringValue(value.serviceName, "附掛加購服務"), status: stringValue(value.status) };
+  return { id, staffId: stringValue(value.staffId), staffName: stringValue(value.staffName, "未指定店員"), serviceName: stringValue(value.serviceName, "附掛加購服務"), status: stringValue(value.status), parentNomineeId: stringValue(value.parentNomineeId) };
 }
 
 function normalizeOrder(value: unknown, session: OperationsSession): OperationsOrder | null {
@@ -188,6 +195,7 @@ function normalizeOrder(value: unknown, session: OperationsSession): OperationsO
     gameId: session.gameId,
     orderNumber: stringValue(value.orderNumber, id),
     orderKind: stringValue(value.orderKind),
+    businessPeriodId: stringValue(value.businessPeriodId),
     status: stringValue(value.status),
     storeConfirmationStatus: stringValue(value.storeConfirmationStatus),
     queueStage: stringValue(value.queueStage),
@@ -195,6 +203,12 @@ function normalizeOrder(value: unknown, session: OperationsSession): OperationsO
     submittedAt: stringValue(value.submittedAt),
     totalAmount: numberValue(value.totalAmount),
     customerNote: stringValue(value.customerNote),
+    customerLocation: stringValue(value.customerLocation),
+    flowVersion: numberValue(value.flowVersion, 1),
+    startedAt: stringValue(value.startedAt),
+    completedAt: stringValue(value.completedAt),
+    requestSource: Array.isArray(value.history) && value.history.filter(isRecord).some((item) => item.actorType === "manager_transfer") ? "manager_transfer" : "customer",
+    items: Array.isArray(value.items) ? value.items.filter(isRecord).map((item) => ({ name: stringValue(item.name), quantity: numberValue(item.quantity), kind: stringValue(item.itemType) })) : [],
     nominees,
     addons,
     roomBookings,
@@ -229,6 +243,8 @@ export function AdminRoleOperationsPage({ navigate }: { navigate: Navigate }) {
   const { user } = useAdminAuth();
   const adminUser = useMemo(() => toAdminUser(user), [user]);
   const [state, setState] = useState({ loading: true, data: emptyData, error: "" });
+  const loadGeneration = useRef(0);
+  const requestedRoleAppliedFor = useRef("");
   const [actionState, setActionState] = useState<OperationsActionState>({ busyId: "", message: "", error: "" });
   const [createPassOpen, setCreatePassOpen] = useState(false);
   const [issuedPass, setIssuedPass] = useState<unknown>(null);
@@ -247,8 +263,14 @@ export function AdminRoleOperationsPage({ navigate }: { navigate: Navigate }) {
     } catch {
       persistedRole = null;
     }
+    const requestedRole = new URL(window.location.href).searchParams.get("workbench");
+    if (requestedRoleAppliedFor.current !== roleStorageKey && (requestedRole === "designated" || requestedRole === "service" || requestedRole === "manager") && availableRoles.includes(requestedRole)) {
+      persistedRole = requestedRole;
+      requestedRoleAppliedFor.current = roleStorageKey;
+      try { window.sessionStorage.setItem(roleStorageKey, requestedRole); } catch { /* Session storage remains optional. */ }
+    }
     setSelectedRole(persistedRole && availableRoles.includes(persistedRole) ? persistedRole : defaultRole);
-  }, [availableRoleSignature, availableRoles, defaultRole, roleStorageKey]);
+  }, [adminUser.id, adminUser.staffMemberId, availableRoleSignature, availableRoles, defaultRole, roleStorageKey]);
   const selectDashboardRole = useCallback((role: OperationalDashboardRole) => {
     if (!availableRoles.includes(role)) return;
     setSelectedRole(role);
@@ -263,24 +285,32 @@ export function AdminRoleOperationsPage({ navigate }: { navigate: Navigate }) {
   const isDeveloperPreview = adminUser.role === "developer";
   const canManage = adminUser.role === "developer" || adminUser.role === "manager";
 
-  const load = useCallback(async () => {
-    setState((current) => ({ ...current, loading: true, error: "" }));
+  const load = useCallback(async (background = false) => {
+    const generation = ++loadGeneration.current;
+    if (!background) setState((current) => ({ ...current, loading: true, error: "" }));
     try {
       const context = normalizeContext(await adminApi.getOrderingContext());
       const businessDate = requireBusinessDate(context);
       const [sessionResult, roomResult, staffResult] = await Promise.allSettled([
-        adminApi.getOrderSessions({ businessDate }),
+        dashboardRole === "designated" && adminUser.staffMemberId
+          ? adminRequest(`/designated-order-sessions?businessDate=${encodeURIComponent(businessDate)}`)
+          : adminApi.getOrderSessions({ businessDate }),
         adminApi.getRoomOrders({ businessDate }),
         adminApi.getStaffMembers(),
       ]);
+      if (sessionResult.status === "rejected") {
+        if (dashboardRole === "designated" && adminUser.staffMemberId && sessionResult.reason instanceof ApiError && sessionResult.reason.status === 404) {
+          throw new Error("指名工作台資料服務尚未就緒（HTTP 404），請確認系統更新已完成。");
+        }
+        throw sessionResult.reason;
+      }
+      if (staffResult.status === "rejected") throw staffResult.reason;
+      if (!Array.isArray(sessionResult.value) || !Array.isArray(staffResult.value)) throw new Error("營業資料格式異常，請重新整理。");
       const sessions = arrayValue(sessionResult.status === "fulfilled" ? sessionResult.value : undefined).map(normalizeSession).filter((item): item is OperationsSession => Boolean(item));
       const ordersBySession = await Promise.all(sessions.map(async (session) => {
-        try {
-          const value = await adminApi.getSessionOrders(session.id);
-          return arrayValue(value).map((item) => normalizeOrder(item, session)).filter((item): item is OperationsOrder => Boolean(item));
-        } catch {
-          return [];
-        }
+        const value = await adminApi.getSessionOrders(session.id);
+        if (!Array.isArray(value)) throw new Error("顧客訂單資料格式異常，請重新整理。");
+        return value.map((item) => normalizeOrder(item, session)).filter((item): item is OperationsOrder => Boolean(item));
       }));
       const data: OperationsData = {
         context,
@@ -289,16 +319,24 @@ export function AdminRoleOperationsPage({ navigate }: { navigate: Navigate }) {
         roomOrders: arrayValue(roomResult.status === "fulfilled" ? roomResult.value : undefined).map(normalizeRoomOrder).filter((item): item is OperationsRoomOrder => Boolean(item)),
         staff: arrayValue(staffResult.status === "fulfilled" ? staffResult.value : undefined).map(normalizeStaffMember).filter((item): item is OperationsStaffMember => Boolean(item)),
       };
-      setState({ loading: false, data, error: context ? "" : "今日營運資料格式異常，請前往完整點單管理確認。" });
+      if (generation === loadGeneration.current) setState({ loading: false, data, error: roomResult.status === "rejected" ? "包廂資料暫時無法更新，請重新整理。" : "" });
     } catch (error) {
-      setState((current) => ({ ...current, loading: false, error: errorMessage(error) }));
+      if (generation === loadGeneration.current) setState((current) => ({ ...current, loading: false, error: errorMessage(error) }));
     }
-  }, []);
+  }, [adminUser.staffMemberId, dashboardRole]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => { void load(); }, 0);
-    return () => window.clearTimeout(timer);
+    return () => { window.clearTimeout(timer); loadGeneration.current += 1; };
   }, [load]);
+
+  useEffect(() => {
+    if (dashboardRole !== "designated") return;
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === "visible") void load(true);
+    }, 30_000);
+    return () => window.clearInterval(timer);
+  }, [dashboardRole, load]);
 
   const runAction = useCallback(async (id: string, request: () => Promise<unknown>, successMessage: string) => {
     setActionState({ busyId: id, message: "", error: "" });
@@ -333,13 +371,13 @@ export function AdminRoleOperationsPage({ navigate }: { navigate: Navigate }) {
     await load();
   }, [load]);
 
-  return <AdminPage eyebrow={`${isDeveloperPreview ? "DEVELOPER PREVIEW · " : ""}${config.label.toUpperCase()} DASHBOARD`} title={config.title} description={`${adminUser.displayName}，${isDeveloperPreview ? "可切換檢視三種營業工作台；" : ""}${config.description}`} actions={<><AdminRefreshButton disabled={state.loading} onClick={() => void load()} /><AdminButton variant="ghost" onClick={() => navigate("/admin/orders")}>完整點單管理</AdminButton></>}>
+  return <AdminPage eyebrow={`${isDeveloperPreview ? "DEVELOPER PREVIEW · " : ""}${config.label.toUpperCase()} DASHBOARD`} title={config.title} description={`${adminUser.displayName}，${isDeveloperPreview ? "可切換檢視三種營業工作台；" : ""}${config.description}`} actions={<><AdminRefreshButton disabled={state.loading} onClick={() => void load()} />{dashboardRole !== "designated" && <AdminButton variant="ghost" onClick={() => navigate("/admin/orders")}>完整點單管理</AdminButton>}</>}>
     {state.error ? <div className="adminOrderMessage isError" role="alert">{state.error}</div> : null}
     {availableRoles.length > 1 ? <div className={`adminRoleSwitcher${isDeveloperPreview ? " isDeveloperPreview" : ""}`} role="group" aria-label={isDeveloperPreview ? "開發者工作台預覽切換" : "今日可用工作身分"}><span>{isDeveloperPreview ? "開發者預覽" : adminUser.role === "manager" ? "目前工作視角" : "今日可用身分"}</span>{availableRoles.map((role) => <button type="button" className={dashboardRole === role ? "isActive" : ""} aria-pressed={dashboardRole === role} key={role} onClick={() => selectDashboardRole(role)}>{dashboardRoleLabels[role]}</button>)}</div> : null}
     {!isDeveloperPreview && currentStaff?.todayWorkMode && currentStaff.todayWorkMode.isWorking && !currentStaff.todayWorkMode.activeRoles.some((role) => role === "service" || role === "designated") ? <div className="adminRoleDashboardNotice" role="status">今天尚未啟用服務員或指名人員身分，目前依今日排班顯示預設工作台；若需調整，請先確認值班規劃，再到店員設定開啟今日啟用職位。</div> : null}
-    {dashboardRole === "designated" ? <AdminDesignatedDashboard data={state.data} user={adminUser} navigate={navigate} runAction={runAction} actionState={actionState} onOpenCreatePass={openCreatePass} onOpenCreateRoomService={openCreateRoomService} /> : null}
+    {dashboardRole === "designated" ? <AdminDesignatedWorkbench data={state.data} user={adminUser} onChanged={() => load(true)} loading={state.loading} loadError={state.error} /> : null}
     {dashboardRole === "service" ? <AdminServiceDashboard data={state.data} user={adminUser} navigate={navigate} runAction={runAction} actionState={actionState} onOpenCreatePass={openCreatePass} onOpenCreateRoomService={openCreateRoomService} /> : null}
-    {dashboardRole === "manager" ? <AdminManagerDashboard data={state.data} user={adminUser} navigate={navigate} runAction={runAction} actionState={actionState} onOpenCreatePass={openCreatePass} onOpenCreateRoomService={openCreateRoomService} /> : null}
+    {dashboardRole === "manager" ? <AdminManagerDashboard onChanged={() => load(true)} data={state.data} user={adminUser} navigate={navigate} runAction={runAction} actionState={actionState} onOpenCreatePass={openCreatePass} onOpenCreateRoomService={openCreateRoomService} /> : null}
     {(createPassOpen || issuedPass) ? <AdminCreateOrderPassDrawer canManage={canManage} issued={issuedPass} onClose={closeCreatePass} onIssued={handleCreatePassIssued} /> : null}
     {createRoomServiceOpen ? <AdminCreateRoomServiceDrawer businessDate={state.data.context?.referenceBusinessDate || todayBusinessDate()} onClose={closeCreateRoomService} onCreated={handleRoomServiceCreated} /> : null}
   </AdminPage>;

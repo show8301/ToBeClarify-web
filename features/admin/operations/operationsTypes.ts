@@ -9,6 +9,7 @@ export type CurrentAdminUser = {
 };
 
 export type OperationsContext = {
+  businessPeriodId?: string;
   referenceBusinessDate: string;
   referenceStartsAt: string;
   referenceEndsAt: string;
@@ -24,10 +25,12 @@ export type OperationsContext = {
 };
 
 export type OperationsSession = {
+  businessPeriodId?: string;
   id: string;
   customerName: string;
   gameId: string;
   status: string;
+  entryStatus?: string;
   orderCount: number;
   waitingOrderCount: number;
   confirmedOrderCount: number;
@@ -45,6 +48,10 @@ export type OperationsNominee = {
   requestedServiceEndsAt: string;
   busyUntil: string;
   confirmationStatus: string;
+  reservedMinutes?: number;
+  bufferMinutes?: number;
+  segmentMinutes?: number;
+  minimumSegments?: number;
 };
 
 export type OperationsAddon = {
@@ -53,9 +60,11 @@ export type OperationsAddon = {
   staffName: string;
   serviceName: string;
   status: string;
+  parentNomineeId?: string;
 };
 
 export type OperationsOrder = {
+  businessPeriodId?: string;
   id: string;
   sessionId: string;
   customerName: string;
@@ -69,6 +78,12 @@ export type OperationsOrder = {
   submittedAt: string;
   totalAmount: number;
   customerNote: string;
+  customerLocation?: string;
+  flowVersion?: number;
+  requestSource?: string;
+  startedAt?: string;
+  completedAt?: string;
+  items?: Array<{ name: string; quantity: number; kind: string }>;
   nominees: OperationsNominee[];
   addons: OperationsAddon[];
   roomBookings: Array<{ roomName: string; startsAt: string; endsAt: string; status: string }>;

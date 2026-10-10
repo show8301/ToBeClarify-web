@@ -1,0 +1,10 @@
+[
+  { "selector": ".adminTheme", "declarations": { "--admin-space-block": "18px", "--admin-space-inline": "18px" } },
+  { "selector": ".adminTheme .adminPageHeading h1", "declarations": { "font": "850 32px/1.2 var(--font-display)" } },
+  { "selector": ".adminDesignatedWorkbench", "declarations": { "display": "grid", "gap": "var(--admin-space-block)" } },
+  { "selector": ".adminDesignatedWorkbench .dwTaskGrid", "declarations": { "gap": "var(--admin-space-inline)", "grid-template-columns": "minmax(0, 1fr) minmax(0, 1fr)" } },
+  { "selector": ".adminDesignatedWorkbench .adminPanel", "declarations": { "margin": "0", "min-width": "0" } },
+  { "selector": ".adminDesignatedWorkbench .dwTaskGrid", "context": ["@media (max-width: 1100px)"], "declarations": { "grid-template-columns": "minmax(0, 1fr)" } },
+  { "selector": ".adminDesignatedWorkbenchDialog .dwFormGrid", "context": ["@media (max-width: 640px)"], "declarations": { "grid-template-columns": "minmax(0, 1fr)" } },
+  { "selector": ".adminDesignatedWorkbench .dwName", "context": ["@media (max-width: 640px)"], "declarations": { "min-height": "44px" } }
+]

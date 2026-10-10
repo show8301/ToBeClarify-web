@@ -2,6 +2,7 @@ import { useState } from "react";
 import { adminApi } from "@/features/admin/api/client.js";
 import { AdminButton, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
 import { AdminAttendanceQuickCard } from "./AdminAttendanceQuickCard.jsx";
+import { WorkbenchManagerRequests } from "./WorkbenchManagerRequests";
 import type {
   CurrentAdminUser,
   OperationsAction,
@@ -11,7 +12,7 @@ import type {
   OperationsOrder,
   OperationsRoomOrder,
 } from "./operationsTypes";
-import { formatClock, formatDateTime, formatMoney, intakeModeLabel, orderStatusLabel, periodStatusLabel, roomStatusLabel } from "./operationsFormat";
+import { formatClock, formatDateTime, formatMoney, intakeModeLabel, periodStatusLabel, roomStatusLabel } from "./operationsFormat";
 
 type DashboardProps = {
   data: OperationsData;
@@ -21,6 +22,7 @@ type DashboardProps = {
   actionState: OperationsActionState;
   onOpenCreatePass: () => void;
   onOpenCreateRoomService: () => void;
+  onChanged?: () => Promise<void>;
 };
 
 type Metric = { label: string; value: string | number; detail: string };
@@ -41,66 +43,6 @@ function ActionFeedback({ state }: { state: OperationsActionState }) {
 
 function OrderIdentity({ order, compact = false }: { order: OperationsOrder; compact?: boolean }) {
   return <div className="adminRoleDashboardIdentity"><strong>{order.customerName || "未命名顧客"}</strong><small>{compact ? order.orderNumber : `${order.orderNumber} · ID ${order.gameId}`}</small></div>;
-}
-
-function AssignedServiceRow({ order, nominee, runAction, actionState }: { order: OperationsOrder; nominee: OperationsOrder["nominees"][number]; runAction: OperationsAction; actionState: OperationsActionState }) {
-  const actionId = `nominee-${order.id}`;
-  const waitingForStore = order.storeConfirmationStatus === "pending";
-  const canConfirm = nominee.confirmationStatus === "waiting" && !waitingForStore;
-  return <article className="adminRoleDashboardRow">
-    <OrderIdentity order={order} />
-    <div className="adminRoleDashboardRowCopy"><strong>{nominee.serviceName}</strong><small>{formatDateTime(nominee.requestedStartsAt)} ～ {formatClock(nominee.busyUntil)} · {nominee.segmentCount} 節</small></div>
-    <span className="adminRoleDashboardBadge">{waitingForStore ? "等待店家確認" : nominee.confirmationStatus === "waiting" ? "等我確認" : orderStatusLabel(order.status)}</span>
-    {canConfirm ? <AdminButton variant="secondary" disabled={actionState.busyId === actionId} onClick={() => void runAction(actionId, () => adminApi.confirmNominee(order.id), "已確認自己的指名；訂單會等待其他被指名店員完成確認。")}>{actionState.busyId === actionId ? "處理中…" : "確認我的指名"}</AdminButton> : null}
-  </article>;
-}
-
-function AssignedAddonRow({ order, addon, runAction, actionState }: { order: OperationsOrder; addon: OperationsOrder["addons"][number]; runAction: OperationsAction; actionState: OperationsActionState }) {
-  const actionId = `addon-${order.id}`;
-  return <article className="adminRoleDashboardRow">
-    <OrderIdentity order={order} />
-    <div className="adminRoleDashboardRowCopy"><strong>附掛加購：{addon.serviceName}</strong><small>{addon.staffName} · 既有指名服務中的加購</small></div>
-    <span className="adminRoleDashboardBadge">{addon.status === "waiting" ? "等我確認" : orderStatusLabel(addon.status)}</span>
-    {addon.status === "waiting" ? <AdminButton variant="secondary" disabled={actionState.busyId === actionId} onClick={() => void runAction(actionId, () => adminApi.confirmAddon(order.id), "已確認顧客送出的附掛加購服務單。")}>{actionState.busyId === actionId ? "處理中…" : "確認加購服務"}</AdminButton> : null}
-  </article>;
-}
-
-export function AdminDesignatedDashboard({ data, user, navigate, runAction, actionState }: DashboardProps) {
-  const assigned = data.orders.flatMap((order) => order.nominees.filter((nominee) => nominee.staffId === user.staffMemberId).map((nominee) => ({ order, nominee })));
-  const addons = data.orders.flatMap((order) => order.addons.filter((addon) => addon.staffId === user.staffMemberId).map((addon) => ({ order, addon })));
-  const waiting = assigned.filter(({ order, nominee }) => nominee.confirmationStatus === "waiting" && order.storeConfirmationStatus !== "pending");
-  const active = assigned.filter(({ order }) => ["confirmed", "in_service"].includes(order.status));
-  const upcoming = assigned.filter(({ order }) => ["completed", "cancelled", "rejected"].includes(order.status) === false).sort((left, right) => new Date(left.nominee.requestedStartsAt).getTime() - new Date(right.nominee.requestedStartsAt).getTime()).slice(0, 6);
-
-  return <div className="adminRoleDashboard adminRoleDashboard-designated">
-    <Metrics items={[
-      { label: "待我確認", value: waiting.length, detail: "需要現在回應的指名" },
-      { label: "服務中／已成立", value: active.length, detail: "我的今日服務" },
-      { label: "今日指名", value: assigned.length, detail: "包含已完成與進行中" },
-      { label: "目前接單", value: intakeModeLabel(data.context?.intakeMode || ""), detail: periodStatusLabel(data.context?.periodStatus || "") },
-    ]} />
-    <AdminAttendanceQuickCard businessDate={data.context?.referenceBusinessDate || ""} staffMemberId={user.staffMemberId || ""} />
-    {!user.staffMemberId ? <div className="adminRoleDashboardNotice" role="alert">目前帳號尚未綁定店員資料，因此無法篩出個人指名。請先請經理在店員資料設定中確認綁定。</div> : null}
-    <ActionFeedback state={actionState} />
-    <div className="adminRoleDashboardGrid">
-      <AdminPanel title="現在需要我處理" description="顧客指名與附掛加購會在這裡集中出現。">
-        <div className="adminRoleDashboardRows">
-          {waiting.map(({ order, nominee }) => <AssignedServiceRow key={`${order.id}-${nominee.id}`} order={order} nominee={nominee} runAction={runAction} actionState={actionState} />)}
-          {addons.filter(({ addon }) => addon.status === "waiting").map(({ order, addon }) => <AssignedAddonRow key={`${order.id}-${addon.id}`} order={order} addon={addon} runAction={runAction} actionState={actionState} />)}
-          {!waiting.length && !addons.some(({ addon }) => addon.status === "waiting") ? <EmptyState>目前沒有需要你立即確認的服務。</EmptyState> : null}
-        </div>
-      </AdminPanel>
-      <AdminPanel title="我的今日排程" description="依預約開始時間排列，方便掌握下一位顧客。" actions={<AdminButton variant="ghost" onClick={() => navigate("/admin/orders")}>查看完整訂單</AdminButton>}>
-        <div className="adminRoleDashboardRows">
-          {upcoming.map(({ order, nominee }) => <article className="adminRoleDashboardRow" key={`${order.id}-${nominee.id}`}><OrderIdentity order={order} /><div className="adminRoleDashboardRowCopy"><strong>{nominee.serviceName}</strong><small>{formatDateTime(nominee.requestedStartsAt)} ～ {formatClock(nominee.requestedServiceEndsAt)}</small></div><span className="adminRoleDashboardBadge">{orderStatusLabel(order.status)}</span></article>)}
-          {!upcoming.length ? <EmptyState>目前沒有可顯示的指名排程。</EmptyState> : null}
-        </div>
-      </AdminPanel>
-    </div>
-    <AdminPanel title="工作入口" description="只保留現場最常用的操作。">
-      <div className="adminRoleDashboardQuickLinks"><AdminButton onClick={() => navigate("/admin/orders")}>查看我的訂單</AdminButton><AdminButton variant="secondary" onClick={() => navigate("/admin/rooms/service")}>查看包廂排程</AdminButton><AdminButton variant="ghost" onClick={() => navigate("/admin/staff")}>更新我的上班狀態</AdminButton></div>
-    </AdminPanel>
-  </div>;
 }
 
 function CoordinationRow({ order, runAction, actionState }: { order: OperationsOrder; runAction: OperationsAction; actionState: OperationsActionState }) {
@@ -170,7 +112,7 @@ function ManagerBusinessControls({ context, runAction, actionState }: { context:
   </div>{context.unfinishedOrderCount > 0 ? <small className="adminRoleDashboardControlHint">仍有 {context.unfinishedOrderCount} 張未完成訂單，完成前不能關店或結算。</small> : null}</div>;
 }
 
-export function AdminManagerDashboard({ data, user, navigate, runAction, actionState }: Omit<DashboardProps, "user"> & { user?: CurrentAdminUser }) {
+export function AdminManagerDashboard({ data, user, navigate, runAction, actionState, onChanged }: Omit<DashboardProps, "user"> & { user?: CurrentAdminUser }) {
   const workingStaff = data.staff.filter((staff) => staff.isActive && staff.isWorkingToday);
   const absentStaff = data.staff.filter((staff) => staff.isActive && !staff.isWorkingToday);
   const risks = [
@@ -187,6 +129,7 @@ export function AdminManagerDashboard({ data, user, navigate, runAction, actionS
     ]} />
     <AdminAttendanceQuickCard businessDate={data.context?.referenceBusinessDate || ""} staffMemberId={user?.staffMemberId || ""} />
     <ActionFeedback state={actionState} />
+    {onChanged && <WorkbenchManagerRequests data={data} onChanged={onChanged} />}
     <div className="adminRoleDashboardGrid">
       <AdminPanel title="營運控制" description="經理可在這裡處理開店、接單模式與關店；詳細操作仍保留在完整點單管理。"><ManagerBusinessControls context={data.context} runAction={runAction} actionState={actionState} /></AdminPanel>
       <AdminPanel title="當班人力" description="先確認今天是否有足夠的人力承接服務。" actions={<AdminButton variant="ghost" onClick={() => navigate("/admin/staff")}>管理店員</AdminButton>}>

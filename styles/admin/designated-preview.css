@@ -1,0 +1,934 @@
+/* Local design drafts: shared shell, typography and controls remain authoritative. */
+.adminDesignatedPreview .dpStack {
+  display: grid;
+  align-content: start;
+  gap: var(--admin-space-block);
+}
+
+.adminDesignatedPreview .adminPanel {
+  min-width: 0;
+  margin: 0;
+}
+
+.adminDesignatedPreview .dpPreviewBar,
+.adminDesignatedPreview .dpShiftBar,
+.adminDesignatedPreview .dpNext,
+.adminDesignatedPreview .dpNotifications,
+.adminDesignatedPreview .dpFeedback {
+  display: flex;
+  align-items: center;
+  gap: var(--admin-space-inline);
+  padding: 16px 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.adminDesignatedPreview .dpPreviewBar {
+  flex-wrap: wrap;
+  background: rgba(var(--color-accent-rgb), .09);
+}
+
+.adminDesignatedPreview .dpPreviewBar > div:first-child {
+  flex: 1 1 250px;
+}
+
+.adminDesignatedPreview .dpPreviewLabel {
+  color: var(--color-fg-soft);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.adminDesignatedPreview .dpPreviewBar p {
+  margin: 4px 0 0;
+  color: var(--color-fg-mute);
+  font-size: 12px;
+}
+
+.adminDesignatedPreview .dpVersionSelector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.adminDesignatedPreview .dpVersionSelector button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface-input);
+  color: var(--color-fg-soft);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.adminDesignatedPreview .dpVersionSelector button.isSelected {
+  border-color: var(--color-accent);
+  background: rgba(var(--color-accent-rgb), .2);
+  color: var(--color-fg);
+}
+
+.adminDesignatedPreview .dpVersionSelector button span {
+  color: var(--color-fg-mute);
+  font: 650 10px/1 var(--font-mono);
+}
+
+.adminDesignatedPreview .dpShiftBar {
+  flex-wrap: wrap;
+}
+
+.adminDesignatedPreview .dpShiftIdentity {
+  display: flex;
+  align-items: center;
+  flex: 1 1 240px;
+  gap: 12px;
+}
+
+.adminDesignatedPreview .dpLiveDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-accent-2);
+  box-shadow: 0 0 0 5px rgba(var(--color-accent-2-rgb), .1);
+}
+
+.adminDesignatedPreview .dpLiveDot.isOff {
+  background: var(--color-fg-mute);
+  box-shadow: none;
+}
+
+.adminDesignatedPreview .dpShiftIdentity strong {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 15px;
+}
+
+.adminDesignatedPreview .dpShiftIdentity small,
+.adminDesignatedPreview .dpShiftIdentity > div > span {
+  color: var(--color-fg-mute);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.adminDesignatedPreview .dpShiftClock {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-fg-mute);
+  font-size: 12px;
+}
+
+.adminDesignatedPreview .dpTaskGrid,
+.adminDesignatedPreview .dpCustomerGrid,
+.adminDesignatedPreview .dpServiceGrid {
+  display: grid;
+  align-items: start;
+  gap: var(--admin-space-inline);
+}
+
+.adminDesignatedPreview .dpTaskGrid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.adminDesignatedPreview .dpCustomerGrid {
+  grid-template-columns: minmax(300px, .8fr) minmax(0, 1.6fr);
+}
+
+.adminDesignatedPreview .dpServiceGrid {
+  grid-template-columns: minmax(0, 1.35fr) minmax(340px, .9fr);
+}
+
+.adminDesignatedPreview .dpTaskGrid > div,
+.adminDesignatedPreview .dpCustomerGrid > div,
+.adminDesignatedPreview .dpServiceGrid > div {
+  min-width: 0;
+}
+
+.adminDesignatedPreview #dp-customer-desk {
+  scroll-margin-top: 18px;
+}
+
+.adminDesignatedPreview .dpBadge,
+.adminDesignatedPreview .dpCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  gap: 6px;
+  padding: 4px 9px;
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  color: var(--color-fg-soft);
+  font-size: 11px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.adminDesignatedPreview .dpBadge.is-in_service,
+.adminDesignatedPreview .dpBadge.is-confirmed {
+  background: rgba(var(--color-accent-2-rgb), .1);
+  border-color: rgba(var(--color-accent-2-rgb), .26);
+  color: var(--color-fg);
+}
+
+.adminDesignatedPreview .dpBadge.is-awaiting,
+.adminDesignatedPreview .dpBadge.is-manager,
+.adminDesignatedPreview .dpCount {
+  background: rgba(var(--color-accent-rgb), .15);
+  border-color: rgba(var(--color-accent-rgb), .35);
+  color: var(--color-fg);
+}
+
+.adminDesignatedPreview .dpCount {
+  min-width: 32px;
+  min-height: 30px;
+  font: 700 14px/1 var(--font-mono);
+}
+
+.adminDesignatedPreview .dpRequestList {
+  display: grid;
+  gap: 14px;
+}
+
+.adminDesignatedPreview .dpRequest {
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: rgba(var(--color-accent-rgb), .04);
+}
+
+.adminDesignatedPreview .dpRowBetween,
+.adminDesignatedPreview .dpServiceBody {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.adminDesignatedPreview .dpNameButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-fg);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.adminDesignatedPreview .dpRequestTime {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 9px 0;
+  font: 650 14px/1.5 var(--font-mono);
+}
+
+.adminDesignatedPreview .dpRequestTime span {
+  color: var(--color-fg-soft);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.adminDesignatedPreview .dpMuted {
+  color: var(--color-fg-mute);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.adminDesignatedPreview .dpRequest > .dpMuted {
+  min-height: 21px;
+  margin: 0 0 14px;
+}
+
+.adminDesignatedPreview .dpActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.adminDesignatedPreview .dpAvatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(var(--color-accent-rgb), .3);
+  border-radius: 12px;
+  background: rgba(var(--color-accent-rgb), .12);
+  color: var(--color-fg);
+  font-size: 18px;
+  font-weight: 750;
+}
+
+.adminDesignatedPreview .dpServiceCustomer,
+.adminDesignatedPreview .dpGuestHeading {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 14px;
+}
+
+.adminDesignatedPreview .dpServiceCustomer > div,
+.adminDesignatedPreview .dpGuestHeading > div {
+  min-width: 0;
+}
+
+.adminDesignatedPreview .dpServiceCustomer h3,
+.adminDesignatedPreview .dpGuestHeading h3 {
+  margin: 0;
+  font: 800 24px/1.3 var(--font-display);
+  letter-spacing: -.035em;
+}
+
+.adminDesignatedPreview .dpServiceCustomer p,
+.adminDesignatedPreview .dpGuestHeading p {
+  margin: 4px 0;
+  color: var(--color-fg-soft);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.adminDesignatedPreview .dpTimer {
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+.adminDesignatedPreview .dpTimer > span {
+  display: block;
+  color: var(--color-fg-mute);
+  font-size: 11px;
+}
+
+.adminDesignatedPreview .dpTimer strong {
+  display: block;
+  margin: 5px 0 3px;
+  color: var(--color-fg);
+  font: 700 48px/1 var(--font-display);
+  letter-spacing: -.06em;
+}
+
+.adminDesignatedPreview .dpTimer strong small {
+  margin-left: 7px;
+  color: var(--color-fg-mute);
+  font: 500 13px/1 var(--font-body);
+  letter-spacing: 0;
+}
+
+.adminDesignatedPreview .dpProgress {
+  height: 4px;
+  margin: 20px 0 12px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: rgba(var(--color-accent-rgb), .13);
+}
+
+.adminDesignatedPreview .dpProgress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-accent);
+}
+
+.adminDesignatedPreview .dpServiceMeta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--color-fg-soft);
+  font-size: 12px;
+}
+
+.adminDesignatedPreview .dpServiceMeta span:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.adminDesignatedPreview .dpNote {
+  margin: 18px 0;
+  padding: 12px 14px;
+  border-left: 2px solid var(--color-accent);
+  border-radius: 0 8px 8px 0;
+  background: rgba(var(--color-accent-rgb), .06);
+  color: var(--color-fg-soft);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.adminDesignatedPreview .dpNext {
+  padding: 16px 20px;
+}
+
+.adminDesignatedPreview .dpNext > svg {
+  flex: 0 0 auto;
+  color: var(--color-fg-mute);
+}
+
+.adminDesignatedPreview .dpNext > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.adminDesignatedPreview .dpNext span {
+  color: var(--color-fg-mute);
+  font-size: 11px;
+}
+
+.adminDesignatedPreview .dpNext strong {
+  display: block;
+  margin: 3px 0;
+  font-size: 17px;
+}
+
+.adminDesignatedPreview .dpNext p {
+  margin: 0;
+  color: var(--color-fg-soft);
+  font-size: 12px;
+}
+
+.adminDesignatedPreview .dpServiceFocus .dpServiceBody {
+  min-height: 160px;
+}
+
+.adminDesignatedPreview .dpServiceFocus .dpServiceCustomer h3 {
+  font-size: 32px;
+}
+
+.adminDesignatedPreview .dpServiceFocus .dpTimer strong {
+  font-size: 76px;
+}
+
+.adminDesignatedPreview .dpFocusAssist {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-fg-mute);
+  font-size: 12px;
+}
+
+.adminDesignatedPreview .dpTimeline {
+  display: grid;
+  gap: 0;
+}
+
+.adminDesignatedPreview .dpTimelineItem {
+  position: relative;
+  display: grid;
+  grid-template-columns: 52px 10px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 83px;
+  padding: 12px 0;
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  background: none;
+  color: var(--color-fg);
+  text-align: left;
+}
+
+.adminDesignatedPreview .dpTimelineItem:last-child {
+  border-bottom: 0;
+}
+
+.adminDesignatedPreview .dpTimelineTime {
+  font: 650 13px/1.5 var(--font-mono);
+}
+
+.adminDesignatedPreview .dpTimelineTime small {
+  display: block;
+  color: var(--color-fg-mute);
+  font: 400 11px/1.5 var(--font-mono);
+}
+
+.adminDesignatedPreview .dpTimelineDot {
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--color-accent);
+  border-radius: 50%;
+}
+
+.adminDesignatedPreview .is-in_service > .dpTimelineDot {
+  background: var(--color-accent);
+  box-shadow: 0 0 0 4px rgba(var(--color-accent-rgb), .12);
+}
+
+.adminDesignatedPreview .dpTimelineCopy strong {
+  display: block;
+  font-size: 15px;
+}
+
+.adminDesignatedPreview .dpTimelineCopy small {
+  display: block;
+  margin-top: 4px;
+  color: var(--color-fg-mute);
+  font-size: 11px;
+}
+
+.adminDesignatedPreview .dpScheduleWide .dpTimeline {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--admin-space-inline);
+}
+
+.adminDesignatedPreview .dpScheduleWide .dpTimelineItem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.adminDesignatedPreview .dpScheduleWide .dpTimelineTime {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.adminDesignatedPreview .dpScheduleWide .dpTimelineDot {
+  display: none;
+}
+
+.adminDesignatedPreview .dpDeskServiceTime {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 18px;
+  color: var(--color-fg-soft);
+  font-size: 12px;
+}
+
+.adminDesignatedPreview .dpDisclosure {
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-fg-soft);
+  font-size: 12px;
+}
+
+.adminDesignatedPreview .dpDisclosure > .dpActions,
+.adminDesignatedPreview .dpCompleted {
+  padding-top: 12px;
+}
+
+.adminDesignatedPreview .dpCompleted p {
+  margin: 0 0 9px;
+}
+
+.adminDesignatedPreview .dpGuestHeading > .dpBadge {
+  margin-left: auto;
+}
+
+.adminDesignatedPreview .dpOrderSummary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.adminDesignatedPreview .dpOrderSummary small,
+.adminDesignatedPreview .dpOrderSummary span {
+  display: block;
+  color: var(--color-fg-mute);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.adminDesignatedPreview .dpOrderSummary strong {
+  display: block;
+  margin: 5px 0;
+  font-size: 15px;
+}
+
+.adminDesignatedPreview .dpDeskSection {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--color-border);
+}
+
+.adminDesignatedPreview .dpDeskSection h4 {
+  margin: 0 0 12px;
+  font-size: 13px;
+}
+
+.adminDesignatedPreview .dpAssistGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.adminDesignatedPreview .dpAssistGrid .adminButton {
+  justify-content: flex-start;
+  min-height: 52px;
+  padding: 12px 14px;
+  font-size: 13px;
+  text-align: left;
+  white-space: normal;
+}
+
+.adminDesignatedPreview .dpAssistGrid .adminButton > svg {
+  flex: 0 0 auto;
+}
+
+.adminDesignatedPreview .dpDeparture {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--color-border);
+}
+
+.adminDesignatedPreview .dpDeparture strong {
+  font-size: 13px;
+}
+
+.adminDesignatedPreview .dpDeparture p {
+  margin: 4px 0 0;
+  color: var(--color-fg-mute);
+  font-size: 11px;
+}
+
+.adminDesignatedPreview .dpDeparture .adminButton {
+  flex: 0 0 auto;
+}
+
+.adminDesignatedPreview .dpListSectionLabel {
+  margin-bottom: 14px;
+  color: var(--color-fg-mute);
+  font-size: 12px;
+}
+
+.adminDesignatedPreview .dpGuestList {
+  display: grid;
+  gap: 10px;
+}
+
+.adminDesignatedPreview .dpGuestRow {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-fg);
+  text-align: left;
+}
+
+.adminDesignatedPreview .dpGuestRow.isSelected {
+  border-color: var(--color-accent);
+  background: rgba(var(--color-accent-rgb), .13);
+}
+
+.adminDesignatedPreview .dpGuestRowCopy strong {
+  display: block;
+  font-size: 16px;
+}
+
+.adminDesignatedPreview .dpGuestRowCopy small,
+.adminDesignatedPreview .dpGuestRowCopy > span {
+  display: block;
+  margin-top: 4px;
+  color: var(--color-fg-mute);
+  font-size: 11px;
+}
+
+.adminDesignatedPreview .dpGuestRowCopy small {
+  font-family: var(--font-mono);
+}
+
+.adminDesignatedPreview .dpInlineRequest {
+  margin-bottom: 18px;
+}
+
+.adminDesignatedPreview .dpInlineRequest p {
+  color: var(--color-fg-soft);
+  font-size: 13px;
+}
+
+.adminDesignatedPreview .dpFeedback {
+  justify-content: space-between;
+  padding-block: 10px;
+  border-color: rgba(var(--color-accent-rgb), .4);
+  color: var(--color-fg-soft);
+  font-size: 13px;
+}
+
+.adminDesignatedPreview .dpNotifications {
+  display: grid;
+  gap: 12px;
+}
+
+.adminDesignatedPreview .dpNotifications button {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  min-height: 44px;
+  padding: 10px 0;
+  border: 0;
+  border-top: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-fg-soft);
+  font-size: 13px;
+  text-align: left;
+}
+
+.adminDesignatedPreview .dpNotifications button span {
+  color: var(--color-fg-mute);
+  font-size: 12px;
+}
+
+.adminDesignatedPreview .dpEmpty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 160px;
+  margin: 0;
+  color: var(--color-fg-mute);
+  font-size: 13px;
+}
+
+.adminDesignatedPreview .dpFootnote {
+  margin: 0;
+  color: var(--color-fg-mute);
+  font-size: 11px;
+}
+
+.adminDesignatedPreview :is(.dpVersionSelector button, .dpGuestRow, .dpTimelineItem, .dpNameButton, .dpNotifications button):focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.adminDesignatedPreview :is(.dpGuestRow, .dpTimelineItem, .dpNameButton):hover {
+  background: rgba(var(--color-accent-rgb), .08);
+}
+
+.adminDesignatedPreviewDialog .dpDialogStack {
+  display: grid;
+  gap: 18px;
+}
+
+.adminDesignatedPreviewDialog .dpDialogContext {
+  display: grid;
+  gap: 6px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.adminDesignatedPreviewDialog .dpDialogContext strong {
+  font-size: 15px;
+}
+
+.adminDesignatedPreviewDialog .dpDialogContext span,
+.adminDesignatedPreviewDialog .dpDialogHint {
+  margin: 0;
+  color: var(--color-fg-soft);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.adminDesignatedPreviewDialog .dpDialogGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.adminDesignatedPreviewDialog .dpMealRows {
+  display: grid;
+  gap: 12px;
+}
+
+.adminDesignatedPreviewDialog .dpMealRows .adminField {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 80px;
+  align-items: center;
+  gap: 18px;
+}
+
+.adminDesignatedPreviewDialog .dpCode {
+  display: grid;
+  gap: 12px;
+  padding: 22px;
+  border: 1px solid rgba(var(--color-accent-rgb), .35);
+  border-radius: var(--radius-md);
+  background: rgba(var(--color-accent-rgb), .09);
+  text-align: center;
+}
+
+.adminDesignatedPreviewDialog .dpCode span,
+.adminDesignatedPreviewDialog .dpCode small {
+  color: var(--color-fg-soft);
+  font-size: 12px;
+}
+
+.adminDesignatedPreviewDialog .dpCode strong {
+  font: 650 21px/1.5 var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+.adminDesignatedPreviewDialog .dpDialogTotal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding-block: 14px;
+  border-block: 1px solid var(--color-border);
+  font-size: 14px;
+}
+
+.adminDesignatedPreviewDialog .dpDialogSuccess {
+  margin: 0;
+  color: var(--color-fg);
+  font-size: 14px;
+}
+
+@media (max-width: 1250px) {
+  .adminDesignatedPreview .dpCustomerGrid {
+    grid-template-columns: minmax(270px, .85fr) minmax(0, 1.4fr);
+  }
+
+  .adminDesignatedPreview .dpGuestRow {
+    grid-template-columns: 36px minmax(0, 1fr);
+  }
+
+  .adminDesignatedPreview .dpGuestRow > .dpBadge {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .adminDesignatedPreview .dpTaskGrid,
+  .adminDesignatedPreview .dpServiceGrid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 1100px) {
+  .adminDesignatedPreview .dpTaskGrid,
+  .adminDesignatedPreview .dpCustomerGrid,
+  .adminDesignatedPreview .dpServiceGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .adminDesignatedPreview .dpGuestList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .adminDesignatedPreview .dpScheduleWide .dpTimeline {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .adminDesignatedPreview .dpPreviewBar,
+  .adminDesignatedPreview .dpShiftBar,
+  .adminDesignatedPreview .dpNext {
+    padding: 16px;
+  }
+
+  .adminDesignatedPreview .dpVersionSelector {
+    flex: 1 1 100%;
+  }
+
+  .adminDesignatedPreview .dpVersionSelector button {
+    flex: 1;
+    gap: 5px;
+    padding-inline: 8px;
+    font-size: 12px;
+  }
+
+  .adminDesignatedPreview .dpPreviewBar > .iconActionButton {
+    position: absolute;
+    right: 14px;
+    top: 14px;
+  }
+
+  .adminDesignatedPreview .dpPreviewBar {
+    position: relative;
+  }
+
+  .adminDesignatedPreview .dpPreviewBar > div:first-child {
+    padding-right: 44px;
+  }
+
+  .adminDesignatedPreview .dpShiftIdentity {
+    flex-basis: 100%;
+  }
+
+  .adminDesignatedPreview .dpShiftClock {
+    flex-basis: 100%;
+  }
+
+  .adminDesignatedPreview .dpGuestList {
+    grid-template-columns: 1fr;
+  }
+
+  .adminDesignatedPreview .dpScheduleWide .dpTimeline {
+    grid-template-columns: 1fr;
+  }
+
+  .adminDesignatedPreview .dpGuestRow {
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+  }
+
+  .adminDesignatedPreview .dpGuestRow > .dpBadge {
+    grid-column: auto;
+  }
+
+  .adminDesignatedPreview .dpGuestHeading {
+    flex-wrap: wrap;
+  }
+
+  .adminDesignatedPreview .dpServiceFocus .dpTimer strong {
+    font-size: 56px;
+  }
+
+  .adminDesignatedPreview .dpServiceFocus .dpServiceCustomer h3 {
+    font-size: 26px;
+  }
+
+  .adminDesignatedPreview .dpTimelineItem {
+    gap: 9px;
+    grid-template-columns: 48px 7px minmax(0, 1fr) auto;
+  }
+
+  .adminDesignatedPreview .dpAssistGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .adminDesignatedPreview .dpDeparture {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .adminDesignatedPreview #dp-customer-desk {
+    scroll-margin-top: 100px;
+  }
+
+  .adminDesignatedPreviewDialog .dpDialogGrid {
+    grid-template-columns: 1fr;
+  }
+}

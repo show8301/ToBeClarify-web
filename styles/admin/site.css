@@ -11,5 +11,6 @@
 @import "./layers/91-customers-and-delivery.css";
 @import "./layers/92-delivery-workspace.css";
 @import "./layers/95-scrollbars.css";
+@import "./designated-workbench.css";
 @import "../shared/select.css";
 @import "../shared/icon-actions.css";

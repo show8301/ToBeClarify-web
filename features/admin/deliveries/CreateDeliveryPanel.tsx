@@ -7,8 +7,9 @@ import { useCustomerMutation } from "@/features/admin/customers/useCustomerMutat
 import type { DeliveryIssued } from "@/features/admin/customers/types";
 import type { DeliveryStaff } from "./workspaceApi";
 type Props = { sessionId: string; orderId: string; businessDate: string; staff: DeliveryStaff[]; defaultStaffId: string; available: boolean;
+  showSourceLink?: boolean; lockOwner?: boolean;
   onIssued: (value: DeliveryIssued) => void; onDirty: (value: boolean) => void; onBusy: (value: boolean) => void };
-export function CreateDeliveryPanel({ sessionId, orderId, businessDate, staff, defaultStaffId, available, onIssued, onDirty, onBusy }: Props) {
+export function CreateDeliveryPanel({ sessionId, orderId, businessDate, staff, defaultStaffId, available, showSourceLink = true, lockOwner = false, onIssued, onDirty, onBusy }: Props) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
@@ -23,8 +24,8 @@ export function CreateDeliveryPanel({ sessionId, orderId, businessDate, staff, d
     <AdminField label="作品／服務名稱" required><input required maxLength={160} disabled={busy} value={title} onChange={(event) => setTitle(event.target.value)} placeholder="例如：雙人半身繪圖委託" /></AdminField>
     <AdminField label="顧客可見說明"><textarea rows={3} maxLength={2000} disabled={busy} value={description} onChange={(event) => setDescription(event.target.value)} /></AdminField>
     <AdminField label="預計交付日"><input type="date" disabled={busy} value={dueDate} onChange={(event) => setDueDate(event.target.value)} /></AdminField>
-    {available ? <AdminField label="委託負責人"><select value={owner} disabled={busy} onChange={(event) => setOwner(event.target.value)}><option value="">尚未指派</option>{staff.map((person) => <option key={person.id} value={person.id}>{person.displayName}</option>)}</select></AdminField> : null}
+    {available && !lockOwner ? <AdminField label="委託負責人"><select value={owner} disabled={busy} onChange={(event) => setOwner(event.target.value)}><option value="">尚未指派</option>{staff.map((person) => <option key={person.id} value={person.id}>{person.displayName}</option>)}</select></AdminField> : null}
     {error ? <p className="adminCustomerFeedback isError" role="alert">{error} 若連線中斷，請先重整清單確認是否已建立，再處理領取碼。</p> : null}
-    <div className="adminCustomerActions"><button type="submit" className="adminButton adminButton-primary" disabled={busy || !title.trim()}>{busy ? "建立中…" : "建立作品並產生領取碼"}</button><a className="adminButton adminButton-ghost" href={queryPath("/admin/order-list", { session: sessionId, date: businessDate, order: orderId })}>核對來源顧客</a></div>
+    <div className="adminCustomerActions"><button type="submit" className="adminButton adminButton-primary" disabled={busy || !title.trim()}>{busy ? "建立中…" : "建立作品並產生領取碼"}</button>{showSourceLink ? <a className="adminButton adminButton-ghost" href={queryPath("/admin/order-list", { session: sessionId, date: businessDate, order: orderId })}>核對來源顧客</a> : null}</div>
   </form>;
 }

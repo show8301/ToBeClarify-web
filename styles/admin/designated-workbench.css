@@ -1,0 +1,402 @@
+.adminDesignatedWorkbench {
+  display: grid;
+  gap: var(--admin-space-block);
+}
+
+.adminDesignatedWorkbench .adminPanel {
+  min-width: 0;
+  margin: 0;
+}
+
+.adminDesignatedWorkbench .dwTaskGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--admin-space-inline);
+}
+
+.adminDesignatedWorkbench .dwStack {
+  display: grid;
+  min-width: 0;
+  gap: var(--admin-space-block);
+}
+
+.adminDesignatedWorkbench .dwShiftBar,
+.adminDesignatedWorkbench .dwNext {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--admin-space-inline);
+  padding: 16px 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.adminDesignatedWorkbench .dwShiftIdentity {
+  display: flex;
+  align-items: center;
+  flex: 1 1 240px;
+  gap: 12px;
+}
+
+.adminDesignatedWorkbench .dwShiftIdentity strong {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 15px;
+}
+
+.adminDesignatedWorkbench .dwShiftIdentity p,
+.adminDesignatedWorkbench .dwShiftIdentity small {
+  margin: 4px 0 0;
+  color: var(--color-fg-mute);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.adminDesignatedWorkbench .dwDot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: 50%;
+  background: var(--color-fg-mute);
+}
+
+.adminDesignatedWorkbench .dwDot.isActive {
+  background: var(--color-accent-2);
+  box-shadow: 0 0 0 5px rgba(var(--color-accent-2-rgb), .1);
+}
+
+.adminDesignatedWorkbench .dwRow,
+.adminDesignatedWorkbench .dwActions,
+.adminDesignatedWorkbenchDialog .dwActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.adminDesignatedWorkbench .dwRow {
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.adminDesignatedWorkbench .dwList {
+  display: grid;
+  gap: 12px;
+}
+
+.adminDesignatedWorkbench .dwRequest {
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface-input);
+}
+
+.adminDesignatedWorkbench .dwName {
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-fg);
+  font-size: 16px;
+  font-weight: 800;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.adminDesignatedWorkbench .dwName:hover {
+  color: var(--color-accent);
+}
+
+.adminDesignatedWorkbench .dwBadge,
+.adminDesignatedWorkbench .dwCount {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 4px 9px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-fg-soft);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.adminDesignatedWorkbench .dwBadge.is-manager,
+.adminDesignatedWorkbench .dwBadge.is-waiting {
+  border-color: rgba(var(--color-accent-rgb), .38);
+  background: rgba(var(--color-accent-rgb), .09);
+  color: var(--color-accent);
+}
+
+.adminDesignatedWorkbench .dwBadge.is-in_service {
+  border-color: rgba(var(--color-accent-2-rgb), .36);
+  background: rgba(var(--color-accent-2-rgb), .1);
+  color: var(--color-accent-2);
+}
+
+.adminDesignatedWorkbench .dwRequestTime {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 12px 0 6px;
+  font: 700 15px/1.5 var(--font-mono);
+}
+
+.adminDesignatedWorkbench .dwRequestTime span {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-fg-soft);
+}
+
+.adminDesignatedWorkbench .dwHint,
+.adminDesignatedWorkbenchDialog .dwHint {
+  margin: 6px 0 12px;
+  color: var(--color-fg-mute);
+  font-size: 12px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.adminDesignatedWorkbench .dwEmpty {
+  display: grid;
+  place-content: center;
+  min-height: 96px;
+  margin: 0;
+  color: var(--color-fg-mute);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.adminDesignatedWorkbench .dwCurrent p {
+  color: var(--color-fg-soft);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.adminDesignatedWorkbench .dwRemaining {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.adminDesignatedWorkbench .dwRemaining > strong {
+  color: var(--color-accent-2);
+  font: 750 44px/1 var(--font-mono);
+}
+
+.adminDesignatedWorkbench .dwRemaining > span {
+  color: var(--color-fg-soft);
+  font-size: 13px;
+}
+
+.adminDesignatedWorkbench .dwRemaining small {
+  display: block;
+  margin-top: 5px;
+  color: var(--color-fg-mute);
+  font-size: 11px;
+}
+
+.adminDesignatedWorkbench .dwNext > span {
+  color: var(--color-fg-mute);
+  font-size: 12px;
+}
+
+.adminDesignatedWorkbench .dwNext > small {
+  flex: 1 1 120px;
+  color: var(--color-fg-soft);
+}
+
+.adminDesignatedWorkbench .dwGuestTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: var(--admin-space-block);
+}
+
+.adminDesignatedWorkbench .dwGuestTabs button {
+  padding: 9px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+  background: var(--color-surface-input);
+  color: var(--color-fg-soft);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.adminDesignatedWorkbench .dwGuestTabs button.isSelected {
+  border-color: var(--color-accent);
+  background: rgba(var(--color-accent-rgb), .12);
+  color: var(--color-fg);
+}
+
+.adminDesignatedWorkbench .dwGuestIdentity h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.adminDesignatedWorkbench .dwGuestIdentity p {
+  margin: 6px 0 var(--admin-space-block);
+  color: var(--color-fg-mute);
+  font-size: 12px;
+}
+
+.adminDesignatedWorkbench .dwGuestActions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.adminDesignatedWorkbench .dwGuestOrders {
+  margin-top: var(--admin-space-block);
+}
+
+.adminDesignatedWorkbench .dwGuestOrder {
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.adminDesignatedWorkbench .dwGuestOrder p {
+  margin: 8px 0;
+  font-size: 12px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.adminDesignatedWorkbench .dwScheduleItem {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.adminDesignatedWorkbench .dwScheduleItem:first-child {
+  padding-top: 0;
+}
+
+.adminDesignatedWorkbench .dwScheduleItem:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.adminDesignatedWorkbench .dwScheduleTime {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.adminDesignatedWorkbench .dwScheduleTime small {
+  color: var(--color-fg-mute);
+  font-size: 11px;
+}
+
+.adminDesignatedWorkbench .dwScheduleCopy {
+  min-width: 0;
+  padding-left: 16px;
+  border-left: 2px solid var(--color-border);
+}
+
+.adminDesignatedWorkbench .isCurrent .dwScheduleCopy {
+  border-left-color: var(--color-accent-2);
+}
+
+.adminDesignatedWorkbench .dwScheduleCopy > p {
+  color: var(--color-fg-mute);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.adminDesignatedWorkbench .dwExceptions {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border);
+}
+
+.adminDesignatedWorkbench .dwExceptions .dwActions {
+  margin-top: 8px;
+}
+
+.adminDesignatedWorkbench .dwNotice,
+.adminDesignatedWorkbenchDialog .dwNotice {
+  margin: 0;
+  padding: 12px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: rgba(var(--color-accent-rgb), .06);
+  color: var(--color-fg-soft);
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.adminDesignatedWorkbenchDialog {
+  width: min(720px, calc(100vw - 36px));
+}
+
+.adminDesignatedWorkbenchDialog .dwForm,
+.adminDesignatedWorkbenchDialog .dwForm fieldset {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.adminDesignatedWorkbenchDialog .dwForm fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.adminDesignatedWorkbenchDialog .dwFormGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 12px;
+}
+
+.adminDesignatedWorkbenchDialog .dwForm input,
+.adminDesignatedWorkbenchDialog .dwForm select,
+.adminDesignatedWorkbenchDialog .dwForm textarea {
+  width: 100%;
+  min-width: 0;
+}
+
+.adminDesignatedWorkbenchDialog .dwShareField {
+  display: grid;
+  gap: 8px;
+}
+
+.adminDesignatedWorkbenchDialog .dwNotice small {
+  display: block;
+  color: var(--color-fg-mute);
+}
+
+@media (max-width: 1100px) {
+  .adminDesignatedWorkbench .dwTaskGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .adminDesignatedWorkbench .dwShiftBar,
+  .adminDesignatedWorkbench .dwNext {
+    padding: 14px 16px;
+  }
+
+  .adminDesignatedWorkbench .dwGuestTabs button,
+  .adminDesignatedWorkbench .dwName {
+    min-height: 44px;
+  }
+
+  .adminDesignatedWorkbenchDialog .dwFormGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

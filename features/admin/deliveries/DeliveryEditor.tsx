@@ -14,10 +14,14 @@ type Props = {
   onChanged: (value: ArtDelivery) => void;
   onIssued: (value: DeliveryIssued) => void;
   onClose: () => void;
+  embedded?: boolean;
+  locked?: boolean;
+  onDirty?: (dirty: boolean) => void;
+  onBusy?: (busy: boolean) => void;
 };
 type Confirmation = { kind: "code" } | { kind: "remove"; asset: DeliveryAsset } | null;
 
-export function DeliveryEditor({ initial, canManage, onChanged, onIssued, onClose }: Props) {
+export function DeliveryEditor({ initial, canManage, onChanged, onIssued, onClose, embedded = false, locked = false, onDirty, onBusy }: Props) {
   const [delivery, setDelivery] = useState(initial);
   const [title, setTitle] = useState(initial.title);
   const [description, setDescription] = useState(initial.description || "");
@@ -30,8 +34,12 @@ export function DeliveryEditor({ initial, canManage, onChanged, onIssued, onClos
   const [preview, setPreview] = useState("");
   const [fileError, setFileError] = useState("");
   const [confirmation, setConfirmation] = useState<Confirmation>(null);
-  const { busy, error, perform } = useCustomerMutation();
+  const { busy: mutationBusy, error, perform } = useCustomerMutation();
+  const busy = mutationBusy || locked;
   const publishWithoutAsset = ["ready", "delivered"].includes(status) && delivery.assets.length === 0;
+  const dirty = title !== delivery.title || description !== (delivery.description || "") || dueDate !== (delivery.dueDate?.slice(0, 10) || "") || status !== delivery.status || Boolean(file || url);
+  useEffect(() => { onDirty?.(dirty); }, [dirty, onDirty]);
+  useEffect(() => { onBusy?.(mutationBusy); }, [mutationBusy, onBusy]);
 
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
 
@@ -70,10 +78,10 @@ export function DeliveryEditor({ initial, canManage, onChanged, onIssued, onClos
     }
   }
 
-  return <AdminPanel title={`交付管理 · ${delivery.title}`} description={`${delivery.customerName} · ${delivery.businessDate.slice(0, 10)} · ${delivery.orderNumber || "入場紀錄"}`} actions={<button type="button" className="adminButton adminButton-ghost" disabled={busy} onClick={onClose}>收合</button>}>
+  const contents = <>
     <div className="adminCustomerActions">
       <a className="adminButton adminButton-secondary" href={queryPath("/admin/order-list", { date: delivery.businessDate.slice(0, 10), session: delivery.sessionId, order: delivery.orderId })}>核對歷史訂單</a>
-      {canManage ? <button type="button" className="adminButton adminButton-secondary" disabled={busy} onClick={() => setConfirmation({ kind: "code" })}>重發單筆領取碼</button> : <span className="adminCustomerHint">重發領取碼需由店經理處理。</span>}
+      {!embedded && (canManage ? <button type="button" className="adminButton adminButton-secondary" disabled={busy} onClick={() => setConfirmation({ kind: "code" })}>重發單筆領取碼</button> : <span className="adminCustomerHint">重發領取碼需由店經理處理。</span>)}
     </div>
     {error ? <p className="adminCustomerFeedback isError" role="alert">{error} 若資料已被其他人更新，請收合後重新整理清單再開啟。</p> : null}
     {feedback ? <p className="adminCustomerFeedback" role="status">{feedback}</p> : null}
@@ -94,7 +102,8 @@ export function DeliveryEditor({ initial, canManage, onChanged, onIssued, onClos
       </div>
       <p className="adminCustomerHint">上傳作品後，儲存為「可領取」才會開放附件；顧客確認收到後會標記「已領取」。新增或移除附件會回到製作中，需要重新開放。</p>
       {publishWithoutAsset ? <p role="status">請先上傳圖片或加入雲端連結，才能設為可領取或已領取。</p> : null}
-      {delivery.deliveredAt ? <p>顧客領取紀錄：{formatCustomerTime(delivery.deliveredAt)}</p> : null}
+      {delivery.deliveredAt ? <p>已領取時間：{formatCustomerTime(delivery.deliveredAt)}；確認來源請查看處理紀錄。</p> : null}
+      {dirty ? <p role="status" className="adminCustomerHint">有尚未儲存的修改。</p> : null}
       <button className="adminButton adminButton-primary" type="submit" disabled={busy || !title.trim() || publishWithoutAsset}>{busy ? "處理中…" : "儲存作品與交付狀態"}</button>
     </form>
 
@@ -142,7 +151,8 @@ export function DeliveryEditor({ initial, canManage, onChanged, onIssued, onClos
       {error ? <p role="alert">{error}</p> : null}
       <button type="button" className="adminButton adminButton-primary" disabled={busy} onClick={confirm}>{busy ? "處理中…" : confirmation?.kind === "code" ? "已核對，重發領取碼" : "確認移除附件"}</button>
     </AdminDialog>
-  </AdminPanel>;
+  </>;
+  return embedded ? contents : <AdminPanel title={`交付管理 · ${delivery.title}`} description={`${delivery.customerName} · ${delivery.businessDate.slice(0, 10)} · ${delivery.orderNumber || "入場紀錄"}`} actions={<button type="button" className="adminButton adminButton-ghost" disabled={busy} onClick={onClose}>收合</button>}>{contents}</AdminPanel>;
 }
 
 function assetHref(deliveryId: string, asset: DeliveryAsset): string | undefined {

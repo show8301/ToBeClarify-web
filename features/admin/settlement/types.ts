@@ -102,3 +102,49 @@ export type AttendanceBackfill = {
   reason: string;
   status: string;
 };
+
+export type SettlementStaffInput = {
+  staffId: string;
+  displayName: string;
+  roleTitle?: string | null;
+  role: string;
+  isWorking: boolean;
+  actualMinutes: number;
+  activityHours?: number | null;
+  payableHours: number;
+  publicTipEligible: boolean;
+  isBackstageParticipant: boolean;
+  attendanceSource: "manual" | "clock" | "backfill_approved";
+  attendanceRequestId?: string | null;
+  attendanceBackfillStatus?: string | null;
+  attendanceBackfillReason?: string | null;
+  note?: string | null;
+};
+
+export type SettlementTab = "operations" | "personal" | "settings";
+
+export type SettlementOverview = {
+  run: SettlementRun;
+  rule: SettlementRule;
+  summary: SettlementSummary;
+  staffInputs: SettlementStaffInput[];
+  results: SettlementResult[];
+  anomalies: { code: string; message: string; sourceId?: string | null }[];
+  attendanceBackfillRequests: AttendanceBackfill[];
+  workflow?: SettlementWorkflow | null;
+};
+
+export type SettlementRunFields = {
+  publicTipAmount: number;
+  admissionFeeOverride: string;
+  activityExpense: number;
+  companyShareHours: string;
+  activityHoursConfirmed: boolean;
+};
+
+export type SettlementBackfillReview = {
+  request: AttendanceBackfill;
+  approved: boolean;
+  businessDate: string;
+  sessionNo: number;
+};

@@ -56,7 +56,12 @@ export type ArtDelivery = {
   updatedAt: string;
   deliveredAt: string | null;
   assets: DeliveryAsset[];
+  workspaceAvailable: boolean;
+  assignedStaffId: string | null;
+  assignedStaffName: string | null;
+  canViewClaimCode: boolean;
+  notifiedAt: string | null;
 };
 export type DeliveryIssued = { delivery: ArtDelivery; claimCode: string };
-export type CreateDelivery = { sessionId: string; orderId: string | null; title: string; description: string | null; dueDate: string | null };
+export type CreateDelivery = { sessionId: string; orderId: string | null; title: string; description: string | null; dueDate: string | null; assignedStaffId?: string | null };
 export type UpdateDelivery = { version: number; title: string; description: string | null; status: string; dueDate: string | null };

@@ -85,6 +85,11 @@ export function parseDelivery(value: unknown): ArtDelivery {
     title: string(data.title), description: nullableString(data.description), status: string(data.status),
     dueDate: nullableString(data.dueDate), version: number(data.version), createdAt: string(data.createdAt),
     updatedAt: string(data.updatedAt), deliveredAt: nullableString(data.deliveredAt), assets: array(data.assets, asset),
+    workspaceAvailable: data.workspaceAvailable === undefined ? false : boolean(data.workspaceAvailable),
+    assignedStaffId: data.assignedStaffId === undefined ? null : nullableString(data.assignedStaffId),
+    assignedStaffName: data.assignedStaffName === undefined ? null : nullableString(data.assignedStaffName),
+    canViewClaimCode: data.canViewClaimCode === undefined ? false : boolean(data.canViewClaimCode),
+    notifiedAt: data.notifiedAt === undefined ? null : nullableString(data.notifiedAt),
   };
 }
 export function parseDeliveries(value: unknown): ArtDelivery[] { return array(value, parseDelivery); }

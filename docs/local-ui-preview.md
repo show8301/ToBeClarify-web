@@ -51,6 +51,8 @@
 
 後台入口包含 `95-scrollbars.css`，統一整頁、側欄、抽屜與內部清單的捲軸明暗配色。根層規則以 `:root:has(.adminTheme)` 限定後台範圍，預覽時確認離開後台後公開頁面不受影響；側欄使用內縮的 `.adminTopbarScroll`，捲軸不得碰到外層圓角邊框。設計基準見[後台 UI 設計規範](admin-ui-design-guidelines.md)。
 
+交付工作台樣式 `92-delivery-workspace.css` 置於 `91-customers-and-delivery.css` 與 `95-scrollbars.css` 之間；預覽時確認 `.adminDeliveryColumns`、範圍切換、詳情頁籤與共用展開箭頭均包含在後台 bundle。
+
 ### 字型 CSS
 
 三個樣式入口另在最後匯入 `styles/shared/icon-actions.css`，遵循[純圖示操作按鈕標準](icon-action-design-standard.md)，共用桌面／觸控尺寸 token。
@@ -92,6 +94,8 @@ node --experimental-strip-types ./node_modules/vinext/dist/cli.js dev --hostname
 若 3000 缺少字型變數，必須標示不能作為字級／版面基準，回到 3001 建置預覽確認。未特別指定時，交付本機預覽連結一律使用 `127.0.0.1:3001`，不混用 localhost 的登入狀態。
 
 ## 4. 開啟後的檢查與交付條件
+
+後台預覽須先確認 Node 伺服器能連線至管理 API：未登入時，`GET /api/admin/auth/me` 應回傳 401，才能正常顯示登入表單。若回傳 502 與 `ADMIN_UPSTREAM_UNAVAILABLE`，檢查預覽程序的外連權限；受限執行環境可能使 Node fetch 回報 `EACCES`。本地 `/api/health` 的 200 只代表 Web 程序存活，不能證明管理 API 已連通。2026-10-09 的本地登入故障以具備外連權限的方式重啟同一份 production build 後恢復，沒有修改 API 位址或登入驗證。
 
 1. 本地與參考站使用相同瀏覽器、viewport、縮放比例（建議 100%）、捲動位置及頁面內容。記錄正在比較的網址與執行模式。
 2. 在 Network 確認 CSS 和頁面實際需要的字型請求成功，回應內容是 CSS／字型，而非錯誤頁；檢查 Console 的資源與字型錯誤。首次排查可停用快取後重新整理。

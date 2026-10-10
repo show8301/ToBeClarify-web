@@ -2,51 +2,21 @@
 
 import { AdminRefreshButton } from "@/features/admin/shared/AdminRefreshButton";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { AttendanceBackfill, SettlementResult, SettlementRule, SettlementRun, SettlementStaff, SettlementSummary, SettlementWorkflow } from "./types";
+import type { SettlementBackfillReview, SettlementOverview, SettlementRule, SettlementRunFields, SettlementStaff, SettlementStaffInput, SettlementTab } from "./types";
 import { getAdminBusinessDate } from "@/features/admin/shared/businessDay";
 import { adminApi, adminRequest } from "@/features/admin/api/client.js";
 import { useAdminAuth } from "@/features/admin/auth/AdminAuthContext.jsx";
 import { AdminButton, AdminField, AdminPage, AdminPanel, AdminState } from "@/features/admin/shared/AdminShared.jsx";
 import { AttendancePanel } from "./AttendancePanel";
+import { SettlementTabs } from "./SettlementTabs";
+import { SettlementOperations } from "./SettlementOperations";
+import { SettlementPersonalAccounts } from "./SettlementPersonalAccounts";
+import { SettlementRuleSettings } from "./SettlementRuleSettings";
+import { SettlementPostActions } from "./SettlementPostActions";
+import { SettlementBackfillReviewDialog } from "./SettlementBackfillReviewDialog";
+import { settlementPeriodStatuses, settlementRoles as roleLabel, settlementStatuses } from "./presentation";
 
-type StaffInput = {
-  staffId: string;
-  displayName: string;
-  roleTitle?: string | null;
-  role: string;
-  isWorking: boolean;
-  actualMinutes: number;
-  activityHours?: number | null;
-  payableHours: number;
-  publicTipEligible: boolean;
-  isBackstageParticipant: boolean;
-  attendanceSource: "manual" | "clock" | "backfill_approved";
-  attendanceRequestId?: string | null;
-  attendanceBackfillStatus?: string | null;
-  attendanceBackfillReason?: string | null;
-  note?: string | null;
-};
-
-type Overview = {
-  run: SettlementRun;
-  rule: SettlementRule;
-  summary: SettlementSummary;
-  staffInputs: StaffInput[];
-  results: SettlementResult[];
-  anomalies: { code: string; message: string; sourceId?: string | null }[];
-  attendanceBackfillRequests: AttendanceBackfill[];
-  workflow?: SettlementWorkflow | null;
-};
-
-const money = (value: number) => Math.ceil(Number(value || 0)).toLocaleString("zh-TW");
-const roleLabel: Record<string, string> = {
-  designated: "指名人員",
-  service: "服務生",
-  manager: "經理",
-  backstage: "幕後技術",
-  dedicated_room_owner: "專屬包廂分成",
-  activity: "活動日分配",
-};
+type StaffInput = SettlementStaffInput;
 
 const emptyRule = (rule: SettlementRule | null, dayType: string, effectiveFrom: string) => ({
   dayType,
@@ -68,22 +38,39 @@ const emptyRule = (rule: SettlementRule | null, dayType: string, effectiveFrom: 
 export function AdminSettlementPage() {
   const { user } = useAdminAuth();
   const canManage = user?.role === "developer" || user?.role === "manager";
+  const [activeTab, setActiveTab] = useState<SettlementTab>(canManage ? "operations" : "personal");
+  const [selectedStaffId, setSelectedStaffId] = useState("");
   const [date, setDate] = useState("");
   const [flowVersion, setFlowVersion] = useState(1);
   const [sessionNo, setSessionNo] = useState(1);
   const [dayType, setDayType] = useState("normal");
-  const [overview, setOverview] = useState<Overview | null>(null);
+  const [overview, setOverview] = useState<SettlementOverview | null>(null);
   const [staff, setStaff] = useState<SettlementStaff[]>([]);
   const [inputs, setInputs] = useState<StaffInput[]>([]);
-  const [runFields, setRunFields] = useState({ publicTipAmount: 0, admissionFeeOverride: "", activityExpense: 0, companyShareHours: "", activityHoursConfirmed: false });
+  const [runFields, setRunFields] = useState<SettlementRunFields>({ publicTipAmount: 0, admissionFeeOverride: "", activityExpense: 0, companyShareHours: "", activityHoursConfirmed: false });
   const [ruleForm, setRuleForm] = useState<Omit<SettlementRule, "id">>(emptyRule(null, "normal", ""));
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [message, setMessage] = useState("");
-  const [backfillForm, setBackfillForm] = useState({ staffId: "", role: "designated", requestedMinutes: "", reason: "" });
+  const [backfillForm, setBackfillForm] = useState({ role: "designated", requestedMinutes: "", reason: "" });
   const [paymentForm, setPaymentForm] = useState({ staffId: "", eventKind: "payout", amount: "", reason: "" });
   const [correctionForm, setCorrectionForm] = useState({ sourceKind: "finance", sourceId: "", staffId: "", amountDelta: "", reason: "" });
+  const [backfillReview, setBackfillReview] = useState<SettlementBackfillReview | null>(null);
+  const reviewInFlight = useRef(false);
+
+  const personalStaff = useMemo(() => {
+    const members = new Map(staff.map(member => [member.id, member]));
+    for (const item of overview?.staffInputs || []) {
+      if (!members.has(item.staffId)) members.set(item.staffId, { id: item.staffId, displayName: item.displayName, isActive: false });
+    }
+    for (const item of overview?.results || []) {
+      if (item.staffId && !members.has(item.staffId)) members.set(item.staffId, { id: item.staffId, displayName: item.displayName || item.staffId, isActive: false });
+    }
+    return [...members.values()].filter(member => canManage || member.id === user?.staffMemberId);
+  }, [staff, overview, canManage, user?.staffMemberId]);
+  const selectedPersonId = personalStaff.some(member => member.id === selectedStaffId) ? selectedStaffId
+    : personalStaff.find(member => member.id === user?.staffMemberId)?.id || personalStaff[0]?.id || "";
 
   const loadSequence = useRef(0);
   const load = useCallback((signal?: AbortSignal) => {
@@ -116,7 +103,6 @@ export function AdminSettlementPage() {
         activityHoursConfirmed: Boolean(nextOverview.run.activityHoursConfirmed),
       });
       setRuleForm(emptyRule(nextOverview.rule, nextOverview.rule.dayType || nextOverview.run.dayType || "normal", nextOverview.rule.effectiveFrom));
-      setBackfillForm((current) => ({ ...current, staffId: current.staffId || nextOverview.staffInputs?.[0]?.staffId || "" }));
     }).catch((nextError: unknown) => {
       if (!signal?.aborted && sequence === loadSequence.current) setError(nextError as Error);
     }).finally(() => {
@@ -164,15 +150,16 @@ export function AdminSettlementPage() {
   };
 
   const submitBackfill = async () => {
-    if (!backfillForm.staffId || !backfillForm.requestedMinutes || !backfillForm.reason.trim()) {
+    const requestedMinutes = Number(backfillForm.requestedMinutes);
+    if (!selectedPersonId || !Number.isFinite(requestedMinutes) || requestedMinutes <= 0 || !backfillForm.reason.trim()) {
       setMessage("補打卡申請需要人員、分鐘數與理由。");
       return;
     }
     setSaving(true); setMessage("");
     try {
       const next = await adminApi.submitSettlementAttendanceBackfill({
-        businessDate: date, sessionNo, dayType, staffId: backfillForm.staffId, role: backfillForm.role,
-        requestedMinutes: Number(backfillForm.requestedMinutes), reason: backfillForm.reason.trim(),
+        businessDate: date, sessionNo, dayType, staffId: selectedPersonId, role: backfillForm.role,
+        requestedMinutes, reason: backfillForm.reason.trim(),
       });
       setOverview(next); setInputs(next.staffInputs || inputs);
       setBackfillForm((current) => ({ ...current, requestedMinutes: "", reason: "" }));
@@ -181,15 +168,41 @@ export function AdminSettlementPage() {
     finally { setSaving(false); }
   };
 
-  const reviewBackfill = async (requestId: string, approved: boolean) => {
-    const note = window.prompt(approved ? "可填寫核准備註" : "請填寫拒絕原因", "") ?? "";
-    if (!approved && !note.trim()) return;
-    setSaving(true); setMessage("");
+  const openBackfillReview = (requestId: string, approved: boolean) => {
+    if (!canManage || loading || saving || overview?.run.status === "finalized") return;
+    const request = overview?.attendanceBackfillRequests?.find(item => item.id === requestId && item.status === "pending");
+    if (!request) { setMessage("這筆補打卡已不在待核准清單，請重新載入。"); return; }
+    setBackfillReview({ request, approved, businessDate: date, sessionNo });
+  };
+
+  const closeBackfillReview = () => {
+    if (!saving && !reviewInFlight.current) setBackfillReview(null);
+  };
+
+  const reviewBackfill = async (note: string) => {
+    if (reviewInFlight.current) return;
+    if (!backfillReview || !canManage || saving || loading || overview?.run.status === "finalized"
+      || backfillReview.businessDate !== date || backfillReview.sessionNo !== sessionNo
+      || !overview?.attendanceBackfillRequests?.some(item => item.id === backfillReview.request.id && item.status === "pending")) {
+      throw new Error("目前已無法審核這筆申請，請關閉視窗並重新載入。");
+    }
+    if (!backfillReview.approved && !note.trim()) throw new Error("請填寫拒絕原因。");
+    reviewInFlight.current = true;
+    setSaving(true);
+    setMessage("");
     try {
-      const next = await adminApi.reviewSettlementAttendanceBackfill(requestId, { businessDate: date, sessionNo, approved, note: note.trim() || null });
-      setOverview(next); setInputs(next.staffInputs || inputs); setMessage(approved ? "補打卡已核准。" : "補打卡已拒絕。");
-    } catch (nextError) { setMessage((nextError as Error).message); }
-    finally { setSaving(false); }
+      const next = await adminApi.reviewSettlementAttendanceBackfill(backfillReview.request.id, {
+        businessDate: backfillReview.businessDate, sessionNo: backfillReview.sessionNo,
+        approved: backfillReview.approved, note: note.trim() || null,
+      });
+      setOverview(next);
+      setInputs(next.staffInputs || inputs);
+      setMessage(backfillReview.approved ? "補打卡已核准。" : "補打卡已拒絕。");
+      setBackfillReview(null);
+    } finally {
+      reviewInFlight.current = false;
+      setSaving(false);
+    }
   };
 
   const calculate = async () => {
@@ -252,44 +265,87 @@ export function AdminSettlementPage() {
     finally { setSaving(false); }
   };
 
-  const summary = overview?.summary;
-  const availableStaff = useMemo(() => staff.filter((item) => item.isActive !== false && (canManage || item.id === user?.staffMemberId)), [canManage, staff, user?.staffMemberId]);
+  const availableStaff = useMemo(() => staff.filter(item => item.isActive !== false && (canManage || item.id === user?.staffMemberId)), [canManage, staff, user?.staffMemberId]);
   const isFinalized = overview?.run.status === "finalized";
+  const tab = !canManage && activeTab === "settings" ? "personal" : activeTab;
+  const dirty = Boolean(overview && (
+    dayType !== overview.run.dayType ||
+    JSON.stringify(inputs) !== JSON.stringify(overview.staffInputs || []) ||
+    runFields.publicTipAmount !== (overview.run.publicTipAmount || 0) ||
+    runFields.admissionFeeOverride !== (overview.run.admissionFeeOverride == null ? "" : String(overview.run.admissionFeeOverride)) ||
+    runFields.activityExpense !== (overview.run.activityExpense || 0) ||
+    runFields.companyShareHours !== (overview.run.companyShareHours == null ? "" : String(overview.run.companyShareHours)) ||
+    runFields.activityHoursConfirmed !== Boolean(overview.run.activityHoursConfirmed)
+  ));
+  const selectPerson = (id: string) => {
+    setSelectedStaffId(id);
+    setBackfillForm(current => ({ ...current, requestedMinutes: "", reason: "" }));
+  };
+  const changeTab = (next: SettlementTab) => { setActiveTab(next); setMessage(""); };
+  const personalRequests = (overview?.attendanceBackfillRequests || []).filter(item => item.staffId === selectedPersonId);
 
-  return <AdminPage eyebrow="PAYROLL · SETTLEMENT" title="帳目／薪資結算" description="依營業日期鎖定規則版本，核對實收營業額、工時、小費與各角色薪資。" actions={<><AdminRefreshButton onClick={() => { setLoading(true); void load(); }} disabled={loading || saving} />{canManage && (isFinalized ? <AdminButton onClick={() => void reopen()} disabled={saving}>重新開放新時段</AdminButton> : <AdminButton onClick={finalize} disabled={loading || saving || !overview || overview.anomalies.length > 0 || overview.workflow?.canFinalize === false}>正式結算</AdminButton>)}</>}>
-    {flowVersion >= 2 && <p role="status">分項履約、現場收退款與結算後差額已納入同一營業日；未決金額會保留分潤並可跨日結轉。</p>}
-    {date ? <AttendancePanel businessDate={date} canManage={canManage} /> : null}
-    <div className="adminSettlementToolbar"><AdminField label="營業日期"><input type="date" value={date} onChange={(event) => { setLoading(true); if (event.target.value) setDate(event.target.value); }} /></AdminField><AdminField label="營業時段"><input type="number" min="1" value={sessionNo} onChange={(event) => { setLoading(true); setSessionNo(Number(event.target.value) || 1); }} /></AdminField><AdminField label="日期類型"><select value={dayType} onChange={(event) => setDayType(event.target.value)} disabled={!canManage || Boolean(overview?.run.status !== "draft")}><option value="normal">非活動日</option><option value="event">活動日</option></select></AdminField>{canManage ? <><AdminButton variant="secondary" onClick={saveInputs} disabled={loading || saving || isFinalized}>保存輸入</AdminButton><AdminButton onClick={calculate} disabled={loading || saving || isFinalized}>重新計算</AdminButton></> : null}</div>
-    {message ? <div className="adminNotice" role="status">{message}</div> : null}
-    <AdminState loading={loading} error={error} onRetry={() => void load()} />
-    {!loading && !error && overview && summary ? <>
-      <AdminPanel title="關店與結算流程" description="停止新單、實際關店、核對現金，再由同一入口正式結算。未決退款與工時差額可以結轉。">
-        <div className="adminSettlementSummary"><div><span>營業狀態</span><strong>{overview.workflow?.periodStatus === "open" ? "營業中" : overview.workflow?.periodStatus === "closed" ? "已關店" : overview.workflow?.periodStatus === "settled" ? "已結算" : "尚未開店"}</strong></div><div><span>未完成訂單</span><strong>{overview.workflow?.unfinishedOrderCount ?? 0}</strong></div><div><span>淨實收</span><strong>{money(overview.workflow?.netCash ?? summary.netCash ?? 0)} G</strong></div><div><span>分潤保留</span><strong>{money(overview.workflow?.retainedAmount ?? summary.retainedAmount ?? 0)} G</strong></div></div>
-        {canManage && overview.workflow?.periodStatus === "open" ? <AdminButton variant="danger" onClick={() => void closeBusinessDay()} disabled={saving}>停止新單並完成關店</AdminButton> : null}
-        {overview.workflow?.unfinishedOrderCount ? <p>仍有未完成訂單；先在訂單工作台完成或登記實際終止，系統不會用關店抹掉履約事實。</p> : null}
-        {overview.workflow?.pendingFinanceCount ? <p>有 {overview.workflow.pendingFinanceCount} 筆費用待確認，已發生金流仍列入淨實收，受影響分潤保留。</p> : null}
-      </AdminPanel>
-      {overview.anomalies.length ? <AdminPanel title="需手動處理" description="以下項目會阻止正式結算；完成輸入或修正後重新計算。" className="adminSettlementAnomalies"><ul>{overview.anomalies.map((item) => <li key={`${item.code}-${item.sourceId || ""}`}>{item.message}{item.sourceId ? `（${item.sourceId}）` : ""}</li>)}</ul></AdminPanel> : null}
-      <AdminPanel title="營業額與分潤摘要" description={`第 ${overview.run.sessionNo} 時段 · 規則 ${overview.rule.effectiveFrom} 生效 · 狀態 ${overview.run.status}`}>
-        <div className="adminSettlementSummary">{[["有效營業額", summary.grossRevenue], ["指名營業額基礎", summary.designatedRevenueBase], ["公司營業額", summary.companyRevenue], ["服務生／經理池", summary.serviceManagerPool], ["幕後技術池", summary.backstagePool], ["公司收入", summary.companyIncome], ["應付薪資", summary.totalPayroll], ["公司補貼尾差", summary.companySubsidy]].map(([label, value]) => <div key={label as string}><span>{label}</span><strong>{money(value as number)} G</strong></div>)}</div>
-      </AdminPanel>
-      <AdminPanel title="結算輸入" description="工時請輸入全天實際分鐘數；系統會先全天加總，再以半小時切點進位。公共小費名單由核准出勤資料自動產生，幕後技術人員不納入公共小費。">
-        <div className="adminFormGrid"><AdminField label="公共小費" hint="不包含既有指定店員小費。"><input type="number" min="0" value={runFields.publicTipAmount} disabled={!canManage} onChange={(event) => setRunFields((current) => ({ ...current, publicTipAmount: Number(event.target.value) || 0 }))} /></AdminField><AdminField label="入場費覆寫" hint="留白時讀取後台啟用中的入場費設定。"><input type="number" min="0" value={runFields.admissionFeeOverride} disabled={!canManage} onChange={(event) => setRunFields((current) => ({ ...current, admissionFeeOverride: event.target.value }))} /></AdminField><AdminField label="活動日活動費用"><input type="number" min="0" value={runFields.activityExpense} disabled={!canManage} onChange={(event) => setRunFields((current) => ({ ...current, activityExpense: Number(event.target.value) || 0 }))} /></AdminField><AdminField label="活動日公司份額時數" hint="由開發人員或店經理設定；所有店員均可查看。"><input type="number" min="0" step="0.5" value={runFields.companyShareHours} disabled={!canManage} onChange={(event) => setRunFields((current) => ({ ...current, companyShareHours: event.target.value }))} /></AdminField></div>
-        {canManage ? <div className="adminSettlementAddInput"><select defaultValue="" onChange={(event) => { const [staffId, role] = event.target.value.split("|"); if (staffId && role) addInput(staffId, role); event.target.value = ""; }}><option value="">新增人員角色輸入…</option>{availableStaff.flatMap((member) => ["designated", "service", "manager", "backstage"].map((role) => <option key={`${member.id}-${role}`} value={`${member.id}|${role}`}>{member.displayName} · {roleLabel[role]}</option>))}</select></div> : null}
-        <div className="adminSettlementTableWrap"><table className="adminSettlementTable"><thead><tr><th>人員</th><th>角色</th><th>實際分鐘</th><th>計薪時數</th><th>活動日分配時數</th><th>出勤來源</th><th>公共小費</th><th>幕後參與</th></tr></thead><tbody>{inputs.map((item, index) => <tr key={`${item.staffId}-${item.role}`}><td>{item.displayName}</td><td>{roleLabel[item.role] || item.role}</td><td><input type="number" min="0" value={item.actualMinutes} disabled={!canManage || isFinalized} onChange={(event) => updateInput(index, "actualMinutes", Number(event.target.value) || 0)} /></td><td>{item.payableHours}</td><td><input type="number" min="0" step="0.5" value={item.activityHours ?? ""} disabled={!canManage || isFinalized} onChange={(event) => updateInput(index, "activityHours", event.target.value === "" ? null : Number(event.target.value))} /></td><td><select value={item.attendanceSource || "manual"} disabled={!canManage || isFinalized || item.attendanceSource === "backfill_approved"} onChange={(event) => updateInput(index, "attendanceSource", event.target.value)}><option value="manual">未核准</option><option value="clock">已由打卡帶入</option><option value="backfill_approved">補打卡已核准</option></select></td><td><span>{item.publicTipEligible ? "自動納入" : "不納入"}</span></td><td><input type="checkbox" checked={item.isBackstageParticipant} disabled={!canManage || isFinalized} onChange={(event) => updateInput(index, "isBackstageParticipant", event.target.checked)} /></td></tr>)}</tbody></table></div>
-        {dayType === "event" ? <label className="adminSettlementConfirm"><input type="checkbox" checked={runFields.activityHoursConfirmed} disabled={!canManage || isFinalized} onChange={(event) => setRunFields((current) => ({ ...current, activityHoursConfirmed: event.target.checked }))} /> 我已確認活動日個人分配時數與公司份額時數。</label> : null}
-      </AdminPanel>
-      <AdminPanel title="補打卡申請與核准" description="活動日出席必須有打卡；補打卡需填寫理由並由開發人員或店經理核准。">
-        <div className="adminFormGrid"><AdminField label="申請人員"><select value={backfillForm.staffId} onChange={(event) => setBackfillForm((current) => ({ ...current, staffId: event.target.value }))}><option value="">選擇人員</option>{availableStaff.map((member) => <option key={member.id} value={member.id}>{member.displayName}</option>)}</select></AdminField><AdminField label="角色"><select value={backfillForm.role} onChange={(event) => setBackfillForm((current) => ({ ...current, role: event.target.value }))}>{["designated", "service", "manager", "backstage"].map((role) => <option key={role} value={role}>{roleLabel[role]}</option>)}</select></AdminField><AdminField label="補打卡分鐘"><input type="number" min="1" value={backfillForm.requestedMinutes} onChange={(event) => setBackfillForm((current) => ({ ...current, requestedMinutes: event.target.value }))} /></AdminField><AdminField label="理由"><input value={backfillForm.reason} onChange={(event) => setBackfillForm((current) => ({ ...current, reason: event.target.value }))} /></AdminField></div>
-        <AdminButton variant="secondary" onClick={() => void submitBackfill()} disabled={loading || saving || isFinalized}>提出補打卡</AdminButton>
-        <div className="adminSettlementTableWrap"><table className="adminSettlementTable"><thead><tr><th>人員</th><th>角色</th><th>分鐘</th><th>理由</th><th>狀態</th><th>處理</th></tr></thead><tbody>{(overview.attendanceBackfillRequests || []).map((item) => <tr key={item.id}><td>{item.staffName || item.staffId}</td><td>{roleLabel[item.role] || item.role}</td><td>{item.requestedMinutes}</td><td>{item.reason}</td><td>{item.status}</td><td>{canManage && item.status === "pending" ? <><AdminButton variant="secondary" onClick={() => void reviewBackfill(item.id, true)} disabled={saving}>核准</AdminButton> <AdminButton variant="secondary" onClick={() => void reviewBackfill(item.id, false)} disabled={saving}>拒絕</AdminButton></> : "—"}</td></tr>)}</tbody></table></div>
-      </AdminPanel>
-      <AdminPanel title="薪資明細" description="底薪與營收分成擇優，小費獨立加計；每筆金額無條件進位，尾差由公司補貼。"><div className="adminSettlementTableWrap"><table className="adminSettlementTable"><thead><tr><th>人員</th><th>角色</th><th>底薪</th><th>營收分成</th><th>指定小費</th><th>公共小費</th><th>進位後應付</th><th>異常</th></tr></thead><tbody>{overview.results.map((item, index) => <tr key={`${item.staffId || "company"}-${item.role}-${index}`}><td>{item.displayName || item.staffId || "公司"}</td><td>{roleLabel[item.role] || item.role}</td><td>{money(item.basePay)} G</td><td>{money(item.revenueShare)} G</td><td>{money(item.designatedTip)} G</td><td>{money(item.publicTip)} G</td><td><strong>{money(item.afterRounding)} G</strong></td><td>{item.anomalyStatus !== "normal" ? item.anomalyNote || item.anomalyStatus : "—"}</td></tr>)}</tbody></table></div></AdminPanel>
-      {isFinalized && canManage ? <AdminPanel title="支付與結算後更正" description="支付／追回與事後差額各自記錄；原結算快照保留，重送操作不重複入帳。">
-        <div className="adminFormGrid"><AdminField label="支付人員"><select value={paymentForm.staffId} onChange={(event) => setPaymentForm(current => ({ ...current, staffId: event.target.value }))}><option value="">選擇人員</option>{availableStaff.map(member => <option key={member.id} value={member.id}>{member.displayName}</option>)}</select></AdminField><AdminField label="類型"><select value={paymentForm.eventKind} onChange={(event) => setPaymentForm(current => ({ ...current, eventKind: event.target.value }))}><option value="payout">支付／補發</option><option value="recovery">追回</option></select></AdminField><AdminField label="金額"><input type="number" min="1" value={paymentForm.amount} onChange={(event) => setPaymentForm(current => ({ ...current, amount: event.target.value }))} /></AdminField><AdminField label="原因"><input value={paymentForm.reason} onChange={(event) => setPaymentForm(current => ({ ...current, reason: event.target.value }))} /></AdminField></div><AdminButton variant="secondary" onClick={() => void recordPayment()} disabled={saving}>記錄支付／追回</AdminButton>
-        <div className="adminFormGrid"><AdminField label="更正來源"><select value={correctionForm.sourceKind} onChange={(event) => setCorrectionForm(current => ({ ...current, sourceKind: event.target.value }))}><option value="finance">現場費用</option><option value="attendance">出勤／工時</option><option value="manual">其他</option></select></AdminField><AdminField label="原案件／紀錄編號"><input value={correctionForm.sourceId} onChange={(event) => setCorrectionForm(current => ({ ...current, sourceId: event.target.value }))} /></AdminField><AdminField label="指定人員（可留白）"><select value={correctionForm.staffId} onChange={(event) => setCorrectionForm(current => ({ ...current, staffId: event.target.value }))}><option value="">共同／待分配</option>{availableStaff.map(member => <option key={member.id} value={member.id}>{member.displayName}</option>)}</select></AdminField><AdminField label="應付差額"><input type="number" value={correctionForm.amountDelta} onChange={(event) => setCorrectionForm(current => ({ ...current, amountDelta: event.target.value }))} /></AdminField><AdminField label="原因"><input value={correctionForm.reason} onChange={(event) => setCorrectionForm(current => ({ ...current, reason: event.target.value }))} /></AdminField></div><AdminButton variant="secondary" onClick={() => void recordCorrection()} disabled={saving}>建立更正差額</AdminButton>
-      </AdminPanel> : null}
-      {canManage ? <AdminPanel title="可調整規則版本" description="規則以生效日期版本化；建立新版本不會改寫已完成結算使用的快照。金額最小支付單位固定為 1 Gil，不提供調整。"><div className="adminFormGrid">{([["dayType", "日期類型", "select"], ["effectiveFrom", "生效日期", "date"], ["designatedHourlyRate", "指名時薪", "number"], ["serviceManagerHourlyRate", "服務生／經理時薪", "number"], ["designatedSharePercentage", "指名分成 %", "number"], ["publicRoomStaffPercentage", "公共包廂指名 %", "number"], ["dedicatedRoomOwnerPercentage", "專屬包廂擁有者 %", "number"], ["serviceManagerPoolPercentage", "服務生／經理池 %", "number"], ["backstagePoolPercentage", "幕後池 %", "number"], ["companyPercentage", "公司收入 %", "number"]] as const).map(([key, label, type]) => <AdminField key={key} label={label}><>{type === "select" ? <select value={ruleForm[key]} onChange={(event) => setRuleForm((current) => ({ ...current, [key]: event.target.value }))}><option value="normal">非活動日</option><option value="event">活動日</option></select> : <input type={type as "date" | "number"} min="0" value={ruleForm[key]} onChange={(event) => setRuleForm((current) => ({ ...current, [key]: type === "date" ? event.target.value : Number(event.target.value) }))} />}</></AdminField>)}</div><AdminButton variant="secondary" onClick={saveRule} disabled={saving}>建立規則版本</AdminButton></AdminPanel> : null}
-    </> : null}
+  return <AdminPage
+    eyebrow="PAYROLL · SETTLEMENT"
+    title="結算工作台"
+    description="營運結算、個人帳目與規則設定，依工作目的分開處理。"
+    actions={<AdminRefreshButton onClick={() => { setLoading(true); void load(); }} disabled={loading || saving} />}
+  >
+    <div className="adminSettlementWorkspace">
+      <SettlementTabs active={tab} canManage={canManage} onChange={changeTab} />
+      <div className="adminSettlementContext">
+        <AdminField label="營業日期"><input type="date" value={date} disabled={saving} onChange={event => {
+          if (!event.target.value || event.target.value === date) return;
+          setLoading(true); setMessage(""); setDate(event.target.value);
+        }} /></AdminField>
+        <AdminField label="營業時段"><input type="number" min="1" step="1" value={sessionNo} disabled={saving} onChange={event => {
+          const next = Math.max(1, Math.floor(Number(event.target.value) || 1));
+          if (next === sessionNo) return;
+          setLoading(true); setMessage(""); setSessionNo(next);
+        }} /></AdminField>
+        {!loading && !error && overview ? <div className="adminSettlementContextStatus">
+          <span>{overview.run.dayType === "event" ? "活動日" : "非活動日"}</span>
+          {overview.workflow ? <span>{settlementPeriodStatuses[overview.workflow.periodStatus] || overview.workflow.periodStatus}</span> : null}
+          <span className="adminSettlementBadge">{settlementStatuses[overview.run.status] || overview.run.status}</span>
+        </div> : null}
+      </div>
+      {message ? <div className="adminNotice" role="status">{message}</div> : null}
+      <AdminState loading={loading} error={error} onRetry={() => { setLoading(true); void load(); }} />
+      {!loading && !error && overview ? <>
+        <div id="settlement-panel-operations" role="tabpanel" aria-labelledby="settlement-tab-operations" hidden={tab !== "operations"} className="adminSettlementTabPanel" tabIndex={0}>
+          <SettlementOperations
+            key={`${date}-${sessionNo}`}
+            overview={overview} inputs={inputs} staff={availableStaff} dayType={dayType} setDayType={setDayType}
+            fields={runFields} setFields={setRunFields} canManage={canManage} active={tab === "operations"} saving={saving} dirty={dirty} flowVersion={flowVersion}
+            onBusyChange={setSaving} onAdd={addInput} onInputChange={updateInput} onSave={saveInputs} onCalculate={calculate}
+            onClose={closeBusinessDay} onFinalize={finalize} onReopen={reopen} onReview={openBackfillReview}
+            onViewPerson={id => { selectPerson(id); changeTab("personal"); }}
+          >
+            <SettlementPostActions staff={personalStaff} payment={paymentForm} setPayment={setPaymentForm} correction={correctionForm} setCorrection={setCorrectionForm} saving={saving} onPayment={recordPayment} onCorrection={recordCorrection} />
+          </SettlementOperations>
+        </div>
+        <div id="settlement-panel-personal" role="tabpanel" aria-labelledby="settlement-tab-personal" hidden={tab !== "personal"} className="adminSettlementTabPanel" tabIndex={0}>
+          <SettlementPersonalAccounts staff={personalStaff} selectedId={selectedPersonId} results={overview.results} inputs={inputs} canManage={canManage} finalized={isFinalized} saving={saving} onSelect={selectPerson} />
+          {selectedPersonId ? <AttendancePanel key={`${date}-${selectedPersonId}`} businessDate={date} staffId={selectedPersonId} canManage={canManage} locked={isFinalized} disabled={saving} active={tab === "personal"} onBusyChange={setSaving} /> : null}
+          <AdminPanel title="補打卡申請" description="填寫個人的出勤角色、分鐘與理由，送交開發人員或店經理核准。">
+            {!isFinalized && availableStaff.some(member => member.id === selectedPersonId) ? <>
+              <div className="adminFormGrid">
+                <AdminField label="角色"><select value={backfillForm.role} disabled={saving} onChange={event => setBackfillForm(current => ({ ...current, role: event.target.value }))}>{["designated", "service", "manager", "backstage"].map(role => <option key={role} value={role}>{roleLabel[role]}</option>)}</select></AdminField>
+                <AdminField label="補打卡分鐘"><input type="number" min="1" value={backfillForm.requestedMinutes} disabled={saving} onChange={event => setBackfillForm(current => ({ ...current, requestedMinutes: event.target.value }))} /></AdminField>
+                <AdminField label="申請理由"><input value={backfillForm.reason} disabled={saving} onChange={event => setBackfillForm(current => ({ ...current, reason: event.target.value }))} /></AdminField>
+              </div>
+              <div className="adminSettlementActionBar"><span>申請人員：{personalStaff.find(member => member.id === selectedPersonId)?.displayName}</span><AdminButton variant="secondary" disabled={saving} onClick={() => void submitBackfill()}>提出補打卡</AdminButton></div>
+            </> : null}
+            {personalRequests.length ? <div className="adminSettlementRequestList">{personalRequests.map(item => <article key={item.id}><div><strong>{roleLabel[item.role] || item.role} · {item.requestedMinutes} 分鐘</strong><p>{item.reason}</p></div><span className="adminSettlementBadge">{settlementStatuses[item.status] || item.status}</span></article>)}</div> : <p className="adminEmptyText">本時段沒有補打卡申請。</p>}
+          </AdminPanel>
+        </div>
+        {canManage ? <div id="settlement-panel-settings" role="tabpanel" aria-labelledby="settlement-tab-settings" hidden={tab !== "settings"} className="adminSettlementTabPanel" tabIndex={0}>
+          <SettlementRuleSettings rule={overview.rule} form={ruleForm} setForm={setRuleForm} saving={saving} onSave={saveRule} />
+        </div> : null}
+      </> : null}
+    </div>
+    {backfillReview ? <SettlementBackfillReviewDialog
+      key={`${backfillReview.request.id}-${backfillReview.approved}`}
+      review={backfillReview} saving={saving} onClose={closeBackfillReview} onSubmit={reviewBackfill}
+    /> : null}
   </AdminPage>;
 }

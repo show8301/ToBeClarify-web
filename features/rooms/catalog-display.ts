@@ -1,4 +1,6 @@
-{
+import type { RoomsData } from "./types";
+
+const demoRooms: RoomsData = {
   "segmentMinutes": 20,
   "rooms": [
     {
@@ -34,4 +36,10 @@
       ]
     }
   ]
+};
+
+export function getRoomCatalogDisplay(data: RoomsData | null) {
+  if (!data) return null;
+  const isDemo = data.rooms.length === 0;
+  return { data: isDemo ? demoRooms : data, isDemo };
 }

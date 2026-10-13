@@ -87,8 +87,8 @@ components／lib → 中立共用模組；不得反向依賴 feature 執行期�
 - 應用程式的 upstream API origin 統一由 `lib/server/upstream-config.ts` 讀取。保留既有預設值及環境變數覆寫能力；不得接受使用者提供任意上游 origin。
 - 每個上游請求必須明確處理逾時、HTTP／業務錯誤及 fallback。需要取消的請求傳遞 signal；背景刷新須處理拒絕與重複請求。
 - 快取須說明資料範圍、更新時機與失敗策略。程序記憶體快取只適用可接受短暫過期的公開讀取，不得保存跨使用者交易或登入狀態。
-- `site.json`、`staff.json`、`rooms.json` 只支援公開內容降級。不得用快照判定真實餘額、包廂空位、授權或完成訂單。
-- 快照更新優先使用既有 `snapshot:site`／`snapshot:staff` 指令並檢查差異；目前沒有包廂專用生成指令，更新 `rooms.json` 時須記錄來源及更新方式。
+- `site.json`、`staff.json` 只支援公開內容降級。不得用快照判定真實餘額、包廂空位、授權或完成訂單。
+- 快照更新優先使用既有 `snapshot:site`／`snapshot:staff` 指令並檢查差異。公開包廂目錄首次讀取等待有逾時限制的 API，失敗只沿用程序曾成功讀取的資料，尚無資料時顯示暫時無法載入。API 成功回傳空清單時，展示元件使用 `features/rooms/catalog-display.ts` 的範例資料，明確標示 DEMO；範例不得寫入 API 快取或即時營運資料。
 - 快取 TTL、逾時與重試間隔集中於設定或具名常數，依功能需要決定，不把目前數字寫成永遠不變的規則。
 
 ### 5.2 瀏覽器 API client

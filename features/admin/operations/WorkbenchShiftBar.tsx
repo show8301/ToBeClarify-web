@@ -7,9 +7,9 @@ import { formatClock, periodStatusLabel } from "./operationsFormat";
 import { errorText, integer, list, record, textValue } from "./workbenchApi";
 type Attendance = { hasOpenShift: boolean; stopped: boolean; startsAt: string; activeCount: number };
 
-export function WorkbenchShiftBar({ businessDate, staffId, name, periodStatus, disabled, onChanged }: {
+export function WorkbenchShiftBar({ businessDate, staffId, name, periodStatus, disabled, onChanged, showOrderIntake = true }: {
   businessDate: string; staffId: string; name: string; periodStatus: string;
-  disabled: boolean; onChanged: () => Promise<void>;
+  disabled: boolean; onChanged: () => Promise<void>; showOrderIntake?: boolean;
 }) {
   const [summaryState, setSummary] = useState<(Attendance & { key: string }) | null>(null);
   const [busy, setBusy] = useState(false);
@@ -46,7 +46,7 @@ export function WorkbenchShiftBar({ businessDate, staffId, name, periodStatus, d
   };
   return <section className="dwShiftBar" aria-label="我的營業狀態">
     <div className="dwShiftIdentity"><span className={`dwDot${summary?.hasOpenShift ? " isActive" : ""}`} /><div><strong>{name} <small>{periodStatusLabel(periodStatus)}</small></strong><p>{!staffId ? "帳號尚未綁定店員" : summary ? summary.hasOpenShift ? `上班中 · ${formatClock(summary.startsAt)} 打卡` : "尚未上班打卡" : error || "讀取今日出勤…"}</p></div></div>
-    <AdminToggle checked={Boolean(summary && !summary.stopped)} label="接受新指名" ariaLabel="接受新指名" disabled={disabled || busy || !summary} onChange={() => void apply(summary?.stopped ? "resume_orders" : "stop_orders")} />
+    {showOrderIntake && <AdminToggle checked={Boolean(summary && !summary.stopped)} label="接受新指名" ariaLabel="接受新指名" disabled={disabled || busy || !summary} onChange={() => void apply(summary?.stopped ? "resume_orders" : "stop_orders")} />}
     <AdminButton variant="secondary" disabled={disabled || busy || !summary || Boolean(summary.hasOpenShift && summary.activeCount)} onClick={() => void apply(summary?.hasOpenShift ? "clock_out" : "clock_in")}>{busy ? "處理中…" : summary?.hasOpenShift ? "下班打卡" : "上班打卡"}</AdminButton>
     {actionError && <p className="adminFormError" role="alert">{actionError}</p>}
   </section>;

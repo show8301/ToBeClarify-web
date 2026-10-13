@@ -2,6 +2,7 @@ import { useState } from "react";
 import { adminApi } from "@/features/admin/api/client.js";
 import { AdminButton, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
 import { AdminAttendanceQuickCard } from "./AdminAttendanceQuickCard.jsx";
+import { WorkbenchShiftBar } from "./WorkbenchShiftBar";
 import { WorkbenchManagerRequests } from "./WorkbenchManagerRequests";
 import type {
   CurrentAdminUser,
@@ -67,7 +68,7 @@ function RoomServiceRow({ order }: { order: OperationsRoomOrder }) {
   return <article className="adminRoleDashboardRow"><div className="adminRoleDashboardIdentity"><strong>{order.roomName}</strong><small>{formatDateTime(order.startsAt)} ～ {formatClock(order.endsAt)} · {order.segmentCount} 節</small></div><div className="adminRoleDashboardRowCopy"><strong>{order.note || "包廂服務"}</strong><small>{formatMoney(order.totalAmount)}</small></div><span className="adminRoleDashboardBadge">{roomStatusLabel(order.status)}</span></article>;
 }
 
-export function AdminServiceDashboard({ data, user, navigate, runAction, actionState, onOpenCreatePass, onOpenCreateRoomService }: Omit<DashboardProps, "user"> & { user?: CurrentAdminUser }) {
+export function AdminServiceDashboard({ data, user, navigate, runAction, actionState, onOpenCreateRoomService, onChanged, disabled }: Omit<DashboardProps, "user" | "onOpenCreatePass" | "onChanged"> & { user?: CurrentAdminUser; onChanged: () => Promise<void>; disabled: boolean }) {
   const coordinationOrders = data.orders.filter((order) => order.storeConfirmationStatus === "pending");
   const waitingSessions = data.sessions.filter((session) => session.waitingOrderCount > 0);
   const roomOrders = data.roomOrders.filter((order) => !["completed", "cancelled"].includes(order.status)).sort((left, right) => new Date(left.startsAt).getTime() - new Date(right.startsAt).getTime()).slice(0, 6);
@@ -79,14 +80,8 @@ export function AdminServiceDashboard({ data, user, navigate, runAction, actionS
       { label: "包廂服務", value: roomOrders.length, detail: "尚未完成的服務時段" },
       { label: "開啟中的顧客", value: data.context?.openSessionCount ?? data.sessions.length, detail: intakeModeLabel(data.context?.intakeMode || "") },
     ]} />
-    <AdminAttendanceQuickCard businessDate={data.context?.referenceBusinessDate || ""} staffMemberId={user?.staffMemberId || ""} />
+    <WorkbenchShiftBar businessDate={data.context?.referenceBusinessDate || ""} staffId={user?.staffMemberId || ""} name={user?.displayName || "我的出勤"} periodStatus={data.context?.periodStatus || ""} disabled={disabled || Boolean(actionState.busyId)} onChanged={onChanged} showOrderIntake={false} />
     <ActionFeedback state={actionState} />
-    <div className="adminRoleDashboardServiceActionRow">
-      <AdminPanel className="adminRoleDashboardPrimaryAction"><AdminButton onClick={onOpenCreatePass}>發點餐碼</AdminButton></AdminPanel>
-      <AdminPanel title="包廂服務排程" description="掌握即將開始與服務中的包廂。" actions={<><AdminButton onClick={onOpenCreateRoomService}>建立包廂服務</AdminButton><AdminButton variant="ghost" onClick={() => navigate("/admin/rooms/service")}>開啟完整排程</AdminButton></>}>
-        <div className="adminRoleDashboardRows">{roomOrders.map((order) => <RoomServiceRow key={order.id} order={order} />)}{!roomOrders.length ? <EmptyState>目前沒有未完成的包廂服務。</EmptyState> : null}</div>
-      </AdminPanel>
-    </div>
     <AdminPanel className="adminRoleDashboardServiceCoordination" title="現場待辦" description="先處理協調單，再依顧客或訂單進入完整操作。">
         <div className="adminRoleDashboardRows">
           {coordinationOrders.map((order) => <CoordinationRow key={order.id} order={order} runAction={runAction} actionState={actionState} />)}
@@ -94,9 +89,10 @@ export function AdminServiceDashboard({ data, user, navigate, runAction, actionS
           {!coordinationOrders.length && !waitingSessions.length ? <EmptyState>目前沒有需要現場接手的訂單。</EmptyState> : null}
         </div>
     </AdminPanel>
-    <AdminPanel title="現場快速入口" description="需要查看完整資料時，再進入原本的管理畫面。">
-      <div className="adminRoleDashboardQuickLinks"><AdminButton onClick={() => navigate("/admin/orders")}>處理完整訂單</AdminButton><AdminButton variant="secondary" onClick={() => navigate("/admin/rooms/service")}>管理包廂服務</AdminButton><AdminButton variant="ghost" onClick={() => navigate("/admin/order-list")}>查詢歷史訂單</AdminButton></div>
+    <AdminPanel className="adminRoleDashboardRoomSchedule" title="包廂服務排程" description="掌握即將開始與服務中的包廂。" actions={<><AdminButton onClick={onOpenCreateRoomService}>訂購包廂</AdminButton><AdminButton variant="ghost" onClick={() => navigate("/admin/rooms/service")}>完整排程</AdminButton></>}>
+      <div className="adminRoleDashboardRows">{roomOrders.map((order) => <RoomServiceRow key={order.id} order={order} />)}{!roomOrders.length ? <EmptyState>目前沒有未完成的包廂服務。</EmptyState> : null}</div>
     </AdminPanel>
+    <AdminPanel className="adminRoleDashboardServiceQuickLinks" title="現場快速入口" description="需要查看完整資料時，再進入原本的管理畫面。" actions={<><AdminButton onClick={() => navigate("/admin/orders")}>完整訂單</AdminButton><AdminButton variant="secondary" onClick={() => navigate("/admin/rooms/service")}>管理包廂</AdminButton><AdminButton variant="ghost" onClick={() => navigate("/admin/order-list")}>查詢訂單</AdminButton></>} />
   </div>;
 }
 

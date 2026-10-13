@@ -29,6 +29,7 @@
 @import "./layers/50-guestbook.css";
 @import "./layers/60-collection.css";
 @import "./layers/70-section-spacing.css";
+@import "./layers/80-menu-cards.css";
 @import "../shared/select.css";
 @import "../shared/icon-actions.css";
 ```
@@ -40,6 +41,8 @@
 `70-section-spacing.css` 統一公開頁面的主要區段間距，沿用已確認的首頁基準：桌機上下各 `clamp(30px, 4vw, 62px)`；820px 以下上 34px、下 58px。共用變數為 `--public-section-space-start` 與 `--public-section-space-end`，新增公開頁面時將主要區段加入該檔的明確 selector 清單。
 
 適用首頁、店員名單、活動相簿、菜單、包廂、即時動態、排行榜、留言牆／分享頁及作品領取頁；店員個人頁調整頁面外圍留白並保留工具列空間。頁首、頁尾、搜尋列、跑馬燈、卡片內距、相片燈箱及點餐嵌入面板不套用大區塊間距。頁首沿用既有高度，頁尾上下各 14px。
+
+`80-menu-cards.css` 在共用區段間距後載入，負責菜單的費用、單點與套餐卡片。卡片用自然高度與換行容納新增費用、分類、長名稱、標籤及套餐子項目；桌面單點／套餐雙欄、平板雙欄直式卡、手機單欄圖文卡，359px 以下改為圖片在上。分類列桌面可換列、手機可橫向捲動；此檔不改菜單 hero 或其他頁面的卡片。
 
 | 頁面範圍 | 額外樣式入口 | 載入規則 |
 | --- | --- | --- |
@@ -124,6 +127,8 @@ node --experimental-strip-types ./node_modules/vinext/dist/cli.js dev --hostname
 若 3000 缺少字型變數，必須標示不能作為字級／版面基準，回到 3001 建置預覽確認。未特別指定時，交付本機預覽連結一律使用 `127.0.0.1:3001`，不混用 localhost 的登入狀態。
 
 ## 4. 開啟後的檢查與交付條件
+
+使用者自行檢視本地畫面、未明確要求 AI 瀏覽器檢查時，不自動操作瀏覽器。此時完成建置、必要的靜態／HTTP 與 CSS、字型資源輸出檢查後，提供 `http://127.0.0.1:3001/menu` 等受影響頁面，並明確註記 Computed／Rendered Fonts 尚未確認；不得把資源檢查稱為實際渲染驗證。下列瀏覽器檢查步驟在使用者明確要求 AI 檢查時執行。
 
 後台預覽須先通過 [3.2 節的本地 API 檢查](#32-建置啟動與本地-api-檢查)，再確認樣式與字型。若無法連通，依 [3.1 節](#31-新對話與程序的外連權限) 排查實際啟動程序的權限；不得只以 Web 健康端點的 200 判定預覽可用。
 

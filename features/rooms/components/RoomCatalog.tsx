@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Room, RoomsData } from "@/features/rooms/types";
+import { getRoomCatalogDisplay } from "../catalog-display";
 
 const money=(value:number)=>value>0?`${new Intl.NumberFormat("zh-TW").format(value)} Gil`:`請洽店員`;
 const ownershipLabel=(room:Room)=>room.ownershipType==="dedicated"?`店員專屬 · ${room.ownerStaffName||"指定店員"}`:"店內共用";
@@ -20,24 +21,29 @@ function RoomVisual({room,index}:{room:Room;index:number}){
   </div>;
 }
 
-function RoomCard({room,index,segmentMinutes}:{room:Room;index:number;segmentMinutes:number}){
+function RoomCard({room,index,segmentMinutes,isDemo}:{room:Room;index:number;segmentMinutes:number;isDemo:boolean}){
   const paragraphs=(room.detailContent||"").split(/\n\s*\n/).map((value)=>value.trim()).filter(Boolean);
   return <article className="room-card">
     <RoomVisual room={room} index={index}/>
     <div className="room-card-copy">
-      <div className="room-card-heading"><span>ROOM / {String(index+1).padStart(2,"0")}</span><h2>{room.roomName}</h2><b className={room.ownershipType==="dedicated"?"is-dedicated":"is-common"}>{ownershipLabel(room)}</b></div>
+      <div className="room-card-heading"><span>{isDemo?"DEMO":"ROOM"} / {String(index+1).padStart(2,"0")}</span><h2>{room.roomName}</h2><b className={room.ownershipType==="dedicated"?"is-dedicated":"is-common"}>{isDemo?"DEMO · 範例包廂 · ":""}{ownershipLabel(room)}</b></div>
       <p className="room-card-intro">{room.shortDescription}</p>
       {paragraphs.length?<div className="room-card-detail">{paragraphs.map((paragraph,paragraphIndex)=><p key={`${room.id}-detail-${paragraphIndex}`}>{paragraph}</p>)}</div>:null}
-      <div className="room-card-price"><span><small>每節時間</small><strong>{segmentMinutes} 分鐘</strong></span><span><small>使用價格</small><strong>{money(room.segmentPrice)} <em>/ 節</em></strong></span></div>
+      <div className="room-card-price"><span><small>{isDemo?"範例每節時間":"每節時間"}</small><strong>{segmentMinutes} 分鐘</strong></span><span><small>{isDemo?"範例價格":"使用價格"}</small><strong>{money(room.segmentPrice)} <em>/ 節</em></strong></span></div>
     </div>
   </article>;
 }
 
-export default function RoomCatalog({data}:{data:RoomsData}){
+export default function RoomCatalog({data}:{data:RoomsData|null}){
+  const display=getRoomCatalogDisplay(data);
+  if(!display)return <div className="room-page">
+    <section className="room-hero"><div><span>PRIVATE ROOMS</span><h1>ROOM<br/><i>ARCHIVE</i></h1></div><a href="/menu" className="room-hero-back">← 回到佳餚名錄</a></section>
+    <div className="room-empty" role="status"><span>TEMPORARILY UNAVAILABLE</span><strong>包廂資料暫時無法載入</strong><p>請稍後重新整理頁面，或洽店員確認包廂資訊。</p></div>
+  </div>;
+  const {data:catalog,isDemo}=display;
   return <div className="room-page">
-    <section className="room-hero"><div><span>PRIVATE ROOMS / {String(data.rooms.length).padStart(2,"0")} SPACES</span><h1>ROOM<br/><i>ARCHIVE</i></h1></div><a href="/menu" className="room-hero-back">← 回到佳餚名錄</a></section>
-    <section className="room-notice"><span>HOUSE NOTE</span><p>包廂以每節 {data.segmentMinutes} 分鐘計算。進入顧客點餐頁後，可直接選擇包廂與時段；實際送出時只會檢查該包廂時段是否已被占用。</p></section>
-    <section className="room-list" aria-label="包廂列表">{data.rooms.map((room,index)=><RoomCard key={room.id} room={room} index={index} segmentMinutes={data.segmentMinutes}/>)}</section>
-    {!data.rooms.length?<div className="room-empty"><span>NO ROOMS YET</span><strong>今晚尚未公開包廂</strong><p>包廂資料會在後台完成設定後出現在這裡。</p></div>:null}
+    <section className="room-hero"><div><span>{isDemo?"PRIVATE ROOMS / DEMO PREVIEW":`PRIVATE ROOMS / ${String(catalog.rooms.length).padStart(2,"0")} SPACES`}</span><h1>ROOM<br/><i>ARCHIVE</i></h1></div><a href="/menu" className="room-hero-back">← 回到佳餚名錄</a></section>
+    <section className="room-notice"><span>{isDemo?"DEMO · 範例展示":"HOUSE NOTE"}</span><p>{isDemo?"目前尚未公開包廂，以下為 DEMO 範例展示。名稱、照片、價格與每節時間僅供示意，實際包廂資訊請洽店員。":`包廂以每節 ${catalog.segmentMinutes} 分鐘計算。進入顧客點餐頁後，可直接選擇包廂與時段；實際送出時只會檢查該包廂時段是否已被占用。`}</p></section>
+    <section className="room-list" aria-label={isDemo?"DEMO 範例包廂列表":"包廂列表"}>{catalog.rooms.map((room,index)=><RoomCard key={`${isDemo?"demo":"room"}-${room.id}`} room={room} index={index} segmentMinutes={catalog.segmentMinutes} isDemo={isDemo}/>)}</section>
   </div>;
 }

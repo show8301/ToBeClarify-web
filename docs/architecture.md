@@ -68,6 +68,7 @@ Customer ordering styles are owned by `styles/ordering/site.css`, which imports 
 ## Data and API flow
 
 - Server-rendered public pages use feature server data and fall back to `data/snapshots/` when upstream data is unavailable.
+- The public room catalog waits for its bounded API request before rendering, caches successful responses for 10 minutes, and retries failed reads after 30 seconds. Only previously loaded API data is retained on failure; without it, the catalog shows an unavailable message. A successful empty catalog is displayed using the explicitly labeled demo fixture in `features/rooms/catalog-display.ts`; demo data never enters the API cache or the live board's room-photo catalog. The live board uses an empty room-photo catalog when this read is unavailable.
 - Browser mutations and live refreshes use same-origin API routes.
 - Admin and ordering browser clients call `/api/admin` and `/api/ordering`; route handlers proxy to configured upstream services.
 - Notifications use their own client under `/api/admin/notifications`, with an authenticated provider managing streaming, reconnection, and browser resources. The admin proxy preserves SSE bodies rather than buffering successful streams.

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { financeApi } from "./finance-api";
 import type { AdmissionEntry, FinanceAccount, FinanceCase, FinancePeriodOption } from "./finance-types";
+import { AdminButton } from "@/features/admin/shared/AdminShared.jsx";
 
 const money = (amount: number) => `${amount.toLocaleString("zh-TW")} G`;
 
@@ -39,20 +40,20 @@ export function AdmissionAndCasesPanel({ sessionId, account, periods, admission,
     catch (error) { setMessage(error instanceof Error ? error.message : "案件確認失敗"); }
     finally { setBusy(false); }
   };
-  return <div className="adminOrderEmergency">
+  return <section className="adminOrderFinanceAdmission" aria-label="入場實收與離店">
     <h4>入場實收與離店</h4>
     <p>同一顧客只建立一筆入場事件。折讓只調整應付；實收與實退代表現場已發生的金流。</p>
-    {!admission ? <form onSubmit={submitAdmission}>
+    {!admission ? <form className="adminOrderFinanceAdmissionForm" onSubmit={submitAdmission}>
       <label>入場費<input type="number" min="0" step="1" value={amount} onChange={e => setAmount(Number(e.target.value))} required /></label>
       <label>折讓／優惠<input type="number" min="0" step="1" value={discount} onChange={e => setDiscount(Number(e.target.value))} /></label>
       <label>餐點折抵額度<input type="number" min="0" step="1" value={credit} onChange={e => setCredit(Number(e.target.value))} /></label>
       <label>入場狀態<select value={mode} onChange={e => setMode(e.target.value as typeof mode)}><option value="received">已收款</option><option value="unpaid">未收款，轉未決</option><option value="waived">免收／全額優惠</option></select></label>
       {mode === "received" && <label>收款營業日<select value={cashPeriod} onChange={e => setCashPeriod(e.target.value)}><option value="">先記實收，稍後歸屬</option>{periods.map(p => <option key={p.id} value={p.id}>{p.businessDate}</option>)}</select></label>}
       <label>原因<input maxLength={500} value={reason} onChange={e => setReason(e.target.value)} required /></label>
-      <button type="submit" disabled={busy}>記錄已收並完成入場</button>
+      <AdminButton type="submit" disabled={busy}>記錄已收並完成入場</AdminButton>
     </form> : <p>入場費 {money(admission.amount)} · 折讓 {money(admission.discountAmount)} · 狀態 {admission.status === "received" ? "已收款" : admission.status === "unpaid" ? "未收款" : "優惠／免收"} · 已防重複入帳</p>}
-    <div><button type="button" disabled={busy} onClick={() => void updateDeparture("depart")}>正常離店／停新單</button><button type="button" disabled={busy} onClick={() => void updateDeparture("void")}>誤開碼作廢</button><button type="button" disabled={busy} onClick={() => void updateDeparture("reopen")}>重新開放</button></div>
+    <div className="adminOrderFinanceActions"><AdminButton variant="secondary" disabled={busy} onClick={() => void updateDeparture("depart")}>正常離店／停新單</AdminButton><AdminButton variant="danger" disabled={busy} onClick={() => void updateDeparture("void")}>誤開碼作廢</AdminButton><AdminButton variant="ghost" disabled={busy} onClick={() => void updateDeparture("reopen")}>重新開放</AdminButton></div>
     {message && <p role="status">{message}</p>}
-    {cases.length > 0 && <div><h5>未決案件</h5>{cases.map(item => <div key={item.id}><strong>{item.caseKind} · {money(item.amount)}</strong><span> · {item.description}</span>{item.status === "open" && <button type="button" disabled={busy} onClick={() => void resolve(item)}>確認歸屬／結轉</button>}</div>)}</div>}
-  </div>;
+    {cases.length > 0 && <div className="adminOrderFinanceCases"><h5>未決案件</h5>{cases.map(item => <div key={item.id} className="adminOrderFinanceRecord"><div><strong>{item.caseKind}</strong><p>{item.description}</p></div><b>{money(item.amount)}</b>{item.status === "open" && <AdminButton variant="secondary" disabled={busy} onClick={() => void resolve(item)}>確認歸屬／結轉</AdminButton>}</div>)}</div>}
+  </section>;
 }

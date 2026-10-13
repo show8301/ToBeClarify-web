@@ -160,7 +160,7 @@
   -webkit-text-fill-color: var(--color-fg-soft);
 }
 
-:root[data-admin-theme="dark"] .adminCustomerToolbar form button {
+:root[data-admin-theme="dark"] .adminCustomerToolbar form button:not(.adminButton) {
   border-color: #5d8db2;
   background: #4f7c9f;
   color: #fff;
@@ -551,7 +551,7 @@
   color: var(--color-fg-soft);
 }
 
-:root[data-admin-theme="dark"] .adminOrderItemList button {
+:root[data-admin-theme="dark"] .adminOrderItemList button:not(.adminButton) {
   border-color: rgba(159, 199, 232, .46);
   background: rgba(45, 76, 98, .72);
   color: var(--color-accent);

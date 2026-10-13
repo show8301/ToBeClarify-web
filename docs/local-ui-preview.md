@@ -56,6 +56,8 @@
 
 交付工作台樣式 `92-delivery-workspace.css` 置於 `91-customers-and-delivery.css` 與 `95-scrollbars.css` 之間；預覽時確認 `.adminDeliveryColumns`、範圍切換、詳情頁籤與共用展開箭頭均包含在後台 bundle。
 
+完整點單管理樣式 `93-orders-workspace.css` 在交付工作台之後、捲軸樣式之前載入。預覽時確認顧客資訊、現場帳款摘要、紀錄與表單樣式包含在 bundle；主要區塊沿用 18px 間距，表單與卡片內部使用緊湊配置。
+
 ### 字型 CSS
 
 三個樣式入口另在最後匯入 `styles/shared/icon-actions.css`，遵循[純圖示操作按鈕標準](icon-action-design-standard.md)，共用桌面／觸控尺寸 token。

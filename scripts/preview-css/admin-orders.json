@@ -1,0 +1,126 @@
+[
+  {
+    "selector": ":root[data-admin-theme=\"dark\"] .adminButton-secondary",
+    "declarations": { "background": "rgba(25, 133, 94, .24)", "color": "#d9fff1" }
+  },
+  {
+    "selector": ":root[data-admin-theme=\"dark\"] .adminButton-danger",
+    "declarations": { "background": "rgba(120, 54, 73, .42)", "color": "#ffc0ca" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderWorkspace",
+    "declarations": { "grid-template-columns": "280px minmax(0, 1fr)", "min-height": "0" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminCustomerToolbar",
+    "declarations": { "grid-template-columns": "minmax(0, 1fr)", "min-width": "0" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminCustomerToolbar > label",
+    "declarations": { "grid-template-columns": "auto minmax(0, 1fr)" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminBusinessPeriod .adminBusinessPeriodRange",
+    "declarations": { "display": "flex", "flex-wrap": "wrap", "white-space": "normal" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderDetailPane",
+    "declarations": { "display": "flex", "gap": "var(--admin-space-block)", "max-height": "none", "overflow": "visible" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderCustomerServices",
+    "declarations": { "grid-column": "1 / -1", "display": "flex", "flex-wrap": "wrap", "padding-top": "14px" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderCustomerIdentity",
+    "declarations": { "display": "flex", "flex-wrap": "wrap" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminSessionControls",
+    "declarations": { "display": "grid", "grid-template-columns": "auto minmax(0, 1fr)" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderItemList > .adminOrderItemRow",
+    "declarations": { "grid-template-columns": "minmax(0, 1fr) auto auto auto" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderItemName strong",
+    "declarations": { "font-size": "16px" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderItemQuantity",
+    "declarations": { "font-size": "16px" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderCustomerServices > .adminCustomerActions",
+    "declarations": { "justify-content": "flex-end", "margin-block": "0" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderNominationControl input",
+    "declarations": { "text-align": "center" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderCardBody > .adminOrderEmergency > label",
+    "declarations": { "font-size": "12px" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderCardBody > .adminOrderTransitions > label",
+    "declarations": { "font-size": "12px" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderTransitions > div",
+    "declarations": { "justify-content": "flex-end" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminCustomerPane",
+    "declarations": { "display": "flex", "max-height": "max(360px, calc(100dvh - 260px))", "overflow": "hidden" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminCustomerListScroll",
+    "declarations": { "min-height": "0", "overflow": "hidden auto", "scrollbar-gutter": "stable", "overscroll-behavior": "contain" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminCustomerRow",
+    "declarations": { "padding": "6px 12px", "min-height": "44px" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderFinanceMetrics dt",
+    "declarations": { "font-size": "16px" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderFinanceMetrics dd",
+    "declarations": { "font-size": "24px" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderFinance",
+    "declarations": { "display": "grid", "gap": "14px", "padding": "16px" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderFinanceBalance > strong",
+    "declarations": { "font-size": "26px", "font-variant-numeric": "tabular-nums" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderFinanceMetrics",
+    "declarations": { "grid-template-columns": "repeat(4, minmax(0, 1fr))" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderFinanceMetrics",
+    "context": ["@media (max-width: 1280px)"],
+    "declarations": { "grid-template-columns": "repeat(2, minmax(0, 1fr))" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderFinanceOverview",
+    "context": ["@media (max-width: 760px)"],
+    "declarations": { "grid-template-columns": "minmax(0, 1fr)" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderFinanceForm fieldset",
+    "context": ["@media (max-width: 480px)"],
+    "declarations": { "grid-template-columns": "minmax(0, 1fr)" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminButton",
+    "context": ["@media (pointer: coarse)"],
+    "declarations": { "min-height": "44px" }
+  }
+]

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { financeApi, financeKind, financeSource } from "./finance-api";
 import type { FinanceAccount, FinanceOrderOption, FinancePeriodOption, FinanceRecord, FinanceSaveRequest } from "./finance-types";
 import { AdmissionAndCasesPanel } from "./AdmissionAndCasesPanel";
+import { AdminButton } from "@/features/admin/shared/AdminShared.jsx";
 
 const kindLabels = { charge_add: "加收應付", charge_reduce: "折讓應付", cash_receipt: "實際收款", cash_refund: "實際退款" };
 const money = (amount: number) => `${amount.toLocaleString("zh-TW")} G`;
@@ -22,31 +23,61 @@ export function FinancialRecordsPanel({ sessionId, refreshKey }: { sessionId: st
   const [error, setError] = useState("");
   const [editing, setEditing] = useState<FinanceRecord | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const requestKey = `${sessionId}:${revision}:${refreshKey ?? ""}`;
+  const [settledRequest, setSettledRequest] = useState("");
+  const loading = settledRequest !== requestKey;
   useEffect(() => {
     const controller = new AbortController();
     Promise.all([financeApi.account(sessionId, controller.signal), financeApi.periods(sessionId, controller.signal), financeApi.orders(sessionId, controller.signal), financeApi.admission(sessionId, controller.signal), financeApi.cases(sessionId, false, controller.signal)])
       .then(([a, p, o, admissionEntry, financeCases]) => { setAccount(a); setPeriods(p); setOrders(o); setAdmission(admissionEntry); setCases(financeCases); setError(""); })
-      .catch((e: Error) => { if (!controller.signal.aborted) setError(e.message); });
+      .catch((e: Error) => { if (!controller.signal.aborted) setError(e.message); })
+      .finally(() => { if (!controller.signal.aborted) setSettledRequest(requestKey); });
     return () => controller.abort();
-  }, [sessionId, revision, refreshKey]);
-  return <section className="adminOrderCard" aria-label="現場帳款">
-    <h3>現場帳款</h3>
-    <button type="button" onClick={() => setRevision(n => n + 1)}>重新讀取帳款</button>
-    {error && <p role="alert">{error}</p>}
+  }, [sessionId, requestKey]);
+  return <section className="adminOrderCard adminOrderFinance" aria-label="現場帳款" aria-busy={loading}>
+    <header className="adminOrderFinanceHeading">
+      <div><h3>現場帳款</h3><p>應付、實收與實退分開記錄，掌握待處理金額。</p></div>
+      <AdminButton variant="ghost" disabled={loading} onClick={() => setRevision(n => n + 1)}>{loading ? "讀取中…" : "重新讀取帳款"}</AdminButton>
+    </header>
+    {error && <p className="adminOrderFinanceNotice isError" role="alert">{error}</p>}
+    {!account && loading && <p className="adminOrderFinanceNotice" role="status">正在讀取帳款…</p>}
     {account && <>
-      <p>應付 {money(account.receivable)} · 實收 {money(account.cashReceived)} · 實退 {money(account.cashRefunded)} · 淨收 {money(account.netCash)}</p>
-      <p>{account.balance >= 0 ? `尚待收取 ${money(account.balance)}` : `待退 ${money(account.refundDue)}`} · 待確認 {account.pendingCount} 筆{account.holdScope !== "none" ? " · 分潤保留" : ""}</p>
-      {account.balanceIsProvisional && <p>金額仍待補齊或確認。入場費須登記應付，實際收退款各自記錄。</p>}
-      <p>加收／折讓會調整應付；實收／實退只記錄已發生的款項。取消餐點已自動扣除應付，請勿再登一次折讓。</p>
+      <div className="adminOrderFinanceOverview">
+        <div className="adminOrderFinanceBalance">
+          <span>{account.balance >= 0 ? "尚待收取" : "待退款"}{account.balanceIsProvisional ? "（暫計）" : ""}</span>
+          <strong>{money(account.balance >= 0 ? account.balance : account.refundDue)}</strong>
+          <div className="adminOrderFinanceFlags"><span>待確認 {account.pendingCount} 筆</span>{account.holdScope !== "none" && <span>分潤保留</span>}</div>
+        </div>
+        <dl className="adminOrderFinanceMetrics">
+          <div><dt>應收</dt><dd>{money(account.receivable)}</dd></div>
+          <div><dt>實收</dt><dd>{money(account.cashReceived)}</dd></div>
+          <div><dt>退款</dt><dd>{money(account.cashRefunded)}</dd></div>
+          <div><dt>淨收</dt><dd>{money(account.netCash)}</dd></div>
+        </dl>
+      </div>
+      {account.balanceIsProvisional && <p className="adminOrderFinanceNotice">金額仍待補齊或確認。入場費須登記應付，實際收退款各自記錄。</p>}
+      <div className="adminOrderFinanceGuide">
+        <strong>帳款登記說明</strong>
+        <p>加收／折讓調整應付；實收／實退記錄已發生的款項。</p>
+        <p>取消餐點已自動扣除應付，請勿重複登記折讓。</p>
+      </div>
       {account.canWrite && <AdmissionAndCasesPanel sessionId={sessionId} account={account} periods={periods} admission={admission} cases={cases} onSaved={() => setRevision(n => n + 1)} />}
-      {!account.canWrite ? <p>此顧客沿用原營業日帳務；分項帳款在新開啟的分項接待營業日使用。</p> : <button type="button" onClick={() => { setEditing(null); setShowForm(true); }}>登記費用／收退款</button>}
+      <div className="adminOrderFinanceRecordHeading">
+        <div><h4>帳款紀錄 <span>{account.records.length} 筆</span></h4><p>查看已登記款項與確認狀態。</p></div>
+        {account.canWrite && <AdminButton onClick={() => { setEditing(null); setShowForm(true); }}>＋ 登記費用／收退款</AdminButton>}
+      </div>
+      {!account.canWrite && <p className="adminOrderFinanceNotice">此顧客沿用原營業日帳務；分項帳款在新開啟的分項接待營業日使用。</p>}
       {showForm && account.canWrite && <FinanceForm key={`${sessionId}-${editing?.id ?? "new"}`} account={account} periods={periods} orders={orders} record={editing}
         onSaved={() => { setShowForm(false); setRevision(n => n + 1); }} onClose={() => setShowForm(false)} />}
-      {account.records.map(record => <div key={record.id} className="adminOrderEmergency">
-        <strong>{kindLabels[record.kind]} {money(record.amount)} · {record.allocationStatus === "confirmed" ? "已確認" : "待確認"}</strong>
-        <p>{new Date(record.occurredAt).toLocaleString("zh-TW", { timeZone: "Asia/Taipei" })} · {record.reason}{record.cashPeriodId === null && (record.kind === "cash_receipt" || record.kind === "cash_refund") ? " · 收退款營業日待歸屬" : ""}</p>
-        {account.canWrite && <button type="button" onClick={() => { setEditing(record); setShowForm(true); }}>更正／確認</button>}
-      </div>)}
+      <div className="adminOrderFinanceRecords">
+        {!account.records.length && <p className="adminOrderFinanceEmpty">尚無額外帳款紀錄。</p>}
+        {account.records.map(record => <article key={record.id} className="adminOrderFinanceRecord">
+          <div><div className="adminOrderFinanceRecordTitle"><strong>{kindLabels[record.kind]}</strong><span className="adminOrderFinanceTag">{record.allocationStatus === "confirmed" ? "已確認" : "待確認"}</span></div>
+            <p>{record.reason}</p><small>{new Date(record.occurredAt).toLocaleString("zh-TW", { timeZone: "Asia/Taipei" })}{record.cashPeriodId === null && (record.kind === "cash_receipt" || record.kind === "cash_refund") ? " · 收退款營業日待歸屬" : ""}</small></div>
+          <b>{money(record.amount)}</b>
+          {account.canWrite && <AdminButton variant="secondary" onClick={() => { setEditing(record); setShowForm(true); }}>更正／確認</AdminButton>}
+        </article>)}
+      </div>
     </>}
   </section>;
 }
@@ -85,7 +116,7 @@ function FinanceForm({ account, periods, orders, record, onSaved, onClose }: {
       if (e && typeof e === "object" && "status" in e && typeof e.status === "number" && e.status >= 400 && e.status < 500) setRetry(null);
     } finally { setBusy(false); }
   };
-  return <form className="adminOrderEmergency" onSubmit={e => { e.preventDefault(); void save(); }}>
+  return <form className="adminOrderFinanceForm" onSubmit={e => { e.preventDefault(); void save(); }}>
     <h4>{record ? "更正／確認既有紀錄" : "登記現場費用"}</h4>
     {record && <p>更正保留原始紀錄及修改歷程；若現場真的再次收款或退款，請另外新增實收／實退。</p>}
     <fieldset disabled={busy || !!retry}>
@@ -97,10 +128,12 @@ function FinanceForm({ account, periods, orders, record, onSaved, onClose }: {
       {isCash && <label>收退款營業日<select value={cashPeriod} onChange={e => setCashPeriod(e.target.value)}><option value="">先記款項，稍後歸屬</option>{periods.map(p => <option key={p.id} value={p.id}>{p.businessDate}</option>)}</select></label>}
       <label>實際發生時間（台灣時間）<input type="datetime-local" required value={occurredAt} onChange={e => setOccurredAt(e.target.value)} /></label>
       <label>原因<input required maxLength={500} value={reason} onChange={e => setReason(e.target.value)} /></label>
-      <label><input type="checkbox" checked={pending || source === "unallocated"} disabled={source === "unallocated"} onChange={e => setPending(e.target.checked)} />留待後續確認，分潤先保留</label>
+      <label className="adminOrderFinanceCheckbox"><input type="checkbox" checked={pending || source === "unallocated"} disabled={source === "unallocated"} onChange={e => setPending(e.target.checked)} />留待後續確認，分潤先保留</label>
     </fieldset>
-    {error && <p role="alert">{error}</p>}
-    <button type="submit" disabled={busy}>{retry ? "查回／重試同一笔操作" : "儲存紀錄"}</button>
-    <button type="button" disabled={busy || !!retry} onClick={onClose}>返回</button>
+    {error && <p className="adminOrderFinanceNotice isError" role="alert">{error}</p>}
+    <div className="adminOrderFinanceActions">
+      <AdminButton type="submit" disabled={busy}>{retry ? "查回／重試同一筆操作" : "儲存紀錄"}</AdminButton>
+      <AdminButton variant="ghost" disabled={busy || !!retry} onClick={onClose}>返回</AdminButton>
+    </div>
   </form>;
 }

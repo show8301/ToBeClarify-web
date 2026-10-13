@@ -3,6 +3,8 @@ import { BusinessDayPlanPanel } from "./BusinessDayPlanPanel";
 import { OrderFulfillmentPanel } from "./OrderFulfillmentPanel";
 import { AdminAssistedOrderPanel } from "./AdminAssistedOrderPanel";
 import { FinancialRecordsPanel } from "./FinancialRecordsPanel";
+import { SessionHeader } from "./SessionHeader";
+import { AdminOrderItemRow } from "./AdminOrderItemRow";
 import { ChevronDown, SlidersHorizontal } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -31,7 +33,7 @@ const normalizeTipPresetAmounts = (values) => {
   return next.length === 4 && next.every((value) => Number.isFinite(value) && value > 0) ? next : defaultTipPresetAmounts;
 };
 const labels = { waiting: '等待確認', submitted: '等待確認', partially_confirmed: '部分確認', needs_reschedule: '需重新排程', confirmed: '已成立', in_service: '服務中', completed: '已完成', cancelled: '已取消', expired: '已失效', rejected: '已退回' };
-const transitionLabels = { start: '開始服務', complete: '完成訂單', cancel: '取消訂單', reject: '退回訂單', return_to_reschedule: '退回重新排程' };
+const transitionLabels = { start: '開始服務', complete: '完成訂單', cancel: '取消訂單', reject: '退回訂單', return_to_reschedule: '重新排程' };
 const intakeLabels = { normal: '一般接單', coordination: '協調接單', staff_only: '僅店員接單' };
 
 const minutesToTime = (value) => `${String(Math.floor(Number(value || 0) / 60)).padStart(2, '0')}:${String(Number(value || 0) % 60).padStart(2, '0')}`;
@@ -125,7 +127,7 @@ export function AdminOrdersPage() {
   };
 
   return <section className="adminPage adminOrdersPage">
-    <header className="adminPageHeading"><div><p className="eyebrow">ORDER CONTROL</p><h1>點餐與現場帳款</h1><p>查看顧客訂單、逐項接待，並記錄現場收款、退款及待確認費用。</p></div><div className="adminPageActions"><AdminRefreshButton onClick={() => loadSessions(selectedId)} /><AdminButton variant="secondary" onClick={() => router.push('/admin/rooms/service')}>包廂服務排程</AdminButton>{canManage ? <AdminButton variant="ghost" onClick={() => setShowSettings(!showSettings)}>營運參數</AdminButton> : null}<AdminButton onClick={() => setShowCreate(!showCreate)}>＋ 開立點餐碼</AdminButton></div></header>
+    <header className="adminPageHeading"><div><p className="eyebrow">ORDER CONTROL</p><h1>完整點單管理</h1><p>查看顧客訂單、逐項接待，並記錄現場收款、退款及待確認費用。</p></div><div className="adminPageActions"><AdminRefreshButton onClick={() => loadSessions(selectedId)} /><AdminButton variant="secondary" onClick={() => router.push('/admin/rooms/service')}>包廂服務排程</AdminButton>{canManage ? <AdminButton variant="ghost" onClick={() => setShowSettings(!showSettings)}>營運參數</AdminButton> : null}<AdminButton onClick={() => setShowCreate(!showCreate)}>＋ 開立點餐碼</AdminButton></div></header>
     {message.text ? <div className={message.error ? 'adminOrderMessage isError' : 'adminOrderMessage'} role="status">{message.text}<button onClick={() => setMessage({ text: '', error: false })}>×</button></div> : null}
     {businessContext ? <BusinessOperationsBar context={businessContext} canManage={canManage} onChanged={(value, text) => { setBusinessContext(value); setBusinessDate(value.referenceBusinessDate); setMessage({ text, error: false }); }} onError={(error) => setMessage({ text: error.message, error: true })}>
       {canManage ? <BusinessDayPlanPanel businessDate={businessContext.referenceBusinessDate} onOpened={loadBusinessContext} /> : null}
@@ -136,20 +138,35 @@ export function AdminOrdersPage() {
     {canManage && showSettings && settingsError ? <div className="adminOrderMessage isError" role="alert">營運參數載入失敗：{settingsError}</div> : null}
     <div className="adminOrderWorkspace">
       <aside className="adminCustomerPane">
-        <div className="adminCustomerToolbar"><label>營業日<input type="date" value={businessDate} onChange={(event) => setBusinessDate(event.target.value)} /></label>{businessContext ? <p className={businessContext.orderingOpen ? 'adminBusinessPeriod isOpen' : 'adminBusinessPeriod'}><strong>{businessContext.orderingOpen ? '目前營業中' : '目前非營業時段'}</strong><span>{formatBusinessPeriodTime(businessContext.referenceStartsAt)} ～ {formatBusinessPeriodTime(businessContext.referenceEndsAt)}</span></p> : null}<form onSubmit={(event) => { event.preventDefault(); loadSessions(); }}><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="搜尋顧客名稱或遊戲 ID" /><button type="submit">搜尋</button></form><div><span>本營業日顧客</span><strong>{sessions.length}</strong></div></div>
-        <CustomerGroup title="待處理" count={groups.attention.length} open={groupsOpen.attention} onToggle={() => setGroupsOpen((current) => ({ ...current, attention: !current.attention }))}>{groups.attention.map((item) => <CustomerRow key={item.session.id} item={item} active={item.session.id === selectedId} onClick={() => selectSession(item.session.id)} />)}</CustomerGroup>
-        <CustomerGroup title="其他顧客" count={groups.others.length} open={groupsOpen.others} onToggle={() => setGroupsOpen((current) => ({ ...current, others: !current.others }))}>{groups.others.map((item) => <CustomerRow key={item.session.id} item={item} active={item.session.id === selectedId} onClick={() => selectSession(item.session.id)} />)}</CustomerGroup>
+        <div className="adminCustomerToolbar">
+          <label>營業日<input type="date" value={businessDate} onChange={(event) => setBusinessDate(event.target.value)} /></label>
+          {businessContext ? <p className={businessContext.orderingOpen ? 'adminBusinessPeriod isOpen' : 'adminBusinessPeriod'}>
+            <strong>{businessContext.orderingOpen ? '目前營業中' : '目前非營業時段'}</strong>
+            <span className="adminBusinessPeriodRange">
+              <time dateTime={businessContext.referenceStartsAt}>{formatBusinessPeriodTime(businessContext.referenceStartsAt)}</time>
+              <span>～</span>
+              <time dateTime={businessContext.referenceEndsAt}>{formatBusinessPeriodTime(businessContext.referenceEndsAt)}</time>
+            </span>
+          </p> : null}
+          <form onSubmit={(event) => { event.preventDefault(); loadSessions(); }}>
+            <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="搜尋顧客名稱或遊戲 ID" aria-label="搜尋顧客名稱或遊戲 ID" />
+            <AdminButton type="submit" variant="secondary">搜尋</AdminButton>
+          </form>
+          <div><span>本營業日顧客</span><strong>{sessions.length}</strong></div>
+        </div>
+        <div className="adminCustomerListScroll" role="region" aria-label="顧客清單" tabIndex={0}>
+          <CustomerGroup title="待處理" count={groups.attention.length} open={groupsOpen.attention} onToggle={() => setGroupsOpen((current) => ({ ...current, attention: !current.attention }))}>{groups.attention.map((item) => <CustomerRow key={item.session.id} item={item} active={item.session.id === selectedId} onClick={() => selectSession(item.session.id)} />)}</CustomerGroup>
+          <CustomerGroup title="其他顧客" count={groups.others.length} open={groupsOpen.others} onToggle={() => setGroupsOpen((current) => ({ ...current, others: !current.others }))}>{groups.others.map((item) => <CustomerRow key={item.session.id} item={item} active={item.session.id === selectedId} onClick={() => selectSession(item.session.id)} />)}</CustomerGroup>
+        </div>
       </aside>
       <div className="adminOrderDetailPane">
         {!selected ? <div className="adminOrderEmpty"><span>LD</span><h2>選擇一位顧客</h2><p>使用左側搜尋或分組快速定位顧客。</p></div> : <>
-          <SessionHeader item={selected} loading={loading} onUpdate={(body) => act(() => adminApi.updateOrderSession(selectedId, body), '顧客點餐設定已更新。')} onReissue={async () => { try { setIssued(await adminApi.reissueOrderSession(selectedId)); } catch (error) { setMessage({ text: error.message, error: true }); } }} onAssisted={() => setShowAssisted((value) => !value)} />
-          <div className="adminCustomerActions">
-            <a className="adminButton adminButton-secondary" href={`/admin/deliveries?${new URLSearchParams({ session: selectedId, date: selected.session.businessDate, create: '1' })}`}>建立繪圖／簽繪交付</a>
-            <a className="adminButton adminButton-ghost" href={`/admin/deliveries?${new URLSearchParams({ session: selectedId, date: selected.session.businessDate })}`}>查看此顧客的作品交付</a>
-            <a className="adminButton adminButton-ghost" href={`/admin/order-list?${new URLSearchParams({ session: selectedId, date: selected.session.businessDate })}`}>查看此顧客歷史訂單</a>
-          </div>
+          <SessionHeader key={`${selectedId}:${selected.session.maxNominatedStaff}`} item={selected} loading={loading} onUpdate={(body) => act(() => adminApi.updateOrderSession(selectedId, body), '顧客點餐設定已更新。')} onReissue={async () => { try { setIssued(await adminApi.reissueOrderSession(selectedId)); } catch (error) { setMessage({ text: error.message, error: true }); } }} onAssisted={() => setShowAssisted((value) => !value)} />
           {showAssisted ? <AdminAssistedOrderPanel sessionId={selectedId} businessDate={businessDate} onSaved={refreshSelected} onClose={() => setShowAssisted(false)} /> : null}
-          <div className="adminOrderCards">{orders.length ? orders.map((order) => order.flowVersion >= 2 ? <AdminFulfillmentOrderCard key={order.id} order={order} user={user} loading={loading} canManage={canManage} act={act} onChanged={refreshSelected} /> : <AdminOrderCard key={order.id} order={order} user={user} loading={loading} act={act} />) : <div className="adminOrderEmpty isCompact"><h2>尚未下單</h2><p>此點餐碼今天還沒有送出訂單。</p></div>}</div>
+          <section className="adminOrderCustomerOrders" aria-label="顧客訂單">
+            <header className="adminOrderSectionHeading"><h3>顧客訂單</h3><span>{orders.length} 張</span></header>
+            <div className="adminOrderCards">{orders.length ? orders.map((order) => order.flowVersion >= 2 ? <AdminFulfillmentOrderCard key={order.id} order={order} user={user} loading={loading} canManage={canManage} act={act} onChanged={refreshSelected} /> : <AdminOrderCard key={order.id} order={order} user={user} loading={loading} act={act} />) : <div className="adminOrderEmpty isCompact"><h2>尚未下單</h2><p>此點餐碼今天還沒有送出訂單。</p></div>}</div>
+          </section>
           <FinancialRecordsPanel key={selectedId} sessionId={selectedId} refreshKey={orders.map(o => `${o.id}:${o.totalAmount}:${o.status}`).join("|")} />
         </>}
       </div>
@@ -210,12 +227,6 @@ function CustomerRow({ item, active, onClick }) {
   return <button type="button" className={`adminCustomerRow ${active ? 'isActive' : ''}`} onClick={onClick}><span><strong>{item.session.customerName}</strong><small>ID {item.session.gameId}</small></span><span><b>{item.waitingOrderCount ? `${item.waitingOrderCount} 待處理` : `${item.orderCount} 單`}</b><small>{money(item.totalAmount)}</small></span></button>;
 }
 
-function SessionHeader({ item, onUpdate, onReissue, onAssisted, loading }) {
-  const [max, setMax] = useState(item.session.maxNominatedStaff);
-  useEffect(() => setMax(item.session.maxNominatedStaff), [item.session.maxNominatedStaff]);
-  return <header className="adminSelectedCustomer"><div><span>SELECTED CUSTOMER</span><h2>{item.session.customerName}</h2><p>遊戲 ID：{item.session.gameId} · 今日共 {item.orderCount} 張訂單 · {item.session.status === 'active' ? '可點餐' : '僅可查看'}</p></div><dl><div><dt>信物餐點餘額</dt><dd>{money(item.session.remainingMealCredit)}</dd></div><div><dt>今日消費</dt><dd>{money(item.totalAmount)}</dd></div></dl><div className="adminSessionControls"><label>同時可指名人數<input type="number" min="0" max="100" value={max} onChange={(event) => setMax(Number(event.target.value))} /></label><AdminButton variant="secondary" disabled={loading} onClick={() => onUpdate({ maxNominatedStaff: max })}>儲存人數</AdminButton><AdminButton variant="ghost" disabled={loading} onClick={onReissue}>尋回／重發點餐碼</AdminButton><AdminButton variant="secondary" disabled={loading || item.session.status !== 'active'} onClick={onAssisted}>代客點餐</AdminButton><AdminButton variant={item.session.status === 'active' ? 'danger' : 'secondary'} disabled={loading} onClick={() => onUpdate({ status: item.session.status === 'active' ? 'readonly' : 'active' })}>{item.session.status === 'active' ? '顧客離店／停止點餐' : '重新開放點餐'}</AdminButton></div></header>;
-}
-
 function AdminFulfillmentOrderCard({ order, user, loading, canManage, act, onChanged }) {
   const [note, setNote] = useState(order.customerNote || '');
   const [location, setLocation] = useState(order.customerLocation || '');
@@ -250,7 +261,13 @@ function AdminOrderCard({ order, user, loading, act }) {
   const cancelable = ['submitted', 'partially_confirmed', 'needs_reschedule'].includes(order.status);
   const transitions = order.status === 'confirmed' ? (order.orderKind === 'service_addon' ? ['start', 'cancel'] : ['start', 'return_to_reschedule', 'cancel']) : order.status === 'in_service' ? ['complete'] : cancelable ? ['reject', 'cancel'] : [];
   const isEarlyCompletion = order.status === 'in_service' && order.nominees?.some((item) => new Date(item.requestedServiceEndsAt).getTime() > Date.now());
-  return <article className={`adminOrderCard is-${order.status}`}><button type="button" className="adminOrderCardHead" onClick={() => setOpen(!open)}><div><span>{order.orderKind === 'service_addon' ? '附掛加購服務單' : order.orderNumber}</span><strong>{labels[order.status] || order.status}</strong><small>{order.queueStage}{order.queueMinutes ? ` · ${order.queueMinutes} 分鐘` : ''}</small></div><div><span>{new Date(order.submittedAt).toLocaleString('zh-TW')}</span><b>{money(order.totalAmount)}</b></div></button>{open ? <div className="adminOrderCardBody">
+  const statusLabel = labels[order.status] || order.status;
+  const queueStage = typeof order.queueStage === 'string' ? order.queueStage.trim() : '';
+  const queueDetails = [
+    queueStage !== statusLabel ? queueStage : '',
+    order.queueMinutes > 0 ? `${order.queueMinutes} 分鐘` : '',
+  ].filter(Boolean).join(' · ');
+  return <article className={`adminOrderCard is-${order.status}`}><button type="button" className="adminOrderCardHead" onClick={() => setOpen(!open)}><div><span>{order.orderKind === 'service_addon' ? '附掛加購服務單' : order.orderNumber}</span><strong>{statusLabel}</strong>{queueDetails ? <small>{queueDetails}</small> : null}</div><div><span>{new Date(order.submittedAt).toLocaleString('zh-TW')}</span><b>{money(order.totalAmount)}</b></div></button>{open ? <div className="adminOrderCardBody">
      {order.storeConfirmationStatus === 'pending' ? <div className="adminStoreConfirmation"><div><strong>關店時段協調單</strong><p>顧客已送出，但尚未成立。接受後，餐點／小費直接成立；指名與加購仍需被指名店員確認。</p></div><label>拒絕原因<input value={storeDecisionReason} maxLength="500" placeholder="拒絕時必填" onChange={(event) => setStoreDecisionReason(event.target.value)} /></label><div><AdminButton disabled={loading} onClick={() => act(() => adminApi.decideStoreConfirmation(order.id, 'approved', '現場確認可承接'), '已接受協調單。')}>接受協調單</AdminButton><AdminButton variant="danger" disabled={loading || !storeDecisionReason.trim()} onClick={() => act(() => adminApi.decideStoreConfirmation(order.id, 'rejected', storeDecisionReason.trim()), '已拒絕協調單並退回本單餐點信物折抵。')}>拒絕協調單</AdminButton></div></div> : null}
      <div className="adminOrderItemList">{order.items.map((item) => <AdminOrderItemRow key={item.id} orderId={order.id} item={item} loading={loading} act={act} />)}</div>
      {order.addons?.length ? <div className="adminAddonSummary">{order.addons.map((item) => <article key={item.id}><span>ADD-ON · {labels[item.status] || item.status}</span><strong>{item.staffName}｜{item.serviceName}</strong><small>{item.serviceDurationMinutes} 分鐘 · {item.participantCount} 人 · 附掛於既有指名，不新增基礎費與忙碌區段</small></article>)}</div> : null}
@@ -312,29 +329,6 @@ function NominationShortenControl({ orderId, orderStatus, item, loading, act }) 
   useEffect(() => { setSegments(Math.max(minimum, item.segmentCount - 1)); setReason(''); }, [item.id, item.segmentCount, minimum]);
   if (!canShorten) return <small className="adminNomineeLimit">{item.segmentCount <= minimum ? `已達服務最低 ${minimum} 節` : '開始後不可正式縮短'}</small>;
   return <div className="adminNomineeShorten"><label>正式縮短為<input type="number" min={minimum} max={item.segmentCount - 1} value={segments} onChange={(event) => setSegments(Number(event.target.value))} /> 節</label><input value={reason} maxLength="500" placeholder="縮短原因（必填）" onChange={(event) => setReason(event.target.value)} /><button type="button" disabled={loading || !reason.trim() || segments < minimum || segments >= item.segmentCount} onClick={() => act(() => adminApi.shortenNomination(orderId, item.id, segments, reason.trim()), `已由 ${item.segmentCount} 節正式縮短為 ${segments} 節；金額與忙碌區段已同步。`)}>確認縮短</button></div>;
-}
-
-function AdminOrderItemRow({ orderId, item, loading, act }) {
-  const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState({ name: item.name, unitPrice: Number(item.unitPrice), quantity: Number(item.quantity) });
-  const locksQuantity = item.itemType === 'nomination_base' || item.itemType === 'staff_service';
-  useEffect(() => setForm({ name: item.name, unitPrice: Number(item.unitPrice), quantity: Number(item.quantity) }), [item.id, item.name, item.unitPrice, item.quantity]);
-  const save = () => act(
-    () => adminApi.updateOrderItem(orderId, item.id, { name: form.name.trim(), unitPrice: Number(form.unitPrice), quantity: locksQuantity ? undefined : Number(form.quantity) }),
-    '訂單項目已修改，金額已重新計算並留下稽核紀錄。',
-  );
-  return <div className={editing ? 'isEditing' : ''}>
-    <span><small>{item.itemType}</small><strong>{item.name}</strong>{item.quantity > 1 ? <em>× {item.quantity}</em> : null}</span>
-    <b>{money(item.lineTotal)}</b>
-    <div className="adminOrderItemActions"><button type="button" disabled={loading} onClick={() => setEditing(!editing)}>{editing ? '收起編輯' : '修改'}</button><button type="button" disabled={loading} onClick={() => act(() => adminApi.deleteOrderItem(orderId, item.id), '訂單項目已刪除。')}>快速刪除</button></div>
-    {editing ? <div className="adminOrderItemEditor">
-      <label>品名<input value={form.name} maxLength="160" onChange={(event) => setForm({ ...form, name: event.target.value })} /></label>
-      <label>單價<input type="number" min="0" max="1000000" value={form.unitPrice} onChange={(event) => setForm({ ...form, unitPrice: Number(event.target.value) })} /></label>
-      <label>數量<input type="number" min="1" max="99" value={form.quantity} disabled={locksQuantity} title={locksQuantity ? '既有指名不可直接延長，請另開新訂單。' : undefined} onChange={(event) => setForm({ ...form, quantity: Number(event.target.value) })} /></label>
-      <AdminButton variant="secondary" disabled={loading || !form.name.trim()} onClick={save}>儲存項目</AdminButton>
-      {locksQuantity ? <small>既有指名不可修改節數；需要追加時數請另開新訂單。</small> : null}
-    </div> : null}
-  </div>;
 }
 
 function SettingsPanel({ settings, onSaved }) {

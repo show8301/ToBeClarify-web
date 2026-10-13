@@ -1078,9 +1078,13 @@
   .adminDutyPlanningMetrics article:nth-child(-n+2) { border-bottom:1px solid var(--color-border); }
   .adminDutyPlanningToolbar { align-items:stretch; flex-direction:column; gap:10px; }
   .adminDutyPlanningToolbar .adminField { width:100%; }
-  .adminDutyPlanCard { grid-template-columns:1fr auto; align-items:start; }
-  .adminDutyPlanRoles,.adminDutyPlanStatus { grid-column:1 / -1; }
-  .adminDutyPlanActions { grid-column:1 / -1; justify-content:flex-start; }
+  .adminDutyPlanCard { grid-template-columns:minmax(0,1fr) auto; align-items:center; }
+  .adminDutyPlanIdentity,.adminDutyPlanRoles { grid-column:1 / -1; }
+  .adminDutyPlanIdentity { grid-template-columns:minmax(0,1fr) auto; align-items:baseline; column-gap:8px; }
+  .adminDutyPlanIdentity strong { white-space:normal; overflow-wrap:anywhere; }
+  .adminDutyPlanIdentity small { white-space:nowrap; text-align:right; }
+  .adminDutyPlanStatus { grid-column:1; }
+  .adminDutyPlanActions { grid-column:2; justify-content:flex-end; }
 }
 
 @media(max-width:560px){

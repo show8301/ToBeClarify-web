@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { AdminDialog, AdminField, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
+import { AdminDialog, AdminField } from "@/features/admin/shared/AdminShared.jsx";
 import { ACTION_LABELS, SECONDARY_BUTTON_CLASS, adminGuestbookTime } from "@/features/admin/guestbook/presentation";
 import type { GuestbookAuthor, GuestbookHistoryEntry, GuestbookMessage, GuestbookSettings } from "@/features/guestbook/types";
 import { compressGuestbookImage } from "@/lib/guestbook-image";
+import { AdminGuestbookDrawer } from "@/features/admin/guestbook/AdminGuestbookDrawer";
 
 type StaffRole = Exclude<GuestbookAuthor, "customer">;
 
 type ComposerProps = {
+  open: boolean;
+  error: string;
+  onClose: () => void;
   target: GuestbookMessage | null;
   settings: GuestbookSettings | null;
   staffDisplayName?: string;
@@ -52,7 +56,14 @@ export function AdminGuestbookComposer(props: ComposerProps) {
   };
 
   return (
-    <AdminPanel title={props.target ? `回覆 ${props.target.displayName} 的留言串` : "新增店家留言"}>
+    <AdminGuestbookDrawer
+      open={props.open}
+      title={props.target ? `回覆 ${props.target.displayName}` : "新增店家留言"}
+      busy={props.busy}
+      onClose={props.onClose}
+    >
+      {props.target ? <p className="adminGuestbookReplyContext">{props.target.content}</p> : null}
+      {props.error ? <p className="adminFormError" role="alert">{props.error}</p> : null}
       <form id="admin-guestbook-composer" className="adminGuestbookForm" onSubmit={(event) => {
         event.preventDefault();
         void props.onSubmit(image?.base64 ?? null).then((success) => {
@@ -74,7 +85,7 @@ export function AdminGuestbookComposer(props: ComposerProps) {
         <AdminField label="留言內容">
           <textarea required maxLength={2000} value={props.content} onChange={(event) => props.onContentChange(event.target.value)} rows={4} />
         </AdminField>
-        <AdminField label="附上圖片（選填，送出前會自動壓縮）">
+        <AdminField label="附圖" hint="選填，送出前自動壓縮">
           <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" disabled={props.busy || processing} onChange={(event) => void chooseImage(event.target.files?.[0])} />
         </AdminField>
         {processing ? <p role="status">正在壓縮圖片…</p> : null}
@@ -94,10 +105,10 @@ export function AdminGuestbookComposer(props: ComposerProps) {
           >
             {processing ? "圖片處理中…" : props.busy ? "處理中…" : "公開送出"}
           </button>
-          {props.target ? <button className={SECONDARY_BUTTON_CLASS} type="button" disabled={props.busy} onClick={props.onCancelReply}>改為新增留言串</button> : null}
+          {props.target ? <button className={SECONDARY_BUTTON_CLASS} type="button" disabled={props.busy} onClick={props.onCancelReply}>改為新增留言</button> : null}
         </div>
       </form>
-    </AdminPanel>
+    </AdminGuestbookDrawer>
   );
 }
 
@@ -142,6 +153,9 @@ export function AdminGuestbookEditor(props: EditorProps) {
 }
 
 type SettingsProps = {
+  open: boolean;
+  error: string;
+  onClose: () => void;
   settings: GuestbookSettings | null;
   name: string;
   busy: boolean;
@@ -154,9 +168,10 @@ type SettingsProps = {
 
 export function AdminGuestbookSettingsPanel(props: SettingsProps) {
   return (
-    <AdminPanel title="吉祥物名稱" description="名稱變更只套用到之後的新留言；既有留言保留當時名稱。">
+    <AdminGuestbookDrawer open={props.open} title="留言板設定" description="吉祥物名稱只套用到之後的新留言。" busy={props.busy} onClose={props.onClose}>
+      {props.error ? <p className="adminFormError" role="alert">{props.error}</p> : null}
       <form className="adminGuestbookForm" onSubmit={props.onSubmit}>
-        <AdminField label="名稱">
+        <AdminField label="吉祥物名稱">
           <input required maxLength={60} value={props.name} onChange={(event) => props.onNameChange(event.target.value)} />
         </AdminField>
         <div className="adminGuestbookActions">
@@ -168,11 +183,11 @@ export function AdminGuestbookSettingsPanel(props: SettingsProps) {
             儲存名稱
           </button>
           <button type="button" className={SECONDARY_BUTTON_CLASS} disabled={props.busy || props.loading || props.pinsDirty} onClick={props.onDiscard}>
-            重新載入名稱（放棄修改）
+            放棄修改
           </button>
         </div>
       </form>
-    </AdminPanel>
+    </AdminGuestbookDrawer>
   );
 }
 
@@ -182,18 +197,20 @@ export function AdminGuestbookHistoryPanel({ history, onClose }: {
 }) {
   if (!history) return null;
   return (
-    <AdminPanel title="最近操作紀錄" actions={<button className={SECONDARY_BUTTON_CLASS} onClick={onClose}>關閉紀錄</button>}>
-      <p>留言串：{history.thread}</p>
+    <AdminGuestbookDrawer open title="操作紀錄" description="最近 100 筆，點選項目查看變更內容。" onClose={onClose}>
+      <p className="adminGuestbookRecordId">留言串：{history.thread}</p>
       {history.items.map((item) => (
         <details className="adminGuestbookHistory" key={item.id}>
           <summary>{adminGuestbookTime(item.createdAt)} · {ACTION_LABELS[item.action] || item.action}</summary>
           <p>操作帳號：{item.actorId}</p>
           <p>留言：{item.messageId}</p>
+          <h4>變更前</h4>
           <pre>{item.beforeValue || "（無原始內容）"}</pre>
+          <h4>變更後</h4>
           <pre>{item.afterValue || "（無內容）"}</pre>
         </details>
       ))}
       {!history.items.length ? <p>尚無後台操作紀錄。</p> : null}
-    </AdminPanel>
+    </AdminGuestbookDrawer>
   );
 }

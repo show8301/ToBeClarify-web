@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { AdminAuthProvider } from "@/features/admin/auth/AdminAuthContext.jsx";
 import { AdminImageProcessingProvider } from "@/features/admin/media/AdminImageProcessingProvider.jsx";
 import { AdminToastProvider } from "@/features/admin/shared/AdminToastProvider.jsx";
+import { AdminToolbarProvider } from "@/features/admin/shared/AdminToolbar";
 
 export default function AdminProviders({ children }: Readonly<{ children: React.ReactNode }>) {
   useEffect(() => {
@@ -22,7 +23,11 @@ export default function AdminProviders({ children }: Readonly<{ children: React.
     <div className="adminTheme">
       <AdminToastProvider>
         <AdminImageProcessingProvider>
-          <AdminAuthProvider><AuthenticatedNotifications>{children}</AuthenticatedNotifications></AdminAuthProvider>
+          <AdminAuthProvider>
+            <AdminToolbarProvider>
+              <AuthenticatedNotifications>{children}</AuthenticatedNotifications>
+            </AdminToolbarProvider>
+          </AdminAuthProvider>
         </AdminImageProcessingProvider>
       </AdminToastProvider>
     </div>

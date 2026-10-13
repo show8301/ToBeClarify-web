@@ -2,6 +2,8 @@ import {AdminNotificationBell} from '@/features/admin/notifications/AdminNotific
 import { useEffect, useMemo, useState } from 'react';
 import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
 import { AdminButton } from '@/features/admin/shared/AdminShared.jsx';
+import { AdminToolbarRefreshSlot } from '@/features/admin/shared/AdminToolbar';
+import { AdminBackToTop } from '@/features/admin/shared/AdminBackToTop';
 
 const allGroups = [
   { label: '營運', items: [
@@ -94,7 +96,11 @@ export function AdminLayout({ route, navigate, children }) {
               {group.items.map((item) => <button key={item.route} className={route === item.route ? 'isActive' : ''} aria-current={route === item.route ? 'page' : undefined} type="button" onClick={() => handleNavigate(item.route)}><span className="adminNavIndex">{item.index}</span><span className="adminNavText">{item.label}</span></button>)}
             </section>)}
           </nav>
-          <div className="adminTopbarUtilities"><AdminNotificationBell/>
+          <div className="adminTopbarUtilities">
+            <div className="adminToolbarActions">
+              <AdminNotificationBell/>
+              <AdminToolbarRefreshSlot/>
+            </div>
             <div className="adminAccount">
               <div className="adminAccountIdentity"><small>目前登入</small><strong>{user.displayName}</strong><span>{user.roleLabel}</span></div>
               <AdminButton
@@ -117,6 +123,7 @@ export function AdminLayout({ route, navigate, children }) {
       <div className="adminWorkspace">
         <div className="adminContent">{children}</div>
       </div>
+      <AdminBackToTop />
     </main>
   );
 }

@@ -106,14 +106,18 @@
 @media (max-width: 1020px) {
   .adminTopbar:has(> .adminTopbarScroll) {
     padding: 8px 6px;
+    overflow: visible;
   }
 
   .adminTopbarScroll {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto;
-    grid-template-areas: "brand menu utilities" "nav nav nav";
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "brand menu" "utilities utilities" "nav nav";
     align-items: center;
     padding: 1px 4px;
+    overflow: visible;
+    scrollbar-gutter: auto;
   }
 }
 

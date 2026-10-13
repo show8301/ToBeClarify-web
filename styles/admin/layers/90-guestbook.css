@@ -1,25 +1,206 @@
-.adminGuestbook { display: grid; gap: 22px; min-width: 0; }
-.adminGuestbookForm { display: grid; gap: 16px; }
-.adminGuestbookForm textarea { resize: vertical; min-height: 110px; }
-.adminGuestbookActions, .adminGuestbookMessage > header, .adminGuestbookMeta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
-.adminGuestbookActions { margin-block: 14px; }
-.adminGuestbookMessage { padding: 20px; margin-block: 16px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
-.adminGuestbookMessage.isHidden { border-style: dashed; }
-.adminGuestbookMessage > p { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.8; }
-.adminGuestbookMessage strong { overflow-wrap: anywhere; }
-.adminGuestbookMessage time, .adminGuestbookMeta { color: var(--color-fg-soft); font-size: 12px; }
-.adminGuestbookBadge { padding: 3px 9px; border-radius: 999px; border: 1px solid var(--color-border-strong); background: var(--color-surface-strong); font-size: 12px; }
-.adminGuestbookReplies { border-top: 1px solid var(--color-border); margin-top: 14px; }
-.adminGuestbookReplies .adminGuestbookMessage { padding: 14px; }
-.adminGuestbookPins { padding-block: 12px 24px; border-bottom: 1px solid var(--color-border-strong); }
-.adminGuestbook .adminButton:disabled { cursor: not-allowed; }
-.adminGuestbookHistory { padding: 14px 0; border-top: 1px solid var(--color-border); }
+.adminGuestbook {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.adminGuestbookForm {
+  display: grid;
+  gap: 14px;
+}
+
+.adminGuestbookForm textarea {
+  resize: vertical;
+  min-height: 150px;
+}
+
+.adminGuestbookActions,
+.adminGuestbookRowActions,
+.adminGuestbookPinControls,
+.adminGuestbookMessageMain > header,
+.adminGuestbookMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.adminGuestbookActions { margin-block: 12px; }
+.adminGuestbookListPanel { padding: 16px; }
+.adminGuestbookListPanel .adminPanelHeader { margin-bottom: 12px; padding-bottom: 12px; }
+.adminGuestbookListPanel .adminPanelActions { align-items: center; gap: 8px; }
+.adminGuestbookListPanel .adminPanelActions > .adminButton-primary { display: inline-flex; align-items: center; gap: 6px; }
+
+.adminGuestbookFilters {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) minmax(140px, 180px) minmax(100px, 130px) auto;
+  align-items: end;
+  gap: 10px;
+}
+
+.adminGuestbookFilters .adminField { min-width: 0; gap: 5px; }
+.adminGuestbookFilters .adminField :is(input, select) { min-height: 38px; padding-block: 8px; }
+.adminGuestbookFilters .adminGuestbookActions { margin: 0; flex-wrap: nowrap; }
+.adminGuestbookListPanel .adminButton:not(.iconActionButton) { min-height: 36px; padding: 8px 12px; }
+
+.adminGuestbookFilterHint,
+.adminGuestbookActionStatus {
+  color: var(--color-fg-soft);
+  font-size: 12px;
+}
+
+.adminGuestbookFilterHint { margin: 8px 0 12px; }
+.adminGuestbookActionStatus { margin: 6px 0; }
+
+.adminGuestbookSectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 4px;
+  color: var(--color-fg-soft);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.adminGuestbookSectionTitle span { font-weight: 450; }
+.adminGuestbookMessage { padding: 12px 0; border-bottom: 1px solid var(--color-border); }
+.adminGuestbookMessage.isHidden { border-bottom-style: dashed; }
+.adminGuestbookMessageRow { display: flex; align-items: flex-start; gap: 14px; }
+.adminGuestbookMessageMain { flex: 1; min-width: 0; }
+.adminGuestbookMessageMain > header { gap: 5px 8px; margin-bottom: 6px; }
+.adminGuestbookMessage strong { overflow-wrap: anywhere; font-size: 14px; }
+.adminGuestbookMessage time { color: var(--color-fg-soft); font-size: 12px; }
+
+.adminGuestbookBadge {
+  padding: 2px 7px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.adminGuestbookContentRow { display: flex; align-items: flex-start; gap: 10px; }
+.adminGuestbookContent { flex: 1; min-width: 0; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; line-height: 1.55; }
+.adminGuestbookContent.isCollapsed { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+.adminGuestbookThumbnail { display: block; flex: 0 0 72px; border-radius: 8px; overflow: hidden; border: 1px solid var(--color-border); background: var(--color-surface); }
+.adminGuestbookThumbnail img { display: block; width: 72px; height: 72px; object-fit: contain; }
+.adminGuestbookMeta { margin-top: 6px; gap: 6px 12px; color: var(--color-fg-soft); font-size: 12px; }
+.adminGuestbookDetails { display: grid; gap: 3px; margin-top: 8px; color: var(--color-fg-soft); font-size: 12px; overflow-wrap: anywhere; }
+
+.adminGuestbookTextButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-fg-soft);
+  font: inherit;
+  cursor: pointer;
+}
+
+.adminGuestbookTextButton:hover:not(:disabled) { color: var(--color-fg); text-decoration: underline; }
+.adminGuestbookRowActions { flex: 0 0 auto; gap: 5px; max-width: 225px; justify-content: flex-end; }
+.adminGuestbookRowActions [aria-pressed="true"] { border-color: var(--color-accent); background: var(--color-surface-strong); box-shadow: inset 0 0 0 1px var(--color-accent); }
+.adminGuestbookPinControls { justify-content: flex-end; width: 100%; padding-top: 4px; color: var(--color-fg-soft); font-size: 12px; }
+.adminGuestbookPinControls > span { margin-right: 3px; }
+.adminGuestbookReplies { margin: 10px 0 0 12px; padding-left: 12px; border-left: 2px solid var(--color-border-strong); }
+.adminGuestbookReplies .adminGuestbookMessage { padding-block: 10px; }
+.adminGuestbookReplies .adminGuestbookMessage:last-of-type { border-bottom: 0; }
+.adminGuestbookPins { padding-bottom: 8px; border-bottom: 1px solid var(--color-border-strong); }
+.adminGuestbookPins .adminGuestbookMessage { border-bottom: 0; }
+.adminGuestbookPins > div + div { border-top: 1px solid var(--color-border); }
+.adminGuestbookPagination { justify-content: flex-end; margin-bottom: 0; color: var(--color-fg-soft); font-size: 12px; }
+
+.adminGuestbookFeedback { margin: 0; padding: 12px; border: 1px solid var(--color-border-strong); border-radius: var(--radius-md); }
+.adminGuestbookFeedback .adminButton { margin-left: 10px; }
+.adminGuestbook :is(button, .adminButton):disabled,
+.adminGuestbookDrawer :is(button, .adminButton):disabled { cursor: not-allowed; opacity: .5; }
+.adminGuestbook :is(button, summary, a):focus-visible,
+.adminGuestbookDrawer :is(button, summary, a):focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+
+.adminGuestbookMenuPositioner { z-index: 1100; }
+.adminGuestbookMenu {
+  min-height: 0;
+  min-width: 180px;
+  padding: 5px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 10px;
+  background: var(--color-surface-strong);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .15);
+}
+
+.adminGuestbookMenu [role="menuitem"] { display: block; padding: 10px 12px; border-radius: 6px; color: var(--color-fg); font-size: 13px; text-decoration: none; cursor: pointer; outline: none; }
+.adminGuestbookMenu [data-highlighted] { background: var(--color-surface-input); box-shadow: inset 0 0 0 1px var(--color-border-strong); }
+.adminGuestbookMenu [data-disabled] { color: var(--color-fg-mute); cursor: not-allowed; }
+.adminGuestbookMenu .adminGuestbookDangerAction { color: var(--color-accent-dark); }
+
+.adminGuestbookDrawerTheme { min-height: 0; }
+.adminGuestbookDrawerBackdrop { position: fixed; inset: 0; z-index: 1000; background: rgba(8, 18, 24, .4); transition: opacity .2s ease; }
+.adminGuestbookDrawer {
+  position: fixed;
+  inset: 0 0 0 auto;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  width: min(520px, 100vw);
+  height: 100dvh;
+  border-left: 1px solid var(--color-border-strong);
+  background: var(--color-surface-strong);
+  box-shadow: -12px 0 32px rgba(0, 0, 0, .2);
+  transition: transform .2s ease;
+}
+
+.adminGuestbookDrawer[hidden],
+.adminGuestbookDrawerBackdrop[hidden] { display: none; }
+.adminGuestbookDrawer[data-starting-style],
+.adminGuestbookDrawer[data-ending-style] { transform: translateX(100%); }
+.adminGuestbookDrawerBackdrop[data-starting-style],
+.adminGuestbookDrawerBackdrop[data-ending-style] { opacity: 0; }
+.adminGuestbookDrawerHeader { display: flex; flex: 0 0 auto; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 18px; border-bottom: 1px solid var(--color-border); }
+.adminGuestbookDrawerHeader h2 { margin: 0; overflow-wrap: anywhere; font-size: 20px; line-height: 1.4; }
+.adminGuestbookDrawerHeader p { margin: 5px 0 0; color: var(--color-fg-soft); font-size: 12px; line-height: 1.6; }
+.adminGuestbookDrawerBody { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 18px; }
+.adminGuestbookReplyContext { margin: 0 0 16px; padding: 10px 12px; border-left: 2px solid var(--color-border-strong); background: var(--color-surface-input); color: var(--color-fg-soft); white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13px; line-height: 1.55; max-height: 150px; overflow-y: auto; }
+.adminGuestbookRecordId { margin: 0 0 12px; overflow-wrap: anywhere; color: var(--color-fg-soft); font-size: 12px; }
+.adminGuestbookHistory { padding: 12px 0; border-top: 1px solid var(--color-border); font-size: 13px; }
 .adminGuestbookHistory summary { cursor: pointer; }
-.adminGuestbookHistory pre { white-space: pre-wrap; overflow-wrap: anywhere; padding: 12px; background: var(--color-surface); font-size: 12px; }
-.adminGuestbookFeedback { padding: 16px; border: 1px solid var(--color-border-strong); border-radius: var(--radius-md); }
-.adminGuestbookFilters { display: grid; grid-template-columns: minmax(220px, 1fr) auto; align-items: end; gap: 12px; }
-.adminGuestbookFilterHint, .adminGuestbookActionStatus { color: var(--color-fg-soft); font-size: 12px; }
-.adminGuestbookMessage a.adminButton { display: inline-flex; align-items: center; text-decoration: none; }
-.adminGuestbookImagePreview { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
-.adminGuestbookImagePreview img { width: min(100%, 360px); max-height: 240px; object-fit: contain; border: 1px solid var(--color-border); border-radius: var(--radius-md); }
-@media (max-width: 600px) { .adminGuestbookMessage { padding: 14px; } .adminGuestbookActions .adminButton { flex: 1 1 auto; } .adminGuestbookFilters { grid-template-columns: 1fr; } }
+.adminGuestbookHistory h4 { margin: 12px 0 4px; font-size: 12px; }
+.adminGuestbookHistory pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; padding: 10px; background: var(--color-surface-input); font-size: 12px; }
+.adminGuestbookImagePreview { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 12px; }
+.adminGuestbookImagePreview img { width: min(100%, 220px); max-height: 180px; object-fit: contain; border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+
+@media (max-width: 1150px) {
+  .adminGuestbookFilters { grid-template-columns: minmax(150px, 1fr) minmax(130px, 170px) minmax(100px, 130px); }
+  .adminGuestbookFilters .adminGuestbookActions { grid-column: 1 / -1; justify-content: flex-end; }
+}
+
+@media (max-width: 760px) {
+  .adminGuestbookMessageRow { flex-direction: column; gap: 8px; }
+  .adminGuestbookMessageMain { width: 100%; }
+  .adminGuestbookRowActions { max-width: none; width: 100%; justify-content: flex-start; }
+  .adminGuestbookPinControls { width: auto; padding-top: 0; margin-left: auto; }
+}
+
+@media (max-width: 600px) {
+  .adminGuestbookListPanel { padding: 12px; }
+  .adminGuestbookListPanel .adminPanelHeader { flex-direction: row; align-items: center; flex-wrap: wrap; }
+  .adminGuestbookListPanel .adminPanelHeader h2 { font-size: 18px; }
+  .adminGuestbookFilters { grid-template-columns: 1fr 1fr; }
+  .adminGuestbookFilters .adminField:first-child { grid-column: 1 / -1; }
+  .adminGuestbookFilters .adminGuestbookActions { grid-column: 1 / -1; }
+  .adminGuestbookReplies { margin-left: 0; padding-left: 8px; }
+  .adminGuestbookDrawerHeader, .adminGuestbookDrawerBody { padding: 16px; }
+}
+
+@media (any-pointer: coarse) {
+  .adminGuestbookListPanel .adminButton:not(.iconActionButton),
+  .adminGuestbookFilters .adminField :is(input, select),
+  .adminGuestbookTextButton { min-height: 44px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .adminGuestbookDrawer, .adminGuestbookDrawerBackdrop { transition: none; }
+}

@@ -1,7 +1,10 @@
 "use client";
 
 import { AdminRefreshButton } from "@/features/admin/shared/AdminRefreshButton";
+import { useAdminToast } from "@/features/admin/shared/AdminToastProvider.jsx";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowDown, ArrowUp, Plus, Settings } from "lucide-react";
+import type { ReactNode } from "react";
 import { ApiError } from "@/features/admin/api/client.js";
 import { useAdminAuth } from "@/features/admin/auth/AdminAuthContext.jsx";
 import { adminGuestbookPath, adminGuestbookRequest as request } from "@/features/admin/guestbook/api";
@@ -45,6 +48,7 @@ function errorText(cause: unknown, fallback: string) {
 
 export function AdminGuestbookPage() {
   const { user } = useAdminAuth();
+  const toast = useAdminToast();
   const [list, setList] = useState<GuestbookList | null>(null);
   const [settings, setSettings] = useState<GuestbookSettings | null>(null);
   const [mascotName, setMascotName] = useState("");
@@ -55,7 +59,6 @@ export function AdminGuestbookPage() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
-  const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [pinsDirty, setPinsDirty] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -66,6 +69,8 @@ export function AdminGuestbookPage() {
   const [editName, setEditName] = useState("");
   const [editContent, setEditContent] = useState("");
   const [composeTarget, setComposeTarget] = useState<GuestbookMessage | null>(null);
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [content, setContent] = useState("");
   const [role, setRole] = useState<StaffRole>("staff");
   const [history, setHistory] = useState<{ thread: string; items: GuestbookHistoryEntry[] } | null>(null);
@@ -181,14 +186,13 @@ export function AdminGuestbookPage() {
     mutationBusy.current = true;
     setBusy(true);
     setError("");
-    setStatus("");
     const controller = new AbortController();
     mutationController.current = controller;
     try {
       await operation(controller.signal);
       if (controller.signal.aborted) return false;
       after?.();
-      setStatus(success);
+      toast.add({ title: success, type: "success" });
       await load(true);
       if (expanded) await loadReplies(expanded);
       return true;
@@ -243,9 +247,8 @@ export function AdminGuestbookPage() {
   };
   const openReplyComposer = (target: GuestbookMessage) => {
     setComposeTarget(target);
-    const composer = document.querySelector<HTMLFormElement>("#admin-guestbook-composer");
-    composer?.scrollIntoView({ block: "center" });
-    composer?.querySelector("textarea")?.focus({ preventScroll: true });
+    setError("");
+    setComposerOpen(true);
   };
   const toggleReplies = (target: GuestbookMessage) => {
     if (expanded === target.id) {
@@ -259,11 +262,12 @@ export function AdminGuestbookPage() {
     const items = await request(`/threads/${encodeURIComponent(target.id)}/history`, parseGuestbookHistory, { signal });
     setHistory({ thread: target.id, items });
   }, "已讀取最近 100 筆操作紀錄。");
-  const messageView = (message: GuestbookMessage) => (
+  const messageView = (message: GuestbookMessage, pinControls?: ReactNode) => (
     <AdminGuestbookMessage
       key={message.id}
       message={message}
-      busy={busy}
+      busy={busy || pinsDirty}
+      pinControls={pinControls}
       loading={loading}
       expanded={expanded}
       replies={replies}
@@ -283,14 +287,13 @@ export function AdminGuestbookPage() {
   );
 
   return (
-    <AdminPage eyebrow="GUESTBOOK" title="留言板管理" description="留下店家的回應，整理旅人們的留言。">
+    <AdminPage eyebrow="GUESTBOOK" title="留言板管理" description="檢視與回覆留言，管理顯示狀態、置頂順序與附件圖片。">
       <div className="adminGuestbook" aria-busy={busy || loading}>
-        {error ? (
+        {error && !composerOpen && !settingsOpen && !editor ? (
           <p className="adminGuestbookFeedback" role="alert">
             {error}
           </p>
         ) : null}
-        <p role="status" aria-live="polite">{status}</p>
         {pinsDirty ? (
           <p className="adminGuestbookFeedback" role="status">
             置頂排序尚未儲存，請先儲存或放棄，才可進行其他操作。
@@ -299,13 +302,16 @@ export function AdminGuestbookPage() {
         ) : null}
         <AdminGuestbookComposer
           key={composeTarget?.id ?? "new-thread"}
+          open={composerOpen}
+          error={error}
+          onClose={() => setComposerOpen(false)}
           target={composeTarget}
           settings={settings}
           staffDisplayName={user?.displayName}
           hasStaff={Boolean(user?.staffMemberId)}
           role={role}
           content={content}
-          busy={busy}
+          busy={busy || pinsDirty}
           onRoleChange={setRole}
           onContentChange={setContent}
           onCancelReply={() => setComposeTarget(null)}
@@ -314,7 +320,7 @@ export function AdminGuestbookPage() {
             return mutate(
               (signal) => request(endpoint, parseGuestbookMessage, { method: "POST", body: JSON.stringify({ authorType: role, content, ...(imageBase64 ? { imageBase64 } : {}) }), signal }),
               "店家留言已公開。",
-              () => { setContent(""); setComposeTarget(null); },
+              () => { setContent(""); setComposerOpen(false); setComposeTarget(null); },
             );
           }}
         />
@@ -343,25 +349,13 @@ export function AdminGuestbookPage() {
         />
         <AdminPanel
           title="留言清單"
-          actions={<AdminRefreshButton disabled={busy || loading} onClick={() => void load()} />}
+          className="adminGuestbookListPanel"
+          actions={<>
+            <button type="button" className="adminButton adminButton-primary" disabled={busy || loading || pinsDirty} onClick={() => { setError(""); setComposeTarget(null); setComposerOpen(true); }}><Plus size={16} aria-hidden="true" />新增留言</button>
+            <button type="button" className={`${SECONDARY_BUTTON_CLASS} iconActionButton`} disabled={busy || loading || pinsDirty} aria-label="留言板設定" title="留言板設定" onClick={() => { setError(""); setSettingsOpen(true); }}><Settings aria-hidden="true" /></button>
+            <AdminRefreshButton disabled={busy || loading} onClick={() => void load()} />
+          </>}
         >
-          <AdminField label="顯示範圍">
-            <select
-              disabled={busy || loading || pinsDirty}
-              value={filter}
-              onChange={(event) => {
-                setLoading(true);
-                setFilter(event.target.value);
-                setPage(1);
-                setExpanded(null);
-              }}
-            >
-              <option value="all">所有留言（含隱藏）</option>
-              <option value="hidden">隱藏的留言串</option>
-              <option value="locked">已關閉回覆</option>
-              <option value="hidden-replies">含隱藏回覆的留言串</option>
-            </select>
-          </AdminField>
           <form
             className="adminGuestbookFilters"
             onSubmit={(event) => {
@@ -375,13 +369,41 @@ export function AdminGuestbookPage() {
               else setSearch(nextSearch);
             }}
           >
-            <AdminField label="搜尋姓名、內容或 UID">
+            <AdminField label="搜尋">
               <input
+                placeholder="姓名、內容或 UID"
                 maxLength={100}
                 value={searchDraft}
                 disabled={busy || loading || pinsDirty}
                 onChange={(event) => setSearchDraft(event.target.value)}
               />
+            </AdminField>
+            <AdminField label="顯示範圍">
+              <select disabled={busy || loading || pinsDirty} value={filter} onChange={(event) => {
+                setLoading(true);
+                setFilter(event.target.value);
+                setPage(1);
+                setExpanded(null);
+                replyController.current?.abort();
+              }}>
+                <option value="all">全部（含隱藏）</option>
+                <option value="hidden">隱藏留言串</option>
+                <option value="locked">關閉回覆</option>
+                <option value="hidden-replies">含隱藏回覆</option>
+              </select>
+            </AdminField>
+            <AdminField label="圖片">
+              <select disabled={busy || loading || pinsDirty} value={hasImage} onChange={(event) => {
+                setLoading(true);
+                setHasImage(event.target.value);
+                setPage(1);
+                setExpanded(null);
+                replyController.current?.abort();
+              }}>
+                <option value="all">不限</option>
+                <option value="yes">含圖片</option>
+                <option value="no">無圖片</option>
+              </select>
             </AdminField>
             <div className="adminGuestbookActions">
               <button className="adminButton adminButton-primary" type="submit" disabled={busy || loading || pinsDirty}>搜尋</button>
@@ -399,45 +421,27 @@ export function AdminGuestbookPage() {
                   else setSearch("");
                 }}
               >
-                清除搜尋
+                清除
               </button>
             </div>
           </form>
-          <AdminField label="圖片篩選">
-            <select
-              disabled={busy || loading || pinsDirty}
-              value={hasImage}
-              onChange={(event) => {
-                setLoading(true);
-                setHasImage(event.target.value);
-                setPage(1);
-                setExpanded(null);
-                replyController.current?.abort();
-              }}
-            >
-              <option value="all">全部留言串</option>
-              <option value="yes">含圖片（留言或回覆）</option>
-              <option value="no">不含圖片</option>
-            </select>
-          </AdminField>
-          <p className="adminGuestbookFilterHint">搜尋姓名、內容與 UID 會檢查留言串及回覆；結果以留言串顯示。圖片篩選也會檢查整串。</p>
+          <p className="adminGuestbookFilterHint">姓名、內容、UID 與圖片均檢查整串留言及回覆，結果以留言串顯示。</p>
           {loading ? <p role="status">正在讀取留言…</p> : null}
           {list?.pinnedItems.length ? (
             <section className="adminGuestbookPins">
-              <h3>置頂留言</h3>
+              <h3 className="adminGuestbookSectionTitle">置頂 <span>{list.pinnedItems.length}</span></h3>
               {list.pinnedItems.map((message, index) => (
                 <div key={message.id}>
-                  {canReorderPins ? (
-                    <div className="adminGuestbookActions">
-                      <span>置頂順序 {index + 1}</span>
-                      <button className={SECONDARY_BUTTON_CLASS} disabled={busy || loading || index === 0} aria-label={`將 ${message.displayName} 的留言上移`} onClick={() => movePin(index, -1)}>↑ 上移</button>
-                      <button className={SECONDARY_BUTTON_CLASS} disabled={busy || loading || index === list.pinnedItems.length - 1} aria-label={`將 ${message.displayName} 的留言下移`} onClick={() => movePin(index, 1)}>↓ 下移</button>
+                  {messageView(message, canReorderPins ? (
+                    <div className="adminGuestbookPinControls">
+                      <span title="置頂順序">#{index + 1}</span>
+                      <button type="button" className={`${SECONDARY_BUTTON_CLASS} iconActionButton`} disabled={busy || loading || index === 0} aria-label={`將 ${message.displayName} 的留言上移`} title="上移" onClick={() => movePin(index, -1)}><ArrowUp aria-hidden="true" /></button>
+                      <button type="button" className={`${SECONDARY_BUTTON_CLASS} iconActionButton`} disabled={busy || loading || index === list.pinnedItems.length - 1} aria-label={`將 ${message.displayName} 的留言下移`} title="下移" onClick={() => movePin(index, 1)}><ArrowDown aria-hidden="true" /></button>
                     </div>
-                  ) : null}
-                  {messageView(message)}
+                  ) : null)}
                 </div>
               ))}
-              {canReorderPins ? (
+              {canReorderPins && pinsDirty ? (
                 <button
                   className="adminButton adminButton-primary"
                   disabled={busy || !pinsDirty}
@@ -457,19 +461,22 @@ export function AdminGuestbookPage() {
               ) : null}
             </section>
           ) : null}
-          <h3>一般留言</h3>
-          {list?.items.map(messageView)}
+          <h3 className="adminGuestbookSectionTitle">一般留言</h3>
+          {list?.items.map((message) => messageView(message))}
           {list && !list.items.length && !list.pinnedItems.length ? <p>目前沒有符合條件的留言。</p> : null}
-          <div className="adminGuestbookActions">
+          <div className="adminGuestbookActions adminGuestbookPagination">
             <button className={SECONDARY_BUTTON_CLASS} disabled={busy || loading || pinsDirty || page === 1} onClick={() => { setLoading(true); setPage(page - 1); setExpanded(null); }}>上一頁</button>
             <span>第 {page} 頁</span>
             <button className={SECONDARY_BUTTON_CLASS} disabled={busy || loading || pinsDirty || !list || page * list.pageSize >= list.totalCount} onClick={() => { setLoading(true); setPage(page + 1); setExpanded(null); }}>下一頁</button>
           </div>
         </AdminPanel>
         <AdminGuestbookSettingsPanel
+          open={settingsOpen}
+          error={error}
+          onClose={() => setSettingsOpen(false)}
           settings={settings}
           name={mascotName}
-          busy={busy}
+          busy={busy || pinsDirty}
           loading={loading}
           pinsDirty={pinsDirty}
           onNameChange={(value) => { mascotDirty.current = true; setMascotName(value); }}

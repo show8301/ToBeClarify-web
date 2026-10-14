@@ -144,7 +144,7 @@ export function WorkbenchOrderComposer({ sessionId, businessDate, mode, staffId:
             </select>
           </AdminField>}
         </div>
-        <AdminButton variant="secondary" disabled={!productKey || !Number.isInteger(quantity) || quantity < 1 || quantity > 99} onClick={() => {
+        <AdminButton variant="secondary" disabledReason={!productKey ? "請先選擇餐點或套餐。" : "數量需為 1 至 99 的整數。"} disabled={!productKey || !Number.isInteger(quantity) || quantity < 1 || quantity > 99} onClick={() => {
           const product = catalog.products.find((p) => `${p.kind}:${p.id}` === productKey);
           const recipient = product?.isChampagneTower && catalog.supportsChampagne ? recipientStaffId || null : null;
           if (product) setCart((current) => [...current, { key: crypto.randomUUID(), product, quantity,
@@ -170,6 +170,6 @@ export function WorkbenchOrderComposer({ sessionId, businessDate, mode, staffId:
     </fieldset>}
     {validQuote && <div className="dwNotice" role="status">正式報價 <strong>{formatMoney(validQuote.total)}</strong> · 餐費折抵 {formatMoney(validQuote.credit)}<small>送出時再次檢查時段及報價有效期限。</small></div>}
     {error && <p className="adminFormError" role="alert">{error}</p>}
-    <AdminButton type="submit" disabled={busy || !catalog || !hasLines || submitted}>{busy ? "處理中…" : uncertain ? "查回／重試同一張訂單" : validQuote ? "確認報價並送出" : "取得正式報價"}</AdminButton>
+    <AdminButton type="submit" busy={busy} disabledReason={submitted ? "這張訂單已送出，請查看最新訂單明細。" : !catalog ? "正在載入菜單與可用時段。" : !hasLines ? "請先加入至少一個品項。" : undefined} disabled={busy || !catalog || !hasLines || submitted}>{busy ? "處理中…" : uncertain ? "查回／重試同一張訂單" : validQuote ? "確認報價並送出" : "取得正式報價"}</AdminButton>
   </form>;
 }

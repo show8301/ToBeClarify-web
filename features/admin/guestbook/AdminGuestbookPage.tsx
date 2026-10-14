@@ -353,7 +353,7 @@ export function AdminGuestbookPage() {
           actions={<>
             <button type="button" className="adminButton adminButton-primary" disabled={busy || loading || pinsDirty} onClick={() => { setError(""); setComposeTarget(null); setComposerOpen(true); }}><Plus size={16} aria-hidden="true" />新增留言</button>
             <button type="button" className={`${SECONDARY_BUTTON_CLASS} iconActionButton`} disabled={busy || loading || pinsDirty} aria-label="留言板設定" title="留言板設定" onClick={() => { setError(""); setSettingsOpen(true); }}><Settings aria-hidden="true" /></button>
-            <AdminRefreshButton disabled={busy || loading} onClick={() => void load()} />
+            <AdminRefreshButton loading={loading} disabled={busy || loading} onClick={() => void load()} />
           </>}
         >
           <form

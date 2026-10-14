@@ -34,7 +34,7 @@ export function AdminCustomersPage() {
           <AdminField label="營業日"><input type="date" value={dateInput} onChange={(event) => setDateInput(event.target.value)} /></AdminField>
           <AdminField label="顧客名稱／填寫 ID／UID"><input value={searchInput} maxLength={100} onChange={(event) => setSearchInput(event.target.value)} placeholder="輸入顧客線索" /></AdminField>
           <button type="submit" className="adminButton adminButton-primary" disabled={loading}>查詢</button>
-          <AdminRefreshButton disabled={loading} onClick={() => setRevision((value) => value + 1)} />
+          <AdminRefreshButton loading={loading} disabled={loading} onClick={() => setRevision((value) => value + 1)} />
         </form>
       </AdminPanel>
       {error ? <div className="adminCustomerFeedback isError" role="alert">{error}</div> : null}

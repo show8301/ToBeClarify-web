@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { adminRequest } from "@/features/admin/api/client.js";
+import { AdminButton } from "@/features/admin/shared/AdminButton";
 
 interface Unit {
   id: string;
@@ -112,6 +113,7 @@ function UnitControls({ orderId, unit, onChanged }: { orderId: string; unit: Uni
   const [compensationReason, setCompensationReason] = useState("");
   const [preview, setPreview] = useState<Preview | null>(null);
   const [busy, setBusy] = useState(false);
+  const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [error, setError] = useState("");
   useEffect(() => {
     if (!unit.allowedActions.includes("reschedule") && !unit.allowedActions.includes("carry_forward")) return;
@@ -123,12 +125,12 @@ function UnitControls({ orderId, unit, onChanged }: { orderId: string; unit: Uni
   const [retry, setRetry] = useState<RequestBody | null>(null);
 
   const loadPreview = async () => {
-    setBusy(true); setError("");
+    setBusy(true); setPendingAction("start-preview"); setError("");
     try {
       const value = await adminRequest(`/orders/${encodeURIComponent(orderId)}/fulfillment/${encodeURIComponent(unit.id)}/start-preview`) as Preview;
       setPreview(value);
     } catch (e) { setError(e instanceof Error ? e.message : "無法預覽現在接待"); }
-    finally { setBusy(false); }
+    finally { setBusy(false); setPendingAction(null); }
   };
   const run = async (action: string) => {
     if (action === "start_now" && !preview) { await loadPreview(); return; }
@@ -139,14 +141,22 @@ function UnitControls({ orderId, unit, onChanged }: { orderId: string; unit: Uni
       compensationAmount, compensationReason: compensationReason.trim() || null,
       actualStartsAt: actualStartsAt ? `${actualStartsAt}:00+08:00` : null,
       actualEndsAt: actualEndsAt ? `${actualEndsAt}:00+08:00` : null };
-    setBusy(true); setRetry(body);
+    setBusy(true); setPendingAction(retry ? `retry:${action}` : action); setRetry(body);
     try {
       await adminRequest(`/orders/${encodeURIComponent(orderId)}/fulfillment/${encodeURIComponent(unit.id)}/transition`, { method: "POST", body: JSON.stringify(body) });
       setRetry(null); setPreview(null); setError(""); await onChanged();
     } catch (e) {
       setError(e instanceof Error ? e.message : "操作失敗");
       if (e && typeof e === "object" && "status" in e && typeof e.status === "number" && e.status >= 400 && e.status < 500) setRetry(null);
-    } finally { setBusy(false); }
+    } finally { setBusy(false); setPendingAction(null); }
+  };
+  const disabledReason = (action: string) => {
+    if (busy) return "操作處理中，請稍候。";
+    if (retry) return "上一筆操作結果尚未確認，請先查回或重試同一筆操作。";
+    if (["cancel", "decline", "reschedule", "carry_forward"].includes(action) && !reason.trim()) return "請先填寫操作原因。";
+    if (action === "reschedule" && unit.kind === "nominee" && !startsAt) return "請先填寫改期開始時間。";
+    if (action === "carry_forward" && targetBusinessPeriodId && unit.kind === "nominee" && !startsAt) return "請先填寫跨期履約開始時間。";
+    return undefined;
   };
   return <div className="adminOrderEmergency">
     <strong>{unit.name} · {labels[unit.status] || unit.status}</strong>
@@ -158,10 +168,10 @@ function UnitControls({ orderId, unit, onChanged }: { orderId: string; unit: Uni
       {(unit.allowedActions.includes("reschedule") || unit.allowedActions.includes("carry_forward")) && <><label>{unit.allowedActions.includes("carry_forward") ? "新履約開始時間（台灣時間）" : "改期開始時間（台灣時間）"}<input type="datetime-local" value={startsAt} disabled={!!retry} onChange={e => setStartsAt(e.target.value)} /></label><label>履約營業期（跨期時選擇）<select value={targetBusinessPeriodId} disabled={!!retry} onChange={e => setTargetBusinessPeriodId(e.target.value)}><option value="">沿用原營業期</option>{periods.map(period => <option key={period.id} value={period.id}>{period.businessDate}（{period.status === "coordination" ? "協調" : "營業中"}）</option>)}</select></label></>}
       {unit.allowedActions.includes("backfill") && <div><label>實際開始<input type="datetime-local" value={actualStartsAt} disabled={!!retry} onChange={e => setActualStartsAt(e.target.value)} /></label><label>實際結束（已完成才填）<input type="datetime-local" value={actualEndsAt} disabled={!!retry} onChange={e => setActualEndsAt(e.target.value)} /></label></div>}
       {unit.allowedActions.includes("start_now") && <div><p>現在接待設定</p><label><input type="radio" checked={restMinutes === unit.restMinutesReserved} disabled={!!retry} onChange={() => setRestMinutes(unit.restMinutesReserved)} />保留原休息 {unit.restMinutesReserved} 分鐘</label><label><input type="radio" checked={restMinutes === 0} disabled={!!retry} onChange={() => setRestMinutes(0)} />本次不占休息（可折讓）</label><label>折讓金額<input type="number" min="0" value={compensationAmount} disabled={!!retry} onChange={e => setCompensationAmount(Math.max(0, Number(e.target.value)))} /></label><label>折讓／待確認原因<input value={compensationReason} maxLength={500} disabled={!!retry} onChange={e => setCompensationReason(e.target.value)} /></label></div>}
-      {preview && <div role="status"><p>現在接待：{showTime(preview.effectiveStartsAt)} 開始，服務至 {showTime(preview.effectiveEndsAt)}，購買 {preview.purchasedMinutes} 分鐘。</p>{preview.conflicts.length > 0 && <p>會影響：{preview.conflicts.map(c => `${c.name}（重疊 ${c.overlapMinutes} 分鐘）`).join("、")}；開始後這些單會轉待協調。</p>}{!preview.canStartNow && <p>此店員仍有進行中的服務，請先完成該服務。</p>}<button type="button" disabled={busy || !!retry || !preview.canStartNow} onClick={() => void run("start_now")}>確認現在接待</button></div>}
-      <div className="adminPageActions">{unit.allowedActions.filter(action => action !== "start_now").map(action => <button type="button" key={action} disabled={busy || !!retry || ((action === "cancel" || action === "decline" || action === "reschedule" || action === "carry_forward") && !reason.trim()) || (action === "reschedule" && unit.kind === "nominee" && !startsAt) || (action === "carry_forward" && !!targetBusinessPeriodId && unit.kind === "nominee" && !startsAt)} onClick={() => void run(action)}>{labels[action]}</button>)}{unit.allowedActions.includes("start_now") && !preview && <button type="button" disabled={busy || !!retry} onClick={() => void run("start_now")}>{labels.start_now}</button>}</div>
+      {preview && <div role="status"><p>現在接待：{showTime(preview.effectiveStartsAt)} 開始，服務至 {showTime(preview.effectiveEndsAt)}，購買 {preview.purchasedMinutes} 分鐘。</p>{preview.conflicts.length > 0 && <p>會影響：{preview.conflicts.map(c => `${c.name}（重疊 ${c.overlapMinutes} 分鐘）`).join("、")}；開始後這些單會轉待協調。</p>}{!preview.canStartNow && <p>此店員仍有進行中的服務，請先完成該服務。</p>}<AdminButton busy={pendingAction === "start_now"} busyLabel="接待處理中…" disabledReason={!preview.canStartNow ? "仍有進行中的服務，請先完成該服務。" : disabledReason("start_now")} disabled={busy || !!retry || !preview.canStartNow} onClick={() => void run("start_now")}>確認現在接待</AdminButton></div>}
+      <div className="adminPageActions">{unit.allowedActions.filter(action => action !== "start_now").map(action => <AdminButton key={action} busy={pendingAction === action} busyLabel="處理中…" disabledReason={disabledReason(action)} disabled={busy || !!retry || ((action === "cancel" || action === "decline" || action === "reschedule" || action === "carry_forward") && !reason.trim()) || (action === "reschedule" && unit.kind === "nominee" && !startsAt) || (action === "carry_forward" && !!targetBusinessPeriodId && unit.kind === "nominee" && !startsAt)} onClick={() => void run(action)}>{labels[action]}</AdminButton>)}{unit.allowedActions.includes("start_now") && !preview && <AdminButton busy={pendingAction === "start-preview"} busyLabel="讀取接待預覽…" disabledReason={disabledReason("start_now")} disabled={busy || !!retry} onClick={() => void run("start_now")}>{labels.start_now}</AdminButton>}</div>
     </>}
     {error && <p role="alert">{error}</p>}
-    {retry && <button type="button" disabled={busy} onClick={() => void run(retry.action)}>查回／重試同一筆操作</button>}
+    {retry && <AdminButton busy={pendingAction === `retry:${retry.action}`} busyLabel="查回中…" disabled={busy} onClick={() => void run(retry.action)}>查回／重試同一筆操作</AdminButton>}
   </div>;
 }

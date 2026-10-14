@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { AdminField } from "@/features/admin/shared/AdminShared.jsx";
+import { AdminButton, AdminField } from "@/features/admin/shared/AdminShared.jsx";
 import { customerApi } from "@/features/admin/customers/api";
 import { queryPath } from "@/features/admin/customers/presentation";
 import { useCustomerMutation } from "@/features/admin/customers/useCustomerMutation";
@@ -26,6 +26,6 @@ export function CreateDeliveryPanel({ sessionId, orderId, businessDate, staff, d
     <AdminField label="預計交付日"><input type="date" disabled={busy} value={dueDate} onChange={(event) => setDueDate(event.target.value)} /></AdminField>
     {available && !lockOwner ? <AdminField label="委託負責人"><select value={owner} disabled={busy} onChange={(event) => setOwner(event.target.value)}><option value="">尚未指派</option>{staff.map((person) => <option key={person.id} value={person.id}>{person.displayName}</option>)}</select></AdminField> : null}
     {error ? <p className="adminCustomerFeedback isError" role="alert">{error} 若連線中斷，請先重整清單確認是否已建立，再處理領取碼。</p> : null}
-    <div className="adminCustomerActions"><button type="submit" className="adminButton adminButton-primary" disabled={busy || !title.trim()}>{busy ? "建立中…" : "建立作品並產生領取碼"}</button>{showSourceLink ? <a className="adminButton adminButton-ghost" href={queryPath("/admin/order-list", { session: sessionId, date: businessDate, order: orderId })}>核對來源顧客</a> : null}</div>
+    <div className="adminCustomerActions"><AdminButton type="submit" busy={busy} disabledReason={!title.trim() ? "請先填寫作品或服務名稱。" : undefined} disabled={busy || !title.trim()}>{busy ? "建立中…" : "建立作品並產生領取碼"}</AdminButton>{showSourceLink ? <a className="adminButton adminButton-ghost" href={queryPath("/admin/order-list", { session: sessionId, date: businessDate, order: orderId })}>核對來源顧客</a> : null}</div>
   </form>;
 }

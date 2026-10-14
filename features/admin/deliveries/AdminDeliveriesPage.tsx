@@ -60,7 +60,7 @@ export function AdminDeliveriesPage() {
   }
   return <AdminPage eyebrow="ART DELIVERY" title="作品交付" description="追蹤自己的委託，核對作品內容，再將領取資料交給顧客。" actions={<a className="adminButton adminButton-secondary" href="/admin/customers" onClick={(event) => { if (unsaved || locked) { event.preventDefault(); guarded(() => { window.location.href = "/admin/customers"; }); } }}>從歷史顧客建立</a>}>
     <div className="adminDeliveryWorkspace">
-      <AdminRefreshButton disabled={loading || locked} onClick={() => guarded(() => { clearDetail(); setRevision((count) => count + 1); })} />
+      <AdminRefreshButton loading={loading} disabled={loading || locked} onClick={() => guarded(() => { clearDetail(); setRevision((count) => count + 1); })} />
       <AdminPanel title="交付工作台" description="負責人決定我的委託歸屬。未指派的歷史作品可在全部交付中核對。">
         <div className="adminDeliveryScopes" role="group" aria-label="交付範圍">{([["mine", "我的委託"], ["all", "全部交付"], ["unassigned", "尚未指派"]] as const).map(([value, label]) => <button key={value} type="button" aria-pressed={scope === value} disabled={locked || (available === false && value !== "all")} onClick={() => changeQuery({ scope: value, page: 1 })}>{label}</button>)}</div>
         <form className="adminCustomerFilters" onSubmit={(event) => { event.preventDefault(); changeQuery({ search: searchInput.trim(), page: 1 }); }}>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { Dispatch, ReactNode, SetStateAction } from "react";
 import { ArrowLeft, ArrowRight, CircleAlert, CircleCheck } from "lucide-react";
 import { AdminButton, AdminField, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
@@ -7,6 +7,7 @@ import { AttendancePanel } from "./AttendancePanel";
 import { SettlementStaffInputTable } from "./SettlementStaffInputTable";
 import { settlementMoney as money, settlementPeriodStatuses, settlementRoles, settlementStatuses } from "./presentation";
 import type { SettlementOverview, SettlementRunFields, SettlementStaff, SettlementStaffInput } from "./types";
+import { getFinalizeDisabledReason } from "./disabled-reasons";
 
 type Props = {
   overview: SettlementOverview;
@@ -43,6 +44,9 @@ const steps = [
 
 export function SettlementOperations({ overview, inputs, staff, dayType, setDayType, fields, setFields, canManage, active, saving, dirty, flowVersion, onBusyChange, onAdd, onInputChange, onSave, onCalculate, onClose, onFinalize, onReopen, onReview, onViewPerson, children }: Props) {
   const [step, setStep] = useState(0);
+  type Action = "close" | "save" | "calculate" | "finalize" | "reopen";
+  const [pendingAction, setPendingAction] = useState<Action | null>(null);
+  const actionLock = useRef<Action | null>(null);
   const { run, summary, workflow, anomalies } = overview;
   const finalized = run.status === "finalized";
   const editable = canManage && !finalized && !saving;
@@ -54,6 +58,15 @@ export function SettlementOperations({ overview, inputs, staff, dayType, setDayT
   const closed = period === "closed" || period === "settled";
   const complete = [closed, false, run.status === "calculated" || finalized, finalized];
   const canFinalize = canManage && !saving && !dirty && !finalized && !anomalies.length && workflow?.canFinalize !== false;
+  const finalizeReason = pendingAction === "finalize" ? "正在完成正式結算，請勿重複送出。"
+    : getFinalizeDisabledReason({ canManage, saving, dirty, finalized, anomalyCount: anomalies.length, workflow });
+  const runAction = async (action: Action, operation: () => Promise<void>) => {
+    if (saving || actionLock.current || (action === "finalize" && !canFinalize)) return;
+    actionLock.current = action;
+    setPendingAction(action);
+    try { await operation(); }
+    finally { actionLock.current = null; setPendingAction(null); }
+  };
   const metrics: [string, number][] = [
     ["有效營業額", summary.grossRevenue], ["指名營業額基礎", summary.designatedRevenueBase],
     ["公司營業額", summary.companyRevenue], ["服務生／經理池", summary.serviceManagerPool],
@@ -88,7 +101,7 @@ export function SettlementOperations({ overview, inputs, staff, dayType, setDayT
       <AdminPanel title="確認營業狀態" description="先完成關店，再核對仍在服務的訂單。">
         <div className="adminSettlementClosing">
           <div><span>本日營業狀態</span><strong>{period ? settlementPeriodStatuses[period] || period : "尚無營業狀態"}</strong><small>{run.businessDate} · 第 {run.sessionNo} 時段</small></div>
-          {canManage && period === "open" ? <AdminButton variant="danger" onClick={() => void onClose()} disabled={saving}>停止新單並完成關店</AdminButton> : null}
+          {canManage && period === "open" ? <AdminButton variant="danger" busy={pendingAction === "close"} busyLabel="關店處理中…" onClick={() => void runAction("close", onClose)} disabled={saving}>停止新單並完成關店</AdminButton> : null}
         </div>
         <div className="adminSettlementSummary">
           <div><span>未完成訂單</span><strong>{workflow?.unfinishedOrderCount ?? "—"} <small>筆</small></strong></div>
@@ -138,7 +151,7 @@ export function SettlementOperations({ overview, inputs, staff, dayType, setDayT
           </> : null}
         </div>
         {dayType === "event" ? <label className="adminSettlementConfirm"><input type="checkbox" checked={fields.activityHoursConfirmed} disabled={!editable} onChange={event => setFields(current => ({ ...current, activityHoursConfirmed: event.target.checked }))} />我已確認個人分配時數與公司份額時數。</label> : null}
-        {canManage && !finalized ? <div className="adminSettlementActionBar"><span>{dirty ? "輸入尚未保存，請先保存再重新計算。" : "保存輸入後，重新計算最新薪資。"}</span><AdminButton variant="secondary" onClick={() => void onSave()} disabled={saving}>保存輸入</AdminButton><AdminButton onClick={() => void onCalculate()} disabled={saving || dirty}>重新計算預覽</AdminButton></div> : null}
+        {canManage && !finalized ? <div className="adminSettlementActionBar"><span>{dirty ? "輸入尚未保存，請先保存再重新計算。" : "保存輸入後，重新計算最新薪資。"}</span><AdminButton variant="secondary" busy={pendingAction === "save"} busyLabel="儲存中…" onClick={() => void runAction("save", onSave)} disabled={saving}>保存輸入</AdminButton><AdminButton busy={pendingAction === "calculate"} busyLabel="計算中…" disabledReason={dirty ? "請先保存輸入，再重新計算預覽。" : undefined} onClick={() => void runAction("calculate", onCalculate)} disabled={saving || dirty}>重新計算預覽</AdminButton></div> : null}
       </AdminPanel>
       <details className="adminSettlementDisclosure">
         <AdminDisclosureSummary>營業額與分潤明細</AdminDisclosureSummary>
@@ -170,9 +183,8 @@ export function SettlementOperations({ overview, inputs, staff, dayType, setDayT
       <AdminPanel title={finalized ? "本時段已正式結算" : "確認並完成結算"} description={finalized ? "本時段的結算快照已鎖定，可記錄支付或事後差額。" : "核對本次應付與規則版本後，鎖定此營業時段。"}>
         <div className="adminSettlementFinalTotal"><span>本時段應付薪資</span><strong>{money(summary.totalPayroll)} <small>G</small></strong></div>
         <dl className="adminSettlementDefinitionList"><div><dt>營業日期／時段</dt><dd>{run.businessDate} · 第 {run.sessionNo} 時段</dd></div><div><dt>規則版本</dt><dd>{overview.rule.effectiveFrom} 生效</dd></div><div><dt>營業狀態</dt><dd>{period ? settlementPeriodStatuses[period] || period : "由系統檢查"}</dd></div><div><dt>結算異常</dt><dd>{anomalies.length ? `${anomalies.length} 項待處理` : "無結算異常"}</dd></div><div><dt>計算狀態</dt><dd>{settlementStatuses[run.status] || run.status}</dd></div></dl>
-        {dirty ? <p className="adminSettlementInlineWarning">有尚未保存的輸入，請返回金額核對保存並重新計算。</p> : null}
-        {!finalized && workflow?.canFinalize === false ? <p className="adminSettlementInlineWarning">目前尚不符合正式結算條件，請依前面步驟處理後重新計算。</p> : null}
-        {canManage ? <div className="adminSettlementActionBar"><span>{finalized ? "若繼續營業，可建立新的營業時段。" : "正式結算後，本時段輸入會鎖定。"}</span>{finalized ? <AdminButton variant="secondary" disabled={saving} onClick={() => void onReopen()}>重新開放新時段</AdminButton> : <AdminButton disabled={!canFinalize} onClick={() => void onFinalize()}>確認正式結算</AdminButton>}</div> : null}
+        {!finalized && finalizeReason ? <p id="settlement-finalize-reason" className="adminSettlementInlineWarning" role="status">{finalizeReason}</p> : null}
+        {canManage ? <div className="adminSettlementActionBar"><span>{finalized ? "若繼續營業，可建立新的營業時段。" : "正式結算後，本時段輸入會鎖定。"}</span>{finalized ? <AdminButton variant="secondary" busy={pendingAction === "reopen"} busyLabel="重新開放中…" disabled={saving} onClick={() => void runAction("reopen", onReopen)}>重新開放新時段</AdminButton> : <AdminButton busy={pendingAction === "finalize"} busyLabel="結算中…" disabledReason={finalizeReason} aria-describedby={finalizeReason ? "settlement-finalize-reason" : undefined} disabled={!canFinalize} onClick={() => void runAction("finalize", onFinalize)}>確認正式結算</AdminButton>}</div> : null}
       </AdminPanel>
       {finalized && canManage ? children : null}
       {navigation}

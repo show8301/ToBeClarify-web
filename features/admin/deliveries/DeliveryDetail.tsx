@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useEffect, useId, useState } from "react";
-import { AdminDialog, AdminField, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
+import { AdminButton, AdminDialog, AdminField, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
 import { customerApi } from "@/features/admin/customers/api";
 import { DELIVERY_STATUS_LABELS, formatCustomerTime } from "@/features/admin/customers/presentation";
 import { useCustomerMutation } from "@/features/admin/customers/useCustomerMutation";
@@ -60,7 +60,7 @@ export function DeliveryDetail({ initial, staff, canManage, initialCode, onChang
     <div role="tabpanel" id={`${id}-panel-1`} aria-labelledby={`${id}-tab-1`} hidden={tab !== 1}>{tab === 1 ? <DeliveryCredentials delivery={delivery} initialCode={initialCode} canManage={canManage} locked={locked || unsaved} onIssued={issued} onBusy={setCodeBusy} /> : null}</div>
     <div role="tabpanel" id={`${id}-panel-2`} aria-labelledby={`${id}-tab-2`} hidden={tab !== 2}>{tab === 2 ? <DeliveryHistoryPanel id={delivery.id} revision={historyRevision} available={delivery.workspaceAvailable} /> : null}</div>
     <AdminDialog open={dialog !== null} title={dialog === "preview" ? "顧客畫面預覽" : dialog === "notify" ? "記錄已通知顧客" : "開放作品領取"} description={dialog === "preview" ? "預覽目前已儲存內容。製作中的附件只在此後台預覽顯示。" : dialog === "notify" ? "請確認已實際將領取資料傳送給顧客。複製文字本身不代表已通知。" : "開放後顧客可讀取目前所有附件。請先核對作品與雲端連結權限。"} onClose={() => { if (!busy) setDialog(null); }} actions={null}>
-      {dialog === "preview" ? <div className="adminDeliveryCustomerPreview"><span className="adminDeliveryStatus">{DELIVERY_STATUS_LABELS[delivery.status]}</span><h3>{delivery.title}</h3><p>{delivery.description || "尚無作品說明"}</p>{!["ready", "delivered"].includes(delivery.status) ? <p>顧客目前只能看到進度，還無法讀取附件。</p> : null}<div className="adminDeliveryAssetGrid">{delivery.assets.map((asset) => <article key={asset.id}>{asset.kind === "image" ? <Image unoptimized width={640} height={480} src={`/api/admin/art-deliveries/${encodeURIComponent(delivery.id)}/assets/${encodeURIComponent(asset.id)}`} alt={asset.label} /> : <strong>雲端連結 · {asset.label}</strong>}<span>{asset.label}</span></article>)}</div></div> : <>{error ? <p role="alert">{error}</p> : null}<button type="button" className="adminButton adminButton-primary" disabled={busy} onClick={confirmWorkflow}>{busy ? "處理中…" : dialog === "notify" ? "已實際傳送，記錄通知" : "已核對附件，開放領取"}</button></>}
+      {dialog === "preview" ? <div className="adminDeliveryCustomerPreview"><span className="adminDeliveryStatus">{DELIVERY_STATUS_LABELS[delivery.status]}</span><h3>{delivery.title}</h3><p>{delivery.description || "尚無作品說明"}</p>{!["ready", "delivered"].includes(delivery.status) ? <p>顧客目前只能看到進度，還無法讀取附件。</p> : null}<div className="adminDeliveryAssetGrid">{delivery.assets.map((asset) => <article key={asset.id}>{asset.kind === "image" ? <Image unoptimized width={640} height={480} src={`/api/admin/art-deliveries/${encodeURIComponent(delivery.id)}/assets/${encodeURIComponent(asset.id)}`} alt={asset.label} /> : <strong>雲端連結 · {asset.label}</strong>}<span>{asset.label}</span></article>)}</div></div> : <>{error ? <p role="alert">{error}</p> : null}<AdminButton busy={busy} disabled={busy} onClick={confirmWorkflow}>{busy ? "處理中…" : dialog === "notify" ? "已實際傳送，記錄通知" : "已核對附件，開放領取"}</AdminButton></>}
     </AdminDialog>
   </AdminPanel>;
 }

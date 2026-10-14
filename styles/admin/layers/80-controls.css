@@ -1,4 +1,32 @@
 /* Shared admin controls: readable native selects and clear disclosure states. */
+/* Availability and progress are separate: disabled never implies busy. */
+.adminTheme button:disabled,
+.adminTheme button[aria-disabled="true"],
+.adminTheme button[data-disabled],
+.adminTheme [role="button"][aria-disabled="true"],
+.adminTheme [role="button"][data-disabled],
+:is(.adminButton, .adminPrimaryButton):disabled,
+.zoom-photo-controls button:disabled,
+.adminButton.isDisabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
+.adminButtonSpinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  margin-inline-end: 8px;
+  border: 2px solid currentColor;
+  border-inline-end-color: transparent;
+  border-radius: 50%;
+  animation: admin-button-processing .8s linear infinite;
+}
+@keyframes admin-button-processing { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .adminButtonSpinner { animation: none; }
+}
+
 .adminTheme select {
   color-scheme:light;
   background-color:var(--color-surface-input);

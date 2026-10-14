@@ -3,7 +3,7 @@
 .adminDeliveryScopes, .adminDeliveryDetailTabs { display: flex; gap: 8px; flex-wrap: wrap; margin-block: 0 18px; }
 .adminDeliveryScopes > button, .adminDeliveryDetailTabs > button { min-height: 44px; padding: 10px 18px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-fg-soft); font: inherit; font-weight: 700; cursor: pointer; }
 .adminDeliveryScopes > button[aria-pressed="true"], .adminDeliveryDetailTabs > button[aria-selected="true"] { color: var(--color-fg); background: var(--color-surface-strong); border-color: var(--color-border-strong); box-shadow: inset 0 -2px 0 var(--color-border-strong); }
-.adminDeliveryScopes > button:disabled, .adminDeliveryDetailTabs > button:disabled { cursor: default; opacity: .6; }
+.adminDeliveryScopes > button:disabled, .adminDeliveryDetailTabs > button:disabled { opacity: .6; }
 .adminDeliveryColumns { display: grid; grid-template-columns: minmax(260px, .8fr) minmax(0, 1.65fr); gap: var(--admin-space-inline); align-items: start; min-width: 0; }
 .adminDeliveryQueue, .adminDeliveryDetail { min-width: 0; }
 .adminDeliveryQueue { position: sticky; top: 24px; }
@@ -11,7 +11,7 @@
 .adminDeliveryQueueItem { display: grid; gap: 8px; width: 100%; text-align: left; min-height: 44px; padding: 16px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-fg); font: inherit; cursor: pointer; overflow-wrap: anywhere; }
 .adminDeliveryQueueItem.isSelected { border-color: var(--color-border-strong); background: var(--color-surface-strong); box-shadow: inset 3px 0 0 var(--color-border-strong); }
 .adminDeliveryQueueItem:hover { border-color: var(--color-border-strong); }
-.adminDeliveryQueueItem:disabled { cursor: default; opacity: .65; }
+.adminDeliveryQueueItem:disabled { opacity: .65; }
 .adminDeliveryQueueHeading { display: flex; align-items: start; justify-content: space-between; gap: 10px; }
 .adminDeliveryQueueHeading > strong { font-size: 16px; line-height: 1.5; }
 .adminDeliveryQueueHeading .adminDeliveryStatus { flex-shrink: 0; }

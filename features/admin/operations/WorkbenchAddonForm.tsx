@@ -63,6 +63,6 @@ export function WorkbenchAddonForm({ entry, onSaved, onBusy }: { entry: ServiceE
     </fieldset>
     {option && <p className="dwNotice">{duration} 分鐘 · {formatMoney(amount)}{duration > remaining ? " · 超過原指名剩餘時間，請改用續時" : ""}</p>}
     {error && <p className="adminFormError" role="alert">{error} 若連線中斷，請先關閉並重新整理，確認是否已成立。</p>}
-    <AdminButton type="submit" disabled={busy || loading || !option || duration > remaining || submitted || uncertain}>{busy ? "送出中…" : uncertain ? "請先關閉並重新整理確認" : "確認並建立加購"}</AdminButton>
+    <AdminButton type="submit" busy={busy} disabledReason={uncertain ? "操作結果尚未確認，請先關閉並重新整理。" : submitted ? "這筆加購已送出。" : loading ? "正在載入加購項目。" : !option ? "請先選擇加購項目。" : duration > remaining ? "加購時間超過原指名剩餘時段。" : undefined} disabled={busy || loading || !option || duration > remaining || submitted || uncertain}>{busy ? "送出中…" : uncertain ? "請先關閉並重新整理確認" : "確認並建立加購"}</AdminButton>
   </form>;
 }

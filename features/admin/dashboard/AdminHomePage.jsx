@@ -138,7 +138,7 @@ export function AdminHomePage({ navigate }) {
   const closeTime = context?.projectedCloseAt || context?.referenceEndsAt;
 
   return (
-    <AdminPage eyebrow="OPERATIONS OVERVIEW" title="營運總覽" description={`${user.displayName}，這裡集中顯示今日需要處理的資訊。`} actions={<AdminRefreshButton disabled={operations.loading} onClick={loadOperations} />}>
+    <AdminPage eyebrow="OPERATIONS OVERVIEW" title="營運總覽" description={`${user.displayName}，這裡集中顯示今日需要處理的資訊。`} actions={<AdminRefreshButton loading={operations.loading} disabled={operations.loading} onClick={loadOperations} />}>
       <section className="adminOperationsOverview">
         <header><div><span>今日營業</span><h2>{operations.loading ? '讀取中…' : periodLabel}</h2><p>{context ? `${intakeLabel}${closeTime ? ` · 預計 ${new Date(closeTime).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })} 結束` : ''}` : operations.error || '尚無營運資料'}</p></div><div className="adminOperationsActions"><AdminButton onClick={() => navigate('/admin')}>前往營業工作台</AdminButton><AdminButton variant="secondary" onClick={() => navigate('/admin/order-list')}>查詢訂單</AdminButton></div></header>
         <div className="adminOperationsMetrics"><article><span>等待處理</span><strong>{context?.waitingOrderCount ?? '—'}</strong><small>筆訂單</small></article><article><span>尚未完成</span><strong>{context?.unfinishedOrderCount ?? '—'}</strong><small>筆訂單</small></article><article><span>接單模式</span><strong className="isText">{context ? intakeLabel : '—'}</strong><small>目前狀態</small></article><article><span>店員設定</span><strong className="isText">工作狀態</strong><button type="button" onClick={() => navigate('/admin/staff')}>前往店員設定 <span aria-hidden="true">›</span></button></article></div>

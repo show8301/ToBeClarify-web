@@ -11,9 +11,8 @@ import type {
   OperationsContext,
   OperationsData,
   OperationsOrder,
-  OperationsRoomOrder,
 } from "./operationsTypes";
-import { formatClock, formatDateTime, formatMoney, intakeModeLabel, periodStatusLabel, roomStatusLabel } from "./operationsFormat";
+import { formatDateTime, formatMoney, intakeModeLabel, periodStatusLabel } from "./operationsFormat";
 
 type DashboardProps = {
   data: OperationsData;
@@ -64,11 +63,7 @@ function CoordinationRow({ order, runAction, actionState }: { order: OperationsO
   </article>;
 }
 
-function RoomServiceRow({ order }: { order: OperationsRoomOrder }) {
-  return <article className="adminRoleDashboardRow"><div className="adminRoleDashboardIdentity"><strong>{order.roomName}</strong><small>{formatDateTime(order.startsAt)} ～ {formatClock(order.endsAt)} · {order.segmentCount} 節</small></div><div className="adminRoleDashboardRowCopy"><strong>{order.note || "包廂服務"}</strong><small>{formatMoney(order.totalAmount)}</small></div><span className="adminRoleDashboardBadge">{roomStatusLabel(order.status)}</span></article>;
-}
-
-export function AdminServiceDashboard({ data, user, navigate, runAction, actionState, onOpenCreateRoomService, onChanged, disabled }: Omit<DashboardProps, "user" | "onOpenCreatePass" | "onChanged"> & { user?: CurrentAdminUser; onChanged: () => Promise<void>; disabled: boolean }) {
+export function AdminServiceDashboard({ data, user, navigate, runAction, actionState, onChanged, disabled }: Omit<DashboardProps, "user" | "onOpenCreatePass" | "onOpenCreateRoomService" | "onChanged"> & { user?: CurrentAdminUser; onChanged: () => Promise<void>; disabled: boolean }) {
   const coordinationOrders = data.orders.filter((order) => order.storeConfirmationStatus === "pending");
   const waitingSessions = data.sessions.filter((session) => session.waitingOrderCount > 0);
   const roomOrders = data.roomOrders.filter((order) => !["completed", "cancelled"].includes(order.status)).sort((left, right) => new Date(left.startsAt).getTime() - new Date(right.startsAt).getTime()).slice(0, 6);
@@ -88,9 +83,6 @@ export function AdminServiceDashboard({ data, user, navigate, runAction, actionS
           {waitingSessions.slice(0, 6).map((session) => <article className="adminRoleDashboardRow" key={session.id}><div className="adminRoleDashboardIdentity"><strong>{session.customerName || "未命名顧客"}</strong><small>ID {session.gameId} · {session.orderCount} 張訂單</small></div><div className="adminRoleDashboardRowCopy"><strong>{session.waitingOrderCount} 張待處理</strong><small>{formatMoney(session.totalAmount)} · 最後下單 {formatDateTime(session.lastOrderedAt)}</small></div><span className="adminRoleDashboardBadge">待接手</span></article>)}
           {!coordinationOrders.length && !waitingSessions.length ? <EmptyState>目前沒有需要現場接手的訂單。</EmptyState> : null}
         </div>
-    </AdminPanel>
-    <AdminPanel className="adminRoleDashboardRoomSchedule" title="包廂服務排程" description="掌握即將開始與服務中的包廂。" actions={<><AdminButton onClick={onOpenCreateRoomService}>訂購包廂</AdminButton><AdminButton variant="ghost" onClick={() => navigate("/admin/rooms/service")}>完整排程</AdminButton></>}>
-      <div className="adminRoleDashboardRows">{roomOrders.map((order) => <RoomServiceRow key={order.id} order={order} />)}{!roomOrders.length ? <EmptyState>目前沒有未完成的包廂服務。</EmptyState> : null}</div>
     </AdminPanel>
     <AdminPanel className="adminRoleDashboardServiceQuickLinks" title="現場快速入口" description="需要查看完整資料時，再進入原本的管理畫面。" actions={<><AdminButton onClick={() => navigate("/admin/orders")}>完整訂單</AdminButton><AdminButton variant="secondary" onClick={() => navigate("/admin/rooms/service")}>管理包廂</AdminButton><AdminButton variant="ghost" onClick={() => navigate("/admin/order-list")}>查詢訂單</AdminButton></>} />
   </div>;

@@ -98,8 +98,8 @@ export function AdminLayout({ route, navigate, children }) {
           </nav>
           <div className="adminTopbarUtilities">
             <div className="adminToolbarActions">
-              <AdminNotificationBell/>
               <AdminToolbarRefreshSlot/>
+              <AdminNotificationBell/>
             </div>
             <div className="adminAccount">
               <div className="adminAccountIdentity"><small>目前登入</small><strong>{user.displayName}</strong><span>{user.roleLabel}</span></div>

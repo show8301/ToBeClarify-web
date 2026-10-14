@@ -83,7 +83,7 @@ export type MenuSet = {
   policy?:ProductPolicy; isOrderable?:boolean; unavailableReason?:string; effectiveEventCategories?:string[];
   id:string; setName:string; setDescription:string; setPrice:number; imageUrl:string|null; items:MenuSetItem[];
 };
-export type MenuData = { contractVersion?:number; updatedAt?:string; showSets?:boolean; categories:MenuCategory[]; pricingRules:PricingRule[]; sets:MenuSet[] };
+export type MenuData = { contractVersion?:number; champagnePolicyVersion?:number; updatedAt?:string; showSets?:boolean; categories:MenuCategory[]; pricingRules:PricingRule[]; sets:MenuSet[] };
 
 export type GalleryAlbumSummary = {
   id:string; albumTitle:string; albumDescription:string; coverImageUrl:string;

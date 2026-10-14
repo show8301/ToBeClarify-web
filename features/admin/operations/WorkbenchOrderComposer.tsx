@@ -7,12 +7,12 @@ import { errorText, integer, list, record, textValue } from "./workbenchApi";
 import { formatMoney } from "./operationsFormat";
 
 export type ComposerMode = "meals" | "rooms" | "renew" | "transfer";
-type Product = { id: string; kind: "item" | "set"; name: string; price: number };
+type Product = { id: string; kind: "item" | "set"; name: string; price: number; isChampagneTower: boolean };
 type Room = { id: string; name: string; price: number };
 type Service = { id: string; name: string; price: number };
 type Staff = { id: string; name: string; services: Service[] };
-type Catalog = { products: Product[]; rooms: Room[]; staff: Staff[] };
-type CartLine = { key: string; product: Product; quantity: number };
+type Catalog = { products: Product[]; rooms: Room[]; staff: Staff[]; recipients: Pick<Staff, "id" | "name">[]; supportsChampagne: boolean };
+type CartLine = { key: string; product: Product; quantity: number; recipientStaffId: string | null; recipientStaffName: string | null };
 type Quote = { token: string; total: number; credit: number; expiresAt: number; source: string };
 
 function parseCatalog(value: unknown): Catalog {
@@ -22,12 +22,16 @@ function parseCatalog(value: unknown): Catalog {
     const category = record(entry);
     return list(category.items, (item) => record(item))
       .filter((item) => item.isAvailable !== false && (item.policy == null || record(item.policy).canOrderAlone !== false))
-      .map((item): Product => ({ id: textValue(item.id), kind: "item", name: textValue(item.itemName), price: integer(item.price) }));
+      .map((item): Product => ({ id: textValue(item.id), kind: "item", name: textValue(item.itemName), price: integer(item.price),
+        isChampagneTower: list(record(item.policy ?? {}).eventCategories, textValue).includes("champagne_tower") }));
   }).flat();
   const sets = list(menu.sets, record).filter((item) => item.isOrderable !== false)
-    .map((item): Product => ({ id: textValue(item.id), kind: "set", name: textValue(item.setName), price: integer(item.setPrice) }));
+    .map((item): Product => ({ id: textValue(item.id), kind: "set", name: textValue(item.setName), price: integer(item.setPrice),
+      isChampagneTower: list(item.effectiveEventCategories, textValue).includes("champagne_tower") }));
   return {
     products: [...products, ...sets],
+    supportsChampagne: menu.champagnePolicyVersion === 1,
+    recipients: list(c.staff, record).map(s => ({ id: textValue(s.id), name: textValue(s.displayName) })),
     rooms: list(c.rooms, record).filter((r) => typeof r.segmentPrice === "number" && r.segmentPrice > 0)
       .map((r) => ({ id: textValue(r.id), name: textValue(r.roomName), price: integer(r.segmentPrice) })),
     staff: list(c.staff, record).filter((s) => s.isNominatable === true).map((s) => ({
@@ -63,6 +67,7 @@ export function WorkbenchOrderComposer({ sessionId, businessDate, mode, staffId:
   const [uncertain, setUncertain] = useState(false);
   const [cart, setCart] = useState<CartLine[]>([]);
   const [productKey, setProductKey] = useState("");
+  const [recipientStaffId, setRecipientStaffId] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [staffId, setStaffId] = useState(mode === "renew" ? ownStaffId : "");
   const [serviceId, setServiceId] = useState("");
@@ -87,8 +92,9 @@ export function WorkbenchOrderComposer({ sessionId, businessDate, mode, staffId:
     return () => controller.abort();
   }, [businessDate]);
   const staff = catalog?.staff.find((s) => s.id === staffId);
+  const selectedProduct = catalog?.products.find(p => `${p.kind}:${p.id}` === productKey);
   const body = {
-    meals: mode === "meals" ? cart.map(({ product, quantity: count }) => ({ referenceId: product.id, kind: product.kind, quantity: count })) : [],
+    meals: mode === "meals" ? cart.map(({ product, quantity: count, recipientStaffId: recipient }) => ({ referenceId: product.id, kind: product.kind, quantity: count, recipientStaffId: recipient })) : [],
     rooms: mode === "rooms" && roomId ? [{ roomId, segmentCount: segments, requestedStartsAt: `${startsAt}:00+08:00` }] : [],
     nominations: (mode === "renew" || mode === "transfer") && staffId ? [{ staffId, mode: serviceId ? "service" : "companionship", serviceId: serviceId || null, segmentCount: segments, participantCount: participants, requestedStartsAt: `${startsAt}:00+08:00` }] : [],
     tips: [], customerNote: note.trim() || null, customerLocation: location.trim() || null,
@@ -128,16 +134,23 @@ export function WorkbenchOrderComposer({ sessionId, businessDate, mode, staffId:
     {catalog && <fieldset disabled={busy || submitted || uncertain}>
       {mode === "meals" ? <>
         <div className="dwFormGrid">
-          <AdminField label="餐點／套餐"><select value={productKey} onChange={(e) => setProductKey(e.target.value)}>
+          <AdminField label="餐點／套餐"><select value={productKey} onChange={(e) => { setProductKey(e.target.value); setRecipientStaffId(""); }}>
             <option value="">選擇餐點</option>{catalog.products.map((p) => <option key={`${p.kind}:${p.id}`} value={`${p.kind}:${p.id}`}>{p.name} · {formatMoney(p.price)}</option>)}
           </select></AdminField>
           <AdminField label="數量"><input type="number" min={1} max={99} value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} /></AdminField>
+          {selectedProduct?.isChampagneTower && catalog.supportsChampagne && <AdminField label="香檳塔贈送對象" hint="不可使用信物折抵；贈送不會建立服務指名。">
+            <select value={recipientStaffId} onChange={e => setRecipientStaffId(e.target.value)}><option value="">不指定店員，送給店家</option>
+              {catalog.recipients.map(person => <option key={person.id} value={person.id}>{person.name}</option>)}
+            </select>
+          </AdminField>}
         </div>
         <AdminButton variant="secondary" disabled={!productKey || !Number.isInteger(quantity) || quantity < 1 || quantity > 99} onClick={() => {
           const product = catalog.products.find((p) => `${p.kind}:${p.id}` === productKey);
-          if (product) setCart((current) => [...current, { key: crypto.randomUUID(), product, quantity }]);
+          const recipient = product?.isChampagneTower && catalog.supportsChampagne ? recipientStaffId || null : null;
+          if (product) setCart((current) => [...current, { key: crypto.randomUUID(), product, quantity,
+            recipientStaffId: recipient, recipientStaffName: catalog.recipients.find(person => person.id === recipient)?.name || null }]);
         }}>加入餐點</AdminButton>
-        <div className="dwList">{cart.map((line) => <div className="dwRow" key={line.key}><strong>{line.product.name} × {line.quantity}</strong><AdminButton variant="ghost" onClick={() => setCart((c) => c.filter((x) => x.key !== line.key))}>移除</AdminButton></div>)}</div>
+        <div className="dwList">{cart.map((line) => <div className="dwRow" key={line.key}><strong>{line.product.name} × {line.quantity}{line.product.isChampagneTower && catalog.supportsChampagne ? ` · 贈送：${line.recipientStaffName || "店家"} · 不可折抵` : ""}</strong><AdminButton variant="ghost" onClick={() => setCart((c) => c.filter((x) => x.key !== line.key))}>移除</AdminButton></div>)}</div>
       </> : <>
         {(mode === "renew" || mode === "transfer") && <>
           <AdminField label="指名人員" required><select required value={staffId} disabled={mode === "renew"} onChange={(e) => { setStaffId(e.target.value); setServiceId(""); }}>

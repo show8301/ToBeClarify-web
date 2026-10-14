@@ -1,4 +1,5 @@
 "use client";
+import {MealOrderPage} from './MealOrderPage';
 import {OrderQuoteReview} from '@/features/ordering/components/OrderQuoteReview';
 
 import { useEffect, useRef, useState } from 'react';
@@ -92,7 +93,7 @@ export default function OrderClient() {
     try {
       const hasNomination = cart.nominations.some((line) => !line.baseRemoved);
       const body = {
-        meals: cart.meals.map(({ referenceId, kind, quantity }) => ({ referenceId, kind, quantity })),
+        meals: cart.meals.map(({ referenceId, kind, quantity, recipientStaffId }) => ({ referenceId, kind, quantity, recipientStaffId: recipientStaffId || null })),
         nominations: cart.nominations.filter((line) => !line.baseRemoved && (line.mode === 'companionship' || !line.serviceRemoved)).map((line) => ({
           staffId: line.staffId, mode: line.mode, serviceId: line.serviceId || null, segmentCount: line.segments,
           participantCount: line.participants, requestedStartsAt: new Date(line.startsAt).toISOString(),
@@ -168,7 +169,7 @@ export default function OrderClient() {
       </nav>
       <section className="orderWorkspace">
         <div className="orderMain">
-          {tab === 'meal' ? <MealPage menu={catalog.menu} cart={cart} setCart={setCart} /> : null}
+          {tab === 'meal' ? <MealOrderPage menu={catalog.menu} staff={catalog.staff} cart={cart} setCart={setCart} /> : null}
           {tab === 'room' ? <RoomBookingPage rooms={catalog.rooms || []} settings={catalog.settings} cart={cart} setCart={setCart} onNotice={setNotice} /> : null}
           {tab === 'nomination' ? <NominationPage session={session} settings={catalog.settings} businessContext={businessContext} staff={catalog.staff} cart={cart} setCart={setCart} onNotice={setNotice} /> : null}
           {tab === 'tip' ? <TipPage staff={catalog.staff} settings={catalog.settings} setCart={setCart} onAdded={() => setNotice({ message: '小費分配已加入本次點餐。', error: false })} /> : null}
@@ -179,7 +180,7 @@ export default function OrderClient() {
         </div>
         <aside className="orderAside">
           <div><span>本次點餐</span><strong>{cartCount} 項</strong></div>
-          <dl><div><dt>預估小計</dt><dd>{money(cartSubtotal)}</dd></div><div><dt>可折抵的餐點費用</dt><dd>{money(Math.min(session.remainingMealCredit, cart.meals.reduce((sum, line) => sum + line.price * line.quantity, 0)))}</dd></div></dl>
+          <dl><div><dt>預估小計</dt><dd>{money(cartSubtotal)}</dd></div><div><dt>可折抵的餐點費用</dt><dd>{money(Math.min(session.remainingMealCredit, cart.meals.filter(line => !line.isChampagneTower).reduce((sum, line) => sum + line.price * line.quantity, 0)))}</dd></div></dl>
           <button className="isSecondary" type="button" onClick={() => setTab('orders')}>查看全部訂單</button>
           <button type="button" onClick={() => setTab('cart')}>購物車結帳</button>
         </aside>
@@ -222,24 +223,6 @@ function OrderAccess({ notice, onAccess, onRecover, loading }) {
       <button className="orderTextButton" type="button" onClick={() => setShowRecover(!showRecover)}>{showRecover ? '返回輸入點餐碼' : '找不到點餐碼？請洽店員'}</button>
     </section></main>
   );
-}
-
-function MealPage({ menu, cart, setCart }) {
-  const availableSets=(menu.sets||[]).filter(set=>(set.items||[]).some(item=>item.isAvailable!==false));
-  const showSets = availableSets.length>0 && (menu.contractVersion===2||menu.showSets!==false);
-  const [category, setCategory] = useState(menu.categories?.[0]?.id || (showSets ? 'sets' : ''));
-  const products = category === 'sets' ? availableSets.map((item) => ({ ...item, id: item.id, name: item.setName, description: item.setDescription, price: item.setPrice, kind: 'set' }))
-    : (menu.categories?.find((item) => item.id === category)?.items || []).map((item) => ({ ...item, name: item.itemName, description: item.itemDescription, kind: 'item' }));
-  const add = (product) => setCart((current) => {
-    const found = current.meals.find((line) => line.referenceId === product.id && line.kind === product.kind);
-    const meals = found ? current.meals.map((line) => line === found ? { ...line, quantity: Math.min(99,line.quantity + 1) } : line)
-      : [...current.meals, { referenceId: product.id, kind: product.kind, name: product.name, price: product.price, quantity: 1 }];
-    return { ...current, meals };
-  });
-  return <div className="orderPage"><PageHeading kicker="FOOD & DRINK" title="一般點餐" text="可折抵餘額只會折抵餐點；未使用完的餘額保留到今天後續加點。" />
-    <div className="orderCategoryRail">{showSets ? <button className={category === 'sets' ? 'isActive' : ''} onClick={() => setCategory('sets')}>套餐</button> : null}{(menu.categories || []).map((item) => <button className={category === item.id ? 'isActive' : ''} key={item.id} onClick={() => setCategory(item.id)}>{item.categoryName}</button>)}</div>
-    <div className="orderProductGrid">{products.map((item) => <article key={item.id} className="orderProductCard"><div className="orderProductImage">{item.imageUrl ? <img src={item.imageUrl} alt="" /> : <span>LD</span>}</div><div>{item.kind === 'set' ? <small>SET</small> : null}<h2>{item.name}</h2><p>{item.description || '現場供應品項'}</p>{item.kind==='set'&&<ul>{(item.items||[]).map(part=><li key={part.id}>{part.itemName} × {part.quantity}{part.isAvailable===false?' · 暫停供應':''}</li>)}</ul>}{Array.isArray(item.tags)&&<p>{item.tags.join(' · ')}</p>}</div><footer><strong>{money(item.price)}</strong><button type="button" disabled={item.isOrderable===false} aria-label={`加入 ${item.name}`} onClick={() => add(item)}><span aria-hidden="true">＋</span>{item.isOrderable===false ? ' 暫停供應' : null}</button></footer></article>)}</div>
-  </div>;
 }
 
 function RoomBookingPage({ rooms, settings, cart, setCart, onNotice }) {
@@ -351,7 +334,7 @@ function TipPage({ staff, settings, setCart, onAdded }) {
 }
 
 function CartPage({ cart, setCart, session, businessContext, subtotal, onSubmit, loading, quoteRequired=false }) {
-  const mealSubtotal = cart.meals.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const mealSubtotal = cart.meals.filter(item => !item.isChampagneTower).reduce((sum, item) => sum + item.price * item.quantity, 0);
   const credit = Math.min(session.remainingMealCredit, mealSubtotal);
   const removeMeal = (index) => setCart((current) => ({ ...current, meals: current.meals.filter((_, i) => i !== index) }));
   const removeRoom = (id) => setCart((current) => ({ ...current, rooms: current.rooms.filter((line) => line.id !== id) }));
@@ -362,7 +345,7 @@ function CartPage({ cart, setCart, session, businessContext, subtotal, onSubmit,
   const coordination = businessContext?.intakeMode === 'coordination' || businessContext?.requiresStoreConfirmation;
   return <div className="orderPage"><PageHeading kicker="REVIEW" title="查看明細" text="快速刪除每個選項；指名服務必須先刪除服務項目，才能刪除相依的基礎指名費。" />
     {empty ? <EmptyState title="本次點餐還是空的" text="從一般點餐、訂購包廂、指名服務或小費頁加入項目。" /> : <div className="cartLayout"><div className="cartLines">
-      {cart.meals.map((item, index) => <CartLine key={`${item.referenceId}-${index}`} label="餐點" title={`${item.name} × ${item.quantity}`} price={item.price * item.quantity} onRemove={() => removeMeal(index)} />)}
+      {cart.meals.map((item, index) => <CartLine key={`${item.referenceId}-${index}`} label={item.isChampagneTower ? "香檳塔（不可折抵）" : "餐點"} title={`${item.name} × ${item.quantity}${item.isChampagneTower ? ` · 贈送：${item.recipientStaffName || "店家"}` : ""}`} price={item.price * item.quantity} onRemove={() => removeMeal(index)} />)}
       {cart.rooms.map((item) => <div className="cartRoomGroup" key={item.id}><header><span>{item.roomName}</span><small>{item.segments} 節 · {item.duration} 分鐘 · {new Date(item.startsAt).toLocaleString('zh-TW')}</small></header><CartLine label="包廂服務" title={`${money(item.unitPrice)} × ${item.segments} 節`} price={item.total} onRemove={() => removeRoom(item.id)} /></div>)}
       {cart.nominations.map((item) => <div className="cartNominationGroup" key={item.id}><header><span>{item.staffName}</span><small>{item.segments} 節 · {item.duration} 分鐘 · {new Date(item.startsAt).toLocaleString('zh-TW')}</small></header>{item.mode === 'service' ? (!item.serviceRemoved ? <CartLine label="服務項目" title={item.serviceName} price={item.serviceTotal} onRemove={() => removeNominationPart(item.id, 'service')} /> : <div className="cartRemoved">服務項目已刪除，現在可刪除基礎指名費。</div>) : <div className="cartCompanionship"><strong>純陪伴</strong><span>成立後可在原指名時段內附掛加購服務。</span></div>}{!item.baseRemoved ? <CartLine label="基礎指名費" title={`${money(item.baseFee)} × ${item.segments} 節`} price={item.baseTotal} disabled={item.mode === 'service' && !item.serviceRemoved} removeHint={item.mode === 'service' && !item.serviceRemoved ? '請先刪除服務項目' : ''} onRemove={() => removeNominationPart(item.id, 'base')} /> : null}</div>)}
       {cart.tips.map((item, index) => <CartLine key={item.id} label="小費" title={item.staffName ? `${item.staffName} ${item.staffPercentage}%／店家 ${100 - item.staffPercentage}%` : '店家 100%'} price={item.amount} onRemove={() => removeTip(index)} />)}
@@ -388,7 +371,7 @@ function CustomerBill({ bill }) {
 function MyOrders({ orders, catalog, loading, token, onAddon }) {
   const [open, setOpen] = useState(orders[0]?.id || '');
   return <div className="orderPage"><PageHeading kicker="ORDER HISTORY" title="我的訂單" text="查看今天每次加點的狀態、包廂時段、金額與狀態歷程。" />
-    {orders.length === 0 ? <EmptyState title="今天還沒有訂單" text="完成本次點餐後，訂單會出現在這裡。" /> : <div className="myOrderList">{orders.map((order) => <article key={order.id} className={`myOrderCard status-${order.status}`}><button className="myOrderHead" type="button" onClick={() => setOpen(open === order.id ? '' : order.id)}><div><span>{order.orderKind === 'service_addon' ? '附掛加購服務單' : order.orderNumber}</span><strong>{order.storeConfirmationStatus === 'pending' ? '等待店員接受協調單' : statusLabels[order.status] || order.status}</strong></div><div><small>{new Date(order.submittedAt).toLocaleString('zh-TW')}</small><b>{money(order.totalAmount)}</b></div></button>{open === order.id ? <div className="myOrderDetail"><CustomerOrderDetails order={order} token={token} loading={loading} />{order.storeConfirmationStatus === 'pending' ? <div className="myOrderCoordination"><strong>此單尚未成立</strong><span>店員接受後，才會進入一般成立／指名確認流程。</span></div> : null}<div className="myOrderStage"><span>{order.queueStage}</span>{order.queueMinutes ? <small>已等待 {order.queueMinutes} 分鐘</small> : null}</div>{order.flowVersion >= 2 && <div className="myOrderItems">{order.fulfillment?.map(unit => <div key={unit.id}><span>{unit.name}</span><b>已完成 {unit.completedQuantity}／{unit.quantity}{unit.cancelledQuantity ? ` · 取消 ${unit.cancelledQuantity}` : ""}{unit.startedQuantity > unit.completedQuantity ? " · 處理中" : ""}</b></div>)}</div>}<div className="myOrderItems">{order.items.map((item) => <div key={item.id}><span>{item.name}</span><b>{money(item.lineTotal)}</b></div>)}</div>{order.menuSnapshot?.lines?.some(line=>line.components.length>0)&&<details><summary>提交當時套餐內容</summary>{order.menuSnapshot.lines.filter(line=>line.components.length>0).map((line,index)=><div key={index}><strong>{line.name} × {line.quantity}</strong><ul>{line.components.map((part,i)=><li key={i}>{part.itemName} × {part.quantity}</li>)}</ul></div>)}</details>}{order.roomBookings?.map((item) => <div className="myOrderRoom" key={item.id}><span>ROOM / {item.roomName}</span><strong>{item.segmentCount} 節 · {item.segmentMinutes} 分鐘</strong><small>{new Date(item.startsAt).toLocaleString('zh-TW')} ～ {new Date(item.endsAt).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}</small></div>)}{order.addons?.map((item) => <div className="myOrderAddon" key={item.id}><span>ADD-ON</span><strong>{item.staffName}｜{item.serviceName}</strong><small>{item.serviceDurationMinutes} 分鐘 · {item.participantCount} 人 · {statusLabels[item.status] || item.status}</small></div>)}{order.nominees.map((item) => <div className="myOrderNominee" key={item.id}><strong>{item.staffName}｜{item.serviceName}</strong><span>{item.segmentCount} 節 · {new Date(item.requestedStartsAt).toLocaleString('zh-TW')}</span><small>店員狀態：{item.confirmationStatus}</small>{['confirmed', 'in_service'].includes(order.status) && new Date(item.requestedServiceEndsAt).getTime() > Date.now() ? <CustomerAddonComposer nominee={item} catalog={catalog} loading={loading} onAddon={onAddon} /> : null}</div>)}<dl><div><dt>小計</dt><dd>{money(order.subtotal)}</dd></div><div><dt>信物折抵</dt><dd>− {money(order.mealCreditApplied)}</dd></div><div><dt>應付</dt><dd>{money(order.totalAmount)}</dd></div></dl><ol className="orderTimeline">{order.history.map((item, index) => <li key={`${item.createdAt}-${index}`}><span>{new Date(item.createdAt).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}</span><div><strong>{statusLabels[item.toStatus] || item.toStatus}</strong><p>{item.reason}</p></div></li>)}</ol></div> : null}</article>)}</div>}
+    {orders.length === 0 ? <EmptyState title="今天還沒有訂單" text="完成本次點餐後，訂單會出現在這裡。" /> : <div className="myOrderList">{orders.map((order) => <article key={order.id} className={`myOrderCard status-${order.status}`}><button className="myOrderHead" type="button" onClick={() => setOpen(open === order.id ? '' : order.id)}><div><span>{order.orderKind === 'service_addon' ? '附掛加購服務單' : order.orderNumber}</span><strong>{order.storeConfirmationStatus === 'pending' ? '等待店員接受協調單' : statusLabels[order.status] || order.status}</strong></div><div><small>{new Date(order.submittedAt).toLocaleString('zh-TW')}</small><b>{money(order.totalAmount)}</b></div></button>{open === order.id ? <div className="myOrderDetail"><CustomerOrderDetails order={order} token={token} loading={loading} />{order.storeConfirmationStatus === 'pending' ? <div className="myOrderCoordination"><strong>此單尚未成立</strong><span>店員接受後，才會進入一般成立／指名確認流程。</span></div> : null}<div className="myOrderStage"><span>{order.queueStage}</span>{order.queueMinutes ? <small>已等待 {order.queueMinutes} 分鐘</small> : null}</div>{order.flowVersion >= 2 && <div className="myOrderItems">{order.fulfillment?.map(unit => <div key={unit.id}><span>{unit.name}</span><b>已完成 {unit.completedQuantity}／{unit.quantity}{unit.cancelledQuantity ? ` · 取消 ${unit.cancelledQuantity}` : ""}{unit.startedQuantity > unit.completedQuantity ? " · 處理中" : ""}</b></div>)}</div>}<div className="myOrderItems">{order.items.map((item) => <div key={item.id}><span>{item.name}{item.isChampagneTower && <small> · 贈送：{item.recipientStaffName || "店家"} · 不可使用信物折抵</small>}</span><b>{money(item.lineTotal)}</b></div>)}</div>{order.menuSnapshot?.lines?.some(line=>line.components.length>0)&&<details><summary>提交當時套餐內容</summary>{order.menuSnapshot.lines.filter(line=>line.components.length>0).map((line,index)=><div key={index}><strong>{line.name} × {line.quantity}</strong><ul>{line.components.map((part,i)=><li key={i}>{part.itemName} × {part.quantity}</li>)}</ul></div>)}</details>}{order.roomBookings?.map((item) => <div className="myOrderRoom" key={item.id}><span>ROOM / {item.roomName}</span><strong>{item.segmentCount} 節 · {item.segmentMinutes} 分鐘</strong><small>{new Date(item.startsAt).toLocaleString('zh-TW')} ～ {new Date(item.endsAt).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}</small></div>)}{order.addons?.map((item) => <div className="myOrderAddon" key={item.id}><span>ADD-ON</span><strong>{item.staffName}｜{item.serviceName}</strong><small>{item.serviceDurationMinutes} 分鐘 · {item.participantCount} 人 · {statusLabels[item.status] || item.status}</small></div>)}{order.nominees.map((item) => <div className="myOrderNominee" key={item.id}><strong>{item.staffName}｜{item.serviceName}</strong><span>{item.segmentCount} 節 · {new Date(item.requestedStartsAt).toLocaleString('zh-TW')}</span><small>店員狀態：{item.confirmationStatus}</small>{['confirmed', 'in_service'].includes(order.status) && new Date(item.requestedServiceEndsAt).getTime() > Date.now() ? <CustomerAddonComposer nominee={item} catalog={catalog} loading={loading} onAddon={onAddon} /> : null}</div>)}<dl><div><dt>小計</dt><dd>{money(order.subtotal)}</dd></div><div><dt>信物折抵</dt><dd>− {money(order.mealCreditApplied)}</dd></div><div><dt>應付</dt><dd>{money(order.totalAmount)}</dd></div></dl><ol className="orderTimeline">{order.history.map((item, index) => <li key={`${item.createdAt}-${index}`}><span>{new Date(item.createdAt).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}</span><div><strong>{statusLabels[item.toStatus] || item.toStatus}</strong><p>{item.reason}</p></div></li>)}</ol></div> : null}</article>)}</div>}
   </div>;
 }
 

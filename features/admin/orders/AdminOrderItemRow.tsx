@@ -6,6 +6,8 @@ import { adminApi } from "@/features/admin/api/client.js";
 import { AdminButton } from "@/features/admin/shared/AdminShared.jsx";
 
 interface OrderItem {
+  isChampagneTower?: boolean;
+  recipientStaffName?: string | null;
   id: string;
   itemType: string;
   name: string;
@@ -28,7 +30,7 @@ export function AdminOrderItemRow({ orderId, item, loading, act }: OrderItemRowP
   const [editing, setEditing] = useState(false);
   return (
     <div className={`adminOrderItemRow${editing ? " isEditing" : ""}`}>
-      <span className="adminOrderItemName"><small>{itemLabels[item.itemType] || item.itemType}</small><strong>{item.name}</strong></span>
+      <span className="adminOrderItemName"><small>{item.isChampagneTower ? "香檳塔" : itemLabels[item.itemType] || item.itemType}</small><strong>{item.name}</strong>{item.isChampagneTower && <small>贈送：{item.recipientStaffName || "店家"} · 不可使用信物折抵</small>}</span>
       <span className="adminOrderItemQuantity" aria-label={`數量 ${item.quantity}`}>× {item.quantity}</span>
       <b>{money(item.lineTotal)}</b>
       <div className="adminOrderItemActions">

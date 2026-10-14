@@ -17,5 +17,5 @@ export function ProductPolicyForm({form,update,single=false}:ProductProps) {
   const policy={...productPolicy,...form.policy};
   return <div className="adminFormWide"><strong>供應與事件分類</strong>{single&&<AdminToggle ariaLabel="可單點" label="可單點（關閉後仍可作為套餐內容）" checked={policy.canOrderAlone} onChange={(value:boolean)=>update('policy',{...policy,canOrderAlone:value})}/>}
     <AdminToggle ariaLabel="香檳塔事件" label="香檳塔事件" checked={policy.eventCategories.includes('champagne_tower')} onChange={(value:boolean)=>update('policy',{...policy,eventCategories:value?['champagne_tower']:[]})}/>
-    <p className="adminFieldHint">事件分類供通知中心使用；不會改變價格、信物折抵或接單方式。套餐會繼承內容品項的分類。</p></div>;
+    <p className="adminFieldHint">標記後可觸發香檳塔訂單提醒。套餐會繼承子品分類，整組不可使用餐點信物折抵。下單時可選擇送給店員或店家；指定店員依指名服務比例額外分潤，不會建立服務指名。</p></div>;
 }

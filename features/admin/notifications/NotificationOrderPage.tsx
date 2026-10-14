@@ -4,7 +4,7 @@ import {useEffect,useState} from 'react';
 
 type OrderLookup={session:{id:string;customerName:string;businessDate:string};order:{
   orderNumber:string;status:string;storeConfirmationStatus:string;totalAmount:number;
-  items:{id:string;name:string;quantity:number;lineTotal:number}[];
+  items:{id:string;name:string;quantity:number;lineTotal:number;isChampagneTower?:boolean;recipientStaffName?:string|null}[];
   menuSnapshot?:{lines:{referenceId:string;name:string;quantity:number;components:{menuItemId:string;itemName:string;quantity:number}[]}[]};
 }};
 export function NotificationOrderPage({orderId}:{orderId:string}){
@@ -22,7 +22,7 @@ export function NotificationOrderPage({orderId}:{orderId:string}){
     {error?<p role="alert">{error}</p>:!result?<p role="status">讀取中…</p>:<>
       <h2>{result.order.orderNumber} · {result.session.customerName}</h2>
       <p>目前狀態：{({pending:'等待確認',confirmed:'已成立',preparing:'準備中',serving:'服務中',completed:'已完成',cancelled:'已取消',expired:'已過期'} as Record<string,string>)[result.order.status]||result.order.status}{result.order.storeConfirmationStatus==='pending'?' · 待店內確認':''}</p>
-      <ul>{result.order.items.map(item=><li key={item.id}>{item.name} × {item.quantity} · {item.lineTotal.toLocaleString('zh-TW')} Gil</li>)}</ul>
+      <ul>{result.order.items.map(item=><li key={item.id}>{item.name} × {item.quantity} · {item.lineTotal.toLocaleString('zh-TW')} Gil{item.isChampagneTower ? ` · 贈送：${item.recipientStaffName || "店家"} · 不可使用信物折抵` : ""}</li>)}</ul>
       <p>目前應付：{result.order.totalAmount.toLocaleString('zh-TW')} Gil</p>
       {result.order.menuSnapshot&&<details><summary>提交當時套餐內容（歷史快照）</summary>{result.order.menuSnapshot.lines.filter(line=>line.components.length>0).map((line,index)=><div key={`${line.referenceId}:${index}`}><h3>{line.name} × {line.quantity}</h3><ul>{line.components.map((part,i)=><li key={`${part.menuItemId}:${i}`}>{part.itemName} × {part.quantity}</li>)}</ul></div>)}</details>}
       <p>查看通知不會變更訂單狀態。</p>

@@ -288,7 +288,7 @@ export function AdminSettlementPage() {
     eyebrow="PAYROLL · SETTLEMENT"
     title="結算工作臺"
     description="營運結算、個人帳目與規則設定，依工作目的分開處理。"
-    actions={<AdminRefreshButton onClick={() => { setLoading(true); void load(); }} disabled={loading || saving} />}
+    actions={<AdminRefreshButton loading={loading} onClick={() => { setLoading(true); void load(); }} disabled={loading || saving} />}
   >
     <div className="adminSettlementWorkspace">
       <SettlementTabs active={tab} canManage={canManage} onChange={changeTab} />

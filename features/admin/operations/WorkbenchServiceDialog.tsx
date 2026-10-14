@@ -114,6 +114,6 @@ export function WorkbenchServiceDialog({ entry, action, onSaved, onBusy }: {
       {(requiredReason || action === "complete") && <AdminField label="原因" required={requiredReason}><textarea rows={3} maxLength={500} required={requiredReason} value={reason} onChange={(e) => setReason(e.target.value)} /></AdminField>}
     </fieldset>
     {error && <p className="adminFormError" role="alert">{error}</p>}
-    <AdminButton type="submit" disabled={busy || !prepared || preview?.canStartNow === false || !retrying && requiredReason && !reason.trim()}>{busy ? "處理中…" : retrying ? "查回／重試同一筆操作" : serviceActionLabels[action]}</AdminButton>
+    <AdminButton type="submit" busy={busy} disabledReason={!prepared ? "正在讀取接待預覽。" : preview?.canStartNow === false ? "仍有其他服務進行中，請先完成該服務。" : !retrying && requiredReason && !reason.trim() ? "請先填寫操作原因。" : undefined} disabled={busy || !prepared || preview?.canStartNow === false || !retrying && requiredReason && !reason.trim()}>{busy ? "處理中…" : retrying ? "查回／重試同一筆操作" : serviceActionLabels[action]}</AdminButton>
   </form>;
 }

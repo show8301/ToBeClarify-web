@@ -44,7 +44,7 @@
 .adminPageLoginStatus::before { width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 4px rgba(var(--color-accent-2-rgb), .12); content: ''; }
 .adminButton { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 9px 15px; border: 1px solid transparent; border-radius: 10px; color: var(--color-fg); font-weight: 600; transition: transform .2s ease, background .2s ease, border-color .2s ease; }
 .adminButton:hover:not(:disabled) { transform: translateY(-1px); }
-.adminButton:disabled { cursor: wait; opacity: .55; }
+.adminButton:disabled { opacity: .55; }
 .adminButton-primary { background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark)); box-shadow: 0 8px 24px rgba(var(--color-accent-rgb), .18); }
 .adminButton-secondary { border-color: rgba(var(--color-accent-rgb), .28); background: rgba(var(--color-accent-rgb), .1); }
 .adminButton-ghost { border-color: var(--color-border-strong); background: var(--color-surface); }

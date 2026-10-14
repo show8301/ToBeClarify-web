@@ -83,7 +83,7 @@ export function AdminOrderListPage() {
   return <section className="adminPage adminOrderListPage">
     <header className="adminPageHeading">
       <div><p className="eyebrow">ORDER QUERY</p><h1>訂單查詢</h1><p>營業結束後依日期、關鍵字或狀態查詢訂單，核對問題並作為後續營運調整參考。</p></div>
-      <div className="adminPageActions"><a className="adminButton adminButton-secondary" href="/admin/customers">歷史顧客</a><AdminRefreshButton disabled={loading} onClick={loadOrders} /></div>
+      <div className="adminPageActions"><a className="adminButton adminButton-secondary" href="/admin/customers">歷史顧客</a><AdminRefreshButton loading={loading} disabled={loading} onClick={loadOrders} /></div>
     </header>
 
     <section className="adminOrderListFilters" aria-label="訂單查詢條件">

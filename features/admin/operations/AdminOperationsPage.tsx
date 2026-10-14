@@ -153,7 +153,7 @@ export function AdminOperationsPage({ navigate }: { navigate: Navigate }) {
       eyebrow="LIVE OPERATIONS"
       title="營業工作台"
       description={`${user?.displayName || "目前登入者"}，這裡會依當日職位集中顯示營業期間需要關注的工作。`}
-      actions={<AdminRefreshButton disabled={state.loading} onClick={load} />}
+      actions={<AdminRefreshButton loading={state.loading} disabled={state.loading} onClick={load} />}
     >
       <section className={`adminOperationsWorkbench adminOperationsWorkbench-${dashboardRole}`}>
         <header className="adminOperationsWorkbenchHeader">

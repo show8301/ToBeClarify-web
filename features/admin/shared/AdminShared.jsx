@@ -3,6 +3,7 @@ import { Dialog } from '@base-ui/react/dialog';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useAdminImageProcessing } from '@/features/admin/media/AdminImageProcessingContext.js';
 import { formatImageFileSize } from '@/features/admin/media/adminImageProcessing.js';
+import { AdminButton } from './AdminButton';
 
 /** @param {{ eyebrow?: import('react').ReactNode, title?: import('react').ReactNode, description?: import('react').ReactNode, actions?: import('react').ReactNode, children?: import('react').ReactNode }} props */
 export function AdminPage({ eyebrow, title, description, actions, children }) {
@@ -50,9 +51,7 @@ export function AdminField({ label, children, hint, className = '', required = f
   );
 }
 
-export function AdminButton({ children, variant = 'primary', className = '', ...props }) {
-  return <button className={`adminButton adminButton-${variant} ${className}`.trim()} type="button" {...props}>{children}</button>;
-}
+export { AdminButton };
 
 export function AdminToggle({ checked, onChange, label = '啟用', ariaLabel, disabled = false, className = '' }) {
   return (

@@ -95,7 +95,7 @@ function AdminRoomServicePanel({ onMessage }: { onMessage: (text: string, error?
           <h2>營業中的包廂服務</h2>
           <p>這裡同時顯示顧客自助訂購與後台代客建立的包廂時段，每節時間依營運參數計算。</p>
         </div>
-        <AdminRefreshButton onClick={() => void load()} disabled={loading} />
+        <AdminRefreshButton loading={loading} onClick={() => void load()} disabled={loading} />
       </header>
 
       <AdminRoomServiceCreateForm date={date} onDateChange={setDate} showDate onCreated={async () => { onMessage("包廂服務訂單已建立。"); await load(); }} />

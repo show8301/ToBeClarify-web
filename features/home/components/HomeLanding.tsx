@@ -112,7 +112,7 @@ export default function HomeLanding({home,pricingRules:initialPricingRules=[]}:H
         <h1><i>LUCID</i><br/>DREAM</h1>
         <p>{shopInfo.subtitle}</p>
         <div className="home-business-status"><b><i aria-hidden="true"/><span><small>LIVE STATUS</small>{shopInfo.businessStatus}</span></b><span>{shopInfo.openHours}</span></div>
-        {livePageVisibility.staff&&<a href="/staff">MEET THE DREAMERS <i>↗</i></a>}
+        {livePageVisibility.staff&&<a href="/staff"><span>MEET THE DREAMERS</span><i aria-hidden="true">↗</i></a>}
       </motion.div>
       <div className="home-hero-ticket"><span>SERVER</span><b>{shopInfo.server}</b><span>ADDRESS</span><b>{shopInfo.address}</b><em><a className="home-admin-trigger" href="/admin/login" onClick={openAdminAfterFiveClicks} aria-label="開啟後台登入頁">LD</a> · 2026</em></div>
     </section>
@@ -120,9 +120,14 @@ export default function HomeLanding({home,pricingRules:initialPricingRules=[]}:H
     <section className="home-marquee" aria-label="店舖特色"><span>ROLE PLAY SALON</span><i>✦</i><span>DEEP NIGHT STORIES</span><i>✦</i><span>PHOTO & COMPANY</span><i>✦</i><span>EORZEA WEEKEND</span></section>
 
     <section className="home-about">
-      <div className="home-about-title"><span>ABOUT THE DREAM</span><h2>在清醒與夢境<br/>交界的深夜沙龍</h2></div>
-      <div className={`home-about-photo${aboutLoaded?" is-image-loaded":""}`}><img src={shopInfo.heroImage||current?.imageUrl} alt="清醒夢空間" loading="lazy" decoding="async" onLoad={()=>setAboutLoaded(true)} onError={()=>setAboutLoaded(true)}/><span>PLACE / 001</span></div>
-      <div className="home-about-copy">{shopInfo.about.map((paragraph,index)=><p key={index}>{paragraph}</p>)}<div><b>OPEN</b><span>{shopInfo.openHours}</span><b>WHERE</b><span>{shopInfo.server} · {shopInfo.address}</span></div></div>
+      <div className={`home-about-photo home-about-photo-landscape${aboutLoaded?" is-image-loaded":""}`}>
+        <img src={shopInfo.heroImage||current?.imageUrl} alt="清醒夢空間" loading="lazy" decoding="async" onLoad={()=>setAboutLoaded(true)} onError={()=>setAboutLoaded(true)}/>
+        <span>PLACE / 001</span>
+      </div>
+      <div className="home-about-content">
+        <div className="home-about-title"><span>ABOUT THE DREAM</span><h2>在清醒與夢境<br/>交界的深夜沙龍</h2></div>
+        <div className="home-about-copy">{shopInfo.about.map((paragraph,index)=><p key={index}>{paragraph}</p>)}</div>
+      </div>
     </section>
 
     <section className="home-pricing">{!pricingFresh&&<p role="status">價格資訊正在更新，實際消費請以最新菜單與點餐確認為準。</p>}
@@ -140,6 +145,6 @@ export default function HomeLanding({home,pricingRules:initialPricingRules=[]}:H
       <ol>{home.shopRules.map((rule,index)=><li key={rule.id}><span>{String(index+1).padStart(2,"0")}</span><div><p>{rule.ruleText}</p>{rule.ruleNote&&<small>{rule.ruleNote}</small>}</div></li>)}</ol>
     </section>
 
-    <section className="home-final-cta"><span>READY TO ENTER?</span><h2>今晚，想遇見<br/>哪一場夢？</h2><div>{livePageVisibility.staff&&<a href="/staff">店員一覽 <i>↗</i></a>}{livePageVisibility.menu&&<a href="/menu">佳餚名錄 <i>↗</i></a>}</div></section>
+    <section className="home-final-cta"><span>READY TO ENTER?</span><h2>今晚，想遇見<br/>哪一場夢？</h2><div>{livePageVisibility.staff&&<a href="/staff">店員一覽</a>}</div></section>
   </div>;
 }

@@ -84,7 +84,7 @@ export function AdminServiceDashboard({ data, user, navigate, runAction, actionS
           {!coordinationOrders.length && !waitingSessions.length ? <EmptyState>目前沒有需要現場接手的訂單。</EmptyState> : null}
         </div>
     </AdminPanel>
-    <AdminPanel className="adminRoleDashboardServiceQuickLinks" title="現場快速入口" description="需要查看完整資料時，再進入原本的管理畫面。" actions={<><AdminButton onClick={() => navigate("/admin/orders")}>完整訂單</AdminButton><AdminButton variant="secondary" onClick={() => navigate("/admin/rooms/service")}>管理包廂</AdminButton><AdminButton variant="ghost" onClick={() => navigate("/admin/order-list")}>查詢訂單</AdminButton></>} />
+    <AdminPanel className="adminRoleDashboardServiceQuickLinks" title="現場快速入口" description="需要查看完整資料時，再進入原本的管理畫面。" actions={<><AdminButton onClick={() => navigate("/admin/orders")}>完整訂單</AdminButton><AdminButton variant="secondary" onClick={() => navigate("/admin/rooms/service")}>包廂訂購</AdminButton><AdminButton variant="ghost" onClick={() => navigate("/admin/order-list")}>查詢訂單</AdminButton></>} />
   </div>;
 }
 
@@ -120,13 +120,13 @@ export function AdminManagerDashboard({ data, user, navigate, runAction, actionS
     {onChanged && <WorkbenchManagerRequests data={data} onChanged={onChanged} />}
     <div className="adminRoleDashboardGrid">
       <AdminPanel title="營運控制" description="經理可在這裡處理開店、接單模式與關店；詳細操作仍保留在完整點單管理。"><ManagerBusinessControls context={data.context} runAction={runAction} actionState={actionState} /></AdminPanel>
-      <AdminPanel title="當班人力" description="先確認今天是否有足夠的人力承接服務。" actions={<AdminButton variant="ghost" onClick={() => navigate("/admin/staff")}>管理店員</AdminButton>}>
+      <AdminPanel title="當班人力" description="先確認今天是否有足夠的人力承接服務。" actions={<AdminButton variant="ghost" onClick={() => navigate("/admin/staff")}>店員設定</AdminButton>}>
         <div className="adminRoleDashboardStaffList">{workingStaff.slice(0, 8).map((staff) => <div key={staff.id}><span className="isOnline" /><strong>{staff.displayName}</strong><small>{staff.statusText || staff.roleTitle || "今日上班"}</small></div>)}{!workingStaff.length ? <EmptyState>目前沒有標記為今日上班的店員。</EmptyState> : null}</div>
       </AdminPanel>
     </div>
     <AdminPanel title="需要經理介入" description="這裡只放會影響營運節奏的事項。">
       <div className="adminRoleDashboardRows">{risks.slice(0, 8).map((risk) => <article className="adminRoleDashboardRow" key={risk.id}><div className="adminRoleDashboardIdentity"><strong>{risk.title}</strong><small>{risk.detail}</small></div><span className="adminRoleDashboardBadge">需關注</span><AdminButton variant="secondary" onClick={() => navigate(risk.id.startsWith("staff-") ? "/admin/staff" : "/admin/orders")}>{risk.action}</AdminButton></article>)}{!risks.length ? <EmptyState>目前沒有需要經理介入的事項。</EmptyState> : null}</div>
     </AdminPanel>
-    <AdminPanel title="經理快速入口" description="高頻營運操作集中在這裡。"><div className="adminRoleDashboardQuickLinks"><AdminButton onClick={() => navigate("/admin/orders")}>完整點單管理</AdminButton><AdminButton variant="secondary" onClick={() => navigate("/admin/duty-planning")}>管理值班規劃</AdminButton><AdminButton variant="secondary" onClick={() => navigate("/admin/rooms/service")}>包廂服務排程</AdminButton><AdminButton variant="ghost" onClick={() => navigate("/admin/staff")}>臨時調整今日職位</AdminButton><AdminButton variant="ghost" onClick={() => navigate("/admin/settlement")}>帳目／薪資結算</AdminButton></div></AdminPanel>
+    <AdminPanel title="經理快速入口" description="高頻營運操作集中在這裡。"><div className="adminRoleDashboardQuickLinks"><AdminButton onClick={() => navigate("/admin/orders")}>完整點單管理</AdminButton><AdminButton variant="secondary" onClick={() => navigate("/admin/duty-planning")}>管理值班規劃</AdminButton><AdminButton variant="secondary" onClick={() => navigate("/admin/rooms/service")}>包廂訂購</AdminButton><AdminButton variant="ghost" onClick={() => navigate("/admin/staff")}>店員設定（今日職位）</AdminButton><AdminButton variant="ghost" onClick={() => navigate("/admin/settlement")}>結算工作臺</AdminButton></div></AdminPanel>
   </div>;
 }

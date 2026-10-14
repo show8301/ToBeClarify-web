@@ -20,7 +20,7 @@ export function AdminCreateRoomServiceDrawer({ businessDate, onClose, onCreated 
     <aside className="adminOrderPassDrawerPanel">
       <div className="adminOrderInlinePanel adminRoomServiceDrawerPanel">
         <header>
-          <div><span>ROOM SERVICE</span><h2>建立包廂服務</h2><p>在工作台直接建立時段，完成後會更新今日包廂服務排程。</p></div>
+          <div><span>ROOM SERVICE</span><h2>建立包廂服務</h2><p>在工作台直接建立時段，完成後可至「包廂訂購」查看今日包廂服務。</p></div>
           <button type="button" aria-label="關閉包廂服務建立視窗" onClick={onClose}>×</button>
         </header>
         <AdminRoomServiceCreateForm date={businessDate} onCreated={onCreated} />

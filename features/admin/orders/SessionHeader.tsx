@@ -62,8 +62,8 @@ export function SessionHeader({ item, onUpdate, onReissue, onAssisted, loading }
       <nav className="adminOrderCustomerServices" aria-label="目前顧客的服務與查詢">
         <span className="adminOrderCustomerGroupLabel">顧客服務</span>
         <div className="adminCustomerActions">
-          <a className="adminButton adminButton-secondary" href={`/admin/deliveries?${createQuery}`}>建立作品</a>
-          <a className="adminButton adminButton-ghost" href={`/admin/deliveries?${customerQuery}`}>查看作品</a>
+          <a className="adminButton adminButton-secondary" href={`/admin/deliveries?${createQuery}`}>建立作品交付</a>
+          <a className="adminButton adminButton-ghost" href={`/admin/deliveries?${customerQuery}`}>查看作品交付</a>
           <a className="adminButton adminButton-ghost" href={`/admin/order-list?${customerQuery}`}>歷史訂單</a>
         </div>
       </nav>

@@ -10,10 +10,10 @@ import { createSampleGuests, VARIANTS } from "./preview-data";
 import type { ActionRequest, PreviewVariant, ServiceStatus } from "./preview-data";
 
 const NAV_GROUPS = [
-  { name: "營運", items: [["01", "營業工作台"], ["02", "訂單查詢"], ["03", "包廂服務排程"], ["04", "通知中心"]] },
-  { name: "營運管理", items: [["11", "營運總覽"], ["12", "值班規劃"], ["14", "帳目／薪資結算"]] },
-  { name: "顧客與互動", items: [["21", "歷史顧客"], ["22", "繪圖／簽繪交付"], ["23", "留言板管理"]] },
-  { name: "公開網站內容", items: [["31", "首頁設定"], ["32", "店員資料設定"]] },
+  { name: "營運", items: [["01", "營業工作台"], ["02", "訂單查詢"], ["03", "包廂訂購"], ["04", "通知中心"]] },
+  { name: "營運管理", items: [["11", "營運總覽"], ["12", "值班規劃"], ["14", "結算工作臺"]] },
+  { name: "顧客與互動", items: [["21", "歷史顧客"], ["22", "作品交付"], ["23", "留言板管理"]] },
+  { name: "公開網站內容", items: [["31", "首頁設定"], ["32", "店員設定"]] },
 ];
 
 export default function DesignatedPreview({ initialVariant }: { initialVariant: PreviewVariant }) {

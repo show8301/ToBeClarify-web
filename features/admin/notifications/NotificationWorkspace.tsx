@@ -141,6 +141,7 @@ export function NotificationWorkspace({ settings, broadcast, busy, dirty, labels
             </Menu.Popup></Menu.Positioner></Menu.Portal>
           </Menu.Root>
         </header>
+        <p className="notification-list-hint">選取一條規則，右側會顯示它的設定。</p>
         <div className="notification-list-filters">
           <label className="notification-search"><Search size={18} aria-hidden="true" /><input aria-label="搜尋規則名稱" placeholder="搜尋規則名稱…" value={query} onChange={event => setQuery(event.target.value)} /></label>
           <select aria-label="篩選規則狀態" value={filter} onChange={event => setFilter(event.target.value)}><option value="all">全部</option><option value="enabled">已啟用</option><option value="disabled">未啟用</option></select>
@@ -183,15 +184,13 @@ export function NotificationWorkspace({ settings, broadcast, busy, dirty, labels
         <p className="notification-list-note">{settings.rules.length >= 20 ? '已達 20 條上限；請編輯或移除現有規則。' : broadcast ? '套用至廣播受眾；僅經理與開發者可管理。' : '只影響自己的通知，可新增同類型、不同條件的規則。'}</p>
       </section>
       <div className="notification-editor-column">
-        <section className="notification-card notification-editor" id="notification-rule-editor" aria-labelledby={selected ? 'notification-editor-title notification-editor-rule-name' : 'notification-editor-title'} tabIndex={-1} ref={editor}>
+        <section className="notification-card notification-editor" id="notification-rule-editor" aria-labelledby="notification-editor-title" tabIndex={-1} ref={editor}>
           <header className="notification-card-heading">
-            <h2 id="notification-editor-title">編輯規則</h2>
-            {selected && (
-              <div className="notification-editor-rule-name">
-                <span className="adminVisuallyHidden">規則名稱：</span>
-                <strong id="notification-editor-rule-name">{selected.name || labels[selected.ruleType] || selected.ruleType}</strong>
-              </div>
-            )}
+            <div className="notification-editor-heading-copy">
+              <span className="notification-editor-kicker">目前選取 · 編輯設定</span>
+              <h2 id="notification-editor-title">{selected ? selected.name || labels[selected.ruleType] || selected.ruleType : '尚未選取規則'}</h2>
+              <p>調整這條規則的提醒條件、顯示方式與音效。</p>
+            </div>
             {selected && <span className={`notification-editor-status ${selected.isEnabled ? 'is-enabled' : ''}`}><span className={`notification-status-dot ${selected.isEnabled ? 'is-enabled' : ''}`} />{selected.isEnabled ? '已啟用' : '未啟用'}</span>}
             <span className="notification-editor-position">{selected ? `規則 ${selectedIndex + 1} / ${settings.rules.length}` : '尚未選取'}</span>
           </header>

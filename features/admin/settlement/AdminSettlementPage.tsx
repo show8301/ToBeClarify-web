@@ -1,6 +1,7 @@
 "use client";
 
 import { AdminRefreshButton } from "@/features/admin/shared/AdminRefreshButton";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { SettlementBackfillReview, SettlementOverview, SettlementRule, SettlementRunFields, SettlementStaff, SettlementStaffInput, SettlementTab } from "./types";
 import { getAdminBusinessDate } from "@/features/admin/shared/businessDay";
@@ -17,6 +18,24 @@ import { SettlementBackfillReviewDialog } from "./SettlementBackfillReviewDialog
 import { settlementPeriodStatuses, settlementRoles as roleLabel, settlementStatuses } from "./presentation";
 
 type StaffInput = SettlementStaffInput;
+
+const settlementTabs = new Set<SettlementTab>(["operations", "personal", "settings"]);
+
+function isBusinessDate(value: string | null): value is string {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const parsed = new Date(`${value}T00:00:00.000Z`);
+  return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+}
+
+function readSessionNo(value: string | null): number {
+  if (!value || !/^[1-9]\d*$/.test(value)) return 1;
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) ? parsed : 1;
+}
+
+function isSessionNo(value: string | null): boolean {
+  return value !== null && /^[1-9]\d*$/.test(value) && Number.isSafeInteger(Number(value));
+}
 
 const emptyRule = (rule: SettlementRule | null, dayType: string, effectiveFrom: string) => ({
   dayType,
@@ -36,13 +55,26 @@ const emptyRule = (rule: SettlementRule | null, dayType: string, effectiveFrom: 
 });
 
 export function AdminSettlementPage() {
+  const searchParams = useSearchParams();
   const { user } = useAdminAuth();
   const canManage = user?.role === "developer" || user?.role === "manager";
-  const [activeTab, setActiveTab] = useState<SettlementTab>(canManage ? "operations" : "personal");
+  const requestedDate = searchParams.get("businessDate");
+  const requestedSessionNo = searchParams.get("sessionNo");
+  const requestedTab = searchParams.get("tab");
+  const invalidParameters = [
+    searchParams.has("businessDate") && !isBusinessDate(requestedDate) ? "營業日期" : "",
+    searchParams.has("sessionNo") && !isSessionNo(requestedSessionNo) ? "營業時段" : "",
+    searchParams.has("tab") && (!requestedTab || !settlementTabs.has(requestedTab as SettlementTab)) ? "分頁" : "",
+  ].filter(Boolean);
+  const [activeTab, setActiveTab] = useState<SettlementTab>(
+    requestedTab && settlementTabs.has(requestedTab as SettlementTab)
+      ? requestedTab as SettlementTab
+      : canManage ? "operations" : "personal",
+  );
   const [selectedStaffId, setSelectedStaffId] = useState("");
-  const [date, setDate] = useState("");
+  const [date, setDate] = useState(() => isBusinessDate(requestedDate) ? requestedDate : "");
   const [flowVersion, setFlowVersion] = useState(1);
-  const [sessionNo, setSessionNo] = useState(1);
+  const [sessionNo, setSessionNo] = useState(() => readSessionNo(requestedSessionNo));
   const [dayType, setDayType] = useState("normal");
   const [overview, setOverview] = useState<SettlementOverview | null>(null);
   const [staff, setStaff] = useState<SettlementStaff[]>([]);
@@ -52,7 +84,9 @@ export function AdminSettlementPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(() => invalidParameters.length
+    ? `分享連結中的${invalidParameters.join("、")}無效，已使用預設值。`
+    : "");
   const [backfillForm, setBackfillForm] = useState({ role: "designated", requestedMinutes: "", reason: "" });
   const [paymentForm, setPaymentForm] = useState({ staffId: "", eventKind: "payout", amount: "", reason: "" });
   const [correctionForm, setCorrectionForm] = useState({ sourceKind: "finance", sourceId: "", staffId: "", amountDelta: "", reason: "" });
@@ -284,10 +318,27 @@ export function AdminSettlementPage() {
   const changeTab = (next: SettlementTab) => { setActiveTab(next); setMessage(""); };
   const personalRequests = (overview?.attendanceBackfillRequests || []).filter(item => item.staffId === selectedPersonId);
 
+  useEffect(() => {
+    if (!date) return;
+    const url = new URL(window.location.href);
+    const nextValues: [string, string][] = [
+      ["businessDate", date],
+      ["sessionNo", String(sessionNo)],
+      ["tab", tab],
+    ];
+    let changed = false;
+    for (const [key, value] of nextValues) {
+      if (url.searchParams.get(key) === value) continue;
+      url.searchParams.set(key, value);
+      changed = true;
+    }
+    if (changed) window.history.replaceState(window.history.state, "", url);
+  }, [date, sessionNo, tab]);
+
   return <AdminPage
     eyebrow="PAYROLL · SETTLEMENT"
     title="結算工作臺"
-    description="營運結算、個人帳目與規則設定，依工作目的分開處理。"
+    description="營業日期、時段與目前分頁會保留在網址，方便分享相同查看範圍；資料仍依登入帳號權限載入。"
     actions={<AdminRefreshButton loading={loading} onClick={() => { setLoading(true); void load(); }} disabled={loading || saving} />}
   >
     <div className="adminSettlementWorkspace">

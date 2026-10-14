@@ -52,7 +52,7 @@
 
 後台與點餐仍繼承根 layout 的公開樣式及字型設定，不是完全獨立的 CSS 作用域。
 
-後台入口包含 `95-scrollbars.css`，統一整頁、側欄、抽屜與內部清單的捲軸明暗配色。根層規則以 `:root:has(.adminTheme)` 限定後台範圍，預覽時確認離開後台後公開頁面不受影響；側欄使用內縮的 `.adminTopbarScroll`，捲軸不得碰到外層圓角邊框。設計基準見[後台 UI 設計規範](admin-ui-design-guidelines.md)。
+後台入口包含 `95-scrollbars.css`，統一整頁、側欄、抽屜與內部清單的捲軸明暗配色。根層規則以 `:root:has(.adminTheme)` 限定後台範圍，預覽時確認離開後台後公開頁面不受影響；桌面側欄的品牌區與帳號工具列固定，中間 `.adminNav` 獨立捲動，捲軸不得碰到外層圓角邊框。窄螢幕側欄仍使用展開式導覽選單。設計基準見[後台 UI 設計規範](admin-ui-design-guidelines.md)。
 
 交付工作台樣式 `92-delivery-workspace.css` 置於 `91-customers-and-delivery.css` 與 `95-scrollbars.css` 之間；預覽時確認 `.adminDeliveryColumns`、範圍切換、詳情頁籤與共用展開箭頭均包含在後台 bundle。
 

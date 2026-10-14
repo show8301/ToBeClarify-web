@@ -58,7 +58,7 @@ export function AdminDeliveriesPage() {
     setIssued(value); setSelected(value.delivery); setShowCreate(false); setCreateDirty(false); setCreateBusy(false);
     setDetailKey((key) => key + 1); setRevision((count) => count + 1);
   }
-  return <AdminPage eyebrow="ART DELIVERY" title="繪圖／簽繪交付" description="追蹤自己的委託，核對作品內容，再將領取資料交給顧客。" actions={<a className="adminButton adminButton-secondary" href="/admin/customers" onClick={(event) => { if (unsaved || locked) { event.preventDefault(); guarded(() => { window.location.href = "/admin/customers"; }); } }}>從歷史顧客建立</a>}>
+  return <AdminPage eyebrow="ART DELIVERY" title="作品交付" description="追蹤自己的委託，核對作品內容，再將領取資料交給顧客。" actions={<a className="adminButton adminButton-secondary" href="/admin/customers" onClick={(event) => { if (unsaved || locked) { event.preventDefault(); guarded(() => { window.location.href = "/admin/customers"; }); } }}>從歷史顧客建立</a>}>
     <div className="adminDeliveryWorkspace">
       <AdminRefreshButton disabled={loading || locked} onClick={() => guarded(() => { clearDetail(); setRevision((count) => count + 1); })} />
       <AdminPanel title="交付工作台" description="負責人決定我的委託歸屬。未指派的歷史作品可在全部交付中核對。">

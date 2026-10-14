@@ -45,8 +45,8 @@ export function AdminRoomServicePage() {
   return (
     <AdminPage
       eyebrow="ROOM SERVICE"
-      title="包廂服務排程"
-      description="管理營業期間的包廂預約與服務狀態；包廂名稱、照片與價格請至包廂內容管理。"
+      title="包廂訂購"
+      description="管理營業期間的包廂預約與服務狀態；包廂名稱、照片與價格請至包廂設定。"
       actions={<AdminButton variant="secondary" onClick={() => setMessage({ text: "", error: false })}>清除提示</AdminButton>}
     >
       {message.text ? <div className={message.error ? "adminOrderMessage isError" : "adminOrderMessage"} role="status">{message.text}</div> : null}

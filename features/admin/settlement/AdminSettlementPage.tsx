@@ -286,7 +286,7 @@ export function AdminSettlementPage() {
 
   return <AdminPage
     eyebrow="PAYROLL · SETTLEMENT"
-    title="結算工作台"
+    title="結算工作臺"
     description="營運結算、個人帳目與規則設定，依工作目的分開處理。"
     actions={<AdminRefreshButton onClick={() => { setLoading(true); void load(); }} disabled={loading || saving} />}
   >

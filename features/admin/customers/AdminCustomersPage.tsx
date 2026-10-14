@@ -27,7 +27,7 @@ export function AdminCustomersPage() {
     setRevision((value) => value + 1);
   }
 
-  return <AdminPage eyebrow="CUSTOMER HISTORY" title="歷史顧客" description="依營業日找回入場紀錄、訂單與作品交付；以長期 UID 累積跨日紀錄。" actions={<a className="adminButton adminButton-secondary" href="/admin/deliveries">作品交付管理</a>}>
+  return <AdminPage eyebrow="CUSTOMER HISTORY" title="歷史顧客" description="依營業日找回入場紀錄、訂單與作品交付；以長期 UID 累積跨日紀錄。" actions={<a className="adminButton adminButton-secondary" href="/admin/deliveries">作品交付</a>}>
     <div className="adminCustomers">
       <AdminPanel title="查詢入場紀錄" description="營業日留空可跨日查詢。填寫 ID 是顧客自填資料；同名或同 ID 的紀錄不會自動合併 UID。">
         <form className="adminCustomerFilters" onSubmit={(event) => { event.preventDefault(); setQuery({ businessDate: dateInput, search: searchInput.trim(), page: 1 }); }}>

@@ -9,25 +9,25 @@ const allGroups = [
   { label: '營運', items: [
     { route: '/admin', label: '營業工作台', index: '01', roles: ['developer', 'manager', 'clerk'] },
     { route: '/admin/order-list', label: '訂單查詢', index: '02', roles: ['developer', 'manager', 'clerk'] },
-    { route: '/admin/rooms/service', label: '包廂服務排程', index: '03', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin/rooms/service', label: '包廂訂購', index: '03', roles: ['developer', 'manager', 'clerk'] },
     { route: '/admin/notifications', label: '通知中心', index: '04', roles: ['developer','manager','clerk'] },
   ] },
   { label: '營運管理', items: [
     { route: '/admin/overview', label: '營運總覽', index: '11', roles: ['developer', 'manager', 'clerk'] },
     { route: '/admin/duty-planning', label: '值班規劃', index: '12', roles: ['developer', 'manager', 'clerk'] },
-    { route: '/admin/settlement', label: '帳目／薪資結算', index: '14', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin/settlement', label: '結算工作臺', index: '14', roles: ['developer', 'manager', 'clerk'] },
   ] },
   { label: '顧客與互動', items: [
     { route: '/admin/customers', label: '歷史顧客', index: '21', roles: ['developer', 'manager', 'clerk'] },
-    { route: '/admin/deliveries', label: '繪圖／簽繪交付', index: '22', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin/deliveries', label: '作品交付', index: '22', roles: ['developer', 'manager', 'clerk'] },
     { route: '/admin/guestbook', label: '留言板管理', index: '23', roles: ['developer', 'manager', 'clerk'] },
   ] },
   { label: '公開網站內容', items: [
     { route: '/admin/home', label: '首頁設定', index: '31', roles: ['developer', 'manager'] },
-    { route: '/admin/staff', label: '店員資料設定', index: '32', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin/staff', label: '店員設定', index: '32', roles: ['developer', 'manager', 'clerk'] },
     { route: '/admin/events', label: '活動頁設定', index: '33', roles: ['developer', 'manager'] },
     { route: '/admin/menu', label: '菜單設定', index: '34', roles: ['developer', 'manager'] },
-    { route: '/admin/rooms', label: '包廂內容管理', index: '35', roles: ['developer', 'manager', 'clerk'] },
+    { route: '/admin/rooms', label: '包廂設定', index: '35', roles: ['developer', 'manager', 'clerk'] },
   ] },
   { label: '進階工具', items: [
     { route: '/admin/orders', label: '完整點單管理', index: '99', roles: ['developer', 'manager', 'clerk'] },

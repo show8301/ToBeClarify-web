@@ -163,7 +163,7 @@ export function AdminOperationsPage({ navigate }: { navigate: Navigate }) {
             <p>{config.description}</p>
           </div>
           <div className="adminOperationsActions">
-            <AdminButton onClick={() => navigate("/admin/rooms/service")}>包廂服務排程</AdminButton>
+            <AdminButton onClick={() => navigate("/admin/rooms/service")}>包廂訂購</AdminButton>
             <AdminButton variant="secondary" onClick={() => navigate("/admin/orders")}>完整點單管理</AdminButton>
           </div>
         </header>

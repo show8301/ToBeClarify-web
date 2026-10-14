@@ -62,7 +62,7 @@ export function BusinessDayPlanPanel({ businessDate, onOpened }: { businessDate:
         {plan && !plan.isOpened && <>
           <button className="adminButton adminButton-secondary adminBusinessPlanSave" type="button" disabled={!startsAt || !endsAt} onClick={() => void run("save")}>儲存計畫</button>
           <label className="adminBusinessPlanOption"><input type="checkbox" checked={flow2} onChange={e => setFlow2(e.target.checked)} /><span>本營業日使用分項接待及現場帳款</span></label>
-          {flow2 && <p className="adminBusinessPlanHint">分項接待與現場帳款可用；關店後由帳目／薪資結算入口核對實收、保留分潤並完成正式結算。</p>}
+          {flow2 && <p className="adminBusinessPlanHint">分項接待與現場帳款可用；關店後由結算工作臺入口核對實收、保留分潤並完成正式結算。</p>}
           <button className="adminButton adminButton-primary adminBusinessPlanOpen" type="button" disabled={!plan.isSaved || startsAt !== inputTime(plan.startsAt) || endsAt !== inputTime(plan.endsAt)} onClick={() => void run("open")}>現在開店</button>
         </>}
       </div>

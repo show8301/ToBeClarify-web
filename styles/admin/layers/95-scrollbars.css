@@ -77,8 +77,8 @@
   }
 }
 
-/* Keep the existing content insets while reserving a real gap between the
-   scrollport and the sidebar's rounded border, including in Firefox. */
+/* Keep the brand and account outside the scrollport. Only the navigation
+   moves, with an inset scrollbar that stays clear of the sidebar border. */
 .adminTopbar:has(> .adminTopbarScroll) {
   display: flex;
   padding: 12px 6px 12px 0;
@@ -94,13 +94,22 @@
   min-height: 0;
   padding: 6px 8px 2px 14px;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
   overscroll-behavior: contain;
-  scrollbar-gutter: stable;
+  scrollbar-gutter: auto;
 }
 
 .adminTopbarScroll > * {
   flex-shrink: 0;
+}
+
+.adminTopbarScroll > .adminNav {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
 
 @media (max-width: 1020px) {
@@ -118,6 +127,14 @@
     padding: 1px 4px;
     overflow: visible;
     scrollbar-gutter: auto;
+  }
+
+  .adminTopbarScroll > .adminNav {
+    flex: initial;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
   }
 }
 

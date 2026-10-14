@@ -83,7 +83,7 @@ export function NotificationSoundLibrary({ sounds, developer, busy, canUpload, s
 
   return (
     <section className="notification-card notification-library" aria-labelledby="notification-library-title">
-      <header className="notification-card-heading"><h2 id="notification-library-title">音效庫</h2><AdminButton disabled={busy || !canUpload} onClick={() => { setUploadError(''); setUploadOpen(true); }}><Upload size={18} aria-hidden="true" />上傳音效</AdminButton></header>
+      <header className="notification-card-heading"><div className="notification-library-heading-copy"><h2 id="notification-library-title">音效庫</h2><p>管理規則可選用的共用音效；套用音效請在上方規則設定。</p></div><AdminButton disabled={busy || !canUpload} onClick={() => { setUploadError(''); setUploadOpen(true); }}><Upload size={18} aria-hidden="true" />上傳音效</AdminButton></header>
       <label className="notification-search"><Search size={18} aria-hidden="true" /><input aria-label="搜尋音效名稱" placeholder="搜尋音效名稱…" value={query} onChange={event => setQuery(event.target.value)} /></label>
       {error && <p className="notification-library-error" role="alert">{error}</p>}
       {!canUpload && <p className="adminFieldHint">音效上傳目前尚未開放。</p>}

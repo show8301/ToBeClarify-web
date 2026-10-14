@@ -59,8 +59,8 @@ body{background-image:radial-gradient(circle at 8% 8%,rgba(184,187,216,.78),tran
 .home-hero-index,.home-hero-ticket,.home-event-card>span{background:rgba(247,247,251,.72);color:var(--ink);border-color:rgba(255,255,255,.9);}
 .home-hero-ticket{border-radius:18px;box-shadow:8px 9px 0 rgba(139,179,226,.48)}
 .home-hero-copy>div b{background:rgba(160,217,214,.72);border-color:rgba(255,255,255,.8);border-radius:999px}
-.home-hero-copy>a,.home-marquee{background:linear-gradient(110deg,rgba(184,187,216,.86),rgba(139,179,226,.72));color:var(--ink);border-color:rgba(255,255,255,.78)}
-.home-hero-copy>a{border-radius:999px;box-shadow:7px 8px 0 rgba(160,217,214,.55)}
+.home-hero-actions>a,.home-marquee{background:linear-gradient(110deg,rgba(184,187,216,.86),rgba(139,179,226,.72));color:var(--ink);border-color:rgba(255,255,255,.78)}
+.home-hero-actions>a{border-radius:999px;box-shadow:7px 8px 0 rgba(160,217,214,.55)}
 .home-slide-arrow{background:rgba(247,247,251,.62);color:var(--ink);border-color:rgba(255,255,255,.86);box-shadow:0 6px 22px rgba(49,51,74,.16)}
 .home-slide-controls .home-slide-dots{background:rgba(247,247,251,.58)}
 .home-slide-controls .home-slide-dots button{background:rgba(49,51,74,.24)}
@@ -345,9 +345,19 @@ body{background-image:radial-gradient(ellipse 75% 55% at 4% 4%,rgba(232,199,218,
 .home-pricing article,.weekly-card,.menu-sets article,.live-status a,.staff-honor a,.guest-composer,.home-event-card,.guest-note,.live-clock,.dossier,.home-pricing article:nth-child(2),.home-pricing article:nth-child(3),.weekly-card:nth-child(n),.live-status a:nth-child(n),.guest-podium article:nth-child(n){box-shadow:0 22px 58px rgba(118,121,161,.13),0 8px 26px rgba(232,199,218,.1),inset 0 1px rgba(255,255,255,.94)}
 .home-pricing,.menu-sets,.live-timeline,.guest-podium{background:radial-gradient(ellipse at 6% 18%,rgba(232,199,218,.48),transparent 45%),radial-gradient(ellipse at 92% 20%,rgba(169,199,234,.42),transparent 44%),linear-gradient(135deg,rgba(193,185,223,.38),rgba(248,244,250,.34))}
 .home-rules{background:linear-gradient(120deg,rgba(193,185,223,.7),rgba(169,199,234,.58) 52%,rgba(232,199,218,.62))}
+.home-rules ol {
+  background: color-mix(in srgb, var(--dream-pearl) 72%, transparent);
+  border: 1px solid rgba(255, 255, 255, .74);
+  box-shadow: 0 16px 40px color-mix(in srgb, var(--hair-shadow) 12%, transparent);
+}
+.home-rules li + li {
+  border-top: 1px solid color-mix(in srgb, var(--dream-violet) 27%, transparent);
+}
+.home-rules li > span { color: var(--hair-shadow); }
+
 .home-final-cta{background:radial-gradient(ellipse at 24% 38%,rgba(232,199,218,.62),transparent 38%),radial-gradient(ellipse at 76% 42%,rgba(169,199,234,.6),transparent 40%),linear-gradient(145deg,rgba(248,244,250,.78),rgba(193,185,223,.48))}
 .home-hero-visual{box-shadow:0 32px 76px rgba(118,121,161,.2),14px 18px 38px rgba(232,199,218,.18)}
-.home-hero-ticket,.home-hero-copy>a,.home-final-cta a{box-shadow:0 14px 34px rgba(118,121,161,.16),0 6px 18px rgba(232,199,218,.14)}
+.home-hero-ticket,.home-hero-actions>a,.home-final-cta a{box-shadow:0 14px 34px rgba(118,121,161,.16),0 6px 18px rgba(232,199,218,.14)}
 
 .roster-intro{background:radial-gradient(ellipse at 78% 26%,rgba(169,199,234,.42),transparent 38%),radial-gradient(ellipse at 10% 82%,rgba(232,199,218,.42),transparent 42%)}
 .intro-feature{box-shadow:0 26px 62px rgba(118,121,161,.16),10px 12px 30px rgba(232,199,218,.16)}

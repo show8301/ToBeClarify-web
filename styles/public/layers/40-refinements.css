@@ -404,28 +404,31 @@
 }
 
 /* Homepage action and live status: optically centered and clearly stateful. */
-.home-hero-copy>a {
+.home-hero-actions>a {
   min-height: 60px; position: relative; align-items: center;
+  flex: 1 1 240px; max-width: 330px; margin-left: auto;
   justify-content: center; text-align: center; font-size: 14px; line-height: 1.15;
 }
-.home-hero-copy>a i {
+.home-hero-actions>a i {
   position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
   width: 22px; height: 22px; display: grid; place-items: center; line-height: 1;
 }
 .home-final-cta a { align-items: center; justify-content: center; text-align: center; }
-.home-hero-copy>.home-business-status{align-items:center;gap:16px}
+.home-hero-actions>.home-business-status{
+  min-width:0;display:flex;flex:1 1 auto;align-items:center;gap:16px
+}
 .home-business-status>b{
-  min-height:48px;padding:8px 15px!important;display:flex;align-items:center;gap:10px;
+  min-height:60px;padding:10px 14px!important;display:flex;flex-shrink:0;align-items:center;gap:10px;
   border:1px solid rgba(255,255,255,.96)!important;background:linear-gradient(115deg,rgba(160,217,214,.92),rgba(184,187,216,.7))!important;
   box-shadow:0 9px 24px rgba(101,120,159,.14)
 }
-.home-business-status>b>i{flex:0 0 9px;width:9px;height:9px;border-radius:50%;background:#35bf87;box-shadow:0 0 0 5px rgba(53,191,135,.14)}
-.home-business-status>b>span{display:grid;gap:3px;font-size:13px;line-height:1.15}
-.home-business-status>b small{font:700 6px/1 var(--font-geist-mono),monospace;letter-spacing:.16em;opacity:.55}
-.home-business-status>span{font-size:13px!important}
+.home-business-status>b>i{flex:0 0 11px;width:11px;height:11px;border-radius:50%;background:#35bf87;box-shadow:0 0 0 4px rgba(53,191,135,.14)}
+.home-business-status>b>span{display:grid;gap:4px;font-size:18px;line-height:1.2}
+.home-business-status>b small{font:700 8px/1.2 var(--font-geist-mono),monospace;letter-spacing:.13em;opacity:.65}
+.home-business-status>span{min-width:0;font-size:13px!important;line-height:1.6;overflow-wrap:anywhere}
 @media(max-width:560px){
-  .home-hero-copy>.home-business-status{align-items:flex-start;gap:10px}
-  .home-business-status>b{width:max-content;min-height:44px}
+  .home-hero-actions>.home-business-status{align-items:center;gap:10px}
+  .home-business-status>b{width:max-content}
 }
 
 /* Roster photo transition: a light tonal bridge,without a hard dark band. */

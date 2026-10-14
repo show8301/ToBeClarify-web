@@ -110,9 +110,11 @@ export default function HomeLanding({home,pricingRules:initialPricingRules=[]}:H
       <motion.div className="home-hero-copy" initial={reduceMotion?false:{opacity:0,y:28}} animate={{opacity:1,y:0}} transition={{delay:reduceMotion ? 0 : .72,duration:reduceMotion ? .2 : 1.15,ease:[.22,1,.36,1]}}>
         <span>WELCOME TO THE WAKING DREAM</span>
         <h1><i>LUCID</i><br/>DREAM</h1>
-        <p>{shopInfo.subtitle}</p>
-        <div className="home-business-status"><b><i aria-hidden="true"/><span><small>LIVE STATUS</small>{shopInfo.businessStatus}</span></b><span>{shopInfo.openHours}</span></div>
-        {livePageVisibility.staff&&<a href="/staff"><span>MEET THE DREAMERS</span><i aria-hidden="true">↗</i></a>}
+        <div className="home-hero-description"><p>{shopInfo.subtitle}</p></div>
+        <div className="home-hero-actions">
+          <div className="home-business-status"><b><i aria-hidden="true"/><span><small>LIVE STATUS</small>{shopInfo.businessStatus}</span></b><span>{shopInfo.openHours}</span></div>
+          {livePageVisibility.staff&&<a href="/staff"><span>MEET THE DREAMERS</span><i aria-hidden="true">↗</i></a>}
+        </div>
       </motion.div>
       <div className="home-hero-ticket"><span>SERVER</span><b>{shopInfo.server}</b><span>ADDRESS</span><b>{shopInfo.address}</b><em><a className="home-admin-trigger" href="/admin/login" onClick={openAdminAfterFiveClicks} aria-label="開啟後台登入頁">LD</a> · 2026</em></div>
     </section>
@@ -141,7 +143,7 @@ export default function HomeLanding({home,pricingRules:initialPricingRules=[]}:H
     </section>}
 
     <section className="home-rules">
-      <header><span>HOUSE ETIQUETTE</span><h2>每一場夢<br/>都值得珍藏</h2><p>入場前請先理解彼此的界線。角色互動建立於尊重、同意與舒適節奏之上。</p></header>
+      <header><span>HOUSE ETIQUETTE</span><h2>每一場夢<br/>都值得珍藏</h2><p>理解彼此的界線。<br/>互動建立於尊重、同意與舒適的節奏之上。</p></header>
       <ol>{home.shopRules.map((rule,index)=><li key={rule.id}><span>{String(index+1).padStart(2,"0")}</span><div><p>{rule.ruleText}</p>{rule.ruleNote&&<small>{rule.ruleNote}</small>}</div></li>)}</ol>
     </section>
 

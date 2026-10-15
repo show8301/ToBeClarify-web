@@ -228,11 +228,11 @@ function normalizeStaffMember(value: unknown): OperationsStaffMember | null {
   if (!id) return null;
   const workMode = isRecord(value.todayWorkMode) ? {
     businessDate: stringValue(value.todayWorkMode.businessDate),
-    isWorking: booleanValue(value.todayWorkMode.isWorking, booleanValue(value.isWorkingToday, true)),
+    isWorking: booleanValue(value.isWorkingToday, false),
     scheduledRoles: Array.isArray(value.todayWorkMode.scheduledRoles) ? value.todayWorkMode.scheduledRoles.map((role) => stringValue(role)).filter(Boolean) : [],
     activeRoles: Array.isArray(value.todayWorkMode.activeRoles) ? value.todayWorkMode.activeRoles.map((role) => stringValue(role)).filter(Boolean) : [],
   } : null;
-  return { id, displayName: stringValue(value.displayName, "未命名店員"), roleTitle: stringValue(value.roleTitle), statusText: stringValue(value.statusText), isWorkingToday: booleanValue(value.isWorkingToday, true), isActive: booleanValue(value.isActive, true), todayWorkMode: workMode };
+  return { id, displayName: stringValue(value.displayName, "未命名店員"), roleTitle: stringValue(value.roleTitle), statusText: stringValue(value.statusText), isWorkingToday: booleanValue(value.isWorkingToday, false), isActive: booleanValue(value.isActive, true), todayWorkMode: workMode };
 }
 
 function arrayValue(value: unknown) {

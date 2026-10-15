@@ -10,3 +10,10 @@ export type StaffSummary = {
   commonServices:Service[]; specialServices:Service[];
 };
 export type StaffDetail = StaffSummary & { profileBio:string|null; gallery:GalleryImage[] };
+export type StaffDutyStatus = {
+  id: string;
+  isWorkingToday: boolean;
+  currentStatus: "off" | "busy" | "available";
+  statusText: string;
+  isNominatable: boolean;
+};

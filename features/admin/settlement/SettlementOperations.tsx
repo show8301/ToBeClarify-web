@@ -146,7 +146,7 @@ export function SettlementOperations({ overview, inputs, staff, dayType, setDayT
         <div className="adminSettlementPrimaryAmount"><span>本時段淨實收</span><strong>{netCash == null ? "—" : money(netCash)} <small>G</small></strong><p>已收款扣除已退款</p></div>
         <dl><div><dt>應付薪資</dt><dd>{money(summary.totalPayroll)} G</dd></div><div><dt>公司收入</dt><dd>{money(summary.companyIncome)} G</dd></div><div><dt>分潤保留</dt><dd>{money(retained)} G</dd></div></dl>
       </section>
-      <SettlementAnomalies overview={overview} staff={staff} onAttendance={() => { setInputsOpen(true); setStep(1); }} />
+      <SettlementAnomalies overview={overview} staff={staff} saving={saving} onRefresh={onAttendanceChanged} onAttendance={() => { setInputsOpen(true); setStep(1); }} />
       {pendingFinance ? <p className="adminSettlementInlineWarning">有 {pendingFinance} 筆費用待確認；已發生金流列入淨實收，受影響分潤保留。</p> : null}
       <AdminPanel title="核對本日輸入" description="確認公共小費與入場費；活動日會顯示活動分配欄位。">
         <div className="adminFormGrid">

@@ -16,6 +16,7 @@ import { SettlementRuleSettings } from "./SettlementRuleSettings";
 import { SettlementPostActions } from "./SettlementPostActions";
 import { SettlementBackfillReviewDialog } from "./SettlementBackfillReviewDialog";
 import { settlementPeriodStatuses, settlementRoles as roleLabel, settlementStatuses } from "./presentation";
+import { mergeRefreshedInputs } from "./refresh-inputs";
 
 type StaffInput = SettlementStaffInput;
 
@@ -107,6 +108,7 @@ export function AdminSettlementPage() {
     : personalStaff.find(member => member.id === user?.staffMemberId)?.id || personalStaff[0]?.id || "";
 
   const loadSequence = useRef(0);
+  const refreshController = useRef<AbortController | null>(null);
   const load = useCallback((signal?: AbortSignal) => {
     const sequence = ++loadSequence.current;
     if (!date) {
@@ -147,8 +149,41 @@ export function AdminSettlementPage() {
   useEffect(() => {
     const controller = new AbortController();
     void load(controller.signal);
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+      refreshController.current?.abort();
+      loadSequence.current += 1;
+    };
   }, [load]);
+
+  const refreshSettlement = async () => {
+    if (!date || !overview || loading) return false;
+    refreshController.current?.abort();
+    const controller = new AbortController();
+    refreshController.current = controller;
+    const sequence = ++loadSequence.current;
+    const previous = overview.staffInputs || [];
+    setSaving(true);
+    setMessage("正在更新結算預覽；尚未保存的輸入會保留。");
+    try {
+      const next: SettlementOverview = await adminApi.getSettlement({ businessDate: date, sessionNo }, controller.signal);
+      if (controller.signal.aborted || sequence !== loadSequence.current) return false;
+      setInputs(current => mergeRefreshedInputs(current, previous, next.staffInputs || []));
+      setOverview(next);
+      setMessage("結算預覽已依最新出勤更新；尚未保存的輸入需保存後才會計入金額。");
+      return true;
+    } catch (nextError) {
+      if (!controller.signal.aborted && sequence === loadSequence.current) {
+        setMessage(`結算預覽刷新失敗：${(nextError as Error).message}。請重新整理結算資料。`);
+      }
+      return false;
+    } finally {
+      if (refreshController.current === controller) {
+        refreshController.current = null;
+        setSaving(false);
+      }
+    }
+  };
 
   const updateInput = (index: number, key: keyof StaffInput, value: unknown) => {
     setInputs((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, [key]: value } : item));
@@ -367,7 +402,7 @@ export function AdminSettlementPage() {
             key={`${date}-${sessionNo}`}
             overview={overview} inputs={inputs} staff={availableStaff} dayType={dayType} setDayType={setDayType}
             fields={runFields} setFields={setRunFields} canManage={canManage} active={tab === "operations"} saving={saving} dirty={dirty} flowVersion={flowVersion}
-            onBusyChange={setSaving} onAdd={addInput} onInputChange={updateInput} onSave={saveInputs} onCalculate={calculate}
+            onBusyChange={setSaving} onAttendanceChanged={refreshSettlement} onAdd={addInput} onInputChange={updateInput} onSave={saveInputs} onCalculate={calculate}
             onClose={closeBusinessDay} onFinalize={finalize} onReopen={reopen} onReview={openBackfillReview}
             onViewPerson={id => { selectPerson(id); changeTab("personal"); }}
           >
@@ -376,7 +411,7 @@ export function AdminSettlementPage() {
         </div>
         <div id="settlement-panel-personal" role="tabpanel" aria-labelledby="settlement-tab-personal" hidden={tab !== "personal"} className="adminSettlementTabPanel" tabIndex={0}>
           <SettlementPersonalAccounts staff={personalStaff} selectedId={selectedPersonId} results={overview.results} inputs={inputs} canManage={canManage} finalized={isFinalized} saving={saving} onSelect={selectPerson} />
-          {selectedPersonId ? <AttendancePanel key={`${date}-${selectedPersonId}`} businessDate={date} staffId={selectedPersonId} canManage={canManage} locked={isFinalized} disabled={saving} active={tab === "personal"} onBusyChange={setSaving} /> : null}
+          {selectedPersonId ? <AttendancePanel key={`${date}-${selectedPersonId}`} businessDate={date} staffId={selectedPersonId} canManage={canManage} locked={isFinalized} disabled={saving} active={tab === "personal"} onBusyChange={setSaving} onChanged={refreshSettlement} /> : null}
           <AdminPanel title="補打卡申請" description="填寫個人的出勤角色、分鐘與理由，送交開發人員或店經理核准。">
             {!isFinalized && availableStaff.some(member => member.id === selectedPersonId) ? <>
               <div className="adminFormGrid">

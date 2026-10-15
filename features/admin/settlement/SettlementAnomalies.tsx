@@ -20,9 +20,9 @@ export function SettlementAnomalies({ overview, staff, onAttendance }: Props) {
       const staffName = staff.find(member => member.id === item.sourceId)?.displayName
         || item.staffName || overview.results.find(result => result.staffId === item.sourceId)?.displayName;
       return <li key={`${item.code}-${item.sourceId || index}`}>
-        <strong>{designated ? `${staffName || "無法辨識姓名的人員"}：缺少指名人員工時輸入` : backstageMissing ? "幕後技術分潤尚無參與人員" : item.message}</strong>
+        <strong>{designated ? `${staffName || "無法辨識姓名的人員"}：尚未建立「指名人員」結算角色` : backstageMissing ? "幕後技術分潤尚無參與人員" : item.message}</strong>
         {designated ? <>
-          <p className="adminSettlementHint">此人員有指名營業額或指定小費，但尚未建立「指名人員」角色的計薪輸入；其他角色的輸入不會計入。</p>
+          <p className="adminSettlementHint">此人員有指名營業額或指定小費，但尚未建立「指名人員」角色的計薪輸入。補登出勤不會自動新增結算角色；請在「計薪輸入與人員角色」選擇此人員的「指名人員」角色並保存，出勤分鐘才會帶入。其他角色的輸入不會計入。</p>
           {!staffName ? <p className="adminSettlementHint">人員識別碼：{item.sourceId}</p> : null}
           <p className="adminSettlementHint">相關訂單：{item.orders?.length
             ? item.orders.map(order => order.orderNumber || `未提供單號（${order.orderId}）`).join("、")

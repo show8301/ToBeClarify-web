@@ -24,6 +24,7 @@ type Props = {
   dirty: boolean;
   flowVersion: number;
   onBusyChange: (busy: boolean) => void;
+  onAttendanceChanged: () => Promise<boolean>;
   onAdd: (staffId: string, role: string) => void;
   onInputChange: (index: number, key: keyof SettlementStaffInput, value: unknown) => void;
   onSave: () => Promise<void>;
@@ -43,7 +44,7 @@ const steps = [
   { title: "正式結算", description: "確認並鎖定時段" },
 ];
 
-export function SettlementOperations({ overview, inputs, staff, dayType, setDayType, fields, setFields, canManage, active, saving, dirty, flowVersion, onBusyChange, onAdd, onInputChange, onSave, onCalculate, onClose, onFinalize, onReopen, onReview, onViewPerson, children }: Props) {
+export function SettlementOperations({ overview, inputs, staff, dayType, setDayType, fields, setFields, canManage, active, saving, dirty, flowVersion, onBusyChange, onAttendanceChanged, onAdd, onInputChange, onSave, onCalculate, onClose, onFinalize, onReopen, onReview, onViewPerson, children }: Props) {
   const [step, setStep] = useState(0);
   const [inputsOpen, setInputsOpen] = useState(false);
   type Action = "close" | "save" | "calculate" | "finalize" | "reopen";
@@ -75,9 +76,14 @@ export function SettlementOperations({ overview, inputs, staff, dayType, setDayT
     ["幕後技術池", summary.backstagePool], ["公司收入", summary.companyIncome],
     ["應付薪資", summary.totalPayroll], ["公司補貼尾差", summary.companySubsidy],
   ];
-  const next = () => setStep(current => Math.min(current + 1, steps.length - 1));
+  const changeStep = (nextStep: number) => {
+    if (saving) return;
+    setStep(nextStep);
+    if (nextStep === 2) void onAttendanceChanged();
+  };
+  const next = () => changeStep(Math.min(step + 1, steps.length - 1));
   const navigation = <div className="adminSettlementStepActions">
-    <AdminButton variant="ghost" disabled={saving || step === 0} onClick={() => setStep(current => current - 1)}><ArrowLeft size={16} aria-hidden="true" />上一步</AdminButton>
+    <AdminButton variant="ghost" disabled={saving || step === 0} onClick={() => changeStep(step - 1)}><ArrowLeft size={16} aria-hidden="true" />上一步</AdminButton>
     <span>步驟 {step + 1} / {steps.length}</span>
     <AdminButton variant="secondary" disabled={saving || step === steps.length - 1} onClick={next}>下一步<ArrowRight size={16} aria-hidden="true" /></AdminButton>
   </div>;
@@ -87,13 +93,13 @@ export function SettlementOperations({ overview, inputs, staff, dayType, setDayT
     {anomalies.length || pending.length || pendingFinance ? <aside className="adminSettlementAttention" aria-label="待處理事項">
       <CircleAlert size={21} aria-hidden="true" />
       <div><strong>結算前需留意</strong><div className="adminSettlementAttentionItems">
-        {anomalies.length ? <button type="button" onClick={() => setStep(2)}>結算異常 {anomalies.length} 項</button> : null}
-        {pending.length ? <button type="button" onClick={() => setStep(1)}>補打卡待核准 {pending.length} 筆</button> : null}
-        {pendingFinance ? <button type="button" onClick={() => setStep(2)}>費用待確認 {pendingFinance} 筆</button> : null}
+        {anomalies.length ? <button type="button" disabled={saving} onClick={() => changeStep(2)}>結算異常 {anomalies.length} 項</button> : null}
+        {pending.length ? <button type="button" disabled={saving} onClick={() => changeStep(1)}>補打卡待核准 {pending.length} 筆</button> : null}
+        {pendingFinance ? <button type="button" disabled={saving} onClick={() => changeStep(2)}>費用待確認 {pendingFinance} 筆</button> : null}
       </div></div>
     </aside> : null}
     <nav className="adminSettlementStepper" aria-label="營運結算流程">
-      {steps.map((item, index) => <button key={item.title} type="button" aria-current={step === index ? "step" : undefined} aria-controls={`settlement-step-panel-${index}`} disabled={saving} onClick={() => setStep(index)}>
+      {steps.map((item, index) => <button key={item.title} type="button" aria-current={step === index ? "step" : undefined} aria-controls={`settlement-step-panel-${index}`} disabled={saving} onClick={() => changeStep(index)}>
         <span className="adminSettlementStepNumber">{complete[index] ? <CircleCheck size={21} aria-label="已完成" /> : index + 1}</span>
         <span><strong>{item.title}</strong><small>{item.description}</small></span>
       </button>)}
@@ -118,7 +124,7 @@ export function SettlementOperations({ overview, inputs, staff, dayType, setDayT
     </div>
 
     <div id="settlement-step-panel-1" hidden={step !== 1} className="adminSettlementStepBody">
-      <AttendancePanel businessDate={run.businessDate} canManage={canManage} locked={finalized} disabled={saving} active={active && step === 1} onBusyChange={onBusyChange} />
+      <AttendancePanel businessDate={run.businessDate} canManage={canManage} locked={finalized} disabled={saving} active={active && step === 1} onBusyChange={onBusyChange} onChanged={onAttendanceChanged} />
       {pending.length ? <AdminPanel title={`補打卡待核准 · ${pending.length} 筆`} description="活動日出席須有打卡紀錄，補打卡由開發人員或店經理核准。">
         <div className="adminSettlementRequestList">{pending.map(item => <article key={item.id}>
           <div><strong>{item.staffName || item.staffId}</strong><span>{settlementRoles[item.role] || item.role} · {item.requestedMinutes} 分鐘</span><p>{item.reason}</p></div>
@@ -128,7 +134,7 @@ export function SettlementOperations({ overview, inputs, staff, dayType, setDayT
       <details className="adminSettlementDisclosure" open={inputsOpen} onToggle={event => setInputsOpen(event.currentTarget.open)}>
         <AdminDisclosureSummary>計薪輸入與人員角色 · {inputs.length} 筆</AdminDisclosureSummary>
         <div className="adminSettlementDisclosureBody">
-        <p className="adminSettlementHint">全天實際分鐘加總後，以半小時為切點計薪。公共小費名單由核准出勤資料產生。</p>
+        <p className="adminSettlementHint">全天實際分鐘加總後，以半小時為切點計薪。出勤修正會更新已建立角色的工時；尚未建立的角色，請先在下方新增結算人員並保存。公共小費名單由核准出勤資料產生。</p>
         <SettlementStaffInputTable inputs={inputs} staff={staff} editable={editable} isEvent={dayType === "event"} onAdd={onAdd} onChange={onInputChange} />
         {canManage && !finalized ? <div className="adminSettlementActionBar"><span>{dirty ? "有尚未保存的結算輸入。" : "核對完成後，在下一步重新計算。"}</span><AdminButton variant="secondary" disabled={saving} onClick={() => void onSave()}>保存結算輸入</AdminButton></div> : null}
       </div></details>

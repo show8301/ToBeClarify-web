@@ -33,6 +33,11 @@ $ErrorActionPreference = 'Stop'
 
 . (Join-Path $PSScriptRoot 'native-command.ps1')
 
+$entryExitCode = Get-Variable -Name LASTEXITCODE -ErrorAction SilentlyContinue
+if ($null -ne $entryExitCode) {
+    Write-Host "[deploy] Entry LASTEXITCODE=$($entryExitCode.Value)"
+}
+
 function Get-NormalizedPath {
     param([Parameter(Mandatory = $true)][string]$Path)
 
@@ -259,7 +264,13 @@ function Get-PortListenerProcessId {
     }
     catch {
         $netstatPattern = "^\s*TCP\s+(127\.0\.0\.1|0\.0\.0\.0|\[::\]):$Port\s+.*\s+LISTENING\s+(\d+)\s*$"
-        $netstatLine = netstat -ano -p TCP | Select-String -Pattern $netstatPattern | Select-Object -First 1
+        # Capture the complete native result before selecting a match. An early
+        # pipeline stop must not terminate netstat or leave an unchecked code.
+        $netstatResult = Invoke-NativeCommand -FilePath 'netstat.exe' -ArgumentList @('-ano', '-p', 'TCP')
+        if ($netstatResult.ExitCode -ne 0) {
+            throw "Unable to inspect the listener on port ${Port}: netstat exited with code $($netstatResult.ExitCode)."
+        }
+        $netstatLine = $netstatResult.Output | Select-String -Pattern $netstatPattern | Select-Object -First 1
         if ($null -ne $netstatLine) {
             $listenerPid = [int]$netstatLine.Matches[0].Groups[2].Value
         }
@@ -1089,3 +1100,10 @@ catch {
     }
     throw $deploymentError
 }
+
+# Reached only after deployment, both sites' SHA/health checks and PM2 startup
+# persistence succeed. All failures above still throw, including rollback errors.
+# An explicit script exit sets the caller's LASTEXITCODE instead of allowing the
+# Actions PowerShell footer to reuse a handled native command's stale result.
+Write-Host '[deploy] All required deployment steps completed; returning exit code 0.'
+exit 0

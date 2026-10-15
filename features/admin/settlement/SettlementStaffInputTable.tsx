@@ -41,7 +41,7 @@ export function SettlementStaffInputTable({ inputs, staff, editable, isEvent, on
                   {isEvent ? <td><input aria-label={`${item.displayName} 活動分配時數`} type="number" min="0" step="0.5" value={item.activityHours ?? ""} disabled={!editable} onChange={(event) => onChange(index, "activityHours", event.target.value === "" ? null : Number(event.target.value))} /></td> : null}
                   <td><select aria-label={`${item.displayName} 出勤來源`} value={item.attendanceSource || "manual"} disabled={!editable || item.attendanceSource === "backfill_approved"} onChange={(event) => onChange(index, "attendanceSource", event.target.value)}><option value="manual">未核准</option><option value="clock">已由打卡帶入</option><option value="backfill_approved">補打卡已核准</option></select></td>
                   <td>{item.publicTipEligible ? "自動納入" : "不納入"}</td>
-                  <td><input aria-label={`${item.displayName} 幕後參與`} type="checkbox" checked={item.isBackstageParticipant} disabled={!editable} onChange={(event) => onChange(index, "isBackstageParticipant", event.target.checked)} /></td>
+                  <td>{item.role === "backstage" ? <input aria-label={`${item.displayName} 幕後參與`} type="checkbox" checked={item.isBackstageParticipant} disabled={!editable} onChange={(event) => onChange(index, "isBackstageParticipant", event.target.checked)} /> : "不適用"}</td>
                 </tr>
               ))}
             </tbody>

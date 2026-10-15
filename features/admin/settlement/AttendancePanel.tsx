@@ -12,10 +12,10 @@ type Summary = {
   activeServiceCount: number; affectedOrders?: Array<{ orderId: string; orderNumber: string; orderStatus: string; customerName?: string | null; requestedStart: string; requestedEnd: string }>;
 };
 type Action = "clock_in" | "clock_out" | "add_minutes" | "subtract_minutes" | "set_times" | "stop_orders" | "resume_orders";
-type Props = { businessDate: string; canManage: boolean; staffId?: string; locked?: boolean; disabled?: boolean; active?: boolean; onBusyChange?: (busy: boolean) => void };
+type Props = { businessDate: string; canManage: boolean; staffId?: string; locked?: boolean; disabled?: boolean; active?: boolean; onBusyChange?: (busy: boolean) => void; onChanged?: () => Promise<boolean> };
 const time = (value?: string | null) => value ? new Date(value).toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Taipei" }) : "—";
 
-export function AttendancePanel({ businessDate, canManage, staffId, locked = false, disabled = false, active = true, onBusyChange }: Props) {
+export function AttendancePanel({ businessDate, canManage, staffId, locked = false, disabled = false, active = true, onBusyChange, onChanged }: Props) {
   const personal = staffId !== undefined;
   const [rows, setRows] = useState<Summary[]>([]);
   const [selected, setSelected] = useState("");
@@ -28,6 +28,7 @@ export function AttendancePanel({ businessDate, canManage, staffId, locked = fal
   const [busy, setBusy] = useState(false);
   const [editing, setEditing] = useState(false);
   const sequence = useRef(0);
+  const applying = useRef(false);
   const load = useCallback((signal?: AbortSignal) => {
     if (!businessDate) return Promise.resolve(false);
     const request = ++sequence.current;
@@ -55,7 +56,8 @@ export function AttendancePanel({ businessDate, canManage, staffId, locked = fal
   const needsMinutes = action === "add_minutes" || action === "subtract_minutes";
   const needsStart = action === "clock_in" || action === "clock_out" || action === "set_times";
   const apply = async () => {
-    if (!selectedId || locked || disabled) return;
+    if (!selectedId || locked || disabled || applying.current) return;
+    applying.current = true;
     setBusy(true); onBusyChange?.(true); setMessage("");
     try {
       await adminApi.applyAttendance({ operationId: crypto.randomUUID(), businessDate, staffId: selectedId, action,
@@ -64,9 +66,11 @@ export function AttendancePanel({ businessDate, canManage, staffId, locked = fal
         minutes: needsMinutes ? minutes : undefined, reason: reason.trim() || undefined });
       setReason("");
       const refreshed = await load();
-      if (refreshed) setMessage(action === "stop_orders" ? "已停止接受新的指名單，既有服務仍保留。" : action === "resume_orders" ? "已恢復接受新的指名單。" : "出勤紀錄已更新；重新計算後更新薪資預覽。");
+      const settlementRefreshed = onChanged ? await onChanged().catch(() => false) : true;
+      if (!settlementRefreshed) setMessage("出勤已保存，但結算預覽刷新失敗，請重新整理結算資料；不需重送出勤操作。");
+      else if (refreshed) setMessage(action === "stop_orders" ? "已停止接受新的指名單，既有服務仍保留。" : action === "resume_orders" ? "已恢復接受新的指名單。" : onChanged ? "出勤紀錄與結算預覽已更新；核准的單一前台計薪角色與幕後參與可同時帶入，請保存或重新計算以儲存。若仍有異常，請核對前台角色及工時分配。" : "出勤紀錄已更新；重新計算後更新薪資預覽。");
     } catch (error) { setMessage(error instanceof Error ? error.message : "出勤操作失敗"); }
-    finally { setBusy(false); onBusyChange?.(false); }
+    finally { applying.current = false; setBusy(false); onBusyChange?.(false); }
   };
   return <AdminPanel title={personal ? "個人出勤紀錄" : "出勤與接單核對"} description={personal ? "核對當日班次；人工修正會保留獨立紀錄。" : "先核對全員班次與有效工時，需要調整時再展開出勤修正。"}>
     {visibleRows.length === 0 ? <p className="adminEmptyText">{personal ? "這位人員當日沒有已核准的班次。" : "當日沒有已核准的工作班次。"}</p> : <>

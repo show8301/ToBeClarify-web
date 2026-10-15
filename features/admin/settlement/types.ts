@@ -123,13 +123,21 @@ export type SettlementStaffInput = {
 
 export type SettlementTab = "operations" | "personal" | "settings";
 
+export type SettlementAnomaly = {
+  code: string;
+  message: string;
+  sourceId?: string | null;
+  staffName?: string | null;
+  orders?: { orderId: string; orderNumber: string }[] | null;
+};
+
 export type SettlementOverview = {
   run: SettlementRun;
   rule: SettlementRule;
   summary: SettlementSummary;
   staffInputs: SettlementStaffInput[];
   results: SettlementResult[];
-  anomalies: { code: string; message: string; sourceId?: string | null }[];
+  anomalies: SettlementAnomaly[];
   attendanceBackfillRequests: AttendanceBackfill[];
   workflow?: SettlementWorkflow | null;
 };

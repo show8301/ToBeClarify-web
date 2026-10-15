@@ -5,6 +5,7 @@ import { AdminButton, AdminField, AdminPanel } from "@/features/admin/shared/Adm
 import { AdminDisclosureSummary } from "@/features/admin/shared/AdminDisclosureSummary";
 import { AttendancePanel } from "./AttendancePanel";
 import { SettlementStaffInputTable } from "./SettlementStaffInputTable";
+import { SettlementAnomalies } from "./SettlementAnomalies";
 import { settlementMoney as money, settlementPeriodStatuses, settlementRoles, settlementStatuses } from "./presentation";
 import type { SettlementOverview, SettlementRunFields, SettlementStaff, SettlementStaffInput } from "./types";
 import { getFinalizeDisabledReason } from "./disabled-reasons";
@@ -44,6 +45,7 @@ const steps = [
 
 export function SettlementOperations({ overview, inputs, staff, dayType, setDayType, fields, setFields, canManage, active, saving, dirty, flowVersion, onBusyChange, onAdd, onInputChange, onSave, onCalculate, onClose, onFinalize, onReopen, onReview, onViewPerson, children }: Props) {
   const [step, setStep] = useState(0);
+  const [inputsOpen, setInputsOpen] = useState(false);
   type Action = "close" | "save" | "calculate" | "finalize" | "reopen";
   const [pendingAction, setPendingAction] = useState<Action | null>(null);
   const actionLock = useRef<Action | null>(null);
@@ -123,7 +125,7 @@ export function SettlementOperations({ overview, inputs, staff, dayType, setDayT
           {canManage && !finalized ? <div className="adminSettlementInlineActions"><AdminButton variant="secondary" disabled={saving} onClick={() => void onReview(item.id, true)}>核准</AdminButton><AdminButton variant="ghost" disabled={saving} onClick={() => void onReview(item.id, false)}>拒絕</AdminButton></div> : <span className="adminSettlementBadge">待核准</span>}
         </article>)}</div>
       </AdminPanel> : null}
-      <details className="adminSettlementDisclosure">
+      <details className="adminSettlementDisclosure" open={inputsOpen} onToggle={event => setInputsOpen(event.currentTarget.open)}>
         <AdminDisclosureSummary>計薪輸入與人員角色 · {inputs.length} 筆</AdminDisclosureSummary>
         <div className="adminSettlementDisclosureBody">
         <p className="adminSettlementHint">全天實際分鐘加總後，以半小時為切點計薪。公共小費名單由核准出勤資料產生。</p>
@@ -138,7 +140,7 @@ export function SettlementOperations({ overview, inputs, staff, dayType, setDayT
         <div className="adminSettlementPrimaryAmount"><span>本時段淨實收</span><strong>{netCash == null ? "—" : money(netCash)} <small>G</small></strong><p>已收款扣除已退款</p></div>
         <dl><div><dt>應付薪資</dt><dd>{money(summary.totalPayroll)} G</dd></div><div><dt>公司收入</dt><dd>{money(summary.companyIncome)} G</dd></div><div><dt>分潤保留</dt><dd>{money(retained)} G</dd></div></dl>
       </section>
-      {anomalies.length ? <AdminPanel title={`需處理的結算異常 · ${anomalies.length} 項`} description="完成輸入或修正後重新計算，以下異常會阻止正式結算。" className="adminSettlementAnomalies"><ul>{anomalies.map((item, index) => <li key={`${item.code}-${item.sourceId || index}`}>{item.message}{item.sourceId ? `（${item.sourceId}）` : ""}</li>)}</ul></AdminPanel> : null}
+      <SettlementAnomalies overview={overview} staff={staff} onAttendance={() => { setInputsOpen(true); setStep(1); }} />
       {pendingFinance ? <p className="adminSettlementInlineWarning">有 {pendingFinance} 筆費用待確認；已發生金流列入淨實收，受影響分潤保留。</p> : null}
       <AdminPanel title="核對本日輸入" description="確認公共小費與入場費；活動日會顯示活動分配欄位。">
         <div className="adminFormGrid">

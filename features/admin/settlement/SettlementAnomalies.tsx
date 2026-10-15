@@ -34,7 +34,7 @@ export function SettlementAnomalies({ overview, staff, onAttendance, saving, onR
       return <li key={`${item.code}-${item.sourceId || index}`}>
         <strong>{designated ? `${staffName || "無法辨識姓名的人員"}：尚未建立「指名人員」結算角色` : backstageMissing ? "幕後技術分潤尚無參與人員" : item.message}</strong>
         {designated ? <>
-          <p className="adminSettlementHint">此人員有指名營業額或指定小費，但目前沒有可用的「指名人員」計薪輸入。有有效出勤且核准班表只有一個計薪角色時會自動帶入；請核對出勤、核准角色及既有角色輸入，必要時在「計薪輸入與人員角色」確認並保存。</p>
+          <p className="adminSettlementHint">此人員有指名營業額或指定小費，但目前沒有可用的「指名人員」計薪輸入。有有效出勤且核准班表的前台角色只有一個時會自動帶入，幕後參與可同時兼任；請核對出勤、核准角色及既有前台角色輸入，必要時在「計薪輸入與人員角色」確認並保存。</p>
           {!staffName ? <p className="adminSettlementHint">人員識別碼：{item.sourceId}</p> : null}
           <p className="adminSettlementHint">相關訂單：{item.orders?.length
             ? item.orders.map(order => order.orderNumber || `未提供單號（${order.orderId}）`).join("、")

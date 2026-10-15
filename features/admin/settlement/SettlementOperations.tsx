@@ -134,7 +134,7 @@ export function SettlementOperations({ overview, inputs, staff, dayType, setDayT
       <details className="adminSettlementDisclosure" open={inputsOpen} onToggle={event => setInputsOpen(event.currentTarget.open)}>
         <AdminDisclosureSummary>計薪輸入與人員角色 · {inputs.length} 筆</AdminDisclosureSummary>
         <div className="adminSettlementDisclosureBody">
-        <p className="adminSettlementHint">全天實際分鐘加總後，以半小時為切點計薪。有有效出勤且核准班表只有一個計薪角色時，會自動補入缺少的計薪輸入；保存或重新計算時儲存。多角色人員請確認工時分配後保存。公共小費名單由核准出勤資料產生。</p>
+        <p className="adminSettlementHint">全天實際分鐘加總後，以半小時為切點計薪。有效出勤會依核准班表自動帶入單一前台角色，幕後參與可同時兼任；保存或重新計算時儲存。若同時擔任多個前台角色，請確認工時分配後保存。公共小費名單由核准出勤資料產生。</p>
         <SettlementStaffInputTable inputs={inputs} staff={staff} editable={editable} isEvent={dayType === "event"} onAdd={onAdd} onChange={onInputChange} />
         {canManage && !finalized ? <div className="adminSettlementActionBar"><span>{dirty ? "有尚未保存的結算輸入。" : "核對完成後，在下一步重新計算。"}</span><AdminButton variant="secondary" disabled={saving} onClick={() => void onSave()}>保存結算輸入</AdminButton></div> : null}
       </div></details>

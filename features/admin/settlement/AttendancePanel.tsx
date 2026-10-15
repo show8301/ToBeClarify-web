@@ -68,7 +68,7 @@ export function AttendancePanel({ businessDate, canManage, staffId, locked = fal
       const refreshed = await load();
       const settlementRefreshed = onChanged ? await onChanged().catch(() => false) : true;
       if (!settlementRefreshed) setMessage("出勤已保存，但結算預覽刷新失敗，請重新整理結算資料；不需重送出勤操作。");
-      else if (refreshed) setMessage(action === "stop_orders" ? "已停止接受新的指名單，既有服務仍保留。" : action === "resume_orders" ? "已恢復接受新的指名單。" : onChanged ? "出勤紀錄與結算預覽已更新；核准的單一計薪角色會自動帶入，請保存或重新計算以儲存。若仍有異常，請核對核准角色及工時分配。" : "出勤紀錄已更新；重新計算後更新薪資預覽。");
+      else if (refreshed) setMessage(action === "stop_orders" ? "已停止接受新的指名單，既有服務仍保留。" : action === "resume_orders" ? "已恢復接受新的指名單。" : onChanged ? "出勤紀錄與結算預覽已更新；核准的單一前台計薪角色與幕後參與可同時帶入，請保存或重新計算以儲存。若仍有異常，請核對前台角色及工時分配。" : "出勤紀錄已更新；重新計算後更新薪資預覽。");
     } catch (error) { setMessage(error instanceof Error ? error.message : "出勤操作失敗"); }
     finally { applying.current = false; setBusy(false); onBusyChange?.(false); }
   };

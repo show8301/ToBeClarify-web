@@ -136,6 +136,24 @@ isolated from unrelated PM2 applications such as `D:\cron`.
   `ToBeClarify PM2 Web Resurrect` startup task only runs `pm2 resurrect` after
   Windows starts; PM2, rather than Scheduled Tasks, watches the Node processes.
 
+## Deployment exit-code handling
+
+- `deploy-vinext-iis.ps1` explicitly exits with `0` only after deployment, target
+  and sibling SHA/health verification, PM2 save, and startup-task registration
+  succeed. The workflow's built-in PowerShell footer therefore receives the
+  deployment result rather than an earlier, handled native-command exit code.
+- Deployment and rollback failures still throw. Never force success in a
+  `finally` block or use `continue-on-error` to hide a deployment failure.
+- `Invoke-NativeCommand` preserves its previous global `$LASTEXITCODE` contract;
+  callers must check the returned `.ExitCode`. Diagnostics record executable
+  names, exit codes, and the preserved global value, not arguments or output.
+- Listener fallback captures `netstat.exe` completely and checks its exit code
+  before selecting a result. Failure to inspect a listener fails the operation
+  rather than treating the port as available.
+- The October 14 incident's original nonzero command remains unconfirmed. The
+  new diagnostics support identifying it on subsequent runs; a successful
+  deployment alone does not prove which command originally produced `1`.
+
 ## Reversible Scheduled Task migration
 
 - DEV and production migrate independently. A sibling may still run through

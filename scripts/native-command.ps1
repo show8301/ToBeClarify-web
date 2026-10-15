@@ -13,6 +13,11 @@ function Invoke-NativeCommand {
         [int]$previousLastExitCodeVariable.Value
     }
 
+    # Log only the executable name, never arguments or captured output: callers
+    # may pass credentials. Preserve the existing exit-code isolation contract.
+    $commandName = Split-Path -Leaf $FilePath
+    Write-Host "[native] $commandName starting; previous global LASTEXITCODE=$previousLastExitCode"
+
     try {
         # Windows PowerShell 5.1 converts native stderr into ErrorRecord values.
         # Capture those values without allowing the caller's Stop preference to
@@ -25,6 +30,8 @@ function Invoke-NativeCommand {
         $ErrorActionPreference = $previousErrorActionPreference
         $global:LASTEXITCODE = $previousLastExitCode
     }
+
+    Write-Host "[native] $commandName completed; exit=$commandExitCode; restored global LASTEXITCODE=$previousLastExitCode"
 
     return [pscustomobject]@{
         ExitCode = [int]$commandExitCode

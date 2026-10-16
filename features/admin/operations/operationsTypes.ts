@@ -100,6 +100,16 @@ export type OperationsRoomOrder = {
   note: string;
 };
 
+export type WorkRole = "service" | "designated" | "backstage";
+
+export type StaffDailyWorkMode = {
+  businessDate: string;
+  isWorking: boolean;
+  stopAcceptingNewOrders: boolean;
+  scheduledRoles: WorkRole[];
+  activeRoles: WorkRole[];
+};
+
 export type OperationsStaffMember = {
   id: string;
   displayName: string;
@@ -107,12 +117,8 @@ export type OperationsStaffMember = {
   statusText: string;
   isWorkingToday: boolean;
   isActive: boolean;
-  todayWorkMode: {
-    businessDate: string;
-    isWorking: boolean;
-    scheduledRoles: string[];
-    activeRoles: string[];
-  } | null;
+  todayShift: string;
+  todayWorkMode: StaffDailyWorkMode | null;
 };
 
 export type OperationsData = {
@@ -121,6 +127,25 @@ export type OperationsData = {
   orders: OperationsOrder[];
   roomOrders: OperationsRoomOrder[];
   staff: OperationsStaffMember[];
+  dutyPlans: OperationsDutyPlan[] | null;
+  dutyPlansError: string;
+  refreshedAt: number;
+};
+
+export type OperationsDutyPlan = {
+  id: string;
+  staffId: string;
+  staffName: string;
+  businessDate: string;
+  isWorking: boolean;
+  startTime: string | null;
+  endTime: string | null;
+  scheduledRoles: WorkRole[];
+  approvalStatus: "pending" | "approved" | "rejected";
+  startsAt: string | null;
+  endsAt: string | null;
+  submittedAt: string;
+  approvedAt: string;
 };
 
 export type OperationsActionState = {

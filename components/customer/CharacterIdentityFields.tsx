@@ -6,9 +6,11 @@ type Props = {
   onGameIdChange: (value: string) => void;
   onServerChange: (value: string) => void;
   disabled?: boolean;
+  gameIdMaxLength?: number;
+  showPreview?: boolean;
 };
 
-export function CharacterIdentityFields({ gameId, serverName, onGameIdChange, onServerChange, disabled = false }: Props) {
+export function CharacterIdentityFields({ gameId, serverName, onGameIdChange, onServerChange, disabled = false, gameIdMaxLength = 100, showPreview = true }: Props) {
   let preview = "填妥人物 ID 與伺服器後顯示完整顧客 ID。";
   let invalid = false;
   if (gameId.trim() && serverName) {
@@ -19,11 +21,11 @@ export function CharacterIdentityFields({ gameId, serverName, onGameIdChange, on
     }
   }
   return <div className="characterIdentityFields">
-    <label>人物 ID<input value={gameId} maxLength={100} autoComplete="off" spellCheck={false} required disabled={disabled} aria-invalid={invalid} onChange={(event) => onGameIdChange(event.target.value)} /></label>
-    <label>角色所屬伺服器<select value={serverName} required disabled={disabled} onChange={(event) => onServerChange(event.target.value)}>
+    <label><span>人物 ID</span><input value={gameId} maxLength={gameIdMaxLength} autoComplete="off" spellCheck={false} required disabled={disabled} aria-invalid={invalid} onChange={(event) => onGameIdChange(event.target.value)} /></label>
+    <label><span>角色所屬伺服器</span><select value={serverName} required disabled={disabled} onChange={(event) => onServerChange(event.target.value)}>
       <option value="" disabled>請選擇伺服器</option>
       {CHARACTER_SERVERS.map((server) => <option value={server} key={server}>{server}</option>)}
     </select></label>
-    <p className="characterIdentityPreview" role="status">{preview}</p>
+    {showPreview ? <p className="characterIdentityPreview" role="status">{preview}</p> : null}
   </div>;
 }

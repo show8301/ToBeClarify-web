@@ -1,0 +1,38 @@
+/* Standard supplemental help: geometry comes from the shared icon tokens. */
+.adminHelpTrigger {
+  --icon-action-size: 24px;
+  --icon-action-glyph-size: 16px;
+  border: 0;
+  color: var(--color-fg-soft);
+  background: transparent;
+  box-shadow: none;
+  cursor: help;
+}
+.adminHelpTrigger:hover { color: var(--color-fg); }
+.adminHelpTrigger:focus-visible,
+.adminHelpPopup button:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 3px; }
+.adminHelpPositioner { z-index: 1200; }
+.adminTheme.adminHelpPopup {
+  box-sizing: border-box;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  max-width: min(340px, calc(100vw - 32px));
+  max-height: var(--available-height);
+  min-height: 0;
+  overflow: auto;
+  overflow-wrap: anywhere;
+  padding: 14px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 10px;
+  color: var(--color-fg);
+  background: var(--color-surface);
+  box-shadow: 0 8px 24px rgb(0 0 0 / .18);
+}
+.adminHelpPopup h2 { margin: 0; font-size: 15px; }
+.adminHelpPopup p { margin: 0; font-size: 13px; line-height: 1.7; }
+.adminHelpPopup button { justify-self: end; min-height: 36px; padding: 6px 10px; border: 1px solid var(--color-border); border-radius: 6px; color: var(--color-fg); background: var(--color-surface-input); }
+@media (any-pointer: coarse) {
+  .adminHelpTrigger { --icon-action-size: 44px; }
+  .adminHelpPopup button { min-height: 44px; }
+}

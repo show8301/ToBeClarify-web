@@ -282,73 +282,9 @@
   margin: 0;
 }
 
-.staffingAvailabilityTrigger {
-  /* User-requested inline help treatment; keep the shared icon geometry source. */
-  --icon-action-size: 28px;
-  --icon-action-glyph-size: 18px;
-  --icon-action-radius: 4px;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-  color: var(--color-fg-mute);
-  cursor: help;
-}
-
-.staffingAvailabilityTrigger:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 3px;
-}
-
-.staffingAvailabilityPositioner {
-  z-index: 1200;
-}
-
-.adminTheme.staffingAvailabilityPopup {
-  box-sizing: border-box;
-  display: grid;
-  gap: 8px;
-  width: min(320px, calc(100vw - 32px));
-  min-height: 0;
-  max-height: var(--available-height);
-  overflow: auto;
-  padding: 14px;
-  border: 1px solid var(--color-border-strong);
-  border-radius: 12px;
-  background: var(--color-surface);
-  color: var(--color-fg);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, .2);
-  overflow-wrap: anywhere;
-}
-
-.staffingAvailabilityPopup h2 {
-  margin: 0;
-  font-size: 16px;
-}
-
-.staffingAvailabilityPopup p {
-  margin: 0;
-  font-size: 15px;
-  line-height: 1.7;
-}
-
-.staffingAvailabilityClose {
-  justify-self: end;
-  min-height: 36px;
-  padding: 6px 10px;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-}
-
 .staffingServiceReview {
   display: grid;
   gap: 8px;
-}
-
-:root[data-admin-theme="dark"] .staffingAvailabilityPopup {
-  background: var(--color-surface);
 }
 
 .managerQueue {
@@ -562,12 +498,6 @@
   .managerTaskActions {
     grid-column: 1 / -1;
     justify-content: flex-start;
-  }
-}
-
-@media (any-pointer: coarse) {
-  .staffingAvailabilityTrigger {
-    --icon-action-size: 44px;
   }
 }
 

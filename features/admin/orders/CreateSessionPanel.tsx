@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { FormEvent } from "react";
+import { AdminHelp } from "@/features/admin/shared/AdminHelp";
 import { CharacterIdentityFields } from "@/components/customer/CharacterIdentityFields";
 import { composeCharacterIdentity } from "@/lib/customer-identity";
 import { adminApi } from "@/features/admin/api/client.js";
@@ -34,6 +35,7 @@ function parseIssued(value: unknown): IssuedSession {
 }
 
 export function CreateSessionPanel({ canManage, onClose, onIssued }: Props) {
+  const uidInputId = useId();
   const [form, setForm] = useState({ gameId: "", serverName: "", customerName: "", customerUid: "", maxNominatedStaff: 1 });
   const [result, setResult] = useState<CandidateState | null>(null);
   const [candidateRevision, setCandidateRevision] = useState(0);
@@ -41,7 +43,11 @@ export function CreateSessionPanel({ canManage, onClose, onIssued }: Props) {
   const [error, setError] = useState("");
   const submission = useRef<AbortController | null>(null);
   let identity = null;
-  try { identity = composeCharacterIdentity(form.gameId, form.serverName); } catch { /* Incomplete input is expected. */ }
+  let identityError = "";
+  try { identity = composeCharacterIdentity(form.gameId, form.serverName); }
+  catch (reason) {
+    if (form.gameId.trim() && form.serverName) identityError = reason instanceof Error ? reason.message : "請核對人物 ID 與伺服器。";
+  }
   const identityKey = identity?.gameId || "";
   const candidates = result?.key === identityKey ? result.items : [];
   const candidateLoading = Boolean(identityKey && result?.key !== identityKey);
@@ -87,27 +93,48 @@ export function CreateSessionPanel({ canManage, onClose, onIssued }: Props) {
   }
 
   return <div className="adminOrderInlinePanel adminCreateSessionPanel">
-    <header><div><span>NEW ORDER PASS</span><h2>開立今日點餐碼</h2></div><button type="button" aria-label="關閉發點餐碼" disabled={loading} onClick={onClose}>×</button></header>
+    <header>
+      <div>
+        <div className="adminCreateSessionHeading">
+          <h2>開立今日點餐碼</h2>
+          <AdminHelp title="點餐碼填寫說明">人物 ID 最多 6 字，顧客顯示名稱最多 12 字，可同時指名人數為 0–9 人。選擇角色所屬伺服器後，系統以「人物 ID@伺服器」查詢歸戶；唯一候選會自動沿用，多個候選未選擇時先不歸戶。</AdminHelp>
+        </div>
+      </div>
+      <button type="button" aria-label="關閉發點餐碼" disabled={loading} onClick={onClose}>×</button>
+    </header>
     <form onSubmit={(event) => { void submit(event); }}>
-      <CharacterIdentityFields gameId={form.gameId} serverName={form.serverName} disabled={loading}
+      <CharacterIdentityFields gameId={form.gameId} serverName={form.serverName} disabled={loading} gameIdMaxLength={6} showPreview={false}
         onGameIdChange={(gameId) => setForm({ ...form, gameId, customerUid: "" })}
         onServerChange={(serverName) => setForm({ ...form, serverName, customerUid: "" })} />
-      <label>顧客顯示名稱（選填）<input maxLength={100} value={form.customerName} disabled={loading} onChange={(event) => setForm({ ...form, customerName: event.target.value })} /></label>
-      <label>可同時指名人數<input type="number" min="0" max="100" required value={form.maxNominatedStaff} disabled={loading} onChange={(event) => setForm({ ...form, maxNominatedStaff: Number(event.target.value) })} /></label>
+      <label className="adminSessionDisplayName">
+        <span>顧客顯示名稱（選填）</span>
+        <input maxLength={12} value={form.customerName} disabled={loading} onChange={(event) => setForm({ ...form, customerName: event.target.value })} />
+      </label>
+      <label className="adminSessionNominationLimit">
+        <span>可同時指名人數</span>
+        <input type="number" inputMode="numeric" min="0" max="9" required value={form.maxNominatedStaff} disabled={loading} onChange={(event) => setForm({ ...form, maxNominatedStaff: Number(event.target.value) })} />
+      </label>
+      {canManage ? <div className="adminSessionExistingUid">
+        <div className="adminSessionFieldHeading">
+          <label htmlFor={uidInputId}>既有 UID（選填）</label>
+          <AdminHelp title="既有 UID 填寫說明">若要延續未記錄伺服器的舊顧客，請先核對歷史資料，於開碼前填入既有 UID。留空時依相同人物及伺服器的候選規則處理。</AdminHelp>
+        </div>
+        <input id={uidInputId} value={form.customerUid} maxLength={40} disabled={loading} autoComplete="off" onChange={(event) => setForm({ ...form, customerUid: event.target.value.trim().toUpperCase() })} />
+      </div> : null}
       <AdminButton type="submit" disabled={loading || !identityKey || candidateLoading || Boolean(candidateError)}>{loading ? "開立中…" : "產生點餐網址"}</AdminButton>
       <div className="adminSessionIdentityFeedback" aria-live="polite">
+        {identityError ? <p className="adminFormError">{identityError}</p> : null}
+        {identityKey ? <p className="adminSessionQualifiedId">顧客 ID：<strong>{identityKey}</strong></p> : null}
         {candidateLoading ? <p>正在查詢相同人物及伺服器的歷史 UID…</p> : null}
         {candidateError ? <div><p className="adminFormError">{candidateError}</p><button type="button" className="adminButton adminButton-secondary" onClick={() => { setResult(null); setCandidateRevision((value) => value + 1); }}>重新查詢 UID</button></div> : null}
         {candidates.length ? <fieldset className="adminIdentityCandidates">
           <legend>相同人物及伺服器的歷史 UID</legend>
-          <p>唯一候選由系統沿用；多個候選且未選擇時，先不歸戶。</p>
           {canManage ? candidates.map((candidate) => <label key={candidate.uid}>
             <input type="radio" name="customerUid" disabled={loading} checked={form.customerUid === candidate.uid} onChange={() => setForm({ ...form, customerUid: candidate.uid })} />
             <span><strong>{candidate.uid}</strong> · {candidate.displayName || "未命名"}<small>最近來店 {candidate.lastVisitAt ? new Date(candidate.lastVisitAt).toLocaleDateString("zh-TW", { timeZone: "Asia/Taipei" }) : "—"} · {candidate.visitCount} 次入場 · {candidate.orderCount} 張訂單</small></span>
           </label>) : <p>手動選擇既有 UID 需由店經理核對。</p>}
           {canManage ? <button type="button" className="adminButton adminButton-ghost" disabled={loading} onClick={() => setForm({ ...form, customerUid: "" })}>由系統判斷歸戶</button> : null}
-        </fieldset> : identityKey && !candidateLoading && !candidateError ? <p>尚無相同人物及伺服器的 UID，將建立新 UID。舊紀錄若未記錄伺服器，請先由店經理至歷史顧客頁核對。</p> : null}
-        {canManage ? <label>經核對的既有 UID（選填）<input value={form.customerUid} maxLength={40} disabled={loading} autoComplete="off" onChange={(event) => setForm({ ...form, customerUid: event.target.value.trim().toUpperCase() })} /><small>若要延續未記錄伺服器的舊顧客，請先核對歷史資料並於開碼前填入 UID。留空依上方候選規則處理。</small></label> : null}
+        </fieldset> : identityKey && !candidateLoading && !candidateError ? <p>{canManage && form.customerUid ? "將使用經核對的既有 UID。" : "新顧客，將建立 UID。"}</p> : null}
       </div>
     </form>
     {error ? <p className="adminFormError" role="alert">{error}</p> : null}

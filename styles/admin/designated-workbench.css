@@ -21,7 +21,7 @@
   gap: var(--admin-space-block);
 }
 
-:is(.adminDesignatedWorkbench, .adminRoleDashboard-service) .dwShiftBar,
+:is(.adminDesignatedWorkbench, .adminRoleDashboard-service, .adminRoleDashboard-manager) .dwShiftBar,
 .adminDesignatedWorkbench .dwNext {
   display: flex;
   align-items: center;
@@ -33,14 +33,14 @@
   background: var(--color-surface);
 }
 
-:is(.adminDesignatedWorkbench, .adminRoleDashboard-service) .dwShiftIdentity {
+:is(.adminDesignatedWorkbench, .adminRoleDashboard-service, .adminRoleDashboard-manager) .dwShiftIdentity {
   display: flex;
   align-items: center;
   flex: 1 1 240px;
   gap: 12px;
 }
 
-:is(.adminDesignatedWorkbench, .adminRoleDashboard-service) .dwShiftIdentity strong {
+:is(.adminDesignatedWorkbench, .adminRoleDashboard-service, .adminRoleDashboard-manager) .dwShiftIdentity strong {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
@@ -48,15 +48,15 @@
   font-size: 15px;
 }
 
-:is(.adminDesignatedWorkbench, .adminRoleDashboard-service) .dwShiftIdentity p,
-:is(.adminDesignatedWorkbench, .adminRoleDashboard-service) .dwShiftIdentity small {
+:is(.adminDesignatedWorkbench, .adminRoleDashboard-service, .adminRoleDashboard-manager) .dwShiftIdentity p,
+:is(.adminDesignatedWorkbench, .adminRoleDashboard-service, .adminRoleDashboard-manager) .dwShiftIdentity small {
   margin: 4px 0 0;
   color: var(--color-fg-mute);
   font-size: 12px;
   font-weight: 500;
 }
 
-:is(.adminDesignatedWorkbench, .adminRoleDashboard-service) .dwDot {
+:is(.adminDesignatedWorkbench, .adminRoleDashboard-service, .adminRoleDashboard-manager) .dwDot {
   width: 8px;
   height: 8px;
   flex: 0 0 8px;
@@ -64,7 +64,7 @@
   background: var(--color-fg-mute);
 }
 
-:is(.adminDesignatedWorkbench, .adminRoleDashboard-service) .dwDot.isActive {
+:is(.adminDesignatedWorkbench, .adminRoleDashboard-service, .adminRoleDashboard-manager) .dwDot.isActive {
   background: var(--color-accent-2);
   box-shadow: 0 0 0 5px rgba(var(--color-accent-2-rgb), .1);
 }
@@ -386,7 +386,7 @@
 }
 
 @media (max-width: 640px) {
-  :is(.adminDesignatedWorkbench, .adminRoleDashboard-service) .dwShiftBar,
+  :is(.adminDesignatedWorkbench, .adminRoleDashboard-service, .adminRoleDashboard-manager) .dwShiftBar,
   .adminDesignatedWorkbench .dwNext {
     padding: 14px 16px;
   }

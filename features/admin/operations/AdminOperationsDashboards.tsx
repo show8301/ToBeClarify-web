@@ -1,20 +1,14 @@
-import { useState } from "react";
 import { adminApi } from "@/features/admin/api/client.js";
 import { AdminButton, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
-import { ManagerStaffingPanel } from "./ManagerStaffingPanel";
-import { staffingServiceAlerts } from "./staffing";
-import { AdminAttendanceQuickCard } from "./AdminAttendanceQuickCard.jsx";
 import { WorkbenchShiftBar } from "./WorkbenchShiftBar";
-import { WorkbenchManagerRequests } from "./WorkbenchManagerRequests";
 import type {
   CurrentAdminUser,
   OperationsAction,
   OperationsActionState,
-  OperationsContext,
   OperationsData,
   OperationsOrder,
 } from "./operationsTypes";
-import { formatDateTime, formatMoney, intakeModeLabel, periodStatusLabel } from "./operationsFormat";
+import { formatDateTime, formatMoney, intakeModeLabel } from "./operationsFormat";
 
 type DashboardProps = {
   data: OperationsData;
@@ -90,43 +84,4 @@ export function AdminServiceDashboard({ data, user, navigate, runAction, actionS
   </div>;
 }
 
-function ManagerBusinessControls({ context, runAction, actionState }: { context: OperationsContext | null; runAction: OperationsAction; actionState: OperationsActionState }) {
-  const [reason, setReason] = useState("現場營運調整");
-  if (!context) return <EmptyState>尚未讀取今日營業狀態。</EmptyState>;
-  const disabled = Boolean(actionState.busyId);
-  const run = (id: string, request: () => Promise<unknown>, message: string) => void runAction(id, request, message);
-  return <div className="adminManagerControls"><label>操作原因<input value={reason} maxLength={500} onChange={(event) => setReason(event.target.value)} /></label><div className="adminRoleDashboardQuickLinks">
-    {context.periodStatus === "scheduled" ? <AdminButton disabled={disabled} onClick={() => run("business-open", () => adminApi.openBusinessPeriod({ businessDate: context.referenceBusinessDate, projectedCloseAt: context.projectedCloseAt || context.referenceEndsAt, reason }), "已執行現在開店。")}>現在開店</AdminButton> : null}
-    {context.periodStatus === "open" ? <><div className="adminBusinessModeButtons" role="group" aria-label="接單模式">{["normal", "coordination", "staff_only"].map((mode) => <button type="button" className={context.intakeMode === mode ? "isActive" : ""} key={mode} disabled={disabled} onClick={() => run(`intake-${mode}`, () => adminApi.applyBusinessPeriodAction({ action: "set_intake_mode", intakeMode: mode, reason }), `已切換為${intakeModeLabel(mode)}。`)}>{intakeModeLabel(mode)}</button>)}</div><AdminButton variant="danger" disabled={disabled || context.unfinishedOrderCount > 0} onClick={() => run("business-close", () => adminApi.applyBusinessPeriodAction({ action: "close", reason }), "已執行實際關店。")}>實際關店</AdminButton></> : null}
-    {context.periodStatus === "closed" ? <><AdminButton variant="secondary" disabled={disabled} onClick={() => run("business-reopen", () => adminApi.applyBusinessPeriodAction({ action: "reopen", reason }), "營業日已重開。")}>誤關重開</AdminButton><AdminButton disabled={disabled || context.unfinishedOrderCount > 0} onClick={() => run("business-settle", () => adminApi.applyBusinessPeriodAction({ action: "settle", reason }), "營業日已完成結算。")}>完成結算</AdminButton></> : null}
-  </div>{context.unfinishedOrderCount > 0 ? <small className="adminRoleDashboardControlHint">仍有 {context.unfinishedOrderCount} 張未完成訂單，完成前不能關店或結算。</small> : null}</div>;
-}
-
-export function AdminManagerDashboard({ data, user, navigate, runAction, actionState, onChanged, disabled }: Omit<DashboardProps, "user"> & { user?: CurrentAdminUser; disabled: boolean }) {
-  const workingStaff = data.staff.filter((staff) => staff.isWorkingToday);
-  const staffingRisks = staffingServiceAlerts(data.orders, data.staff, data.refreshedAt);
-  const risks = [
-    ...staffingRisks,
-    ...data.orders.filter((order) => order.storeConfirmationStatus === "pending").map((order) => ({ id: `risk-${order.id}`, title: `${order.customerName || "未命名顧客"} 的協調單`, detail: "等待店家確認是否承接", action: "查看完整訂單" })),
-    ...data.sessions.filter((session) => session.waitingOrderCount > 0).slice(0, 4).map((session) => ({ id: `session-${session.id}`, title: `${session.customerName || "未命名顧客"} 有待處理訂單`, detail: `${session.waitingOrderCount} 張訂單等待處理`, action: "查看點單管理" })),
-  ];
-  return <div className="adminRoleDashboard adminRoleDashboard-manager">
-    <Metrics items={[
-      { label: "營業狀態", value: periodStatusLabel(data.context?.periodStatus || ""), detail: intakeModeLabel(data.context?.intakeMode || "") },
-      { label: "待處理／未完成", value: `${data.context?.waitingOrderCount ?? 0}／${data.context?.unfinishedOrderCount ?? 0}`, detail: "今日訂單工作量" },
-      { label: "目前執勤", value: workingStaff.length, detail: "依已核准值班時段判斷" },
-      { label: "包廂服務", value: data.roomOrders.filter((order) => !["completed", "cancelled"].includes(order.status)).length, detail: "尚未完成時段" },
-    ]} />
-    <AdminAttendanceQuickCard businessDate={data.context?.referenceBusinessDate || ""} staffMemberId={user?.staffMemberId || ""} />
-    <ActionFeedback state={actionState} />
-    {onChanged && <WorkbenchManagerRequests data={data} onChanged={onChanged} />}
-    <div className="adminRoleDashboardGrid">
-      <AdminPanel title="營運控制" description="經理可在這裡處理開店、接單模式與關店；詳細操作仍保留在完整點單管理。"><ManagerBusinessControls context={data.context} runAction={runAction} actionState={actionState} /></AdminPanel>
-      {onChanged && <ManagerStaffingPanel data={data} disabled={disabled || Boolean(actionState.busyId)} onChanged={onChanged} navigate={navigate} />}
-    </div>
-    <AdminPanel title="需要經理介入" description="這裡只放會影響營運節奏的事項。">
-      <div className="adminRoleDashboardRows">{risks.slice(0, Math.max(8, staffingRisks.length)).map((risk) => <article className="adminRoleDashboardRow" key={risk.id}><div className="adminRoleDashboardIdentity"><strong>{risk.title}</strong><small>{risk.detail}</small></div><span className="adminRoleDashboardBadge">需關注</span><AdminButton variant="secondary" onClick={() => navigate(risk.id.startsWith("staff-service-") ? "/admin/duty-planning" : "/admin/orders")}>{risk.action}</AdminButton></article>)}{!risks.length ? <EmptyState>目前沒有需要經理介入的事項。</EmptyState> : null}</div>
-    </AdminPanel>
-    <AdminPanel title="經理快速入口" description="高頻營運操作集中在這裡。"><div className="adminRoleDashboardQuickLinks"><AdminButton onClick={() => navigate("/admin/orders")}>完整點單管理</AdminButton><AdminButton variant="secondary" onClick={() => navigate("/admin/duty-planning")}>管理值班規劃</AdminButton><AdminButton variant="secondary" onClick={() => navigate("/admin/rooms/service")}>包廂訂購</AdminButton><AdminButton variant="ghost" onClick={() => navigate("/admin/staff")}>店員資料</AdminButton><AdminButton variant="ghost" onClick={() => navigate("/admin/settlement")}>結算工作臺</AdminButton></div></AdminPanel>
-  </div>;
-}
+export { AdminManagerDashboard } from "./AdminManagerWorkbench";

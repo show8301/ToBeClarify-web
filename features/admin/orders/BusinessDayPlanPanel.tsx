@@ -12,7 +12,12 @@ function parsePlan(value: unknown): Plan {
 }
 const inputTime = (value: string) => new Date(new Date(value).getTime() + 8 * 3600000).toISOString().slice(0, 16);
 
-export function BusinessDayPlanPanel({ businessDate, onOpened }: { businessDate: string; onOpened: () => Promise<unknown> }) {
+export function BusinessDayPlanPanel({ businessDate, onOpened, compact = false, onBusyChange }: {
+  businessDate: string;
+  onOpened: () => Promise<unknown>;
+  compact?: boolean;
+  onBusyChange?: (busy: boolean) => void;
+}) {
   const [date, setDate] = useState(businessDate);
   const [plan, setPlan] = useState<Plan | null>(null);
   const [startsAt, setStartsAt] = useState("");
@@ -37,6 +42,7 @@ export function BusinessDayPlanPanel({ businessDate, onOpened }: { businessDate:
         : { businessDate: date, projectedCloseAt: endsAt, flowVersion: flow2 ? 2 : 1, operationId: crypto.randomUUID(), reason: "現場手動開店" },
     };
     setRetry(request); setBusy(true); setMessage("");
+    onBusyChange?.(true);
     try {
       const result: unknown = await adminRequest(request.path, { method: request.action === "save" ? "PUT" : "POST", body: JSON.stringify(request.body) });
       setRetry(null);
@@ -45,13 +51,13 @@ export function BusinessDayPlanPanel({ businessDate, onOpened }: { businessDate:
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "操作失敗");
       if (e && typeof e === "object" && "status" in e && typeof e.status === "number" && e.status >= 400 && e.status < 500) setRetry(null);
-    } finally { setBusy(false); }
+    } finally { setBusy(false); onBusyChange?.(false); }
   };
-  return <section className="adminBusinessOperations">
-    <header className="adminBusinessPlanHeader">
+  return <section className={compact ? "adminBusinessOperations adminBusinessPlanCompact" : "adminBusinessOperations"}>
+    {!compact && <header className="adminBusinessPlanHeader">
       <h3>每日營業計畫與開店</h3>
       <p>時間以台灣時間填寫，跨午夜請選正確的結束日期。計畫不會自動開店。</p>
-    </header>
+    </header>}
     <fieldset disabled={busy || !!retry} className="adminBusinessOperationsControls">
       <div className="adminBusinessPlanFields">
         <label>營業日<input type="date" value={date} onChange={e => { setPlan(null); setDate(e.target.value); }} /></label>

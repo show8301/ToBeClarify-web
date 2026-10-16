@@ -85,7 +85,7 @@ export function staffingServiceAlerts(orders: OperationsOrder[], staff: Operatio
   const staffById = new Map(staff.map((person) => [person.id, person]));
   const alerts = new Map<string, { id: string; title: string; detail: string; action: string }>();
   for (const order of orders) {
-    if (order.status !== "in_service") continue;
+    if (order.status !== "in_service" && !order.nominees.some((nominee) => nominee.confirmationStatus === "in_service")) continue;
     for (const nominee of order.nominees) {
       const active = nominee.confirmationStatus === "in_service" || (nominee.confirmationStatus === "confirmed"
         && Date.parse(nominee.requestedStartsAt) <= now && Date.parse(nominee.requestedServiceEndsAt) > now);

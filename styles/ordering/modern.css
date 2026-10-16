@@ -93,7 +93,14 @@
 .orderGateCard { border-color:rgba(255,255,255,.84); border-radius:22px; background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(245,240,248,.9)); box-shadow:0 30px 80px rgba(118,121,161,.16),inset 0 1px rgba(255,255,255,.94); }
 .orderGateCard h1{font-family:var(--o-display);font-weight:850;letter-spacing:-.055em}
 .orderGateCard label,.helpCard label,.tipComposer label,.nominationControls label{font-size:13px;font-weight:650}
-.orderGateCard form input,.helpCard form input,.tipComposer input,.tipComposer select,.nominationControls input { min-height:48px; padding:11px 13px; border-radius:11px; background:rgba(255,255,255,.8); font-size:15px; }
+.orderGateCard form input,.orderGateCard form select,.helpCard form input,.helpCard form select,.tipComposer input,.tipComposer select,.nominationControls input { min-height:48px; padding:11px 13px; border-radius:11px; background-color:rgba(255,255,255,.8); font-size:15px; }
+.orderRecoveryForm .characterIdentityFields { display:grid; gap:13px; min-width:0; }
+.orderRecoveryForm .characterIdentityFields label { display:grid; gap:6px; min-width:0; }
+.orderRecoveryForm .characterIdentityFields input,
+.orderRecoveryForm .characterIdentityFields select { width:100%; min-width:0; }
+.orderRecoveryForm .characterIdentityPreview { margin:0; font-size:13px; overflow-wrap:anywhere; }
+.orderRecoveryForm .orderLegacyRecovery { display:flex; align-items:center; gap:8px; }
+.orderRecoveryForm .orderLegacyRecovery input { flex:0 0 auto; width:18px; min-height:18px; height:18px; padding:0; }
 .orderGateCard form button,.helpCard form button { min-height:50px; padding:11px 16px; border:1px solid rgba(255,255,255,.82); border-radius:11px; background:linear-gradient(115deg,#c1b9df,#a9c7ea 52%,#e8c7da); color:var(--o-ink); box-shadow:0 10px 24px rgba(118,121,161,.15); font-size:15px; font-weight:760; }
 .orderTextButton{min-height:44px;font-size:13px;font-weight:650}
 .cartLine strong,.myOrderHead strong,.myOrderNominee strong{font-family:var(--o-display);font-weight:750}

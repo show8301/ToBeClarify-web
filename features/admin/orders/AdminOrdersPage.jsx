@@ -11,7 +11,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { adminApi } from '@/features/admin/api/client.js';
 import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
 import { AdminButton } from '@/features/admin/shared/AdminShared.jsx';
-import { CreateSessionPanel, IssuedPanel } from './AdminOrderPassPanels.jsx';
+import { IssuedPanel } from './AdminOrderPassPanels.jsx';
+import { CreateSessionPanel } from './CreateSessionPanel';
 
 const today = () => new Intl.DateTimeFormat('en-CA', {
   timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit',

@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { CreateSessionPanel, IssuedPanel } from '@/features/admin/orders/AdminOrderPassPanels.jsx';
+import { IssuedPanel } from '@/features/admin/orders/AdminOrderPassPanels.jsx';
+import { CreateSessionPanel } from '@/features/admin/orders/CreateSessionPanel';
 
 export function AdminCreateOrderPassDrawer({ canManage, issued, onClose, onIssued }) {
   useEffect(() => {

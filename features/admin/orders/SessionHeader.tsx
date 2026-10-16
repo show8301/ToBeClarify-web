@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AdminButton } from "@/features/admin/shared/AdminShared.jsx";
+import { readCharacterIdentity } from "@/lib/customer-identity";
 
 interface SessionHeaderProps {
   item: {
@@ -39,6 +40,7 @@ export function SessionHeader({ item, onUpdate, onReissue, onAssisted, loading }
           <span className={`adminOrderStatus ${active ? "is-in_service" : ""}`}>{active ? "可點餐" : "僅可查看"}</span>
         </div>
         <p>遊戲 ID：{item.session.gameId}</p>
+        {!readCharacterIdentity(item.session.gameId) ? <p>伺服器未確認（舊紀錄）</p> : null}
         <p>本營業日共 {item.orderCount} 張訂單</p>
       </div>
       <dl className="adminOrderCustomerMetrics">

@@ -9,6 +9,7 @@ import { formatCustomerTime, formatMoney, queryPath } from "./presentation";
 import { useCustomerResource } from "./useCustomerResource";
 import { useCustomerMutation } from "./useCustomerMutation";
 import type { CustomerIdentityCandidate, CustomerVisit } from "./types";
+import { readCharacterIdentity } from "@/lib/customer-identity";
 
 export function AdminCustomersPage() {
   const [dateInput, setDateInput] = useState("");
@@ -29,7 +30,7 @@ export function AdminCustomersPage() {
 
   return <AdminPage eyebrow="CUSTOMER HISTORY" title="歷史顧客" description="依營業日找回入場紀錄、訂單與作品交付；以長期 UID 累積跨日紀錄。" actions={<a className="adminButton adminButton-secondary" href="/admin/deliveries">作品交付</a>}>
     <div className="adminCustomers">
-      <AdminPanel title="查詢入場紀錄" description="營業日留空可跨日查詢。填寫 ID 是顧客自填資料；同名或同 ID 的紀錄不會自動合併 UID。">
+      <AdminPanel title="查詢入場紀錄" description="營業日留空可跨日查詢。新入場依人物 ID＋伺服器尋找 UID；舊紀錄未記錄伺服器時，須先人工核對。">
         <form className="adminCustomerFilters" onSubmit={(event) => { event.preventDefault(); setQuery({ businessDate: dateInput, search: searchInput.trim(), page: 1 }); }}>
           <AdminField label="營業日"><input type="date" value={dateInput} onChange={(event) => setDateInput(event.target.value)} /></AdminField>
           <AdminField label="顧客名稱／填寫 ID／UID"><input value={searchInput} maxLength={100} onChange={(event) => setSearchInput(event.target.value)} placeholder="輸入顧客線索" /></AdminField>
@@ -44,7 +45,7 @@ export function AdminCustomersPage() {
           <thead><tr><th>營業日／入場</th><th>顧客／UID</th><th>當日訂單</th><th>找回碼狀態</th><th>實收淨額</th><th>填寫 ID 參考</th><th>操作</th></tr></thead>
           <tbody>{data.items.map((visit) => <tr key={visit.sessionId}>
             <td><strong>{visit.businessDate.slice(0, 10)}</strong><small>{formatCustomerTime(visit.createdAt)}</small><small>{entryLabel(visit.entryStatus)}</small></td>
-            <td><strong>{visit.customerName}</strong><small>填寫 ID：{visit.gameId || "未填寫"}</small>{visit.customerUid ? <button className="adminCustomerUid" type="button" onClick={() => setSelectedUid(visit.customerUid)}>{visit.customerUid}</button> : <small>尚未綁定長期 UID</small>}</td>
+            <td><strong>{visit.customerName}</strong><small>填寫 ID：{visit.gameId || "未填寫"}</small>{!readCharacterIdentity(visit.gameId) ? <small>伺服器未確認（舊紀錄）</small> : null}{visit.customerUid ? <button className="adminCustomerUid" type="button" onClick={() => setSelectedUid(visit.customerUid)}>{visit.customerUid}</button> : <small>尚未綁定長期 UID</small>}</td>
             <td><strong>{visit.orderCount} 單 · {formatMoney(visit.orderAmount)}</strong><small>未完成作品 {visit.pendingDeliveryCount} 件</small></td>
             <td><strong>{visit.hasRecoveryCode ? "已建立" : "未建立"}</strong><small>第 {visit.recoveryCodeVersion || 1} 版</small>{visit.recoveryCodeIssuedAt ? <small>發行 {formatCustomerTime(visit.recoveryCodeIssuedAt)}</small> : null}</td>
             <td><strong>{visit.hasCashRecords ? formatMoney(visit.netReceived) : "尚無收退款紀錄"}</strong><small>依帳款紀錄扣除退款</small></td>
@@ -88,6 +89,7 @@ function LinkProfileDialog({ visit, canManage, onChanged, onClose }: { visit: Cu
   return <AdminDialog open title={`顧客 UID · ${visit.customerName}`} description="第一次使用可建立新的長期 UID。綁定既有 UID 前，請由店經理核對顧客資料。" onClose={() => { if (!busy) onClose(); }} actions={null}>
     <form className="adminCustomerForm" onSubmit={(event) => { event.preventDefault(); void perform((signal) => customerApi.linkProfile(visit.sessionId, uid.trim() || null, signal), onChanged); }}>
       <p>營業日：{visit.businessDate.slice(0, 10)} · 填寫 ID：{visit.gameId}</p>
+      {!readCharacterIdentity(visit.gameId) ? <p className="adminCustomerHint">此舊紀錄未確認伺服器，同名候選僅供人工核對，不能據此認定為同一角色。若要將新的完整 ID 歸入舊 UID，請由店經理核對後於開立新點餐碼時填入既有 UID。</p> : null}
       {candidateError ? <p role="alert">{candidateError}</p> : null}
       {candidates.length ? <div className="adminCustomerCandidateList"><p>找到以下歷史 UID 候選，請先核對後選擇：</p>{canManage ? candidates.map((candidate) => <button key={candidate.uid} type="button" className={`adminButton ${uid === candidate.uid ? "adminButton-primary" : "adminButton-secondary"}`} onClick={() => setUid(candidate.uid)}><strong>{candidate.displayName}</strong> · {candidate.uid}<small>{candidate.visitCount} 次來店 · {candidate.orderCount} 單</small></button>) : <p className="adminCustomerHint">目前帳號只能建立新 UID；既有 UID 的跨紀錄歸戶需由店經理核對。</p>}</div> : <p className="adminCustomerHint">此遊戲 ID 尚未找到已歸戶 UID，送出後會建立新的 UID。</p>}
       {canManage ? <AdminField label="既有 UID（留空即建立新 UID）"><input value={uid} maxLength={40} onChange={(event) => setUid(event.target.value)} /></AdminField> : <p>本操作會建立新 UID；跨紀錄綁定既有 UID 由店經理處理。</p>}
@@ -118,6 +120,7 @@ function CustomerDetails({ uid, onClose, onViewHistory }: { uid: string; onClose
       <div className="adminCustomerVisitList">{data.visits.map((visit) => <article key={visit.sessionId}>
         <strong>{visit.businessDate.slice(0, 10)} · {visit.customerName}</strong>
         <span>{visit.gameId} · {visit.orderCount} 單 · {formatMoney(visit.orderAmount)}</span>
+        {!readCharacterIdentity(visit.gameId) ? <small>伺服器未確認（舊紀錄）</small> : null}
         <small>{visit.hasRecoveryCode ? "找回碼已建立，第 " + visit.recoveryCodeVersion + " 版" + (visit.recoveryCodeIssuedAt ? " · " + formatCustomerTime(visit.recoveryCodeIssuedAt) : "") : "尚未建立找回碼"}</small>
         <a className="adminButton adminButton-secondary" href={queryPath("/admin/order-list", { date: visit.businessDate.slice(0, 10), session: visit.sessionId })}>查看當日訂單</a>
       </article>)}</div>

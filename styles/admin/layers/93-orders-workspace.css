@@ -1,4 +1,62 @@
 /* Presentation of the full order workspace; transaction controls stay shared. */
+.adminCreateSessionPanel > form {
+  --order-pass-label-height: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+.adminCreateSessionPanel .characterIdentityFields {
+  display: grid;
+  grid-template-columns: calc(6em + 22px) 13em;
+  gap: 12px;
+  min-width: 0;
+  max-width: 100%;
+  font-size: 13px;
+}
+.adminCreateSessionPanel label { min-width: 0; font-size: 13px; }
+.adminCreateSessionPanel input,
+.adminCreateSessionPanel select { box-sizing: border-box; width: 100%; min-width: 0; min-height: 44px; font-size: 13px; }
+.adminCreateSessionPanel .characterIdentityFields select { padding-left: 44px; text-align: center; text-align-last: center; border: 1px solid var(--color-border-strong); border-radius: 8px; color: var(--color-fg); background-color: var(--color-surface-input); }
+.adminCreateSessionPanel .characterIdentityFields option { text-align: center; }
+.adminCreateSessionPanel .characterIdentityFields > label,
+.adminCreateSessionPanel .adminSessionDisplayName,
+.adminCreateSessionPanel .adminSessionNominationLimit,
+.adminCreateSessionPanel .adminSessionExistingUid {
+  grid-template-rows: var(--order-pass-label-height) 44px;
+  align-items: stretch;
+  gap: 6px;
+}
+.adminCreateSessionPanel .characterIdentityFields > label > span,
+.adminCreateSessionPanel .adminSessionDisplayName > span,
+.adminCreateSessionPanel .adminSessionNominationLimit > span { display: flex; align-items: center; line-height: 20px; white-space: nowrap; }
+.adminCreateSessionPanel .adminSessionDisplayName { flex: 0 1 calc(12em + 22px); }
+.adminCreateSessionPanel .adminSessionNominationLimit { flex: 0 0 7em; }
+.adminCreateSessionPanel .adminSessionNominationLimit input { text-align: center; }
+.adminCreateSessionPanel .adminSessionExistingUid { display: grid; flex: 0 1 210px; min-width: 0; }
+.adminCreateSessionPanel .adminSessionFieldHeading,
+.adminCreateSessionHeading { display: flex; align-items: center; gap: 6px; }
+.adminCreateSessionPanel .adminSessionFieldHeading > label { line-height: 20px; }
+.adminCreateSessionPanel > header { align-items: center; }
+.adminCreateSessionHeading h2 { margin: 0; }
+.adminCreateSessionPanel > form > .adminButton { min-height: 44px; }
+.adminCreateSessionPanel .adminSessionIdentityFeedback { flex: 1 0 100%; display: grid; gap: 8px; min-width: 0; font-size: 13px; }
+.adminCreateSessionPanel .adminSessionIdentityFeedback:empty { display: none; }
+.adminCreateSessionPanel .adminSessionIdentityFeedback p { margin: 0; line-height: 1.6; }
+.adminCreateSessionPanel .adminSessionQualifiedId { overflow-wrap: anywhere; color: var(--color-fg-soft); }
+.adminCreateSessionPanel .adminIdentityCandidates input[type="radio"] { width: auto; }
+@media (max-width: 480px) {
+  .adminCreateSessionPanel .characterIdentityFields { width: 100%; grid-template-columns: minmax(0, 1fr) minmax(168px, 1.2fr); }
+  .adminCreateSessionPanel .adminSessionDisplayName { flex-grow: 1; }
+  .adminCreateSessionPanel .adminSessionExistingUid,
+  .adminCreateSessionPanel > form > .adminButton { flex-basis: 100%; }
+}
+@media (max-width: 380px) {
+  .adminCreateSessionPanel .characterIdentityFields { grid-template-columns: minmax(0, 1fr); }
+}
+@media (any-pointer: coarse) {
+  .adminCreateSessionPanel > form { --order-pass-label-height: 44px; }
+}
 .adminOrdersPage > .adminPageHeading { padding-right: 90px; }
 .adminOrdersPage .adminOrderWorkspace {
   grid-template-columns: 280px minmax(0, 1fr);

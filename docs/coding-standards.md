@@ -167,6 +167,7 @@ components／lib → 中立共用模組；不得反向依賴 feature 執行期�
 - 優先使用既有 CSS variables、控制項與色彩層次；[色彩文件](design-palette.md)含歷史紀錄，最終呈現仍以目前 CSS 為準。
 - 先修改負責該樣式的宣告，避免無止境追加同 selector、提高 specificity 或使用 `!important`。確有必要時說明影響範圍。
 - 後台操作沿用 `AdminShared` 的按鈕、欄位、dialog、toggle 與既有 Base UI 控制項，避免重寫每個頁面的互動規則。
+- 後台行內補充說明使用 `features/admin/shared/AdminHelp.tsx` 的小驚嘆號，遵循[標準行內說明](admin-ui-design-guidelines.md#標準行內說明小驚嘆號)。沿用共用尺寸、浮層、鍵盤與觸控行為；載入、錯誤及操作結果直接顯示，不藏進補充說明。
 - 按鈕使用 button、導覽使用連結；表單欄位有 label，純圖示按鈕有可讀名稱。保留鍵盤操作、可辨識的 focus 與正確的 `aria-*` 狀態。
 - Dialog 應管理初始焦點、焦點限制、關閉與焦點返回；需要明確確認的流程按產品契約決定關閉方式。
 - 畫面具備 loading、empty、error、disabled、pending／success 等適用狀態；不可只靠顏色表達重要狀態。

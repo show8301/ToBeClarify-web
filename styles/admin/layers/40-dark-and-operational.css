@@ -570,6 +570,7 @@
 :root[data-admin-theme="dark"] .adminOrderBackfillForm input,
 :root[data-admin-theme="dark"] .adminOrderTransitions input,
 :root[data-admin-theme="dark"] .adminOrderInlinePanel input,
+:root[data-admin-theme="dark"] .adminOrderInlinePanel select,
 :root[data-admin-theme="dark"] .adminOrderingSettings input,
 :root[data-admin-theme="dark"] .adminNominationPause input,
 :root[data-admin-theme="dark"] .adminAddonComposer select,

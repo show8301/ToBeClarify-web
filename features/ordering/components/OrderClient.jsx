@@ -1,6 +1,7 @@
 "use client";
 import {MealOrderPage} from './MealOrderPage';
 import {OrderQuoteReview} from '@/features/ordering/components/OrderQuoteReview';
+import { OrderRecoveryForm } from './OrderRecoveryForm';
 
 import { useEffect, useRef, useState } from 'react';
 import { orderingApi } from '../api/client.js';
@@ -33,6 +34,7 @@ export default function OrderClient() {
   const [cart, setCart] = useState({ meals: [], nominations: [], rooms: [], tips: [], customerLocation: '', customerNote: '' });
   const [notice, setNotice] = useState({ message: '', error: false });
   const [loading, setLoading] = useState(true);
+  const [recovering, setRecovering] = useState(false);
   const [quoteDraft,setQuoteDraft] = useState(null);
   const submitLock=useRef(false);
   const quote=quoteDraft?.cartKey===JSON.stringify(cart)?quoteDraft.quote:null;
@@ -130,10 +132,11 @@ export default function OrderClient() {
     } finally { submitLock.current=false;setLoading(false); }
   };
 
-  const recover = async (gameId, recoveryCode) => {
+  const recover = async (gameId, recoveryCode, serverName) => {
+    setRecovering(true);
     setLoading(true);
     try {
-      const issued = await orderingApi.recover({ gameId, recoveryCode });
+      const issued = await orderingApi.recover({ gameId, recoveryCode, ...(serverName ? { serverName } : {}) });
       const issuedUrl = new URL(issued.orderUrl, window.location.origin);
       const nextToken = issuedUrl.searchParams.get('code') || issued.orderToken;
       window.history.replaceState(null, '', `${issuedUrl.pathname}${issuedUrl.search}`);
@@ -141,9 +144,10 @@ export default function OrderClient() {
       setNotice({ message: '已找回今天的點餐資料。', error: false });
       setTab('meal');
     } catch (error) { setNotice({ message: error.message, error: true }); setLoading(false); }
+    finally { setRecovering(false); }
   };
 
-  if (loading && !session) return <OrderLoading />;
+  if (loading && !session && !recovering) return <OrderLoading />;
   if (!session || !catalog) return <OrderAccess notice={notice} onAccess={(value) => load(value)} onRecover={recover} loading={loading} />;
 
   const tabs = [
@@ -205,18 +209,13 @@ function CustomerOrderingStatus({ context, session }) {
 function OrderAccess({ notice, onAccess, onRecover, loading }) {
   const [code, setCode] = useState('');
   const [showRecover, setShowRecover] = useState(false);
-  const [form, setForm] = useState({ gameId: '', recoveryCode: '' });
   return (
     <main className="orderGate"><section className="orderGateCard">
       <a href="/" className="orderBrand"><img src="/favicon.ico" alt="" /><span><strong>清醒夢</strong><small>LUCID DREAM / ORDER</small></span></a>
       <p className="orderEyebrow">TODAY&apos;S ORDER PASS</p><h1>{showRecover ? '請洽店員' : '輸入今日點餐碼'}</h1>
-      <p>{showRecover ? '向店員取得六位數協助碼，與遊戲 ID 一起輸入即可找回今天的點餐網址。' : '若由店員提供專屬網址，頁面會自動帶入；也可手動貼上點餐碼。'}</p>
+      <p>{showRecover ? '向店員取得六位數協助碼，填寫人物 ID 並選擇角色所屬伺服器，即可找回今天的點餐網址。' : '若由店員提供專屬網址，頁面會自動帶入；也可手動貼上點餐碼。'}</p>
       {notice.message ? <div className={`orderNotice ${notice.error ? 'isError' : ''}`}>{notice.message}</div> : null}
-      {showRecover ? <form onSubmit={(event) => { event.preventDefault(); onRecover(form.gameId.trim(), form.recoveryCode.trim()); }}>
-        <label>顧客遊戲 ID<input value={form.gameId} onChange={(event) => setForm({ ...form, gameId: event.target.value })} required /></label>
-        <label>店員協助碼<input inputMode="numeric" pattern="[0-9]{6}" maxLength={6} value={form.recoveryCode} onChange={(event) => setForm({ ...form, recoveryCode: event.target.value.replace(/\D/g, '') })} required /></label>
-        <button disabled={loading} type="submit">找回並刷新點餐頁</button>
-      </form> : <form onSubmit={(event) => { event.preventDefault(); onAccess(code.trim()); }}>
+      {showRecover ? <OrderRecoveryForm onRecover={onRecover} loading={loading} /> : <form onSubmit={(event) => { event.preventDefault(); onAccess(code.trim()); }}>
         <label>點餐碼<input value={code} onChange={(event) => setCode(event.target.value)} autoComplete="off" required /></label>
         <button disabled={loading} type="submit">開始點餐</button>
       </form>}
@@ -423,9 +422,8 @@ function CustomerAddonComposer({ nominee, catalog, loading, onAddon }) {
 }
 
 function HelpPage({ currentGameId, onRecover, loading }) {
-  const [form, setForm] = useState({ gameId: currentGameId || '', recoveryCode: '' });
-  return <div className="orderPage"><PageHeading kicker="STAFF ASSIST" title="請洽店員" text="點餐碼遺失時，店員可依遊戲 ID 找到今日資料並提供六位數協助碼。" />
-    <section className="helpCard"><div><h2>找回今天的點餐碼</h2><p>為避免他人只知道遊戲 ID 就冒用點餐，仍需由店員確認後提供協助碼。</p></div><form onSubmit={(event) => { event.preventDefault(); onRecover(form.gameId.trim(), form.recoveryCode.trim()); }}><label>顧客遊戲 ID<input value={form.gameId} onChange={(event) => setForm({ ...form, gameId: event.target.value })} required /></label><label>六位數店員協助碼<input inputMode="numeric" pattern="[0-9]{6}" maxLength={6} value={form.recoveryCode} onChange={(event) => setForm({ ...form, recoveryCode: event.target.value.replace(/\D/g, '') })} required /></label><button disabled={loading} type="submit">找回並刷新點餐 UI</button></form></section>
+  return <div className="orderPage"><PageHeading kicker="STAFF ASSIST" title="請洽店員" text="點餐碼遺失時，店員可依人物 ID 與角色所屬伺服器找到今日資料並提供六位數協助碼。" />
+    <section className="helpCard"><div><h2>找回今天的點餐碼</h2><p>仍需由店員核對後提供協助碼。</p></div><OrderRecoveryForm key={currentGameId} currentGameId={currentGameId} onRecover={onRecover} loading={loading} /></section>
   </div>;
 }
 

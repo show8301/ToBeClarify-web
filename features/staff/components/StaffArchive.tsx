@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation";
 import { useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { StaffSummary } from "@/features/staff/types";
 import { useStaffDutyStatus } from "../useStaffDutyStatus";
+import { matchStaffSearch } from "../search";
+import StaffSearchControls from "./StaffSearchControls";
+import type { StaffFilter } from "./StaffSearchControls";
 
 const fallbackPortrait = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='1000'%3E%3Crect width='100%25' height='100%25' fill='%23d9d2c5'/%3E%3Ccircle cx='400' cy='390' r='150' fill='%23eee9df'/%3E%3Cpath d='M150 950c30-240 150-350 250-350s220 110 250 350' fill='%23eee9df'/%3E%3C/svg%3E";
 const rosterPageTitle = "清醒夢 Lucid Dream｜艾歐澤亞深夜沙龍";
@@ -13,6 +16,8 @@ const rosterPageTitle = "清醒夢 Lucid Dream｜艾歐澤亞深夜沙龍";
 export default function StaffArchive({ initialStaff, embedded=false }:{ initialStaff:StaffSummary[];embedded?:boolean }) {
   const getDutyStatus = useStaffDutyStatus();
   const [query, setQuery] = useState("");
+  const [dutyFilter, setDutyFilter] = useState<StaffFilter>("all");
+  const [nominationFilter, setNominationFilter] = useState<StaffFilter>("all");
   const [leaving, setLeaving] = useState(false);
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const [featuredPaused, setFeaturedPaused] = useState(false);
@@ -22,9 +27,20 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
   const navigationWatchdog = useRef<number|null>(null);
   const router = useRouter();
   const reduceMotion = useReducedMotion();
-  const filtered = useMemo(() => initialStaff.filter((person) =>
-    `${person.displayName}${person.nickname ?? ""}${person.roleTitle ?? ""}${person.shortBio ?? ""}`.toLowerCase().includes(deferredQuery.trim().toLowerCase())
-  ), [deferredQuery, initialStaff]);
+  const normalizedQuery = deferredQuery.trim().toLowerCase();
+  const filtered = useMemo(() => initialStaff.flatMap((person) => {
+    const match = matchStaffSearch(person, normalizedQuery);
+    if (match === false) return [];
+    const duty = getDutyStatus(person.id);
+    if (dutyFilter !== "all" && (!duty.isKnown || duty.isWorkingToday !== (dutyFilter === "yes"))) return [];
+    if (nominationFilter !== "all" && (!duty.isKnown || duty.isNominatable !== (nominationFilter === "yes"))) return [];
+    return [{ person, match }];
+  }), [normalizedQuery, initialStaff, getDutyStatus, dutyFilter, nominationFilter]);
+  const clearFilters = () => {
+    setQuery("");
+    setDutyFilter("all");
+    setNominationFilter("all");
+  };
   const featuredPool = useMemo(() => initialStaff.filter((person) => Boolean(person.avatarUrl)), [initialStaff]);
   const featured = featuredPool[featuredIndex] ?? initialStaff[0];
   const featuredServices = featured ? [...(featured.commonServices ?? []), ...(featured.specialServices ?? [])] : [];
@@ -138,13 +154,13 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
         <span className="intro-index">LUCID DREAM / 2026</span>
       </section>
 
-      <section className="gallery-controls" aria-label="名單搜尋">
-        <div><span>ALL STAFF</span><b>{String(filtered.length).padStart(2,"0")}</b></div>
-        <label><span className="sr-only">搜尋店員</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜尋名字、職稱或特色…"/><b>SEARCH <ArrowUpRight aria-hidden="true"/></b></label>
-      </section>
+      <StaffSearchControls query={query} dutyFilter={dutyFilter} nominationFilter={nominationFilter} resultCount={filtered.length} onQueryChange={setQuery} onDutyChange={setDutyFilter} onNominationChange={setNominationFilter} onClear={clearFilters} />
+      {(dutyFilter !== "all" || nominationFilter !== "all") && initialStaff.some((person) => !getDutyStatus(person.id).isKnown) && (
+        <p className="staff-search-status" role="status">值班與指名狀態確認中或暫無法確認的店員，暫不列入篩選結果。</p>
+      )}
 
-      <section className="staff-gallery" aria-label="店員視覺名單">
-        {filtered.map((person, index) => {
+      <section className="staff-gallery" id="staff-search-results" aria-label="店員視覺名單" aria-busy={query !== deferredQuery}>
+        {filtered.map(({ person, match }, index) => {
             const services = [...(person.commonServices ?? []), ...(person.specialServices ?? [])];
             const duty = getDutyStatus(person.id);
             const canBeNominated = duty.isNominatable;
@@ -188,20 +204,21 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
                     {person.nickname && <em>✦ 暱稱｜{person.nickname} ✦</em>}
                   </span>
                   <span className="dreamer-card-bio">{person.shortBio || "這位夢境成員正在準備自己的介紹。"}</span>
+                  {match && <span className="staff-search-match"><small>{match.label}</small><span>{match.excerpt}</span></span>}
                   <span className="dreamer-card-footer">
                     {services.length > 0 && <span className="dreamer-services" aria-label="可提供服務">
-                      {services.slice(0,2).map((service,serviceIndex)=><b key={service.id}><img src={`/assets/staff-card-chip-icon-${serviceIndex===0?"a":"b"}.png`} alt="" aria-hidden="true"/>{service.serviceName}</b>)}
-                      {services.length > 2 && <i><img src="/assets/staff-card-chip-icon-c.png" alt="" aria-hidden="true"/>+{services.length-2}</i>}
+                      {services.slice(0,2).map((service)=><b key={service.id}>{service.serviceName}</b>)}
+                      {services.length > 2 && <i aria-label={`另有 ${services.length-2} 項服務`}>+{services.length-2}</i>}
                     </span>}
-                    <a href={`/staff/${person.id}`} onClick={(event) => openProfile(event, `/staff/${person.id}`)} className="dreamer-card-link" aria-label={`查看 ${person.displayName} 的完整介紹`}>
-                      <small>FILE · {fileNumber}</small><b>VIEW PROFILE <ArrowUpRight aria-hidden="true"/></b>
-                    </a>
                   </span>
+                  <a href={`/staff/${person.id}`} onClick={(event) => openProfile(event, `/staff/${person.id}`)} className="dreamer-card-profile-link">
+                    <span className="sr-only">查看 {person.displayName} 的完整介紹</span>
+                  </a>
                 </span>
               </article>
             );
         })}
-        {!filtered.length && <div className="empty-state"><b>NO MATCHES</b><p>換一個關鍵字，再找找看。</p></div>}
+        {!filtered.length && <div className="empty-state"><b>NO MATCHES</b><p>沒有符合目前條件的店員，試試其他關鍵字或調整篩選。</p><button className="staff-search-empty-clear" type="button" onClick={clearFilters}>清除條件</button></div>}
       </section>
 
       <AnimatePresence>{leaving&&<motion.div className="route-transition" initial={{opacity:0,clipPath:"inset(100% 0 0 0)"}} animate={{opacity:1,clipPath:"inset(0% 0 0 0)"}} exit={{opacity:0}} transition={{duration:.28,ease:[.76,0,.24,1]}} aria-hidden="true"><motion.span initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} transition={{delay:.1,duration:.18}}>OPENING PERSONNEL FILE <i>✦</i></motion.span></motion.div>}</AnimatePresence>

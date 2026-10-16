@@ -944,27 +944,188 @@
 .adminManagerControls .adminBusinessModeButtons { display:flex; flex-wrap:wrap; gap:6px; }
 .adminManagerControls .adminBusinessModeButtons button { min-height:40px; padding:8px 11px; border:1px solid rgba(101,120,159,.22); border-radius:9px; background:#eef3f8; color:var(--color-fg); font-size:11px; font-weight:750; }
 .adminManagerControls .adminBusinessModeButtons button.isActive { background:#65789f; color:#fff; }
-.adminRoleDashboardStaffList { display:grid; gap:7px; }
-.adminRoleDashboardStaffList>div { display:grid; grid-template-columns:10px minmax(0,1fr) auto; align-items:center; gap:8px; padding:9px 0; border-bottom:1px solid rgba(49,51,74,.1); }
-.adminRoleDashboardStaffList>div:last-child { border-bottom:0; }
-.adminRoleDashboardStaffList>div>span { width:8px; height:8px; border-radius:50%; background:#b4bbc5; }
-.adminRoleDashboardStaffList>div>span.isOnline { background:#2d9d76; box-shadow:0 0 0 3px rgba(45,157,118,.12); }
-.adminRoleDashboardStaffList strong { overflow:hidden; color:var(--color-fg); font-size:12px; text-overflow:ellipsis; white-space:nowrap; }
-.adminRoleDashboardStaffList small { color:var(--color-fg-mute); font-size:10px; }
-.adminStaffWorkModePanel { display:grid; gap:14px; }
-.adminStaffWorkModeIntro { display:grid; gap:5px; }
-.adminStaffWorkModeIntro strong { color:var(--color-fg); font-size:13px; }
-.adminStaffWorkModeIntro small,.adminStaffWorkModeOption small { color:var(--color-fg-mute); font-size:11px; line-height:1.5; }
-.adminStaffWorkModeSections { display:grid; gap:12px; }
-.adminStaffWorkModeSection { display:grid; gap:10px; padding:12px; border:1px solid rgba(49,51,74,.12); border-radius:10px; background:rgba(255,255,255,.22); }
-.adminStaffWorkModeSection.isTemporary { border-color:rgba(45,157,118,.28); background:rgba(45,157,118,.06); }
-.adminStaffWorkModeSectionHeading { display:grid; gap:4px; }
-.adminStaffWorkModeSectionHeading strong { color:var(--color-fg); font-size:12px; }
-.adminStaffWorkModeSectionHeading small { color:var(--color-fg-mute); font-size:11px; line-height:1.5; }
-.adminStaffWorkModeOptions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
-.adminStaffWorkModeOption { display:grid; gap:7px; padding:11px; border:1px solid rgba(49,51,74,.12); border-radius:10px; background:rgba(255,255,255,.36); }
-.adminStaffWorkModeOption .adminToggle { min-height:38px; }
-.adminStaffWorkModeSaving { color:#477077; font-size:10px; }
+.adminWorkStatusRoster {
+  display: grid;
+  gap: 10px;
+}
+.adminWorkStatusStaff {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.adminWorkStatusStaffSummary .adminDisclosureLabel { flex: 1 1 auto; }
+.adminWorkStatusStaffIdentity {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+.adminWorkStatusStaffIdentity strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-fg);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.adminWorkStatusStaffIdentity > span {
+  color: var(--color-fg-mute);
+  font-size: 11px;
+}
+.adminWorkStatusStaff[open] > .adminWorkStatus {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border);
+}
+.adminWorkStatus {
+  display: grid;
+  min-width: 0;
+  gap: 14px;
+}
+.adminWorkStatusSummary,
+.adminWorkStatusIntake {
+  display: grid;
+  gap: 6px;
+}
+.adminWorkStatusSummary strong { font-size: 13px; }
+.adminWorkStatusSummary span,
+.adminWorkStatus small,
+.adminWorkStatusHint {
+  color: var(--color-fg-mute);
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.adminWorkStatusRoles {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.adminWorkStatusRoles legend {
+  margin-bottom: 9px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.adminWorkStatusOptions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+  gap: 9px;
+}
+.adminWorkStatusOption {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-input);
+}
+.adminWorkStatusOption .adminToggle { min-height: 38px; }
+.adminWorkStatusHint { margin: 0; }
+.adminWorkStatusHint a { margin-inline: 4px; text-decoration: underline; }
+.adminRoleDashboardGrid:has(.adminStaffingPanel) { align-items: start; }
+.adminStaffingPanel {
+  display: grid;
+  min-width: 0;
+  gap: 14px;
+}
+.adminStaffingPanel > .adminPanelHeader { margin-bottom: 0; }
+.adminStaffingToolbar {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+}
+.adminStaffingCounts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px 12px;
+  color: var(--color-fg);
+  font-size: 12px;
+}
+.adminStaffingCounts > span { color: var(--color-fg-mute); }
+.adminStaffingPickerLabel { color: var(--color-fg); font-size: 12px; font-weight: 700; }
+.adminStaffingPicker {
+  display: flex;
+  min-width: 0;
+  min-height: 44px;
+  align-items: center;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-input);
+}
+.adminStaffingPicker:focus-within { border-color: var(--color-accent); box-shadow: 0 0 0 2px rgba(var(--color-accent-rgb),.15); }
+.adminStaffingPicker input {
+  min-width: 0;
+  min-height: 44px;
+  width: 100%;
+  padding: 0 12px;
+  border: 0;
+  border-radius: inherit;
+  outline: 0;
+  background: transparent;
+  color: var(--color-fg);
+  font: inherit;
+  font-size: 13px;
+}
+.adminStaffingPicker button {
+  display: grid;
+  flex: 0 0 44px;
+  height: 44px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-fg);
+}
+.adminStaffingPicker button:focus-visible { outline: 2px solid var(--color-accent); outline-offset: -3px; }
+.adminStaffingPicker[data-disabled] { opacity: .6; }
+.adminStaffingPortal { min-height: 0; }
+.adminStaffingPickerPositioner { z-index: 1300; width: var(--anchor-width); max-width: calc(100vw - 24px); }
+.adminStaffingPickerPopup {
+  max-height: min(320px, var(--available-height));
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-strong);
+  color: var(--color-fg);
+  box-shadow: 0 12px 32px rgba(0,0,0,.2);
+}
+.adminStaffingPickerItem {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.adminStaffingPickerItem[data-highlighted] { outline: 0; background: rgba(var(--color-accent-rgb),.15); }
+.adminStaffingPickerEmpty { padding: 12px; color: var(--color-fg-mute); font-size: 13px; }
+.adminStaffingScroll {
+  min-height: 0;
+  max-height: min(560px, 60vh);
+  overflow-y: auto;
+  overflow-anchor: none;
+  scrollbar-gutter: stable;
+  padding: 2px 6px 2px 2px;
+}
+.adminStaffingShift { flex-basis: 100%; color: var(--color-fg-mute); font-size: 11px; line-height: 1.5; }
+.adminTemporaryDutyDialog { width: min(620px, 100%); }
+.adminTemporaryDutyForm { display: grid; gap: 14px; }
+.adminTemporaryDutyForm > p { margin: 0; }
+.adminTemporaryDutyTimes { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.adminTemporaryDutyTimes input { min-width: 0; min-height: 44px; }
+@media (max-width: 640px) {
+  .adminStaffingScroll { max-height: min(480px, 55dvh); }
+  .adminTemporaryDutyTimes { grid-template-columns: 1fr; }
+}
 .adminDutyPlanningMetrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); margin-bottom:18px; overflow:hidden; border:1px solid var(--color-border); border-radius:18px; background:rgba(255,255,255,.42); box-shadow:0 15px 36px rgba(118,121,161,.08); }
 .adminDutyPlanningMetrics article { display:grid; gap:5px; min-width:0; padding:17px 18px; border-right:1px solid var(--color-border); }
 .adminDutyPlanningMetrics article:last-child { border-right:0; }
@@ -1034,7 +1195,6 @@
 :root[data-admin-theme="dark"] .adminCoordinationReject { color:#ffc0ca; }
 :root[data-admin-theme="dark"] .adminManagerControls>label input { background:#1b2c34; color:#eef4f5; border-color:rgba(255,255,255,.15); }
 :root[data-admin-theme="dark"] .adminManagerControls .adminBusinessModeButtons button { background:#1b2c34; color:#eef4f5; }
-:root[data-admin-theme="dark"] .adminStaffWorkModeOption { background:rgba(255,255,255,.04); border-color:rgba(255,255,255,.13); }
 :root[data-admin-theme="dark"] .adminDutyPlanningMetrics,
 :root[data-admin-theme="dark"] .adminDutyPlanningToolbar,
 :root[data-admin-theme="dark"] .adminDutyPlanCard,
@@ -1070,7 +1230,6 @@
   .adminRoleDashboardRow .adminButton { justify-self:start; }
   .adminCoordinationActions { justify-self:end; }
   .adminRoleDashboardBadge { justify-self:end; }
-  .adminStaffWorkModeOptions { grid-template-columns:1fr; }
   .adminDutyPlanningMetrics { grid-template-columns:1fr 1fr; }
   .adminDutyPlanningMetrics article:nth-child(2) { border-right:0; }
   .adminDutyPlanningMetrics article:nth-child(-n+2) { border-bottom:1px solid var(--color-border); }

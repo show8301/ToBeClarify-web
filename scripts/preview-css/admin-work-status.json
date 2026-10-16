@@ -1,0 +1,63 @@
+[
+  {
+    "selector": ".adminWorkStatus",
+    "declarations": { "display": "grid", "min-width": "0", "gap": "14px" }
+  },
+  {
+    "selector": ".adminTheme .adminDisclosureChevron",
+    "declarations": { "width": "34px", "height": "34px", "border-radius": "50%" }
+  },
+  {
+    "selector": ".adminTheme .adminDisclosureChevron > svg",
+    "declarations": { "width": "16px", "height": "16px", "transform": "rotate(0)" }
+  },
+  {
+    "selector": ".adminTheme details[open] > .adminDisclosureSummary > .adminDisclosureChevron > svg",
+    "declarations": { "transform": "rotate(180deg)" }
+  },
+  {
+    "selector": ".adminWorkStatusStaffIdentity",
+    "declarations": { "display": "flex", "min-width": "0", "flex-wrap": "wrap" }
+  },
+  {
+    "selector": ".adminWorkStatusOptions",
+    "declarations": { "display": "grid", "gap": "9px" }
+  },
+  {
+    "selector": ".adminWorkStatusOption",
+    "declarations": { "display": "grid", "padding": "10px" }
+  },
+  {
+    "selector": ".adminWorkStatusHint a",
+    "declarations": { "text-decoration": "underline" }
+  },
+  {
+    "selector": ".adminStaffingPanel",
+    "declarations": { "display": "grid", "gap": "14px" }
+  },
+  {
+    "selector": ".adminStaffingToolbar",
+    "declarations": { "display": "grid", "gap": "8px" }
+  },
+  {
+    "selector": ".adminStaffingScroll",
+    "declarations": { "max-height": "min(560px, 60vh)", "overflow-y": "auto", "overflow-anchor": "none" }
+  },
+  {
+    "selector": ".adminStaffingScroll",
+    "context": ["@media (max-width: 640px)"],
+    "declarations": { "max-height": "min(480px, 55dvh)" }
+  },
+  {
+    "selector": ".adminStaffingPickerPositioner",
+    "declarations": { "z-index": "1300", "width": "var(--anchor-width)" }
+  },
+  {
+    "selector": ".adminStaffingPortal",
+    "declarations": { "min-height": "0" }
+  },
+  {
+    "selector": ".adminStaffingPickerItem",
+    "declarations": { "min-height": "44px" }
+  }
+]

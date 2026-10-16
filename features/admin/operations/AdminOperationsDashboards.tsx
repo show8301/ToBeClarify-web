@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { adminApi } from "@/features/admin/api/client.js";
 import { AdminButton, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
+import { ManagerStaffingPanel } from "./ManagerStaffingPanel";
+import { staffingServiceAlerts } from "./staffing";
 import { AdminAttendanceQuickCard } from "./AdminAttendanceQuickCard.jsx";
 import { WorkbenchShiftBar } from "./WorkbenchShiftBar";
 import { WorkbenchManagerRequests } from "./WorkbenchManagerRequests";
@@ -75,7 +77,7 @@ export function AdminServiceDashboard({ data, user, navigate, runAction, actionS
       { label: "包廂服務", value: roomOrders.length, detail: "尚未完成的服務時段" },
       { label: "開啟中的顧客", value: data.context?.openSessionCount ?? data.sessions.length, detail: intakeModeLabel(data.context?.intakeMode || "") },
     ]} />
-    <WorkbenchShiftBar businessDate={data.context?.referenceBusinessDate || ""} staffId={user?.staffMemberId || ""} name={user?.displayName || "我的出勤"} periodStatus={data.context?.periodStatus || ""} disabled={disabled || Boolean(actionState.busyId)} onChanged={onChanged} showOrderIntake={false} />
+    <WorkbenchShiftBar businessDate={data.context?.referenceBusinessDate || ""} staffId={user?.staffMemberId || ""} name={user?.displayName || "我的出勤"} periodStatus={data.context?.periodStatus || ""} disabled={disabled || Boolean(actionState.busyId)} onChanged={onChanged} />
     <ActionFeedback state={actionState} />
     <AdminPanel className="adminRoleDashboardServiceCoordination" title="現場待辦" description="先處理協調單，再依顧客或訂單進入完整操作。">
         <div className="adminRoleDashboardRows">
@@ -100,19 +102,19 @@ function ManagerBusinessControls({ context, runAction, actionState }: { context:
   </div>{context.unfinishedOrderCount > 0 ? <small className="adminRoleDashboardControlHint">仍有 {context.unfinishedOrderCount} 張未完成訂單，完成前不能關店或結算。</small> : null}</div>;
 }
 
-export function AdminManagerDashboard({ data, user, navigate, runAction, actionState, onChanged }: Omit<DashboardProps, "user"> & { user?: CurrentAdminUser }) {
-  const workingStaff = data.staff.filter((staff) => staff.isActive && staff.isWorkingToday);
-  const absentStaff = data.staff.filter((staff) => staff.isActive && !staff.isWorkingToday);
+export function AdminManagerDashboard({ data, user, navigate, runAction, actionState, onChanged, disabled }: Omit<DashboardProps, "user"> & { user?: CurrentAdminUser; disabled: boolean }) {
+  const workingStaff = data.staff.filter((staff) => staff.isWorkingToday);
+  const staffingRisks = staffingServiceAlerts(data.orders, data.staff, data.refreshedAt);
   const risks = [
+    ...staffingRisks,
     ...data.orders.filter((order) => order.storeConfirmationStatus === "pending").map((order) => ({ id: `risk-${order.id}`, title: `${order.customerName || "未命名顧客"} 的協調單`, detail: "等待店家確認是否承接", action: "查看完整訂單" })),
     ...data.sessions.filter((session) => session.waitingOrderCount > 0).slice(0, 4).map((session) => ({ id: `session-${session.id}`, title: `${session.customerName || "未命名顧客"} 有待處理訂單`, detail: `${session.waitingOrderCount} 張訂單等待處理`, action: "查看點單管理" })),
-    ...absentStaff.slice(0, 3).map((staff) => ({ id: `staff-${staff.id}`, title: `${staff.displayName} 目前未執勤`, detail: staff.roleTitle || "請確認今日人力覆蓋", action: "查看店員資料" })),
   ];
   return <div className="adminRoleDashboard adminRoleDashboard-manager">
     <Metrics items={[
       { label: "營業狀態", value: periodStatusLabel(data.context?.periodStatus || ""), detail: intakeModeLabel(data.context?.intakeMode || "") },
       { label: "待處理／未完成", value: `${data.context?.waitingOrderCount ?? 0}／${data.context?.unfinishedOrderCount ?? 0}`, detail: "今日訂單工作量" },
-      { label: "目前執勤", value: workingStaff.length, detail: `共 ${data.staff.filter((staff) => staff.isActive).length} 位啟用店員` },
+      { label: "目前執勤", value: workingStaff.length, detail: "依已核准值班時段判斷" },
       { label: "包廂服務", value: data.roomOrders.filter((order) => !["completed", "cancelled"].includes(order.status)).length, detail: "尚未完成時段" },
     ]} />
     <AdminAttendanceQuickCard businessDate={data.context?.referenceBusinessDate || ""} staffMemberId={user?.staffMemberId || ""} />
@@ -120,13 +122,11 @@ export function AdminManagerDashboard({ data, user, navigate, runAction, actionS
     {onChanged && <WorkbenchManagerRequests data={data} onChanged={onChanged} />}
     <div className="adminRoleDashboardGrid">
       <AdminPanel title="營運控制" description="經理可在這裡處理開店、接單模式與關店；詳細操作仍保留在完整點單管理。"><ManagerBusinessControls context={data.context} runAction={runAction} actionState={actionState} /></AdminPanel>
-      <AdminPanel title="當班人力" description="先確認今天是否有足夠的人力承接服務。" actions={<AdminButton variant="ghost" onClick={() => navigate("/admin/staff")}>店員設定</AdminButton>}>
-        <div className="adminRoleDashboardStaffList">{workingStaff.slice(0, 8).map((staff) => <div key={staff.id}><span className="isOnline" /><strong>{staff.displayName}</strong><small>{staff.statusText || staff.roleTitle || "執勤中"}</small></div>)}{!workingStaff.length ? <EmptyState>目前沒有位於已核准值班時段內的店員。</EmptyState> : null}</div>
-      </AdminPanel>
+      {onChanged && <ManagerStaffingPanel data={data} disabled={disabled || Boolean(actionState.busyId)} onChanged={onChanged} navigate={navigate} />}
     </div>
     <AdminPanel title="需要經理介入" description="這裡只放會影響營運節奏的事項。">
-      <div className="adminRoleDashboardRows">{risks.slice(0, 8).map((risk) => <article className="adminRoleDashboardRow" key={risk.id}><div className="adminRoleDashboardIdentity"><strong>{risk.title}</strong><small>{risk.detail}</small></div><span className="adminRoleDashboardBadge">需關注</span><AdminButton variant="secondary" onClick={() => navigate(risk.id.startsWith("staff-") ? "/admin/staff" : "/admin/orders")}>{risk.action}</AdminButton></article>)}{!risks.length ? <EmptyState>目前沒有需要經理介入的事項。</EmptyState> : null}</div>
+      <div className="adminRoleDashboardRows">{risks.slice(0, Math.max(8, staffingRisks.length)).map((risk) => <article className="adminRoleDashboardRow" key={risk.id}><div className="adminRoleDashboardIdentity"><strong>{risk.title}</strong><small>{risk.detail}</small></div><span className="adminRoleDashboardBadge">需關注</span><AdminButton variant="secondary" onClick={() => navigate(risk.id.startsWith("staff-service-") ? "/admin/duty-planning" : "/admin/orders")}>{risk.action}</AdminButton></article>)}{!risks.length ? <EmptyState>目前沒有需要經理介入的事項。</EmptyState> : null}</div>
     </AdminPanel>
-    <AdminPanel title="經理快速入口" description="高頻營運操作集中在這裡。"><div className="adminRoleDashboardQuickLinks"><AdminButton onClick={() => navigate("/admin/orders")}>完整點單管理</AdminButton><AdminButton variant="secondary" onClick={() => navigate("/admin/duty-planning")}>管理值班規劃</AdminButton><AdminButton variant="secondary" onClick={() => navigate("/admin/rooms/service")}>包廂訂購</AdminButton><AdminButton variant="ghost" onClick={() => navigate("/admin/staff")}>店員設定（今日職位）</AdminButton><AdminButton variant="ghost" onClick={() => navigate("/admin/settlement")}>結算工作臺</AdminButton></div></AdminPanel>
+    <AdminPanel title="經理快速入口" description="高頻營運操作集中在這裡。"><div className="adminRoleDashboardQuickLinks"><AdminButton onClick={() => navigate("/admin/orders")}>完整點單管理</AdminButton><AdminButton variant="secondary" onClick={() => navigate("/admin/duty-planning")}>管理值班規劃</AdminButton><AdminButton variant="secondary" onClick={() => navigate("/admin/rooms/service")}>包廂訂購</AdminButton><AdminButton variant="ghost" onClick={() => navigate("/admin/staff")}>店員資料</AdminButton><AdminButton variant="ghost" onClick={() => navigate("/admin/settlement")}>結算工作臺</AdminButton></div></AdminPanel>
   </div>;
 }

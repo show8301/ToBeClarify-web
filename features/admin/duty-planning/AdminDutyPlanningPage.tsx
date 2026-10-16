@@ -297,6 +297,6 @@ export function AdminDutyPlanningPage({ navigate }: { navigate: Navigate }) {
     </div>
 
     <section className="adminDutyPlanningNote" aria-label="核准流程說明"><strong>流程</strong><span>店員預填</span><i>→</i><span>經理核准／退回</span><i>→</i><span>核准後帶入當日工作身分與 dashboard</span></section>
-    <div className="adminDutyPlanningLinks"><AdminButton variant="ghost" onClick={() => navigate("/admin")}>返回營業工作台</AdminButton><AdminButton variant="ghost" onClick={() => navigate("/admin/staff")}>店員設定（資料與臨時身分）</AdminButton></div>
+    <div className="adminDutyPlanningLinks"><AdminButton variant="ghost" onClick={() => navigate("/admin")}>返回營業工作台</AdminButton><AdminButton variant="ghost" onClick={() => navigate("/admin/staff")}>店員資料</AdminButton></div>
   </AdminPage>;
 }

@@ -1,0 +1,269 @@
+[
+  {
+    "selector": ".managerWorkbench",
+    "declarations": {
+      "display": "grid",
+      "gap": "18px"
+    }
+  },
+  {
+    "selector": ".managerColumns",
+    "declarations": {
+      "display": "grid",
+      "grid-template-columns": "minmax(0, 1fr) minmax(0, 1fr)"
+    }
+  },
+  {
+    "selector": ".managerBusiness",
+    "declarations": {
+      "align-content": "start",
+      "gap": "10px"
+    }
+  },
+  {
+    "selector": ".managerBusinessPlanDialog",
+    "declarations": {
+      "width": "min(760px, 100%)",
+      "max-height": "90dvh"
+    }
+  },
+  {
+    "selector": ".managerBusinessActionDialog",
+    "declarations": {
+      "width": "min(520px, 100%)",
+      "max-height": "90dvh"
+    }
+  },
+  {
+    "selector": ".adminDialog.managerBusinessPlanDialog .adminBusinessPlanCompact",
+    "declarations": {
+      "min-width": "0",
+      "box-shadow": "none"
+    }
+  },
+  {
+    "selector": ".managerBusinessPlanDialog .adminBusinessPlanFields",
+    "declarations": {
+      "grid-template-columns": "minmax(0, 1fr) minmax(0, 1fr)"
+    }
+  },
+  {
+    "selector": ".managerBusinessPlanDialog .adminBusinessPlanFields > label:first-child",
+    "declarations": {
+      "grid-column": "1 / -1"
+    }
+  },
+  {
+    "selector": ".adminStaffingPickerHeading",
+    "declarations": {
+      "display": "flex",
+      "align-items": "center"
+    }
+  },
+  {
+    "selector": ".staffingAvailabilityTrigger",
+    "declarations": {
+      "cursor": "help"
+    }
+  },
+  {
+    "selector": ":root",
+    "declarations": {
+      "--icon-action-size": "36px"
+    }
+  },
+  {
+    "selector": ":root",
+    "context": [
+      "@media (any-pointer: coarse)"
+    ],
+    "declarations": {
+      "--icon-action-size": "44px"
+    }
+  },
+  {
+    "selector": ".staffingAvailabilityPositioner",
+    "declarations": {
+      "z-index": "1200"
+    }
+  },
+  {
+    "selector": ".adminTheme.staffingAvailabilityPopup",
+    "declarations": {
+      "min-height": "0",
+      "width": "min(320px, calc(100vw - 32px))",
+      "overflow": "auto"
+    }
+  },
+  {
+    "selector": ":root[data-admin-theme=\"dark\"] .staffingAvailabilityPopup",
+    "declarations": {
+      "background": "var(--color-surface)"
+    }
+  },
+  {
+    "selector": ".managerQueue",
+    "declarations": {
+      "display": "grid",
+      "overflow": "auto"
+    }
+  },
+  {
+    "selector": ".managerTask",
+    "declarations": {
+      "display": "grid",
+      "border-radius": "12px"
+    }
+  },
+  {
+    "selector": ".managerChecklist",
+    "declarations": {
+      "display": "grid",
+      "list-style": "none"
+    }
+  },
+  {
+    "selector": ":root[data-admin-theme=\"dark\"] .managerTask",
+    "declarations": {
+      "background": "rgba(25, 40, 47, .72)"
+    }
+  },
+  {
+    "selector": ".managerColumns",
+    "context": [
+      "@media (max-width: 1100px)"
+    ],
+    "declarations": {
+      "grid-template-columns": "minmax(0, 1fr)"
+    }
+  },
+  {
+    "selector": ".managerTask",
+    "context": [
+      "@media (max-width: 640px)"
+    ],
+    "declarations": {
+      "grid-template-columns": "minmax(0, 1fr)"
+    }
+  },
+  {
+    "selector": ".managerQueue",
+    "context": [
+      "@media (max-width: 640px)"
+    ],
+    "declarations": {
+      "max-height": "55dvh"
+    }
+  },
+  {
+    "selector": ".managerBusinessPlanDialog .adminBusinessPlanFields",
+    "context": [
+      "@media (max-width: 640px)"
+    ],
+    "declarations": {
+      "grid-template-columns": "minmax(0, 1fr)"
+    }
+  },
+  {
+    "selector": ".managerWorkbench",
+    "declarations": {
+      "font-size": "16px"
+    }
+  },
+  {
+    "selector": ".managerWorkbench .adminPanelHeader h2",
+    "declarations": {
+      "font-size": "24px"
+    }
+  },
+  {
+    "selector": ".managerWorkbench .adminPanelHeader p",
+    "declarations": {
+      "font-size": "14px"
+    }
+  },
+  {
+    "selector": ".managerControlStack",
+    "declarations": {
+      "display": "grid",
+      "gap": "18px"
+    }
+  },
+  {
+    "selector": ".managerColumns > .adminStaffingPanel",
+    "declarations": {
+      "max-width": "none",
+      "width": "100%",
+      "justify-self": "stretch"
+    }
+  },
+  {
+    "selector": ".managerWorkbench .adminStaffingCounts",
+    "declarations": {
+      "justify-content": "flex-start",
+      "font-size": "14px"
+    }
+  },
+  {
+    "selector": ".staffingAvailabilityTrigger",
+    "declarations": {
+      "border": "0",
+      "--icon-action-size": "28px",
+      "--icon-action-glyph-size": "18px",
+      "box-shadow": "none"
+    }
+  },
+  {
+    "selector": ".staffingAvailabilityTrigger",
+    "context": [
+      "@media (any-pointer: coarse)"
+    ],
+    "declarations": {
+      "--icon-action-size": "44px"
+    }
+  },
+  {
+    "selector": ":is(.adminDesignatedWorkbench, .adminRoleDashboard-service, .adminRoleDashboard-manager) .dwShiftBar",
+    "declarations": {
+      "display": "flex",
+      "padding": "16px 20px"
+    }
+  },
+  {
+    "selector": ":is(.adminDesignatedWorkbench, .adminRoleDashboard-service, .adminRoleDashboard-manager) .dwShiftBar",
+    "context": [
+      "@media (max-width: 640px)"
+    ],
+    "declarations": {
+      "padding": "14px 16px"
+    }
+  },
+  {
+    "selector": ".managerRoomsPanel .managerTask",
+    "declarations": {
+      "grid-template-columns": "minmax(0, 1fr)",
+      "gap": "8px"
+    }
+  },
+  {
+    "selector": ".managerRoomsPanel .managerTaskIdentity",
+    "declarations": {
+      "display": "flex",
+      "flex-wrap": "wrap"
+    }
+  },
+  {
+    "selector": ".managerWorkbench :is(.adminStaffingPanel, .managerBroadcastPanel, .managerRoomsPanel) > .adminPanelHeader",
+    "declarations": {
+      "display": "grid",
+      "gap": "12px"
+    }
+  },
+  {
+    "selector": ".managerWorkbench :is(.adminStaffingPanel, .managerBroadcastPanel, .managerRoomsPanel) .adminPanelActions",
+    "declarations": {
+      "justify-content": "flex-start",
+      "margin-left": "0"
+    }
+  }
+]

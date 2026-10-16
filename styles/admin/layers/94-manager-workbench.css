@@ -1,0 +1,608 @@
+.managerWorkbench {
+  display: grid;
+  gap: 18px;
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.managerWorkbench .adminPanelHeader h2 {
+  font-size: 24px;
+}
+
+.managerWorkbench .adminPanelHeader p,
+.managerWorkbench .adminRoleDashboardEmpty,
+.managerWorkbench .adminRoleDashboardMetrics span,
+.managerWorkbench .adminRoleDashboardMetrics small {
+  font-size: 14px;
+}
+
+.managerWorkbench .adminButton,
+.managerWorkbench .adminToggle {
+  font-size: 15px;
+}
+
+.managerDayHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.managerDayHeading h2 {
+  margin: 4px 0;
+  font-size: 24px;
+}
+
+.managerDayHeading p,
+.managerDayHeading > small,
+.managerHint {
+  margin: 0;
+  color: var(--color-fg-mute);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.managerEyebrow {
+  color: var(--color-fg-mute);
+  font-size: 12px;
+  letter-spacing: .14em;
+}
+
+.managerColumns,
+.managerTwoColumns {
+  display: grid;
+  align-items: start;
+  gap: 18px;
+}
+
+.managerColumns {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.managerControlStack {
+  display: grid;
+  min-width: 0;
+  gap: 18px;
+}
+
+.managerColumns > .adminStaffingPanel {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  justify-self: stretch;
+}
+
+.managerWorkbench :is(.adminStaffingPanel, .managerBroadcastPanel, .managerRoomsPanel) > .adminPanelHeader {
+  display: grid;
+  gap: 12px;
+}
+
+.managerWorkbench :is(.adminStaffingPanel, .managerBroadcastPanel, .managerRoomsPanel) .adminPanelActions {
+  justify-content: flex-start;
+  margin-left: 0;
+}
+
+.managerWorkbench .adminStaffingCounts {
+  justify-content: flex-start;
+  font-size: 14px;
+}
+
+.managerWorkbench :is(.adminStaffingPickerLabel, .adminStaffingPicker input, .adminWorkStatusStaffIdentity strong, .adminWorkStatusSummary strong, .adminWorkStatusRoles legend) {
+  font-size: 16px;
+}
+
+.managerWorkbench :is(.adminStaffingShift, .adminWorkStatusStaffIdentity > span, .adminWorkStatusSummary span, .adminWorkStatus small, .adminWorkStatusHint) {
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.adminStaffingPortal :is(.adminStaffingPickerItem, .adminStaffingPickerEmpty) {
+  font-size: 15px;
+}
+
+.managerTwoColumns {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.managerColumns > *,
+.managerTask > * {
+  min-width: 0;
+}
+
+.managerFieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.managerForm {
+  display: grid;
+  gap: 16px;
+}
+
+.managerBusiness {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.managerBusiness > .adminPanelHeader {
+  align-items: center;
+  margin-bottom: 0;
+  padding-bottom: 10px;
+}
+
+.managerBusinessState {
+  color: var(--color-fg-mute);
+  font-size: 14px;
+}
+
+.managerBusinessStatus {
+  display: grid;
+  gap: 4px;
+  color: var(--color-fg-mute);
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.managerInlineForm,
+.managerFilters,
+.managerTaskActions {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.managerInlineForm > .adminField {
+  flex: 1 1 190px;
+}
+
+.managerBusinessModes,
+.managerBusinessActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: start;
+}
+
+.managerBusinessModes > .adminButton {
+  flex: 1 1 auto;
+}
+
+.managerBusinessMore {
+  min-width: 0;
+  margin: 0;
+}
+
+.managerBusinessMore > summary {
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.managerBusinessMoreContent {
+  display: grid;
+  gap: 6px;
+  padding-top: 8px;
+}
+
+.managerBusinessPlanDialog {
+  width: min(760px, 100%);
+  max-height: 90dvh;
+}
+
+.managerBusinessActionDialog {
+  width: min(520px, 100%);
+  max-height: 90dvh;
+}
+
+.managerBusinessPlanDialog .adminDialogBody,
+.managerBusinessActionDialog .adminDialogBody,
+.managerBusinessPlanDialog .adminDialogHeader > div,
+.managerBusinessActionDialog .adminDialogHeader > div {
+  min-width: 0;
+}
+
+/* The shared full-page planner has a wide header and decorative frame.
+   Use a scoped compact variant inside the manager dialog only. */
+.adminDialog.managerBusinessPlanDialog .adminBusinessPlanCompact {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.managerBusinessPlanDialog .adminBusinessPlanFields {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.managerBusinessPlanDialog .adminBusinessPlanFields > label:first-child {
+  grid-column: 1 / -1;
+}
+
+.managerBusinessPlanDialog .adminBusinessPlanFields input,
+.managerBusinessActionDialog input,
+.managerBusinessActionDialog textarea {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.managerBusinessPlanDialog .adminBusinessPlanActions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.managerBusinessPlanDialog .adminBusinessPlanOption {
+  grid-column: 1 / -1;
+  order: 1;
+  min-width: 0;
+  width: auto;
+}
+
+.managerBusinessPlanDialog .adminBusinessPlanHint {
+  grid-column: 1 / -1;
+  order: 2;
+}
+
+.managerBusinessPlanDialog .adminBusinessPlanSave {
+  order: 3;
+}
+
+.managerBusinessPlanDialog .adminBusinessPlanOpen {
+  order: 4;
+}
+
+.managerBusinessPlanDialog .adminBusinessPlanActions > .adminButton {
+  min-width: 0;
+  white-space: normal;
+}
+
+.managerChecklistActions {
+  margin-top: 10px;
+}
+
+.adminStaffingPickerHeading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.adminStaffingPickerHeading > .adminStaffingPickerLabel {
+  margin: 0;
+}
+
+.staffingAvailabilityTrigger {
+  /* User-requested inline help treatment; keep the shared icon geometry source. */
+  --icon-action-size: 28px;
+  --icon-action-glyph-size: 18px;
+  --icon-action-radius: 4px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--color-fg-mute);
+  cursor: help;
+}
+
+.staffingAvailabilityTrigger:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.staffingAvailabilityPositioner {
+  z-index: 1200;
+}
+
+.adminTheme.staffingAvailabilityPopup {
+  box-sizing: border-box;
+  display: grid;
+  gap: 8px;
+  width: min(320px, calc(100vw - 32px));
+  min-height: 0;
+  max-height: var(--available-height);
+  overflow: auto;
+  padding: 14px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-fg);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .2);
+  overflow-wrap: anywhere;
+}
+
+.staffingAvailabilityPopup h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.staffingAvailabilityPopup p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.staffingAvailabilityClose {
+  justify-self: end;
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.staffingServiceReview {
+  display: grid;
+  gap: 8px;
+}
+
+:root[data-admin-theme="dark"] .staffingAvailabilityPopup {
+  background: var(--color-surface);
+}
+
+.managerQueue {
+  display: grid;
+  max-height: min(560px, 65vh);
+  gap: 10px;
+  overflow: auto;
+  margin-top: 14px;
+  padding: 1px 5px 1px 1px;
+  overscroll-behavior: contain;
+}
+
+.managerQueueCompact {
+  max-height: 340px;
+}
+
+.managerRoomsPanel .managerTask {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+
+.managerRoomsPanel .managerTaskIdentity {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+
+.managerTask,
+.managerAlert {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(170px, 1.8fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid rgba(101, 120, 159, .22);
+  border-radius: 12px;
+  background: rgba(101, 120, 159, .04);
+}
+
+.managerTaskIdentity,
+.managerTaskCopy {
+  display: grid;
+  gap: 5px;
+  overflow-wrap: anywhere;
+}
+
+.managerTask strong,
+.managerAlert strong {
+  font-size: 15px;
+}
+
+.managerTask small,
+.managerAlert p {
+  margin: 0;
+  color: var(--color-fg-mute);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.managerTask.isUrgent {
+  border-inline-start: 4px solid #ba6945;
+}
+
+.managerTaskActions {
+  justify-content: flex-end;
+}
+
+.managerAlert {
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-top: 12px;
+  border-inline-start: 4px solid #ba6945;
+}
+
+.managerTask .managerWarning {
+  color: #a25328;
+}
+
+.managerChecklist {
+  display: grid;
+  gap: 0;
+  margin: 16px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.managerChecklist > li {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(101, 120, 159, .18);
+}
+
+.managerCheckIndex {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 1px solid rgba(101, 120, 159, .3);
+  border-radius: 50%;
+  font-size: 14px;
+}
+
+.managerChecklist .isDone .managerCheckIndex {
+  background: #dcece8;
+  color: #245c4c;
+}
+
+.managerChecklist strong {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.managerCheckState {
+  color: var(--color-fg-mute);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.managerChecklist p {
+  margin: 5px 0 0;
+  color: var(--color-fg-mute);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.managerSummaryGrid,
+.managerSettlementAmounts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.managerSummaryGrid > div,
+.managerSettlementAmounts > div {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid rgba(101, 120, 159, .22);
+  border-radius: 12px;
+}
+
+.managerSummaryGrid strong,
+.managerSettlementAmounts strong {
+  font-size: 20px;
+  overflow-wrap: anywhere;
+}
+
+.managerSummaryGrid span,
+.managerSummaryGrid small,
+.managerSettlementAmounts span {
+  color: var(--color-fg-mute);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.managerSessionField {
+  display: grid;
+  width: 130px;
+  gap: 7px;
+  font-size: 14px;
+}
+
+.managerAnomalies,
+.managerBroadcastReceipt {
+  margin: 14px 0;
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.managerAnomalies summary {
+  cursor: pointer;
+}
+
+:root[data-admin-theme="dark"] .managerTask,
+:root[data-admin-theme="dark"] .managerAlert {
+  background: rgba(25, 40, 47, .72);
+  border-color: rgba(255, 255, 255, .14);
+}
+
+:root[data-admin-theme="dark"] .managerTask.isUrgent,
+:root[data-admin-theme="dark"] .managerAlert {
+  border-inline-start-color: #d49b64;
+}
+
+:root[data-admin-theme="dark"] .managerTask .managerWarning {
+  color: #edbf89;
+}
+
+:root[data-admin-theme="dark"] .managerChecklist .isDone .managerCheckIndex {
+  background: #24493f;
+  color: #c1e5d7;
+}
+
+@media (max-width: 1100px) {
+  .managerColumns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .managerTask {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+  }
+
+  .managerTaskActions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+}
+
+@media (any-pointer: coarse) {
+  .staffingAvailabilityTrigger {
+    --icon-action-size: 44px;
+  }
+}
+
+@media (max-width: 640px) {
+  .managerWorkbench {
+    gap: 14px;
+  }
+
+  .managerTask,
+  .managerAlert,
+  .managerTwoColumns,
+  .managerSummaryGrid,
+  .managerSettlementAmounts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .managerQueue {
+    max-height: 55dvh;
+  }
+
+  .managerTaskActions {
+    grid-column: auto;
+  }
+
+  .managerTaskActions > .adminButton {
+    flex: 1 1 auto;
+  }
+
+  .managerBusinessPlanDialog .adminBusinessPlanFields,
+  .managerBusinessPlanDialog .adminBusinessPlanActions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .managerBusiness > .adminPanelHeader {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}

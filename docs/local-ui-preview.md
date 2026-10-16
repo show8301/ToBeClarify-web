@@ -58,6 +58,14 @@
 
 完整點單管理樣式 `93-orders-workspace.css` 在交付工作台之後、捲軸樣式之前載入。預覽時確認顧客資訊、現場帳款摘要、紀錄與表單樣式包含在 bundle；主要區塊沿用 18px 間距，表單與卡片內部使用緊湊配置。
 
+經理工作台樣式 `94-manager-workbench.css` 在完整點單管理之後、捲軸樣式之前載入。確認 `.managerColumns`、`.managerTask`、`.managerChecklist`、明暗主題與手機斷點規則均包含在 bundle；現場待辦與帳款清單各自捲動，收班步驟與營運摘要依自然高度呈現。
+
+營運控制為精簡狀態卡，桌機 `.managerColumns` 為等寬雙欄：左欄依序為營運控制、店內廣播與包廂服務，右欄當班人力填滿其欄寬，整列外緣與上下卡片對齊；1100px 以下依序改成單欄。營業計畫及時間／接單／暫停操作由 dialog 開啟；確認 `.managerBusinessPlanDialog` 的 compact 營業計畫使用日期獨立列、時間雙欄與手機單欄，不繼承完整頁面的標題最小欄寬。實際關店位於收班清單，營運卡不再常駐完整表單。經理出勤沿用服務及指名工作台的 `WorkbenchShiftBar` 及其共用樣式。
+
+當班人力的 ⓘ 說明使用 Base UI Popover，位於「加入臨時排班」標籤右側，預設朝下顯示並自動避開視窗邊緣。確認 `.staffingAvailabilityPositioner`、`.staffingAvailabilityPopup` 的 portal 層級、最大寬度、明暗主題與關閉控制項已輸出；實際 hover、鍵盤及觸控行為仍須人工畫面確認。
+
+依使用者本次畫面要求，此行內說明圖示為純圖示標準的局部例外：沿用共用 class，以元件 token 設定 28px 桌面點擊區、18px 圖示，移除可見外框與底色；觸控點擊區仍為 44px，保留 focus-visible。只影響 `.staffingAvailabilityTrigger`，不變更其他圖示按鈕。
+
 ### 字型 CSS
 
 三個樣式入口另在最後匯入 `styles/shared/icon-actions.css`，遵循[純圖示操作按鈕標準](icon-action-design-standard.md)，共用桌面／觸控尺寸 token。

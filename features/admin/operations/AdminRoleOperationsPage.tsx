@@ -12,17 +12,15 @@ import {
 } from "./AdminOperationsDashboards";
 import { AdminDesignatedWorkbench } from "./AdminDesignatedWorkbench";
 import { StaffWorkStatusPanel } from "./StaffWorkStatusPanel";
-import { parseStaffDailyWorkMode } from "./staffWorkStatus";
-import { parseDutyPlans } from "./staffing";
+import { normalizeContext, normalizeStaffMember } from "./operationsData";
 import { AdminCreateOrderPassDrawer } from "./AdminCreateOrderPassDrawer.jsx";
 import { AdminCreateRoomServiceDrawer } from "./AdminCreateRoomServiceDrawer.jsx";
-import { booleanValue, isRecord, numberValue, stringValue } from "./operationsFormat";
+import { isRecord, numberValue, stringValue } from "./operationsFormat";
 import type {
   CurrentAdminUser,
   DashboardRole,
   OperationsActionState,
   OperationsAddon,
-  OperationsContext,
   OperationsData,
   OperationsNominee,
   OperationsOrder,
@@ -36,25 +34,11 @@ type OperationalDashboardRole = Exclude<DashboardRole, "developer">;
 
 const emptyData: OperationsData = { context: null, sessions: [], orders: [], roomOrders: [], staff: [], dutyPlans: null, dutyPlansError: "", refreshedAt: 0 };
 
-async function loadStaffingPlans(businessDate: string, staff: OperationsStaffMember[], signal: AbortSignal) {
-  try {
-    const dates = new Set([businessDate, ...staff.filter((person) => person.isWorkingToday && person.todayWorkMode)
-      .map((person) => person.todayWorkMode?.businessDate || businessDate)]);
-    const values = await Promise.all([...dates].map(async (date) => {
-      const plans = parseDutyPlans(await adminApi.getDutyPlans({ from: date, to: date }, signal));
-      if (plans.some((plan) => plan.businessDate !== date)) throw new Error("班表日期與查詢日期不符，請重新整理。");
-      return plans;
-    }));
-    return { dutyPlans: values.flat(), dutyPlansError: "" };
-  } catch (error) {
-    return { dutyPlans: null, dutyPlansError: errorMessage(error) };
-  }
-}
 
 const dashboardConfigs: Record<OperationalDashboardRole, { label: string; title: string; description: string }> = {
   designated: { label: "指名人員", title: "指名人員工作台", description: "優先處理指名通知、自己的服務與進行中的顧客。" },
   service: { label: "服務員", title: "服務員工作台", description: "顧客入場、確認訂單、包廂與現場協助。" },
-  manager: { label: "經理", title: "經理主控台", description: "掌握全店待辦、人力配置、服務量與需要介入的異常。" },
+  manager: { label: "經理", title: "經理工作台", description: "掌握全店待辦、人力配置、服務量與需要介入的異常。" },
 };
 
 const developerPreviewRoles: OperationalDashboardRole[] = ["service", "designated", "manager"];
@@ -132,24 +116,6 @@ function errorMessage(error: unknown) {
   return error instanceof Error ? error.message : "無法讀取今日營運資料。";
 }
 
-function normalizeContext(value: unknown): OperationsContext | null {
-  if (!isRecord(value)) return null;
-  return {
-    referenceBusinessDate: requireBusinessDate(value),
-    businessPeriodId: stringValue(value.businessPeriodId),
-    referenceStartsAt: stringValue(value.referenceStartsAt),
-    referenceEndsAt: stringValue(value.referenceEndsAt),
-    periodStatus: stringValue(value.periodStatus, "scheduled"),
-    intakeMode: stringValue(value.intakeMode, "staff_only"),
-    orderingOpen: booleanValue(value.orderingOpen),
-    projectedCloseAt: stringValue(value.projectedCloseAt),
-    actualOpenedAt: stringValue(value.actualOpenedAt),
-    waitingOrderCount: numberValue(value.waitingOrderCount),
-    unfinishedOrderCount: numberValue(value.unfinishedOrderCount),
-    openSessionCount: numberValue(value.openSessionCount),
-    latestCommittedBusyUntil: stringValue(value.latestCommittedBusyUntil),
-  };
-}
 
 function normalizeSession(value: unknown): OperationsSession | null {
   if (!isRecord(value)) return null;
@@ -240,13 +206,6 @@ function normalizeRoomOrder(value: unknown): OperationsRoomOrder | null {
   return { id, roomName: stringValue(value.roomName, "包廂"), startsAt: stringValue(value.startsAt), endsAt: stringValue(value.endsAt), segmentCount: numberValue(value.segmentCount, 1), totalAmount: numberValue(value.totalAmount), status: stringValue(value.status), note: stringValue(value.note) };
 }
 
-function normalizeStaffMember(value: unknown): OperationsStaffMember | null {
-  if (!isRecord(value)) return null;
-  const id = stringValue(value.id);
-  if (!id) return null;
-  const workMode = parseStaffDailyWorkMode(value);
-  return { id, displayName: stringValue(value.displayName, "未命名店員"), roleTitle: stringValue(value.roleTitle), statusText: stringValue(value.statusText), isWorkingToday: booleanValue(value.isWorkingToday, false), isActive: booleanValue(value.isActive, true), todayShift: stringValue(value.todayShift), todayWorkMode: workMode };
-}
 
 function arrayValue(value: unknown) {
   return Array.isArray(value) ? value : [];
@@ -255,9 +214,10 @@ function arrayValue(value: unknown) {
 export function AdminRoleOperationsPage({ navigate }: { navigate: Navigate }) {
   const { user } = useAdminAuth();
   const adminUser = useMemo(() => toAdminUser(user), [user]);
-  const [state, setState] = useState({ loading: true, data: emptyData, error: "" });
+  const [state, setState] = useState({ loading: true, data: emptyData, error: "", authorizationError: "" });
   const loadGeneration = useRef(0);
   const loadRequest = useRef<AbortController | null>(null);
+  const loadedAccount = useRef("");
   const requestedRoleAppliedFor = useRef("");
   const [actionState, setActionState] = useState<OperationsActionState>({ busyId: "", message: "", error: "" });
   const [createPassOpen, setCreatePassOpen] = useState(false);
@@ -300,6 +260,10 @@ export function AdminRoleOperationsPage({ navigate }: { navigate: Navigate }) {
   const canManage = adminUser.role === "developer" || adminUser.role === "manager";
 
   const load = useCallback(async (background = false) => {
+    if (loadedAccount.current !== adminUser.id) {
+      loadedAccount.current = adminUser.id;
+      setState({ loading: true, data: emptyData, error: "", authorizationError: "" });
+    }
     const generation = ++loadGeneration.current;
     loadRequest.current?.abort();
     const controller = new AbortController();
@@ -308,6 +272,7 @@ export function AdminRoleOperationsPage({ navigate }: { navigate: Navigate }) {
     try {
       const context = normalizeContext(await adminApi.getOrderingContext(controller.signal));
       const businessDate = requireBusinessDate(context);
+      if (generation === loadGeneration.current) setState((current) => ({ ...current, authorizationError: "" }));
       const [sessionResult, roomResult, staffResult] = await Promise.allSettled([
         dashboardRole === "designated" && adminUser.staffMemberId
           ? adminRequest(`/designated-order-sessions?businessDate=${encodeURIComponent(businessDate)}`, { signal: controller.signal })
@@ -315,6 +280,9 @@ export function AdminRoleOperationsPage({ navigate }: { navigate: Navigate }) {
         adminApi.getRoomOrders({ businessDate }, controller.signal),
         adminApi.getStaffMembers(controller.signal),
       ]);
+      for (const result of [sessionResult, roomResult, staffResult]) {
+        if (result.status === "rejected" && result.reason instanceof ApiError && [401, 403].includes(result.reason.status)) throw result.reason;
+      }
       if (sessionResult.status === "rejected") {
         if (dashboardRole === "designated" && adminUser.staffMemberId && sessionResult.reason instanceof ApiError && sessionResult.reason.status === 404) {
           throw new Error("指名工作台資料服務尚未就緒（HTTP 404），請確認系統更新已完成。");
@@ -325,25 +293,27 @@ export function AdminRoleOperationsPage({ navigate }: { navigate: Navigate }) {
       if (!Array.isArray(sessionResult.value) || !Array.isArray(staffResult.value)) throw new Error("營業資料格式異常，請重新整理。");
       const sessions = arrayValue(sessionResult.status === "fulfilled" ? sessionResult.value : undefined).map(normalizeSession).filter((item): item is OperationsSession => Boolean(item));
       const staff = staffResult.value.map(normalizeStaffMember).filter((item): item is OperationsStaffMember => Boolean(item));
-      const [ordersBySession, staffing] = await Promise.all([Promise.all(sessions.map(async (session) => {
+      const ordersBySession = await Promise.all(sessions.map(async (session) => {
         const value = await adminApi.getSessionOrders(session.id, controller.signal);
         if (!Array.isArray(value)) throw new Error("顧客訂單資料格式異常，請重新整理。");
         return value.map((item) => normalizeOrder(item, session)).filter((item): item is OperationsOrder => Boolean(item));
-      })), dashboardRole === "manager" ? loadStaffingPlans(businessDate, staff, controller.signal) : Promise.resolve({ dutyPlans: null, dutyPlansError: "" })]);
+      }));
       const data: OperationsData = {
         context,
         sessions,
         orders: ordersBySession.flat(),
         roomOrders: arrayValue(roomResult.status === "fulfilled" ? roomResult.value : undefined).map(normalizeRoomOrder).filter((item): item is OperationsRoomOrder => Boolean(item)),
         staff,
-        ...staffing,
+        dutyPlans: null,
+        dutyPlansError: "",
         refreshedAt: Date.now(),
       };
-      if (generation === loadGeneration.current) setState({ loading: false, data, error: roomResult.status === "rejected" ? "包廂資料暫時無法更新，請重新整理。" : "" });
+      if (generation === loadGeneration.current) setState({ loading: false, data, error: roomResult.status === "rejected" ? "包廂資料暫時無法更新，請重新整理。" : "", authorizationError: "" });
     } catch (error) {
-      if (generation === loadGeneration.current) setState((current) => ({ ...current, loading: false, error: errorMessage(error) }));
+      if (generation === loadGeneration.current) setState((current) => ({ ...current, loading: false, error: errorMessage(error),
+        authorizationError: error instanceof ApiError && [401, 403].includes(error.status) ? "登入或管理權限無法確認，請重新登入後再操作。" : current.authorizationError }));
     }
-  }, [adminUser.staffMemberId, dashboardRole]);
+  }, [adminUser.id, adminUser.staffMemberId, dashboardRole]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => { void load(); }, 0);
@@ -400,7 +370,7 @@ export function AdminRoleOperationsPage({ navigate }: { navigate: Navigate }) {
     </AdminPanel> : null}
     {dashboardRole === "designated" ? <AdminDesignatedWorkbench data={state.data} user={adminUser} onChanged={() => load(true)} loading={state.loading} loadError={state.error} /> : null}
     {dashboardRole === "service" ? <AdminServiceDashboard data={state.data} user={adminUser} navigate={navigate} runAction={runAction} actionState={actionState} onChanged={() => load(true)} disabled={state.loading || Boolean(state.error)} /> : null}
-    {dashboardRole === "manager" ? <AdminManagerDashboard disabled={state.loading || Boolean(state.error)} onChanged={() => load(true)} data={state.data} user={adminUser} navigate={navigate} runAction={runAction} actionState={actionState} onOpenCreatePass={openCreatePass} onOpenCreateRoomService={openCreateRoomService} /> : null}
+    {dashboardRole === "manager" ? <AdminManagerDashboard disabled={state.loading || Boolean(state.error)} staffingBlockedReason={state.authorizationError} onChanged={() => load(true)} data={state.data} user={adminUser} navigate={navigate} runAction={runAction} actionState={actionState} onOpenCreatePass={openCreatePass} onOpenCreateRoomService={openCreateRoomService} /> : null}
     {(createPassOpen || issuedPass) ? <AdminCreateOrderPassDrawer canManage={canManage} issued={issuedPass} onClose={closeCreatePass} onIssued={handleCreatePassIssued} /> : null}
     {createRoomServiceOpen ? <AdminCreateRoomServiceDrawer businessDate={state.data.context?.referenceBusinessDate || todayBusinessDate()} onClose={closeCreateRoomService} onCreated={handleRoomServiceCreated} /> : null}
   </AdminPage>;

@@ -9,6 +9,8 @@ export type CurrentAdminUser = {
 };
 
 export type OperationsContext = {
+  version?: number;
+  flowVersion?: number;
   businessPeriodId?: string;
   referenceBusinessDate: string;
   referenceStartsAt: string;

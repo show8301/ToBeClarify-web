@@ -2,6 +2,7 @@
 
 import { AdminRefreshButton } from "@/features/admin/shared/AdminRefreshButton";
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { adminApi } from "@/features/admin/api/client.js";
 import { AdminButton, AdminPage } from "@/features/admin/shared/AdminShared.jsx";
 import { AdminRoomServiceCreateForm } from "./AdminRoomServiceCreateForm.jsx";
@@ -40,7 +41,11 @@ function statusLabel(status: string) {
 }
 
 export function AdminRoomServicePage() {
+  const params = useSearchParams();
+  const requestedDate = params.get("date");
+  const initialDate = requestedDate && /^\d{4}-\d{2}-\d{2}$/.test(requestedDate) ? requestedDate : today();
   const [message, setMessage] = useState({ text: "", error: false });
+  const onMessage = useCallback((text: string, error = false) => setMessage({ text, error }), []);
 
   return (
     <AdminPage
@@ -50,13 +55,13 @@ export function AdminRoomServicePage() {
       actions={<AdminButton variant="secondary" onClick={() => setMessage({ text: "", error: false })}>清除提示</AdminButton>}
     >
       {message.text ? <div className={message.error ? "adminOrderMessage isError" : "adminOrderMessage"} role="status">{message.text}</div> : null}
-      <AdminRoomServicePanel onMessage={(text, error = false) => setMessage({ text, error })} />
+      <AdminRoomServicePanel key={initialDate} initialDate={initialDate} onMessage={onMessage} />
     </AdminPage>
   );
 }
 
-function AdminRoomServicePanel({ onMessage }: { onMessage: (text: string, error?: boolean) => void }) {
-  const [date, setDate] = useState(today);
+function AdminRoomServicePanel({ onMessage, initialDate }: { onMessage: (text: string, error?: boolean) => void; initialDate: string }) {
+  const [date, setDate] = useState(initialDate);
   const [orders, setOrders] = useState<RoomOrder[]>([]);
   const [loading, setLoading] = useState(true);
 

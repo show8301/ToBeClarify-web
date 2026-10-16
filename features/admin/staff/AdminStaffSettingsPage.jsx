@@ -18,9 +18,9 @@ const dailyWorkRoleOptions = [
 const emptyStaff = {
   id: '', displayName: '', nickname: '', avatarMediaId: null, avatarUrl: '', avatarFile: null, avatarPreviewUrl: '',
   signatureSupported: false, signatureMediaId: null, signatureUrl: '', signatureFile: null, signaturePreviewUrl: '',
-  roleTitle: '', shortBio: '', profileBio: '', isWorkingToday: true,
+  roleTitle: '', shortBio: '', profileBio: '', isWorkingToday: false,
   bufferMinutes: '', isNominatable: false,
-  todayWorkMode: { businessDate: '', isWorking: true, stopAcceptingNewOrders: false, scheduledRoles: ['service'], activeRoles: ['service'] },
+  todayWorkMode: { businessDate: '', isWorking: false, stopAcceptingNewOrders: false, scheduledRoles: ['service'], activeRoles: ['service'] },
   sortOrder: 0, isActive: true, services: [], gallery: [],
 };
 
@@ -95,7 +95,7 @@ function toEditor(value) {
     todayWorkMode: {
       businessDate: sourceWorkMode.businessDate || '',
       stopAcceptingNewOrders: sourceWorkMode.stopAcceptingNewOrders === true,
-      isWorking: sourceWorkMode.isWorking ?? value?.isWorkingToday ?? true,
+      isWorking: value?.isWorkingToday === true,
       scheduledRoles,
       activeRoles,
     },
@@ -268,7 +268,7 @@ export function AdminStaffSettingsPage() {
       setStaffList((current) => current.map((staff) => staff.id === item.id ? saved : staff));
       if (form.id === item.id) setForm((current) => ({ ...current, [field]: saved[field] }));
       setMessage('');
-      toast.add({ title: '操作完成', description: `${field === 'isActive' ? '公開狀態' : '今日上班狀態'}已更新。`, type: 'success' });
+      toast.add({ title: '操作完成', description: `${field === 'isActive' ? '公開狀態' : '執勤狀態'}已更新。`, type: 'success' });
     } catch (error) {
       setStaffList((current) => current.map((staff) => staff.id === item.id ? { ...staff, [field]: previous } : staff));
       if (form.id === item.id) setForm((current) => ({ ...current, [field]: previous }));
@@ -303,7 +303,6 @@ export function AdminStaffSettingsPage() {
       } else activeRoles.delete(role);
     }
     const body = {
-      isWorking: current.isWorking !== false,
       stopAcceptingNewOrders: mode === 'intake' ? enabled : current.stopAcceptingNewOrders === true,
       scheduledRoles: [...scheduledRoles],
       activeRoles: [...activeRoles],
@@ -392,7 +391,7 @@ export function AdminStaffSettingsPage() {
         displayName: form.displayName, nickname: form.nickname || null, avatarMediaId, avatarUrl,
         signatureMediaId, signatureUrl,
         roleTitle: form.roleTitle || null, shortBio: form.shortBio || null, profileBio: form.profileBio || null,
-        isWorkingToday: form.isWorkingToday, bufferMinutes, isNominatable: form.isNominatable === true,
+        bufferMinutes, isNominatable: form.isNominatable === true,
         sortOrder: canManageAll ? Number(form.sortOrder) || 0 : Number(staffList.find((item) => item.id === form.id)?.sortOrder) || 0,
         isActive: form.isActive,
         services: form.services.map((item) => ({
@@ -534,7 +533,7 @@ export function AdminStaffSettingsPage() {
                     </div>
                     <small className="adminStaffListRole">{item.roleTitle || '尚未設定角色'}</small>
                     <div className="adminStaffListSummary">
-                      <span className={item.isWorkingToday ? 'isWorking' : ''}>{item.isWorkingToday ? '今日上班' : '今日休假'}</span>
+                      <span className={item.isWorkingToday ? 'isWorking' : ''}>{item.isWorkingToday ? '執勤中' : '未執勤'}</span>
                       {(item.todayWorkMode?.activeRoles || []).map((role) => <span key={role}>{dailyWorkRoleOptions.find((option) => option.id === role)?.label || role}</span>)}
                       {item.isWorkingToday && !(item.todayWorkMode?.activeRoles || []).length ? <span>尚未啟用身分</span> : null}
                       {item.bufferMinutes === null || item.bufferMinutes === undefined ? null : <span className="adminStaffBufferLine">中間休息 {item.bufferMinutes} 分鐘</span>}
@@ -543,8 +542,8 @@ export function AdminStaffSettingsPage() {
                 </div>
                 <div className={`adminStaffListControls ${statusSaving ? 'isSaving' : ''}`} onClick={(event) => event.stopPropagation()}>
                   <div className="adminStaffListControl adminStaffDutySummary">
-                    <span className="adminStaffListControlLabel">今日值班</span>
-                    <strong>{item.isWorkingToday ? (item.todayShift || '已核准') : '休假／不值班'}</strong>
+                    <span className="adminStaffListControlLabel">核准值班時段</span>
+                    <strong>{item.todayShift || '無核准上班時段'}</strong>
                     <a href="/admin/duty-planning">值班規劃</a>
                   </div>
                   <div className="adminStaffListControl">
@@ -581,7 +580,7 @@ export function AdminStaffSettingsPage() {
               </div>
             </AdminPanel>
 
-            <AdminPanel title="今日工作身分／啟用開關" description="排班允許職位決定可使用的工作台；今日啟用職位決定目前預設與可切換的工作視角。經理可臨時調整啟用，不會改掉原排班。">
+            <AdminPanel title="今日工作身分／啟用開關" description="執勤狀態只由已核准值班時段決定，請假或提早下班請至值班規劃調整。職位開關只調整工作台身分。">
               <div className="adminStaffWorkModePanel">
                 <div className="adminStaffWorkModeIntro"><AdminToggle checked={form.todayWorkMode?.stopAcceptingNewOrders === true} disabled={isReadOnly || workModeSaving} onChange={(value) => void updateTodayWorkRole(null, 'intake', value)} label="停止承接新指名" ariaLabel="停止承接新指名" /><small>提前離店或暫停接單時開啟；既有預約保留，由店員與顧客協調。</small></div>
                 <div className="adminStaffWorkModeIntro"><strong>{form.todayWorkMode?.businessDate || '今日'} 的工作身分</strong><small>「開放指名」只代表公開卡片是否接受指名，不會直接決定 dashboard。</small></div>
@@ -678,7 +677,7 @@ function StaffPublicCard({ form, navigation }) {
       <span className="adminRosterRoleRibbon"><i>✦</i><b>{role}</b><i>✦</i></span>
     </div>
     <div className="adminRosterStatusBar">
-      <span className={`adminRosterDuty ${form.isWorkingToday ? 'isOnline' : ''}`}><i /><small>{form.isWorkingToday ? 'ON DUTY' : 'OFF DUTY'}<b>{form.statusText || (form.isWorkingToday ? '待命中' : '未排班')}</b></small></span>
+      <span className={`adminRosterDuty ${form.isWorkingToday ? 'isOnline' : ''}`}><i /><small>{form.isWorkingToday ? 'ON DUTY' : 'OFF DUTY'}<b>{form.statusText || (form.isWorkingToday ? '待命中' : '未執勤')}</b></small></span>
       <strong>{navigation.number}</strong>
       <span className="adminRosterNomination">✦ {isNominatable ? '可以指名' : '暫不開放指名'}</span>
     </div>
@@ -720,7 +719,7 @@ function StaffDetailPreview({ form, navigation, imageIndex = 0, onImageChange, o
         <div className="adminPreviewPolaroidPhoto">{portraitUrl ? <img src={portraitUrl} alt="" /> : <div className="adminPreviewImageFallback">尚無店員照片</div>}</div>
         <footer><b>{displayName}</b><small>PORTRAIT / 01</small></footer>
       </div>
-      <div className={`adminPreviewDutyStamp ${form.isWorkingToday ? 'isOnline' : ''}`}><i /><span><small>ON DUTY　·　TODAY</small><b>{form.statusText || (form.isWorkingToday ? '待命中' : '未排班')}</b></span><em>LD</em></div>
+      <div className={`adminPreviewDutyStamp ${form.isWorkingToday ? 'isOnline' : ''}`}><i /><span><small>{form.isWorkingToday ? 'ON DUTY' : 'OFF DUTY'}　·　TODAY</small><b>{form.statusText || (form.isWorkingToday ? '待命中' : '未執勤')}</b></span><em>LD</em></div>
     </div>
     <div className="adminPreviewDossier">
       <div className="adminPreviewDossierHead"><div><small>DISPLAY NAME</small><h2>{displayName}</h2></div><b>{navigation.number}</b></div>

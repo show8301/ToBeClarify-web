@@ -5,11 +5,13 @@ import { ArrowUpRight, RotateCcw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { StaffSummary } from "@/features/staff/types";
+import { useStaffDutyStatus } from "../useStaffDutyStatus";
 
 const fallbackPortrait = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='1000'%3E%3Crect width='100%25' height='100%25' fill='%23d9d2c5'/%3E%3Ccircle cx='400' cy='390' r='150' fill='%23eee9df'/%3E%3Cpath d='M150 950c30-240 150-350 250-350s220 110 250 350' fill='%23eee9df'/%3E%3C/svg%3E";
 const rosterPageTitle = "清醒夢 Lucid Dream｜艾歐澤亞深夜沙龍";
 
 export default function StaffArchive({ initialStaff, embedded=false }:{ initialStaff:StaffSummary[];embedded?:boolean }) {
+  const getDutyStatus = useStaffDutyStatus();
   const [query, setQuery] = useState("");
   const [leaving, setLeaving] = useState(false);
   const [featuredIndex, setFeaturedIndex] = useState(0);
@@ -129,7 +131,7 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
       <section className="roster-intro" id="roster">
         <div><span className="section-kicker">THE PEOPLE BEHIND THE DREAM</span><h1>MEET THE<br/><i>DREAMERS</i></h1></div>
         {featured&&<motion.a key={featured.id} className={`intro-feature${featuredPaused?" is-paused":""}`} href={`/staff/${featured.id}`} onClick={(event)=>openProfile(event,`/staff/${featured.id}`)} onMouseEnter={()=>setFeaturedPaused(true)} onMouseLeave={()=>setFeaturedPaused(false)} onFocus={()=>setFeaturedPaused(true)} onBlur={()=>setFeaturedPaused(false)} initial={{opacity:0,y:14,rotate:1}} animate={{opacity:1,y:0,rotate:-1}} transition={{duration:.45,ease:[.22,1,.36,1]}} aria-label={`本次夢境推薦：${featured.displayName}`}>
-          <span className="intro-feature-photo"><img src={featured.avatarUrl||fallbackPortrait} alt={`${featured.displayName} 的推薦照片`}/><i>{featured.isWorkingToday?"ON DUTY":"DREAM STAFF"}</i></span>
+          <span className="intro-feature-photo"><img src={featured.avatarUrl||fallbackPortrait} alt={`${featured.displayName} 的推薦照片`}/><i>{getDutyStatus(featured.id).isWorkingToday?"ON DUTY":"DREAM STAFF"}</i></span>
           <span className="intro-feature-copy"><small>RANDOM DREAMER · 本次推薦</small><strong>{featured.displayName}</strong><em>{featured.roleTitle||"DREAM STAFF"}</em>{featuredServices[0]&&<b>{featuredServices[0].serviceName}</b>}<span>VIEW FILE <ArrowUpRight aria-hidden="true"/></span></span>
           <i className="intro-feature-progress" aria-hidden="true"/>
         </motion.a>}
@@ -144,7 +146,8 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
       <section className="staff-gallery" aria-label="店員視覺名單">
         {filtered.map((person, index) => {
             const services = [...(person.commonServices ?? []), ...(person.specialServices ?? [])];
-            const canBeNominated = person.isNominatable === true;
+            const duty = getDutyStatus(person.id);
+            const canBeNominated = duty.isNominatable;
             const fileNumber = String(index + 1).padStart(2,"0");
             const showTextName = textNameIds.has(person.id);
             return (
@@ -156,8 +159,8 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
                   </span>
                   <span className="dreamer-file-number">{fileNumber}</span>
                   <span className="dreamer-photo-statuses">
-                    <span className={`dreamer-duty${person.isWorkingToday ? " is-online" : ""}`}>
-                      <i aria-hidden="true"/><span><small>{person.isWorkingToday ? "ON DUTY" : "OFF DUTY"}</small><b>{person.statusText || "未排班"}</b></span>
+                    <span className={`dreamer-duty${duty.isWorkingToday ? " is-online" : ""}`}>
+                      <i aria-hidden="true"/><span><small>{duty.label}</small><b>{duty.statusText}</b></span>
                     </span>
                     {canBeNominated && <span className="dreamer-nomination" aria-label="此店員可以指名"><i aria-hidden="true">✦</i><b>可以指名</b></span>}
                   </span>

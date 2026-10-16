@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useRouter } from "next/navigation";
+import { useStaffDutyStatus } from "../useStaffDutyStatus";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { StaffDetail, StaffSummary } from "@/features/staff/types";
 import ZoomablePhoto from "@/components/media/ZoomablePhoto";
@@ -78,6 +79,8 @@ function preloadImage(src:string|null|undefined) {
 
 export default function StaffProfile({ staff, index, navigation, source=null, embedded=false }:{ staff:StaffDetail; index:number; navigation:ProfileNavigation; source?:ProfileSource; embedded?:boolean }) {
   const [currentStaff, setCurrentStaff] = useState(staff);
+  const getDutyStatus = useStaffDutyStatus();
+  const duty = getDutyStatus(currentStaff.id);
   const [lightboxIndex, setLightboxIndex] = useState<number|null>(null);
   const [leaving, setLeaving] = useState(false);
   const [staffSwitch, setStaffSwitch] = useState<StaffSwitchState>(idleStaffSwitch);
@@ -233,7 +236,7 @@ export default function StaffProfile({ staff, index, navigation, source=null, em
       {!embedded?<header className="profile-modal-head"><div><span>清醒夢 · PERSONNEL FILE</span><b>{currentStaff.displayName}</b></div><nav className="profile-switcher" aria-label="切換店員" aria-busy={staffSwitch.phase==="loading"}><button onClick={()=>switchStaff(previous,"previous")} disabled={!previous||isSwitching||leaving} aria-label={`上一位${previous?`：${previous.displayName}`:""}`}><i>←</i><span>{staffSwitch.phase==="loading"&&staffSwitch.direction==="previous"?"LOADING":"PREV"}</span><b>{previous?.displayName}</b></button><em>{String(currentIndex+1).padStart(2,"0")} / {String(navigation.total).padStart(2,"0")}</em><button onClick={()=>switchStaff(next,"next")} disabled={!next||isSwitching||leaving} aria-label={`下一位${next?`：${next.displayName}`:""}`}><span>{staffSwitch.phase==="loading"&&staffSwitch.direction==="next"?"LOADING":"NEXT"}</span><b>{next?.displayName}</b><i>→</i></button></nav><button className="back-to-staff" onClick={returnFromProfile} disabled={isSwitching||leaving} aria-label={source==="liveupdate"?"返回即時動態":"返回店員列表"}><span className="back-label-wide">{returnLabel}</span><span className="back-label-short">{source==="liveupdate"?"LIVE":"LIST"}</span><i>←</i></button></header>:null}
       <motion.div className="portrait-zone" onPointerDown={embedded?undefined:startSwipe} onPointerUp={embedded?undefined:finishSwipe} onPointerCancel={embedded?undefined:()=>{swipeStart.current=null}}>
         <motion.button className="main-polaroid" onClick={(event)=>{if(suppressPhotoClick.current){suppressPhotoClick.current=false;event.preventDefault();return}if(images.length)setLightboxIndex(0)}} aria-label="放大查看店員照片" initial={reduceMotion?false:{opacity:0,y:-56,scale:1.025}} animate={{opacity:1,y:0,rotate:0,scale:1}} transition={{type:"spring",stiffness:125,damping:16,mass:.9,delay:.12}}><motion.span className="clip" initial={reduceMotion?false:{opacity:0,y:-25,rotate:-8}} animate={{opacity:1,y:0,rotate:0}} transition={{type:"spring",stiffness:240,damping:15,delay:.52}}>Ⅱ</motion.span><span className="main-photo"><img src={currentStaff.avatarUrl||fallbackPortrait} alt={`${currentStaff.displayName} 店員照片`}/></span><motion.span className="photo-caption" initial={reduceMotion?false:{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{delay:.48,duration:.28}}><b>{currentStaff.displayName}</b><i>PORTRAIT / 01</i></motion.span></motion.button>
-        <motion.div className="status-stamp" initial={reduceMotion?false:{opacity:0,x:55,rotate:5}} animate={{opacity:1,x:0,rotate:-2}} transition={{type:"spring",stiffness:170,damping:17,delay:.58}}><i/><div><small>ON DUTY · TODAY</small><b>{currentStaff.statusText||"今日待命"}</b></div><em>LD</em></motion.div>
+        <motion.div className="status-stamp" initial={reduceMotion?false:{opacity:0,x:55,rotate:5}} animate={{opacity:1,x:0,rotate:-2}} transition={{type:"spring",stiffness:170,damping:17,delay:.58}}><i/><div><small>{duty.label} · TODAY</small><b>{duty.statusText}</b></div><em>LD</em></motion.div>
         {!embedded?<span className="portrait-swipe-hint">SWIPE TO SWITCH STAFF ↔</span>:null}
       </motion.div>
       <motion.div className="dossier" initial={reduceMotion?false:{opacity:0,x:92,y:16,rotate:1.4,scale:.975}} animate={{opacity:1,x:0,y:0,rotate:0,scale:1}} transition={{type:"spring",stiffness:105,damping:18,mass:.9,delay:.2}}>

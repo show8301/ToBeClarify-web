@@ -1,6 +1,7 @@
 import snapshotJson from "../../../data/snapshots/staff.json";
 import type { StaffDetail, StaffSummary } from "../types";
 import { publicClientApiUrl } from "@/lib/server/upstream-config";
+import { parseStaffDutyStatuses } from "../duty-status";
 
 const STAFF_API_PATH = "/staff-members";
 const CACHE_TTL = 10 * 60 * 1000;
@@ -83,3 +84,12 @@ export async function getStaffDetail(id:string):Promise<StaffDetail|null> {
 }
 
 export const staffSnapshotGeneratedAt = snapshot.generatedAt;
+
+// Operational status must bypass the profile cache and content snapshot.
+export async function getStaffDutyStatuses() {
+  const payload = await request<unknown>(publicClientApiUrl(STAFF_API_PATH));
+  if (typeof payload !== "object" || payload === null || !("data" in payload)) {
+    throw new Error("Invalid staff duty status response");
+  }
+  return parseStaffDutyStatuses(payload.data);
+}

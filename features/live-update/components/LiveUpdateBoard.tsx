@@ -81,7 +81,9 @@ function initialRoomStatuses(rooms:Room[]):LiveRoomStatus[]{
 }
 
 export default function LiveUpdateBoard({staff,rooms,config}:{staff:StaffSummary[];rooms:Room[];config:LiveUpdateConfig}){
-  const [staffMembers,setStaffMembers]=useState(staff);
+  const [staffMembers,setStaffMembers]=useState(()=>staff.map(person=>({
+    ...person,isWorkingToday:false,currentStatus:"off",statusText:"確認執勤狀態中",
+  })));
   const [reservations,setReservations]=useState<StaffReservation[]>([]);
   const [roomStatuses,setRoomStatuses]=useState<LiveRoomStatus[]>(()=>initialRoomStatuses(rooms));
   const [updated,setUpdated]=useState<Date|null>(null);
@@ -131,6 +133,9 @@ export default function LiveUpdateBoard({staff,rooms,config}:{staff:StaffSummary
       setUpdated(new Date(payload.syncedAt));
       setSyncStatus("ready");
     }catch{
+      setStaffMembers(current=>current.map(person=>({
+        ...person,isWorkingToday:false,currentStatus:"off",statusText:"狀態暫無法確認",
+      })));
       setSyncStatus("error");
     }finally{
       syncInFlight.current=false;
@@ -171,7 +176,7 @@ export default function LiveUpdateBoard({staff,rooms,config}:{staff:StaffSummary
   return <div className="live-page">
     <section className="live-hero"><div><span>REAL-TIME DREAM STATUS</span><h1>LIVE<br/><i>TONIGHT</i></h1></div><div className={`live-clock is-${syncStatus}`} aria-live="polite"><span>AUTO SYNC</span><b>{updated?updated.toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}):"CONNECTING"}</b><small><i/>{syncStatus==="syncing"?"正在同步店員狀態與預約":syncStatus==="error"?"自動同步暫時中斷":"每 60 秒自動更新"}</small>{syncStatus==="error"&&<button onClick={()=>void syncLiveStatus()}>同步失敗 · 點此重試 ↻</button>}</div><p>查看今晚店員的待命狀態與預約時段。資料會自動同步，不需要手動更新；實際服務安排請以現場店員說明為準。</p></section>
 
-    <section className="live-status"><header><div><span>STAFF STATUS</span><h2>今晚待命</h2></div><b>{String(working.length).padStart(2,"0")} ON DUTY</b></header>{working.length?<><small className="live-marquee-hint">← 左右滑動查看全部店員 →</small><div className="live-marquee" aria-label="今晚待命店員"><LiveMarqueeRow people={marqueeRows[0]} onNavigate={rememberLivePosition}/>{marqueeRows[1].length>0&&<LiveMarqueeRow people={marqueeRows[1]} reverse onNavigate={rememberLivePosition}/>}</div></>:<p className="live-staff-empty">今晚尚無店員公開待命狀態。</p>}</section>
+    <section className="live-status"><header><div><span>STAFF STATUS</span><h2>今晚待命</h2></div><b>{String(working.length).padStart(2,"0")} ON DUTY</b></header>{working.length?<><small className="live-marquee-hint">← 左右滑動查看全部店員 →</small><div className="live-marquee" aria-label="今晚待命店員"><LiveMarqueeRow people={marqueeRows[0]} onNavigate={rememberLivePosition}/>{marqueeRows[1].length>0&&<LiveMarqueeRow people={marqueeRows[1]} reverse onNavigate={rememberLivePosition}/>}</div></>:<p className="live-staff-empty">{syncStatus==="syncing"?"正在同步執勤狀態…":syncStatus==="error"?"暫時無法確認執勤狀態，請稍後重新整理。":"目前沒有位於已核准值班時段內的店員。"}</p>}</section>
 
     <section className="live-timeline"><header><div><span>RESERVATION TIMELINE</span><h2>今夜時序</h2></div><p>{reservations.length?`目前公開 ${reservations.length} 筆預約時段。`:"公開預約會在這裡顯示；店員的即時狀態請以上方卡片為準。"}</p></header>{reservations.length?<div className="timeline-scroll"><div className="timeline-board" style={{minWidth:`${Math.max(760,slots.length*100)}px`}}><div className="timeline-times"><span>STAFF</span>{slots.map(slot=><b key={slot}>{slot}</b>)}</div>{working.map(person=><div className="timeline-row" key={person.id}><div><img src={person.avatarUrl||"/og.png"} alt="" loading="lazy" decoding="async"/><span>{person.displayName}</span></div><div className="timeline-line">{(barsByStaff.get(person.id)??[]).map(bar=><span key={bar.id} className={bar.status} style={{left:`${bar.left}%`,width:`${bar.width}%`}}><b>{bar.serviceLabel}</b><small>{new Date(bar.startsAt).toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit",hour12:false})}</small></span>)}</div></div>)}</div></div>:<div className="timeline-empty"><span>NO PUBLIC RESERVATIONS</span><strong>今晚尚無公開預約</strong><p>有公開時段後會自動出現在這裡，不需要重新整理頁面。</p></div>}</section>
 

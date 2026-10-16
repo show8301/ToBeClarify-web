@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { parseStaffDutyStatuses } from "./duty-status";
 import type { StaffDutyStatus } from "./types";
 
@@ -59,13 +59,14 @@ export function useStaffDutyStatus() {
     };
   }, []);
 
-  return (id: string) => {
+  return useCallback((id: string) => {
     const status = statuses?.get(id);
     return {
+      isKnown: Boolean(status),
       isWorkingToday: status?.isWorkingToday ?? false,
       isNominatable: status?.isNominatable ?? false,
       label: status ? (status.isWorkingToday ? "ON DUTY" : "OFF DUTY") : "STATUS",
       statusText: status?.statusText || (failed || statuses ? "狀態暫無法確認" : "確認執勤狀態中"),
     };
-  };
+  }, [statuses, failed]);
 }

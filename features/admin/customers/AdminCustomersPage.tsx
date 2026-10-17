@@ -2,7 +2,7 @@
 
 import { AdminRefreshButton } from "@/features/admin/shared/AdminRefreshButton";
 import { useCallback, useEffect, useState } from "react";
-import { useAdminAuth } from "@/features/admin/auth/AdminAuthContext.jsx";
+import { useAdminAuth } from "@/features/admin/auth/AdminAuthContext";
 import { AdminDialog, AdminField, AdminPage, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
 import { customerApi } from "./api";
 import { formatCustomerTime, formatMoney, queryPath } from "./presentation";

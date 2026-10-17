@@ -1,7 +1,7 @@
 "use client";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { useAdminAuth } from "@/features/admin/auth/AdminAuthContext.jsx";
+import { useAdminAuth } from "@/features/admin/auth/AdminAuthContext";
 import { AdminDialog, AdminField, AdminPage, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
 import { AdminRefreshButton } from "@/features/admin/shared/AdminRefreshButton";
 import { DELIVERY_STATUS_LABELS } from "@/features/admin/customers/presentation";

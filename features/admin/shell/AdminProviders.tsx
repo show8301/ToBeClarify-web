@@ -1,9 +1,9 @@
 "use client";
 
 import {AdminNotificationProvider} from '@/features/admin/notifications/AdminNotificationCenter';
-import {useAdminAuth} from '@/features/admin/auth/AdminAuthContext.jsx';
+import {useAdminAuth} from '@/features/admin/auth/AdminAuthContext';
 import { useEffect } from "react";
-import { AdminAuthProvider } from "@/features/admin/auth/AdminAuthContext.jsx";
+import { AdminAuthProvider } from "@/features/admin/auth/AdminAuthContext";
 import { AdminImageProcessingProvider } from "@/features/admin/media/AdminImageProcessingProvider.jsx";
 import { AdminToastProvider } from "@/features/admin/shared/AdminToastProvider.jsx";
 import { AdminToolbarProvider } from "@/features/admin/shared/AdminToolbar";

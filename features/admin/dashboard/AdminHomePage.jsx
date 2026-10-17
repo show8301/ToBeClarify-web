@@ -1,7 +1,7 @@
 import { AdminRefreshButton } from "@/features/admin/shared/AdminRefreshButton";
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/features/admin/api/client.js';
-import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
+import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext';
 import { AdminButton, AdminPage, AdminPanel, AdminToggle } from '@/features/admin/shared/AdminShared.jsx';
 import { AdminCredentialTools } from '@/features/admin/dashboard/AdminCredentialTools.jsx';
 

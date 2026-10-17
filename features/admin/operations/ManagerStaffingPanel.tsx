@@ -2,7 +2,9 @@
 
 import { useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Combobox } from "@base-ui/react/combobox";
-import { useAdminAuth } from "@/features/admin/auth/AdminAuthContext.jsx";
+import { useAdminAuth } from "@/features/admin/auth/AdminAuthContext";
+import { payrollRoleLabel } from "@/features/admin/shared/workRoles";
+import { workRoleOptions } from "./staffWorkStatus";
 import { AdminButton, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
 import { AdminDisclosureSummary } from "@/features/admin/shared/AdminDisclosureSummary";
 import { StaffWorkStatusPanel } from "./StaffWorkStatusPanel";
@@ -68,7 +70,7 @@ export function ManagerStaffingPanel({ blockedReason = "", onChanged, navigate }
   return <AdminPanel
     className="adminStaffingPanel"
     title="當班人力"
-    description="顯示已核准的上班班次；展開店員可調整接單與本班職位。"
+    description="顯示核准班次與單一計薪職位；展開店員可調整接單與目前支援工作。"
     actions={<><AdminButton variant="ghost" disabled={!canManage || workspace.refreshing || Boolean(draft)} onClick={() => void workspace.reload()}>重新讀取人力</AdminButton><AdminButton variant="ghost" onClick={() => navigate("/admin/duty-planning")}>值班規劃</AdminButton></>}
   >
     <div className="adminStaffingToolbar">
@@ -120,6 +122,9 @@ export function ManagerStaffingPanel({ blockedReason = "", onChanged, navigate }
                 <strong>{staff?.displayName || plan.staffName}</strong>
                 <span>{unavailable ? "狀態待確認" : `${shiftStatus(plan, staff, data.refreshedAt)} · ${matchingDay ? intakeText(staff) : "接單狀態屬其他營業日"}`}</span>
                 <small className="adminStaffingShift">{shiftText(plan)}{plan.businessDate !== businessDate ? ` · 跨日執勤（${plan.businessDate}）` : ""}</small>
+                <small className="adminStaffingShift">計薪：{payrollRoleLabel(plan.payrollRole)} · 支援：{matchingDay && staff?.todayWorkMode
+                  ? staff.todayWorkMode.activeRoles.map((role) => workRoleOptions.find((option) => option.id === role)?.label || role).join("、") || "尚未啟用"
+                  : "狀態待確認"}</small>
               </span>
             </AdminDisclosureSummary>
             {staff && matchingDay ? <StaffWorkStatusPanel staff={staff} disabled={unavailable || Boolean(draft)} onChanged={refreshStaffing} /> : <p className="adminWorkStatusHint">{staff ? "此班次與目前可操作的工作狀態日期不同，請至值班規劃確認。" : "店員資料暫無法取得，請重新整理。"}</p>}

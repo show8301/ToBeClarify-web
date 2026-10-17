@@ -9,7 +9,7 @@ import { ChevronDown, SlidersHorizontal } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { adminApi } from '@/features/admin/api/client.js';
-import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
+import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext';
 import { AdminButton } from '@/features/admin/shared/AdminShared.jsx';
 import { IssuedPanel } from './AdminOrderPassPanels.jsx';
 import { CreateSessionPanel } from './CreateSessionPanel';

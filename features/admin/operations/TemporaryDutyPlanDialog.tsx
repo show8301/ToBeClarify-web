@@ -10,6 +10,9 @@ import { affectedCommitments, initialDutyWorking, reducesAvailability, shiftRang
 import { loadStaffCommitments } from "./staffingServices";
 import type { DutyPlanEditMode, StaffCommitment } from "./staffingSafety";
 import type { OperationsContext, OperationsDutyPlan, OperationsStaffMember, WorkRole } from "./operationsTypes";
+import { AdminPayrollRoleField } from "@/features/admin/shared/AdminPayrollRoleField";
+import { AdminHelp } from "@/features/admin/shared/AdminHelp";
+import type { PayrollRole } from "@/features/admin/shared/workRoles";
 
 type Props = {
   mode: DutyPlanEditMode;
@@ -47,6 +50,7 @@ export function TemporaryDutyPlanDialog({ mode, disabledReason = "", staff, cont
   const [startTime, setStartTime] = useState(existing?.startTime || referenceClock(context.referenceStartsAt, businessDate, true));
   const [endTime, setEndTime] = useState(existing?.endTime || referenceClock(context.referenceEndsAt, businessDate));
   const [roles, setRoles] = useState<WorkRole[]>(existing?.scheduledRoles.length ? [...existing.scheduledRoles] : ["service"]);
+  const [payrollRole, setPayrollRole] = useState<PayrollRole | "">(existing?.payrollRole || (existing ? "" : "service"));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [needsReselect, setNeedsReselect] = useState(false);
@@ -84,6 +88,7 @@ export function TemporaryDutyPlanDialog({ mode, disabledReason = "", staff, cont
     const end = minutes(endTime) + (minutes(endTime) <= start ? 1440 : 0);
     if (isWorking && (end <= start || end - start > 1440)) { setError("請確認班次起訖時間，單一班次須在 24 小時內結束。"); return; }
     if (isWorking && !roles.length) { setError("請至少選擇一個排班職位。"); return; }
+    if (isWorking && !payrollRole) { setError("請指定本班單一計薪職位。"); return; }
     const controller = new AbortController();
     requestRef.current = controller;
     setBusy(true);
@@ -111,13 +116,13 @@ export function TemporaryDutyPlanDialog({ mode, disabledReason = "", staff, cont
         setNeedsReselect(true);
         throw new Error("這位店員的班表已更新，請關閉視窗並確認最新班表，避免覆蓋其他修改。");
       }
-      const body = { staffId: staff.id, businessDate, isWorking, startTime: isWorking ? startTime : null, endTime: isWorking ? endTime : null, scheduledRoles: isWorking ? roles : [] };
+      const body = { staffId: staff.id, businessDate, isWorking, startTime: isWorking ? startTime : null, endTime: isWorking ? endTime : null, scheduledRoles: isWorking ? roles : [], payrollRole: isWorking ? payrollRole : null };
       submitted = true;
       const result: unknown = current
         ? await adminApi.updateDutyPlan(current.id, body, controller.signal)
         : await adminApi.createDutyPlan(body, controller.signal);
       const plan = parseDutyPlan(result);
-      if (!plan || plan.staffId !== staff.id || plan.businessDate !== businessDate || plan.approvalStatus !== "approved" || plan.isWorking !== isWorking || (isWorking && !isApprovedShift(plan))) {
+      if (!plan || plan.staffId !== staff.id || plan.businessDate !== businessDate || plan.approvalStatus !== "approved" || plan.isWorking !== isWorking || (isWorking && (!isApprovedShift(plan) || plan.payrollRole !== payrollRole))) {
         throw new Error("已送出排班，但無法確認核准結果，請先重新讀取班表確認。");
       }
       saved = true;
@@ -146,10 +151,10 @@ export function TemporaryDutyPlanDialog({ mode, disabledReason = "", staff, cont
   return <AdminDialog
     open
     title={`${mode === "edit" ? "調整既有班表" : "加入臨時排班"}：${staff.displayName}`}
-    description="確認時段與職位後，經理儲存即核准；上班打卡與實際接單資格仍依原有規則處理。"
+    description="確認班次、單一計薪職位及預排支援工作後儲存核准；當班支援不改變計薪職位。"
     className="adminTemporaryDutyDialog"
     onClose={() => { if (!requestRef.current) onClose(); }}
-    actions={<><AdminButton variant="ghost" disabled={busy} onClick={onClose}>取消</AdminButton><AdminButton type="submit" form={formId} disabled={busy || needsReselect || Boolean(serviceRestriction) || Boolean(disabledReason)} disabledReason={disabledReason || serviceRestriction || undefined}>{busy ? "儲存中…" : "儲存並核准"}</AdminButton></>}
+    actions={<><AdminButton variant="ghost" disabled={busy} onClick={onClose}>取消</AdminButton><AdminButton type="submit" form={formId} busy={busy} busyLabel="儲存中…" disabled={needsReselect || Boolean(serviceRestriction) || Boolean(disabledReason)} disabledReason={disabledReason || serviceRestriction || undefined}>儲存並核准</AdminButton></>}
   >
     <form id={formId} className="adminTemporaryDutyForm" onSubmit={(event) => { event.preventDefault(); void save(); }}>
       <p>營業日：<strong>{businessDate}</strong>（台灣時間）</p>
@@ -168,12 +173,14 @@ export function TemporaryDutyPlanDialog({ mode, disabledReason = "", staff, cont
         {conflicts.map((item) => <p className="adminWorkStatusHint" key={item.id}>{item.name} · {new Date(item.startsAt).toLocaleString("zh-TW", { timeZone: "Asia/Taipei" })} ～ {new Date(item.endsAt).toLocaleString("zh-TW", { timeZone: "Asia/Taipei" })}</p>)}
         <AdminButton variant="ghost" disabled={busy || services.status === "loading"} onClick={() => { setServices({ status: "loading", items: [], error: "" }); setServiceReload((value) => value + 1); }}>重新核對服務</AdminButton>
       </div>}
-      <fieldset className="adminWorkStatusRoles" disabled={busy || needsReselect || !isWorking}>
-        <legend>排班職位</legend>
+      <AdminPayrollRoleField value={payrollRole} onChange={setPayrollRole} required={isWorking}
+        disabled={busy || needsReselect || !isWorking} canUseManagerRole={staff.canUseManagerPayrollRole} />
+      <fieldset className="adminWorkStatusRoles">
+        <legend><span className="adminFieldHeading">預排支援工作（可複選）<AdminHelp title="預排支援工作說明">當班支援可以依資格調整，不必修改計薪職位。重新儲存班表會保留已設定的目前支援工作；休假則關閉支援。</AdminHelp></span></legend>
         <div className="adminWorkStatusOptions">{workRoleOptions.map((option) => <AdminToggle
           key={option.id}
           label={option.label}
-          ariaLabel={`臨時排班${option.label}`}
+          ariaLabel={`臨時排班預排支援${option.label}`}
           checked={roles.includes(option.id)}
           disabled={busy || needsReselect || !isWorking}
           onChange={(enabled: boolean) => setRoles((current) => enabled ? [...new Set([...current, option.id])] : current.filter((role) => role !== option.id))}

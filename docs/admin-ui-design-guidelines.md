@@ -55,9 +55,11 @@
 
 兩欄或多欄的功能面板使用 `column-gap: var(--admin-space-inline)`，通常可直接使用 `gap: var(--admin-space-inline)`。並排面板的水平間距沿用此規則；服務員工作台目前採垂直堆疊。
 
-### 開發者預覽切換列
+### 工作台視角切換列
 
-開發者帳號顯示「開發者預覽」切換列時，切換列與下方角色工作台內容之間也要保留一個 `var(--admin-space-block)` 的垂直間距，避免切換控制與工作台的第一組統計卡片視覺黏連。這個留白只作用於 `.adminRoleSwitcher.isDeveloperPreview`，不改變切換列內部按鈕的緊湊間距。
+所有帳號的 `.adminRoleSwitcher` 與下方角色工作台內容之間保留一個 `var(--admin-space-block)` 的垂直間距，包含開發者預覽；由切換列的單一 `margin-bottom` 控制，不再於開發者版本另加留白。切換按鈕保留既有緊湊間距，偏好規則使用 `AdminHelp`；文字按鈕樣式排除 `.adminHelpTrigger`，避免覆蓋共用小驚嘆號幾何與配色。
+
+計薪職位欄位由 `AdminPayrollRoleField` 共用，標籤與說明圖示分開；`.adminFieldHeading` 沿用 6px 圖示間距、桌面至少 24px／觸控至少 44px 的標籤列。欄位、下拉選單、表單內部間距、字型與對話框底部按鈕沿用現有規格，不逐頁加字級覆寫。
 
 ### 避免間距疊加
 

@@ -43,6 +43,8 @@ function visit(value: unknown): CustomerVisit {
     recoveryCodeIssuedAt: nullableString(data.recoveryCodeIssuedAt), recoveryCodeVersion: number(data.recoveryCodeVersion),
     hasRecoveryCode: boolean(data.hasRecoveryCode),
     orderCount: number(data.orderCount), orderAmount: number(data.orderAmount), netReceived: number(data.netReceived),
+    admissionReceivable: number(data.admissionReceivable), admissionReceived: number(data.admissionReceived),
+    admissionRefunded: number(data.admissionRefunded), admissionStatus: string(data.admissionStatus), consumptionAmount: number(data.consumptionAmount),
     hasCashRecords: boolean(data.hasCashRecords), pendingDeliveryCount: number(data.pendingDeliveryCount),
     gameIdVisitCount: number(data.gameIdVisitCount), gameIdOrderAmount: number(data.gameIdOrderAmount), orders: array(data.orders, historyOrder),
   };
@@ -56,7 +58,7 @@ export function parseCustomerDetail(value: unknown): CustomerDetail {
   const summary = object(data.summary);
   return {
     profile: profile(data.profile),
-    summary: { visitCount: number(summary.visitCount), orderCount: number(summary.orderCount), orderAmount: number(summary.orderAmount), netReceived: number(summary.netReceived), pendingDeliveryCount: number(summary.pendingDeliveryCount) },
+    summary: { admissionReceivable: number(summary.admissionReceivable), admissionReceived: number(summary.admissionReceived), admissionRefunded: number(summary.admissionRefunded), consumptionAmount: number(summary.consumptionAmount), unrecordedAdmissionCount: number(summary.unrecordedAdmissionCount), visitCount: number(summary.visitCount), orderCount: number(summary.orderCount), orderAmount: number(summary.orderAmount), netReceived: number(summary.netReceived), pendingDeliveryCount: number(summary.pendingDeliveryCount) },
     visits: array(data.visits, visit),
   };
 }

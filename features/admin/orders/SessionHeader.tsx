@@ -1,5 +1,7 @@
 "use client";
 
+import { AdmissionSummary } from "./AdmissionSummary";
+
 import { useState } from "react";
 import { AdminButton } from "@/features/admin/shared/AdminShared.jsx";
 import { readCharacterIdentity } from "@/lib/customer-identity";
@@ -61,6 +63,7 @@ export function SessionHeader({ item, onUpdate, onReissue, onAssisted, loading }
           </div>
         </div>
       </div>
+      <AdmissionSummary sessionId={item.session.id} refreshKey={`${item.orderCount}:${item.totalAmount}`} />
       <nav className="adminOrderCustomerServices" aria-label="目前顧客的服務與查詢">
         <span className="adminOrderCustomerGroupLabel">顧客服務</span>
         <div className="adminCustomerActions">

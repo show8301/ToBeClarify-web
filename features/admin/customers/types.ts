@@ -25,6 +25,11 @@ export type CustomerVisit = {
   hasRecoveryCode: boolean;
   orderCount: number;
   orderAmount: number;
+  admissionReceivable: number;
+  admissionReceived: number;
+  admissionRefunded: number;
+  admissionStatus: string;
+  consumptionAmount: number;
   netReceived: number;
   hasCashRecords: boolean;
   pendingDeliveryCount: number;
@@ -33,7 +38,7 @@ export type CustomerVisit = {
   orders: CustomerHistoryOrder[];
 };
 export type CustomerHistoryPage = { page: number; pageSize: number; totalCount: number; items: CustomerVisit[] };
-export type CustomerSummary = { visitCount: number; orderCount: number; orderAmount: number; netReceived: number; pendingDeliveryCount: number };
+export type CustomerSummary = { admissionReceivable: number; admissionReceived: number; admissionRefunded: number; consumptionAmount: number; unrecordedAdmissionCount: number; visitCount: number; orderCount: number; orderAmount: number; netReceived: number; pendingDeliveryCount: number };
 export type CustomerDetail = { profile: CustomerProfile; summary: CustomerSummary; visits: CustomerVisit[] };
 
 export type DeliveryAsset = { id: string; kind: string; label: string; url: string | null; contentType: string | null; byteSize: number; createdAt: string };

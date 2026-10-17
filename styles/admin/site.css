@@ -14,6 +14,7 @@
 @import "./layers/93-orders-workspace.css";
 @import "./layers/94-manager-workbench.css";
 @import "./layers/95-scrollbars.css";
+@import "./layers/96-service-workbench.css";
 @import "./designated-workbench.css";
 @import "../shared/select.css";
 @import "../shared/icon-actions.css";

@@ -94,7 +94,7 @@ export function WorkbenchGuestOrders({ orders, units, unavailable, disabled, cas
         {order.customerNote && <p>顧客備註：{order.customerNote}</p>}
         <div className="dwOrderCash">
           {summary && !summary.blockedReason ? <dl><div><dt>本單應收</dt><dd>{formatMoney(summary.receivable)}</dd></div><div><dt>已收（扣除退款）</dt><dd>{formatMoney(summary.netCash)}</dd></div><div><dt>{summary.balance < 0 ? "待退款" : "尚欠"}</dt><dd>{formatMoney(Math.abs(summary.balance))}</dd></div></dl> : summary?.blockedReason ? <p>{summary.blockedReason}</p> : <p>{financeReady ? "帳款未確認，暫無法記錄收款。" : "讀取本單帳款中…"}</p>}
-          <div className="dwActions"><AdminButton disabled={blocked || !summary || Boolean(summary.blockedReason) || summary.balance <= 0 || !cashPeriodId} onClick={() => { if (account) setDialog({ kind: "receipt", order, account }); }}>同單收款</AdminButton><Link href="/admin/orders">完整點單管理</Link></div>
+          <div className="dwActions"><AdminButton disabled={blocked || !summary || Boolean(summary.blockedReason) || summary.balance <= 0 || !cashPeriodId} onClick={() => { if (account) setDialog({ kind: "receipt", order, account }); }}>同單收款</AdminButton><Link href={`/admin/orders?${new URLSearchParams({ date: order.sessionBusinessDate || businessDate, session: order.sessionId, order: order.id })}`}>完整點單管理</Link></div>
           {!cashPeriodId && <p>尚未確認收款營業日，請重新整理。</p>}
         </div>
       </article>;

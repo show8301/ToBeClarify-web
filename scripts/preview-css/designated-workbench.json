@@ -6,5 +6,9 @@
   { "selector": ".adminDesignatedWorkbench .adminPanel", "declarations": { "margin": "0", "min-width": "0" } },
   { "selector": ".adminDesignatedWorkbench .dwTaskGrid", "context": ["@media (max-width: 1100px)"], "declarations": { "grid-template-columns": "minmax(0, 1fr)" } },
   { "selector": ".adminDesignatedWorkbenchDialog .dwFormGrid", "context": ["@media (max-width: 640px)"], "declarations": { "grid-template-columns": "minmax(0, 1fr)" } },
-  { "selector": ".adminDesignatedWorkbench .dwName", "context": ["@media (max-width: 640px)"], "declarations": { "min-height": "44px" } }
+  { "selector": ".adminDesignatedWorkbench .dwName", "context": ["@media (max-width: 640px)"], "declarations": { "min-height": "44px" } },
+  { "selector": ".adminDesignatedWorkbench .dwOrderUnit", "declarations": { "display": "flex", "flex-wrap": "wrap", "padding": "12px" } },
+  { "selector": ".adminDesignatedWorkbench .dwOrderUnitCopy strong", "declarations": { "font-size": "16px" } },
+  { "selector": ".adminDesignatedWorkbench .dwOrderUnitActions button", "context": ["@media (max-width: 640px)"], "declarations": { "width": "100%" } },
+  { "selector": ".adminDesignatedWorkbenchDialog .dwReceiptTotals .isBalance", "declarations": { "font-size": "18px" } }
 ]

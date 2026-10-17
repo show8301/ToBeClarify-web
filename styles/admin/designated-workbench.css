@@ -265,9 +265,173 @@
 
 .adminDesignatedWorkbench .dwGuestOrder p {
   margin: 8px 0;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.7;
   overflow-wrap: anywhere;
+}
+
+.adminDesignatedWorkbench .dwGuestOrder h4 {
+  margin: 0 0 12px;
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+
+.adminDesignatedWorkbench .dwOrderStatuses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin-bottom: 14px;
+  font-size: 14px;
+}
+
+.adminDesignatedWorkbench .dwOrderUnits {
+  display: grid;
+  gap: 10px;
+}
+
+.adminDesignatedWorkbench .dwOrderUnit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: rgba(var(--color-accent-rgb), .05);
+}
+
+.adminDesignatedWorkbench .dwOrderUnitCopy {
+  display: grid;
+  flex: 1 1 180px;
+  min-width: 0;
+  gap: 5px;
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.adminDesignatedWorkbench .dwOrderUnitCopy strong {
+  font-size: 16px;
+}
+
+.adminDesignatedWorkbench .dwOrderKind {
+  color: var(--color-fg-mute);
+  font-size: 13px;
+}
+
+.adminDesignatedWorkbench .dwOrderUnitActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.adminDesignatedWorkbench .dwOrderCash {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.adminDesignatedWorkbench .dwOrderCash dl,
+.adminDesignatedWorkbenchDialog .dwReceiptTotals {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 14px;
+  font-size: 15px;
+}
+
+.adminDesignatedWorkbench .dwOrderCash dl > div,
+.adminDesignatedWorkbenchDialog .dwReceiptTotals > div,
+.adminDesignatedWorkbenchDialog .dwReceiptItems > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  overflow-wrap: anywhere;
+}
+
+.adminDesignatedWorkbench .dwOrderCash dd,
+.adminDesignatedWorkbenchDialog .dwReceiptTotals dd {
+  margin: 0;
+  font-weight: 700;
+  text-align: right;
+}
+
+.adminDesignatedWorkbenchDialog .dwOrderActionForm,
+.adminDesignatedWorkbenchDialog .dwOrderActionForm fieldset {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.adminDesignatedWorkbenchDialog .dwOrderActionForm fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.adminDesignatedWorkbenchDialog .dwOrderActionForm p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.adminDesignatedWorkbenchDialog .dwOrderActionForm input,
+.adminDesignatedWorkbenchDialog .dwOrderActionForm textarea {
+  width: 100%;
+  min-width: 0;
+}
+
+.adminDesignatedWorkbenchDialog .dwOrderActionForm .dwActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.adminDesignatedWorkbenchDialog .dwReceiptItems {
+  display: grid;
+  gap: 10px;
+  font-size: 15px;
+}
+
+.adminDesignatedWorkbenchDialog .dwReceiptTotals .isBalance {
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+  font-size: 18px;
+}
+
+.adminDesignatedWorkbenchDialog .dwServiceOrderContext {
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.adminDesignatedWorkbenchDialog .dwServiceOrderContext h4,
+.adminDesignatedWorkbenchDialog .dwServiceOrderContext p {
+  margin: 0 0 10px;
+}
+
+.adminDesignatedWorkbenchDialog .dwServiceOrderContext ul {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.adminDesignatedWorkbenchDialog .dwServiceOrderContext li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  overflow-wrap: anywhere;
+}
+
+.adminDesignatedWorkbenchDialog .dwServiceOrderContext .isTarget {
+  padding: 8px;
+  border-radius: 6px;
+  background: rgba(var(--color-accent-rgb), .14);
 }
 
 .adminDesignatedWorkbench .dwScheduleItem {
@@ -386,6 +550,10 @@
 }
 
 @media (max-width: 640px) {
+  .adminDesignatedWorkbench .dwOrderUnitActions,
+  .adminDesignatedWorkbench .dwOrderUnitActions button {
+    width: 100%;
+  }
   :is(.adminDesignatedWorkbench, .adminRoleDashboard-service, .adminRoleDashboard-manager) .dwShiftBar,
   .adminDesignatedWorkbench .dwNext {
     padding: 14px 16px;

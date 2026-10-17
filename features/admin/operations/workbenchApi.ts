@@ -82,6 +82,16 @@ export const fulfillmentPath = (orderId: string, unitId?: string) =>
   `/orders/${encodeURIComponent(orderId)}/fulfillment${unitId ? `/${encodeURIComponent(unitId)}` : ""}`;
 
 export const workbenchApi = {
+  orderPricing: async (sessionId: string, orderId: string, signal?: AbortSignal) => {
+    const value = await adminRequest(`/order-sessions/${encodeURIComponent(sessionId)}/orders`, { signal });
+    const orders = list(value, (entry) => {
+      const row = record(entry);
+      return { id: textValue(row.id), status: textValue(row.status), totalAmount: integer(row.totalAmount) };
+    });
+    const order = orders.find((entry) => entry.id === orderId);
+    if (!order) throw new Error("找不到本張訂單，請重新載入。");
+    return order;
+  },
   units: async (id: string, signal?: AbortSignal) => parseUnits(await adminRequest(fulfillmentPath(id), { signal })),
   respond: (orderId: string, nomineeId: string, body: { operationId: string; expectedVersion: number; decision: "accept" | "decline"; reason: string | null }) =>
     adminRequest(`/orders/${encodeURIComponent(orderId)}/nominees/${encodeURIComponent(nomineeId)}/response`, { method: "POST", body: JSON.stringify(body) }),

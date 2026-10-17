@@ -81,13 +81,15 @@ export type OperationsOrder = {
   queueMinutes: number;
   submittedAt: string;
   totalAmount: number;
+  subtotal?: number;
+  mealCreditApplied?: number;
   customerNote: string;
   customerLocation?: string;
   flowVersion?: number;
   requestSource?: string;
   startedAt?: string;
   completedAt?: string;
-  items?: Array<{ name: string; quantity: number; kind: string }>;
+  items?: Array<{ id?: string; name: string; quantity: number; kind: string; lineTotal?: number }>;
   nominees: OperationsNominee[];
   addons: OperationsAddon[];
   roomBookings: Array<{ roomName: string; startsAt: string; endsAt: string; status: string }>;

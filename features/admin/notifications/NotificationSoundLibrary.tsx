@@ -16,6 +16,8 @@ type Props = {
   onMessage: (message: string) => void;
 };
 
+const maxUploadSizeBytes = 10 * 1024 * 1024;
+
 function durationLabel(milliseconds: number) {
   const seconds = Math.ceil(milliseconds / 1000);
   return `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
@@ -49,7 +51,7 @@ export function NotificationSoundLibrary({ sounds, developer, busy, canUpload, s
 
   const upload = async () => {
     if (!file || busy) return;
-    if (!/\.mp3$/i.test(file.name) || file.size <= 0 || file.size > 1048576) { setUploadError('請選擇最多 1 MiB 的 MP3 音檔。'); return; }
+    if (!/\.mp3$/i.test(file.name) || file.size <= 0 || file.size > maxUploadSizeBytes) { setUploadError('請選擇最多 10 MiB 的 MP3 音檔。'); return; }
     if (!name.trim() || name.trim().length > 80) { setUploadError('請輸入 1–80 字的音效名稱。'); return; }
     if (systemCode && !/^[a-z][a-z0-9_]{0,59}$/.test(systemCode)) { setUploadError('系統音效代碼須以小寫英文字母開頭，只能使用小寫字母、數字與底線，最多 60 字。'); return; }
     setBusy(true); setUploadError('');
@@ -106,13 +108,13 @@ export function NotificationSoundLibrary({ sounds, developer, busy, canUpload, s
         </tr>)}</tbody>
       </table></div>
       {!filtered.length && <div className="notification-empty"><Music2 size={28} aria-hidden="true" /><strong>{sounds.length ? '找不到符合的音效' : '尚無可用音效'}</strong><p>{sounds.length ? '試著使用其他名稱搜尋。' : '上傳 MP3，為不同提醒設定專屬音效。'}</p></div>}
-      <p className="notification-library-note">MP3・最多 5 秒／1 MiB。鈴鐺有聲波表示已設定音效。</p>
-      <AdminDialog open={uploadOpen} title="上傳音效" description="選擇最多 5 秒、1 MiB 的 MP3 音檔。上傳後可在通知規則中選用。" onClose={() => { if (!busy) setUploadOpen(false); }} className="notification-upload-dialog" actions={<><AdminButton variant="ghost" disabled={busy} onClick={() => setUploadOpen(false)}>取消</AdminButton><AdminButton disabled={busy || !file || !name.trim() || !canUpload} onClick={upload}><Upload size={17} aria-hidden="true" />{busy ? '上傳中…' : '上傳音效'}</AdminButton></>}>
+      <p className="notification-library-note">MP3・最多 15 秒／10 MiB。鈴鐺有聲波表示已設定音效。</p>
+      <AdminDialog open={uploadOpen} title="上傳音效" description="選擇最多 15 秒、10 MiB 的 MP3 音檔。上傳後可在通知規則中選用。" onClose={() => { if (!busy) setUploadOpen(false); }} className="notification-upload-dialog" actions={<><AdminButton variant="ghost" disabled={busy} onClick={() => setUploadOpen(false)}>取消</AdminButton><AdminButton disabled={busy || !file || !name.trim() || !canUpload} onClick={upload}><Upload size={17} aria-hidden="true" />{busy ? '上傳中…' : '上傳音效'}</AdminButton></>}>
         <fieldset className="notification-upload-fields" disabled={busy}>
           <legend className="adminVisuallyHidden">音效檔案與名稱</legend>
           {uploadError && <p className="adminNotice" role="alert">{uploadError}</p>}
           <AdminField label="音效名稱" required><input value={name} maxLength={80} placeholder="例如：訂單提示音" onChange={event => setName(event.target.value)} /></AdminField>
-          <AdminField label="MP3 音檔" required hint={file ? `已選取：${file.name}` : '僅接受 MP3，最多 5 秒／1 MiB。'}><input type="file" accept=".mp3,audio/mpeg" onChange={event => { const next = event.target.files?.[0] || null; setFile(next); setUploadError(''); if (next && !name.trim()) setName(next.name.replace(/\.mp3$/i, '').slice(0, 80)); }} /></AdminField>
+          <AdminField label="MP3 音檔" required hint={file ? `已選取：${file.name}` : '僅接受 MP3，最多 15 秒／10 MiB。'}><input type="file" accept=".mp3,audio/mpeg" onChange={event => { const next = event.target.files?.[0] || null; setFile(next); setUploadError(''); if (next && !name.trim()) setName(next.name.replace(/\.mp3$/i, '').slice(0, 80)); }} /></AdminField>
           {developer && <AdminField label="系統音效代碼（留空為個人音效）" hint="基礎代碼：order_chime、time_reminder、store_broadcast；也可增加其他代碼。"><input value={systemCode} maxLength={60} pattern="[a-z][a-z0-9_]*" onChange={event => setSystemCode(event.target.value)} /></AdminField>}
         </fieldset>
       </AdminDialog>

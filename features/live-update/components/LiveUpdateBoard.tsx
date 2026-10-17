@@ -27,11 +27,29 @@ function LiveStaffCard({person,duplicate=false,onNavigate}:{person:StaffSummary;
 
 function LiveMarqueeRow({people,reverse=false,onNavigate}:{people:StaffSummary[];reverse?:boolean;onNavigate:(event:React.MouseEvent<HTMLAnchorElement>)=>void}){
   const rowRef=useRef<HTMLDivElement>(null);
+  const [shouldMarquee,setShouldMarquee]=useState(false);
   const pausedUntil=useRef(0);
   const interacting=useRef(false);
+  useLayoutEffect(()=>{
+    const row=rowRef.current;
+    const segment=row?.querySelector<HTMLElement>("[data-marquee-segment]");
+    if(!row||!segment)return;
+    const measure=()=>setShouldMarquee(people.length>1&&segment.scrollWidth>row.clientWidth);
+    const initialFrame=requestAnimationFrame(measure);
+    const observer=typeof ResizeObserver==="undefined"?null:new ResizeObserver(measure);
+    observer?.observe(row);
+    observer?.observe(segment);
+    window.addEventListener("resize",measure);
+    return()=>{
+      cancelAnimationFrame(initialFrame);
+      observer?.disconnect();
+      window.removeEventListener("resize",measure);
+    };
+  },[people.length]);
   useEffect(()=>{
     const row=rowRef.current;
-    if(!row||people.length<2)return;
+    if(!row)return;
+    if(!shouldMarquee){row.scrollLeft=0;return;}
     const segment=row.querySelector<HTMLElement>("[data-marquee-segment]");
     if(!segment)return;
     let frame=0;
@@ -57,14 +75,14 @@ function LiveMarqueeRow({people,reverse=false,onNavigate}:{people:StaffSummary[]
     };
     frame=requestAnimationFrame(tick);
     return()=>{cancelAnimationFrame(initialFrame);cancelAnimationFrame(frame)};
-  },[people.length,reverse]);
+  },[people.length,reverse,shouldMarquee]);
   const beginInteraction=()=>{interacting.current=true};
   const endInteraction=()=>{interacting.current=false;pausedUntil.current=0};
   return <div ref={rowRef} className={`live-marquee-row${reverse?" is-reverse":""}`} aria-label={reverse?"今晚待命店員第二排":"今晚待命店員第一排"} onPointerDown={beginInteraction} onPointerUp={endInteraction} onPointerCancel={endInteraction} onWheel={()=>{pausedUntil.current=Date.now()+350}}>
     <div className="live-marquee-track">
-      <div className="live-marquee-group" aria-hidden="true">{people.map(person=><LiveStaffCard key={`before-${person.id}`} person={person} duplicate onNavigate={onNavigate}/>)}</div>
+      {shouldMarquee&&<div className="live-marquee-group" aria-hidden="true">{people.map(person=><LiveStaffCard key={`before-${person.id}`} person={person} duplicate onNavigate={onNavigate}/>)}</div>}
       <div className="live-marquee-group" data-marquee-segment>{people.map(person=><LiveStaffCard key={person.id} person={person} onNavigate={onNavigate}/>)}</div>
-      <div className="live-marquee-group" aria-hidden="true">{people.map(person=><LiveStaffCard key={`after-${person.id}`} person={person} duplicate onNavigate={onNavigate}/>)}</div>
+      {shouldMarquee&&<div className="live-marquee-group" aria-hidden="true">{people.map(person=><LiveStaffCard key={`after-${person.id}`} person={person} duplicate onNavigate={onNavigate}/>)}</div>}
     </div>
   </div>;
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { OrderPageHeading } from "./OrderPageHeading";
 import type { MenuData, MenuSetItem } from "@/features/site/types";
 
 type Staff = { id: string; displayName: string };
@@ -52,7 +53,7 @@ export function MealOrderPage({ menu, staff, setCart }: Props) {
   };
 
   return <div className="orderPage">
-    <header className="orderPageHeading"><span>FOOD &amp; DRINK</span><h1>一般點餐</h1><p>信物餘額保留供後續加點。{supportsRecipients ? "香檳塔及含香檳塔的套餐不可使用信物折抵；可贈送給店家或指定店員。" : "實際折抵以正式報價為準。"}</p></header>
+    <OrderPageHeading kicker="FOOD & DRINK" title="一般點餐" text={`信物餘額保留供後續加點。${supportsRecipients ? "香檳塔及含香檳塔的套餐不可使用信物折抵；可贈送給店家或指定店員。" : "實際折抵以正式報價為準。"}`} />
     <div className="orderCategoryRail">
       {showSets && <button type="button" className={category === "sets" ? "isActive" : ""} onClick={() => setCategory("sets")}>套餐</button>}
       {menu.categories.map(item => <button type="button" className={category === item.id ? "isActive" : ""} key={item.id} onClick={() => setCategory(item.id)}>{item.categoryName}</button>)}

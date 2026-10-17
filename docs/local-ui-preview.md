@@ -48,7 +48,7 @@
 | --- | --- | --- |
 | 公開站 | 無 | 根 layout 的公開樣式已包含首頁狀態標籤 |
 | `/admin` | [styles/admin/site.css](../styles/admin/site.css) | 由後台 layout 載入，保留入口內所有 `@import` 的順序 |
-| `/order` 及點餐預覽 | [styles/ordering/site.css](../styles/ordering/site.css) | 由相應頁面載入，順序為 `base.css` → `modern.css` |
+| `/order` 及點餐預覽 | [styles/ordering/site.css](../styles/ordering/site.css) | 由相應頁面載入，順序為 `base.css` → `modern.css` → `shared/inline-help.css` → `shared/select.css` → `shared/icon-actions.css` |
 
 後台與點餐仍繼承根 layout 的公開樣式及字型設定，不是完全獨立的 CSS 作用域。
 

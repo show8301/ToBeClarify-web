@@ -1,0 +1,52 @@
+.inlineHelpTrigger {
+  --icon-action-size: 24px;
+  --icon-action-glyph-size: 16px;
+  border: 0;
+  color: var(--inline-help-muted, #7186ad);
+  background: transparent;
+  box-shadow: none;
+  cursor: help;
+}
+.inlineHelpTrigger:hover { color: var(--inline-help-fg, #31334a); }
+.inlineHelpTrigger:focus-visible,
+.inlineHelpPopup button:focus-visible {
+  outline: 2px solid var(--inline-help-fg, #31334a);
+  outline-offset: 3px;
+}
+.inlineHelpPositioner { z-index: 1200; }
+.inlineHelpPopup {
+  box-sizing: border-box;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  max-width: min(340px, calc(100vw - 32px));
+  max-height: var(--available-height);
+  min-height: 0;
+  overflow: auto;
+  overflow-wrap: anywhere;
+  padding: 14px;
+  border: 1px solid var(--inline-help-border, #cbd3df);
+  border-radius: 10px;
+  color: var(--inline-help-fg, #31334a);
+  background: var(--inline-help-surface, #fbfcfd);
+  box-shadow: 0 8px 24px rgb(0 0 0 / .18);
+  font-family: var(--font-noto-sans-tc, "Noto Sans TC"), "Microsoft JhengHei", sans-serif;
+}
+.inlineHelpPopup h2 { margin: 0; font-size: 15px; font-weight: 700; }
+.inlineHelpPopup p { margin: 0; font-size: 14px; line-height: 1.7; }
+.inlineHelpPopup button {
+  justify-self: end;
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 1px solid var(--inline-help-border, #cbd3df);
+  border-radius: 6px;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+@media (any-pointer: coarse) {
+  .inlineHelpTrigger { --icon-action-size: 44px; }
+  .inlineHelpPopup button { min-height: 44px; }
+}

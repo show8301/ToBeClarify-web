@@ -42,7 +42,7 @@
 
 [發布範圍與檔案 checksum](service-workbench-admission-release-scope.json)列出本次 Web 38 個、API 27 個檔案，協助後續只收本次修改；它是本地準備快照，不是 commit 或部署紀錄。來源再有變動時需重新計算。
 
-SHA-256：`79F76A643FA429C85887E309E4CBFAA5EE08E933483A3392E93358851732C3C9`。
+SHA-256：`3B3F39179F3128AA82AAC8340B6BB2E6FBC06A8600F33283759A6417ED5518E5`。
 
 新增三表為 `ORDERING_ADMISSION_POLICY`、`ORDERING_ADMISSION_POLICY_AUDIT`、`ORDERING_SESSION_CREATE_OPERATIONS`。既有入場、帳款、顧客歸戶及履約表重用；不產生歷史收款、不從 `priceText` 推算收費，也不重算歷史結算。政策初值 NULL，需要管理者明確設定正式金額；餐點折抵仍獨立取營運參數。
 

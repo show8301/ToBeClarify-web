@@ -34,7 +34,7 @@ export function SettlementPostActions({ staff, payment, setPayment, correction, 
     <details className="adminSettlementDisclosure">
       <AdminDisclosureSummary>建立結算後更正差額</AdminDisclosureSummary>
       <div className="adminSettlementDisclosureBody">
-        <p className="adminSettlementHint">現場費用與出勤差額各自建立更正案件，保留歷史快照。</p>
+        <p className="adminSettlementHint">計薪、支援服務所得與現場費用差額請建立更正案件，保留原結算快照；實際補發或追回另行記錄。</p>
         <div className="adminFormGrid">
           <AdminField label="更正來源"><select value={correction.sourceKind} disabled={saving} onChange={event => setCorrection(current => ({ ...current, sourceKind: event.target.value }))}><option value="finance">現場費用</option><option value="attendance">出勤／工時</option><option value="manual">其他</option></select></AdminField>
           <AdminField label="原案件／紀錄編號"><input value={correction.sourceId} disabled={saving} onChange={event => setCorrection(current => ({ ...current, sourceId: event.target.value }))} /></AdminField>

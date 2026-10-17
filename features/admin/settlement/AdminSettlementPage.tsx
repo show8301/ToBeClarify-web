@@ -190,10 +190,12 @@ export function AdminSettlementPage() {
   };
 
   const addInput = (staffId: string, role: string) => {
+    const assignment = overview?.payrollAssignments?.find(item => item.staffId === staffId);
+    if (!assignment?.payrollRole || (role !== assignment.payrollRole && !(role === "backstage" && assignment.canUseBackstage))) return;
     const member = staff.find((item) => item.id === staffId);
     if (!member || inputs.some((item) => item.staffId === staffId && item.role === role)) return;
       setInputs((current) => [...current, {
-      staffId, displayName: member.displayName, roleTitle: member.roleTitle, role,
+      staffId, payrollSnapshotVersion: assignment.payrollSnapshotVersion, displayName: member.displayName, roleTitle: member.roleTitle, role,
       isWorking: Boolean(member.isWorkingToday), actualMinutes: 0, activityHours: null,
       payableHours: 0, publicTipEligible: true, isBackstageParticipant: role === "backstage", attendanceSource: "manual", note: "",
     }]);
@@ -206,7 +208,9 @@ export function AdminSettlementPage() {
         businessDate: date, sessionNo, dayType, ...runFields,
         admissionFeeOverride: runFields.admissionFeeOverride === "" ? null : Number(runFields.admissionFeeOverride),
         companyShareHours: runFields.companyShareHours === "" ? null : Number(runFields.companyShareHours),
+        expectedInputVersion: overview?.run.inputVersion,
         staffInputs: inputs.map((item) => ({
+          payrollSnapshotVersion: overview?.payrollAssignments?.find(assignment => assignment.staffId === item.staffId)?.payrollSnapshotVersion,
           staffId: item.staffId, role: item.role, actualMinutes: Number(item.actualMinutes || 0),
           activityHours: item.activityHours == null ? null : Number(item.activityHours),
           publicTipEligible: true, isBackstageParticipant: Boolean(item.isBackstageParticipant),
@@ -227,7 +231,7 @@ export function AdminSettlementPage() {
     setSaving(true); setMessage("");
     try {
       const next = await adminApi.submitSettlementAttendanceBackfill({
-        businessDate: date, sessionNo, dayType, staffId: selectedPersonId, role: backfillForm.role,
+        businessDate: date, sessionNo, dayType, staffId: selectedPersonId, role: overview?.payrollAssignments?.find(item => item.staffId === selectedPersonId)?.payrollRole,
         requestedMinutes, reason: backfillForm.reason.trim(),
       });
       setOverview(next); setInputs(next.staffInputs || inputs);
@@ -318,15 +322,6 @@ export function AdminSettlementPage() {
     finally { setSaving(false); }
   };
 
-  const reopen = async () => {
-    const reason = window.prompt("請輸入重新開放原因");
-    if (!reason?.trim()) return;
-    setSaving(true); setMessage("");
-    try { const next = await adminApi.reopenSettlement({ businessDate: date, sessionNo, reason: reason.trim() }); setSessionNo(next.run.sessionNo); setOverview(next); setInputs(next.staffInputs || []); setMessage(`已建立第 ${next.run.sessionNo} 營業時段。`); }
-    catch (nextError) { setMessage((nextError as Error).message); }
-    finally { setSaving(false); }
-  };
-
   const saveRule = async () => {
     setSaving(true); setMessage("");
     try { const saved = await adminApi.saveSettlementRule({ ...ruleForm, effectiveFrom: ruleForm.effectiveFrom || date }); setRuleForm(emptyRule(saved, saved.dayType, saved.effectiveFrom)); setMessage("新規則版本已建立；既有規則不會被覆蓋。"); }
@@ -402,8 +397,8 @@ export function AdminSettlementPage() {
             key={`${date}-${sessionNo}`}
             overview={overview} inputs={inputs} staff={availableStaff} dayType={dayType} setDayType={setDayType}
             fields={runFields} setFields={setRunFields} canManage={canManage} active={tab === "operations"} saving={saving} dirty={dirty} flowVersion={flowVersion}
-            onBusyChange={setSaving} onAttendanceChanged={refreshSettlement} onAdd={addInput} onInputChange={updateInput} onSave={saveInputs} onCalculate={calculate}
-            onClose={closeBusinessDay} onFinalize={finalize} onReopen={reopen} onReview={openBackfillReview}
+            onBusyChange={setSaving} onAttendanceChanged={refreshSettlement} onAdd={addInput} onRemove={(index) => setInputs(current => current.filter((_, itemIndex) => itemIndex !== index))} onInputChange={updateInput} onSave={saveInputs} onCalculate={calculate}
+            onClose={closeBusinessDay} onFinalize={finalize} onReview={openBackfillReview}
             onViewPerson={id => { selectPerson(id); changeTab("personal"); }}
           >
             <SettlementPostActions staff={personalStaff} payment={paymentForm} setPayment={setPaymentForm} correction={correctionForm} setCorrection={setCorrectionForm} saving={saving} onPayment={recordPayment} onCorrection={recordCorrection} />
@@ -415,7 +410,7 @@ export function AdminSettlementPage() {
           <AdminPanel title="補打卡申請" description="填寫個人的出勤角色、分鐘與理由，送交開發人員或店經理核准。">
             {!isFinalized && availableStaff.some(member => member.id === selectedPersonId) ? <>
               <div className="adminFormGrid">
-                <AdminField label="角色"><select value={backfillForm.role} disabled={saving} onChange={event => setBackfillForm(current => ({ ...current, role: event.target.value }))}>{["designated", "service", "manager", "backstage"].map(role => <option key={role} value={role}>{roleLabel[role]}</option>)}</select></AdminField>
+                <AdminField label="上班計薪職位"><input readOnly value={roleLabel[overview.payrollAssignments?.find(item => item.staffId === selectedPersonId)?.payrollRole || ""] || "待經理確認"} /></AdminField>
                 <AdminField label="補打卡分鐘"><input type="number" min="1" value={backfillForm.requestedMinutes} disabled={saving} onChange={event => setBackfillForm(current => ({ ...current, requestedMinutes: event.target.value }))} /></AdminField>
                 <AdminField label="申請理由"><input value={backfillForm.reason} disabled={saving} onChange={event => setBackfillForm(current => ({ ...current, reason: event.target.value }))} /></AdminField>
               </div>

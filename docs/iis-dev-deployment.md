@@ -98,7 +98,8 @@ isolated from unrelated PM2 applications such as `D:\cron`.
 - Pull requests targeting `dev` or `main` perform a clean locked install,
   build, typecheck, lint, and script validation without deploying. The current
   workflow also runs the isolated PM2 smoke described below for same-repository
-  pull requests. This is a separate PR check, not part of the dev push deployment.
+  production promotion pull requests targeting `main`. Pull requests targeting
+  `dev` skip this smoke check, as do dev push deployments.
 - For a dev release, skip automated test suites before, during, and after
   deployment unless the user explicitly requests testing for that run. Keep
   release verification limited to builds, static/configuration checks, deployment

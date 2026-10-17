@@ -36,6 +36,7 @@ type StaffOption = {
   displayName: string;
   roleTitle?: string | null;
   canUseManagerPayrollRole: boolean;
+  canUseBackstage: boolean;
 };
 
 type DutyPlanDraft = {
@@ -156,7 +157,7 @@ export function AdminDutyPlanningPage({ navigate }: { navigate: Navigate }) {
       if (parsedPlans.some((plan) => plan === null)) throw new Error("班表或計薪職位資料不完整，請重新讀取。");
       const nextPlans = parsedPlans.filter((value): value is DutyPlan => value !== null);
       const nextStaff = (Array.isArray(staffResult) ? staffResult : [])
-        .map((value: Record<string, unknown>) => ({ id: String(value.id), displayName: String(value.displayName || "未命名店員"), roleTitle: value.roleTitle ? String(value.roleTitle) : null, canUseManagerPayrollRole: value.canUseManagerPayrollRole === true }));
+        .map((value: Record<string, unknown>) => ({ id: String(value.id), displayName: String(value.displayName || "未命名店員"), roleTitle: value.roleTitle ? String(value.roleTitle) : null, canUseManagerPayrollRole: value.canUseManagerPayrollRole === true, canUseBackstage: value.canUseBackstage === true }));
       setPlans(nextPlans);
       setStaff(nextStaff);
       setDraft((current) => current && nextStaff.some((item) => item.id === current.staffId) ? current : null);
@@ -307,16 +308,18 @@ export function AdminDutyPlanningPage({ navigate }: { navigate: Navigate }) {
           {canManageAll ? <AdminField label="店員"><select disabled={Boolean(draft.id) || saving} value={draft.staffId} onChange={(event) => {
             const staffId = event.target.value;
             setDraft((current) => current ? { ...current, staffId,
-              payrollRole: current.payrollRole === "manager" && !staff.find((item) => item.id === staffId)?.canUseManagerPayrollRole ? "" : current.payrollRole } : current);
+              scheduledRoles: current.scheduledRoles.filter(role => role !== "backstage" || staff.find(item => item.id === staffId)?.canUseBackstage),
+              payrollRole: (current.payrollRole === "manager" && !staff.find((item) => item.id === staffId)?.canUseManagerPayrollRole) || (current.payrollRole === "backstage" && !staff.find(item => item.id === staffId)?.canUseBackstage) ? "" : current.payrollRole } : current);
           }}><option value="">請選擇店員</option>{editableStaff.map((item) => <option key={item.id} value={item.id}>{item.displayName}{item.roleTitle ? `｜${item.roleTitle}` : ""}</option>)}</select></AdminField> : <div className="adminDutyPlanReadonly"><span>店員</span><strong>{ownStaff?.displayName || "目前帳號尚未綁定店員"}</strong></div>}
           <AdminField label="值班日期"><input disabled={Boolean(draft.id) || saving} type="date" min={businessDate} value={draft.businessDate} onChange={(event) => setDraft((current) => current ? { ...current, businessDate: event.target.value } : current)} /></AdminField>
           <AdminField label="當天狀態"><select value={draft.isWorking ? "working" : "off"} onChange={(event) => setDraft((current) => current ? { ...current, isWorking: event.target.value === "working" } : current)}><option value="working">有上班</option><option value="off">休假／不值班</option></select></AdminField>
           {draft.isWorking ? <div className="adminDutyPlanTimeGrid"><AdminField label="開始時間"><input type="text" inputMode="numeric" maxLength={5} placeholder="例如 20:00" value={draft.startTime} onChange={(event) => setDraft((current) => current ? { ...current, startTime: event.target.value } : current)} /></AdminField><AdminField label="結束時間"><input type="text" inputMode="numeric" maxLength={5} placeholder="例如 24:00" value={draft.endTime} onChange={(event) => setDraft((current) => current ? { ...current, endTime: event.target.value } : current)} /></AdminField></div> : null}
           {draft.isWorking ? <small>時間使用台北時區；結束時間早於開始時間代表翌日，例如 20:00 ～ 03:00。跨午夜仍歸原營業日。</small> : null}
           <AdminPayrollRoleField value={draft.payrollRole} required={draft.isWorking} disabled={!draft.isWorking || saving}
+            canUseBackstage={staff.find((item) => item.id === draft.staffId)?.canUseBackstage === true}
             canUseManagerRole={staff.find((item) => item.id === draft.staffId)?.canUseManagerPayrollRole === true}
             onChange={(payrollRole) => setDraft((current) => current ? { ...current, payrollRole } : current)} />
-          <fieldset className="adminDutyRoleChoices"><legend><span className="adminFieldHeading">預排支援工作（可複選）<AdminHelp title="預排支援工作說明">這是當班支援的初始規劃。實際值班時可以依工作資格調整目前支援工作及廣播受眾，不會更改單一計薪職位。</AdminHelp></span></legend>{dutyRoleOptions.map((option) => <div className="adminDutyRoleChoice" key={option.id}><AdminToggle checked={draft.scheduledRoles.includes(option.id)} disabled={!draft.isWorking || saving} onChange={() => toggleRole(option.id)} label={option.label} ariaLabel={`切換${option.label}預排支援`} /><small>{option.description}</small></div>)}</fieldset>
+          <fieldset className="adminDutyRoleChoices"><legend><span className="adminFieldHeading">預排支援工作（可複選）<AdminHelp title="預排支援工作說明">這是當班支援的初始規劃。實際值班時可以依工作資格調整目前支援工作及廣播受眾，不會更改單一計薪職位。</AdminHelp></span></legend>{dutyRoleOptions.filter((option) => option.id !== "backstage" || staff.find((item) => item.id === draft.staffId)?.canUseBackstage || draft.scheduledRoles.includes("backstage")).map((option) => <div className="adminDutyRoleChoice" key={option.id}><AdminToggle checked={draft.scheduledRoles.includes(option.id)} disabled={!draft.isWorking || saving} onChange={() => toggleRole(option.id)} label={option.label} ariaLabel={`切換${option.label}預排支援`} /><small>{option.description}</small></div>)}</fieldset>
           <div className="adminDutyPlanEditorActions"><AdminButton variant="ghost" disabled={saving} onClick={() => setDraft(null)}>取消</AdminButton><AdminButton onClick={() => void save()} busy={saving} busyLabel="儲存中…">{draft.id ? "儲存修改" : "送出規劃"}</AdminButton></div>
         </div> : <div className="adminDutyPlanEditorEmpty"><span aria-hidden="true">✦</span><p>值班規劃會保留日期、時段、職位與核准紀錄，讓營業工作台有穩定的當日依據。</p><AdminButton variant="secondary" disabled={!businessDate || loading} onClick={() => startNew()}>新增規劃</AdminButton></div>}
       </AdminPanel>

@@ -75,14 +75,14 @@
 .nominationSection,.tipComposer,.helpCard { border-color:rgba(255,255,255,.84); border-radius:18px; background:linear-gradient(145deg,rgba(255,255,255,.58),rgba(245,240,248,.38)); box-shadow:0 22px 58px rgba(118,121,161,.1),inset 0 1px rgba(255,255,255,.94); }
 .nominationSection { padding:22px; }
 .nominationSection>header>span { box-shadow:0 8px 20px rgba(118,121,161,.16); }
-.nominationStaffGrid button,.nominationServiceGrid>button,.nominationModeGrid>button { border-color:var(--o-line); border-radius:13px; background:rgba(255,255,255,.66); transition:transform .18s ease,border-color .18s ease,background .18s ease; }
-.nominationStaffGrid button:hover:not(:disabled),.nominationServiceGrid>button:hover,.nominationModeGrid>button:hover { border-color:rgba(128,153,196,.4); transform:translateY(-2px); }
+.nominationStaffGrid button,.nominationServiceGrid>button,.nominationModeCard { border-color:var(--o-line); border-radius:13px; background:rgba(255,255,255,.66); transition:transform .18s ease,border-color .18s ease,background .18s ease; }
+.nominationStaffGrid button:hover:not(:disabled),.nominationServiceGrid>button:hover,.nominationModeCard:hover { border-color:rgba(128,153,196,.4); transform:translateY(-2px); }
 .nominationComposer { overflow:hidden; border-color:rgba(255,255,255,.82); border-radius:18px; background:linear-gradient(125deg,rgba(185,222,220,.46),rgba(169,199,234,.32),rgba(232,199,218,.34)); box-shadow:0 20px 52px rgba(118,121,161,.13); }
 .orderPrimaryAction { min-height:52px; padding:12px 18px; border-color:rgba(255,255,255,.82); border-radius:11px; background:linear-gradient(115deg,#c1b9df,#a9c7ea 52%,#e8c7da); box-shadow:0 10px 24px rgba(118,121,161,.15); font-size:15px; font-weight:780; }
 .nominationSection h2,.tipComposer h2,.helpCard h2{font-family:var(--o-display);font-weight:780;letter-spacing:-.025em}
-.nominationSection header p,.nominationServiceGrid p,.nominationModeGrid p{font-size:13px;line-height:1.65}
+.nominationSection header p,.nominationServiceGrid p{font-size:13px;line-height:1.65}
 .nominationStaffGrid button{min-height:116px;padding:11px 8px}.nominationStaffGrid strong{font-size:13px}.nominationStaffGrid small{font-size:10px}
-.nominationServiceGrid>button,.nominationModeGrid>button{min-height:132px;padding:16px}.nominationServiceGrid>button>strong,.nominationModeGrid>button>strong{font:750 16px/1.35 var(--o-display)}
+.nominationServiceGrid>button,.nominationModeCard{min-height:132px;padding:16px}.nominationServiceGrid>button>strong,.nominationModeSelect>strong{font:750 16px/1.35 var(--o-display)}
 .stepper button{min-width:44px;min-height:44px;font-size:18px}.stepper strong{font-size:15px}
 .stepper { overflow:hidden; border-radius:11px; }
 
@@ -105,9 +105,16 @@
 .orderTextButton{min-height:44px;font-size:13px;font-weight:650}
 .cartLine strong,.myOrderHead strong,.myOrderNominee strong{font-family:var(--o-display);font-weight:750}
 .cartLine>button{min-width:40px;min-height:40px;font-size:20px}
-.myOrderHead{font-size:13px}.myOrderHead strong{font-size:16px}.myOrderHead b{font-size:16px}
+.orderShell .myOrderHead{gap:12px;flex-wrap:wrap;white-space:normal;font-size:16px}
+.myOrderHead>div{min-width:0;overflow-wrap:anywhere}
+.myOrderHead span,.myOrderHead small{font-size:14px}
+.myOrderHead strong,.myOrderHead b{font-size:18px}
 .tipAmountButtons button{min-height:48px;padding:11px 14px;font-size:14px;font-weight:750}
-.tipAmountButtons label{min-height:48px;padding:7px 11px;font-size:12px;font-weight:650}
+.tipAmountButtons button{border:1px solid #d8dde6;border-radius:9px;background:#fff;color:#34394f;box-shadow:0 2px 5px rgba(52,57,79,.07)}
+.tipAmountButtons button:hover:not(.isActive){border-color:#aab7ca;background:#f8faff}
+.tipAmountButtons button.isActive{border-color:#7186ad;background:#e8eef8;color:#344767;box-shadow:inset 0 0 0 1px #7186ad}
+.tipAmountButtons label{min-height:48px;padding:9px 11px;font-size:12px;font-weight:650;grid-template-columns:1fr;align-content:center;gap:5px;border:1px solid #d8dde6;border-radius:9px;background:#fff;color:#34394f}
+.tipAmountButtons input{min-height:38px;padding:8px 10px;border:1px solid #cbd3df;border-radius:7px;background:#f8faff;color:#34394f;font:inherit;font-size:14px;font-weight:700}
 .tipResult strong{font:850 19px/1.35 var(--o-display);color:var(--o-ink)}
 .cartSummary h2{font:780 21px/1.25 var(--o-display)}
 .cartSummary dl div{font-size:13px}.cartSummary .isTotal{font-size:17px}.cartSummary p{font-size:12px;line-height:1.65}
@@ -122,8 +129,7 @@
 .orderCategoryRail button.isActive,
 .nominationStaffGrid button.isActive,
 .nominationServiceGrid>button.isActive,
-.nominationModeGrid>button.isActive,
-.tipAmountButtons button.isActive { border-color:rgba(101,120,159,.24); background:rgba(169,199,234,.25); box-shadow:none; }
+.nominationModeCard.isActive { border-color:rgba(101,120,159,.24); background:rgba(169,199,234,.25); box-shadow:none; }
 .status-submitted,.status-partially_confirmed,.status-confirmed,.status-in_service,.status-needs_reschedule { box-shadow:0 8px 24px rgba(82,87,120,.09); }
 .orderAside::before { border-bottom:1px solid rgba(49,51,74,.12); background:rgba(193,185,223,.25); color:var(--o-ink); }
 
@@ -345,14 +351,14 @@
 }
 .nominationStaffGrid button,
 .nominationServiceGrid>button,
-.nominationModeGrid>button {
+.nominationModeCard {
   border-color:#dfe3eb;
   background:#f7f8fa;
   box-shadow:none;
 }
 .nominationStaffGrid button:hover:not(:disabled),
 .nominationServiceGrid>button:hover,
-.nominationModeGrid>button:hover { transform:none; }
+.nominationModeCard:hover { transform:none; }
 .cartNominationGroup>header { background:#454b63; }
 .orderNotice { border-color:#d7dce5; background:#f7f9fb; box-shadow:0 8px 24px rgba(82,87,120,.11); }
 
@@ -431,6 +437,15 @@
   font-size:clamp(30px,2.8vw,36px);
   letter-spacing:-.035em;
 }
+.orderPageTitle {
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-top:8px;
+}
+.orderPageTitle h1 { min-width:0; margin:0; overflow-wrap:anywhere; }
+.orderSectionTitle { display:flex; align-items:center; gap:6px; min-width:0; }
+.orderSectionTitle h2 { min-width:0; margin:0; overflow-wrap:anywhere; }
 .orderScenarioGuide {
   display:grid;
   grid-template-columns:repeat(4,minmax(0,1fr));
@@ -611,6 +626,7 @@
 }
 .nominationControls label>strong { min-height:44px; display:flex; align-items:center; font-size:14px; }
 .orderNotice {
+  position:fixed;
   top:auto;
   right:24px;
   bottom:24px;
@@ -618,14 +634,19 @@
   transform:none;
   z-index:80;
   min-width:240px;
-  max-width:min(420px,calc(100vw - 48px));
-  padding:11px 12px 11px 14px;
+  max-width:min(480px,calc(100vw - 48px));
+  box-sizing:border-box;
+  padding:16px 18px;
+  align-items:flex-start;
+  gap:12px;
+  overflow-wrap:anywhere;
   justify-content:space-between;
   border-radius:11px;
   background:#fff;
   color:#3b4056;
 }
-.orderNotice button { min-width:30px; min-height:30px; margin-left:16px; border-radius:8px; color:#697187; }
+.orderNotice > span { min-width:0; flex:1; }
+.orderNotice button { flex:0 0 30px; min-width:30px; min-height:30px; margin-left:0; border-radius:8px; color:#697187; }
 
 @media(max-width:1080px){
   .orderScenarioGuide{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -705,6 +726,16 @@
 
 .orderQuoteReview{margin:20px 0;padding:24px;border:2px solid #587b70;background:#fffdf8;color:#18201d;border-radius:16px}.orderQuoteReview dl>div{display:flex;justify-content:space-between;gap:18px;padding:8px 0;border-bottom:1px solid #ddd}.orderQuoteReview p{white-space:pre-line}.orderQuoteReview button{padding:12px 18px;margin:10px 10px 0 0;background:#173e35;color:white;border-radius:8px;cursor:pointer}.orderQuoteReview button:disabled{opacity:.5;cursor:not-allowed}.orderQuoteReview :focus-visible{outline:3px solid #805f9e;outline-offset:3px}
 
+.orderQuoteReview > article > h3,
+.orderQuoteReview > article > strong,
+.orderQuoteReview dt,
+.orderQuoteReview dd,
+.orderQuoteReview summary,
+.orderQuoteReview li,
+.orderQuoteReview .orderQuoteItemName {
+  font-size:19px;
+}
+
 /* Keep room choices and menu cards in the same quiet card language. */
 .roomBookingSection {
   border-color:#dfe3eb;
@@ -736,7 +767,14 @@
   padding:10px 14px 2px;
   overflow:hidden;
 }
-.roomBookingCopy small { color:#7186ad; }
+.roomBookingHeading {
+  display:flex;
+  align-items:baseline;
+  flex-wrap:wrap;
+  gap:4px 10px;
+  min-width:0;
+}
+.roomBookingCopy small { color:#7186ad; font-size:12px; }
 .roomBookingCopy strong {
   overflow-wrap:anywhere;
   word-break:break-word;
@@ -936,93 +974,115 @@
   }
 }
 
-/* Make order history details easier to read while keeping each card compact. */
+/* Keep primary order details readable and secondary information at least 14px. */
 .myOrderDetail {
-  padding:14px;
-  font-size:14px;
+  padding:18px;
+  font-size:16px;
+  line-height:1.65;
 }
 .customerOrderDetails {
-  gap:6px;
-  margin-bottom:8px;
-  padding:9px 11px;
-  font-size:13px;
+  gap:10px;
+  margin-bottom:14px;
+  padding:14px;
+  font-size:16px;
 }
 .customerOrderDetails>header {
-  gap:6px;
+  gap:8px 14px;
+  flex-wrap:wrap;
 }
 .customerOrderDetails>header span {
-  font-size:14px;
+  font-size:18px;
 }
 .customerOrderDetails>header small {
-  font-size:11px;
+  font-size:14px;
 }
 .customerOrderDetailsValues {
   gap:2px;
 }
 .customerOrderDetailsValues p {
-  line-height:1.35;
+  line-height:1.65;
+  overflow-wrap:anywhere;
 }
 .customerOrderDetails details {
   gap:5px;
   padding-top:5px;
 }
 .customerOrderDetails label {
-  gap:3px;
-  font-size:12px;
+  gap:6px;
+  font-size:14px;
 }
 .customerOrderDetails input,
 .customerOrderDetails textarea {
-  padding:7px;
-  font-size:13px;
+  padding:10px;
+  font-size:16px;
 }
 .customerOrderDetails button {
-  padding:7px 10px;
-  font-size:12px;
+  min-height:44px;
+  padding:9px 12px;
+  font-size:14px;
 }
 .customerOrderDetails>p {
-  font-size:12px;
+  font-size:14px;
 }
 .myOrderStage {
-  padding:8px 11px;
-  font-size:14px;
+  padding:10px 14px;
+  gap:8px 14px;
+  flex-wrap:wrap;
+  font-size:17px;
 }
 .myOrderItems {
   margin-top:8px;
 }
 .myOrderItems>div,
 .myOrderDetail dl>div {
-  padding:6px 0;
-  font-size:13px;
+  gap:12px;
+  padding:10px 0;
+  font-size:16px;
 }
-.myOrderNominee {
-  gap:3px;
-  margin-top:8px;
-  padding:10px;
-  font-size:13px;
+.myOrderItems>div>span { min-width:0; overflow-wrap:anywhere; }
+.myOrderItems>div>b,
+.myOrderDetail dd { flex-shrink:0; font-size:17px; }
+.myOrderNominee,
+.myOrderAddon,
+.myOrderRoom {
+  gap:6px;
+  margin-top:12px;
+  padding:14px;
+  font-size:16px;
 }
+.myOrderRoom>strong { font-size:18px; }
+.myOrderRoom>span,
+.myOrderAddon>span,
+.myOrderDetail small { font-size:14px; }
 .myOrderDetail dl {
   margin:9px 0;
 }
-.myOrderAddon {
-  gap:3px;
-  margin-top:8px;
-  padding:10px;
-  font-size:13px;
+.myOrderDetail .customerAddonComposer p { font-size:16px; }
+.myOrderDetail .customerAddonComposer label,
+.myOrderDetail .customerAddonComposer button { font-size:14px; }
+.myOrderDetail .customerAddonComposer input,
+.myOrderDetail .customerAddonComposer select { font-size:16px; }
+.myOrderDetail .customerAddonComposer button { min-height:44px; }
+.myOrderDetail .customerAddonComposer footer {
+  display:flex;
+  flex-wrap:wrap;
 }
 .orderTimeline {
   margin-top:12px;
 }
 .orderTimeline li {
-  gap:10px;
-  padding:7px 0;
+  grid-template-columns:minmax(90px,max-content) minmax(0,1fr);
+  gap:12px;
+  padding:10px 0;
 }
+.orderTimeline li>span { font-size:14px; }
 .orderTimeline strong {
-  font-size:13px;
+  font-size:16px;
 }
 .orderTimeline p {
   margin-top:2px;
-  font-size:11px;
-  line-height:1.4;
+  font-size:14px;
+  line-height:1.65;
 }
 
 /* Final spacing pass for the ordering controls and room cards. */
@@ -1263,24 +1323,43 @@
   letter-spacing:-.04em;
 }
 
-/* Let the two nomination modes fit their copy instead of reserving a tall,
-   mostly empty panel. */
-.nominationModeGrid>button {
+/* Keep the card selection target and supplemental help as separate controls. */
+.nominationModeCard {
+  position:relative;
+  min-width:0;
   min-height:0;
   height:auto;
   padding:14px 16px 15px;
   gap:8px;
   align-content:start;
 }
-.nominationModeGrid>button>strong {
-  font-size:18px;
+.nominationModeSelect>strong {
+  font-size:22px;
   line-height:1.35;
 }
-.nominationModeGrid>button>p {
-  margin:0;
-  font-size:14px;
-  line-height:1.6;
+.nominationModeTitle { display:flex; align-items:center; gap:6px; }
+.nominationModeSelect {
+  position:static;
+  padding:0;
+  border:0;
+  color:inherit;
+  background:transparent;
+  font:inherit;
+  text-align:left;
 }
+.nominationModeSelect::after {
+  position:absolute;
+  inset:0;
+  border-radius:14px;
+  content:"";
+}
+.nominationModeTitle>.nominationModeSelect:focus-visible { outline:none; }
+.nominationModeSelect:focus-visible::after {
+  outline:3px solid var(--o-coral);
+  outline-offset:3px;
+}
+.nominationModeTitle>.inlineHelpTrigger { position:relative; z-index:1; }
+
 
 @media(max-width:860px){
   .nominationStaffGrid {

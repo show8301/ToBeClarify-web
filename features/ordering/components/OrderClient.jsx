@@ -2,6 +2,9 @@
 import {MealOrderPage} from './MealOrderPage';
 import {OrderQuoteReview} from '@/features/ordering/components/OrderQuoteReview';
 import { OrderRecoveryForm } from './OrderRecoveryForm';
+import { OrderPageHeading as PageHeading } from './OrderPageHeading';
+import { InlineHelp } from '@/components/InlineHelp';
+import { NominationModeCard } from './NominationModeCard';
 
 import { useEffect, useRef, useState } from 'react';
 import { orderingApi } from '../api/client.js';
@@ -167,7 +170,7 @@ export default function OrderClient() {
       </header>
       <CustomerOrderingStatus context={businessContext} session={session} />
       {catalog.settings.nominationPaused ? <div className="orderPauseBanner">目前暫停受理指名服務；一般餐點與小費仍可正常加點。</div> : null}
-      {notice.message ? <div className={`orderNotice ${notice.error ? 'isError' : ''}`} role="status">{notice.message}<button type="button" onClick={() => setNotice({ message: '', error: false })}>×</button></div> : null}
+      {notice.message ? <div className={`orderNotice ${notice.error ? 'isError' : ''}`} role="status"><span>{notice.message}</span><button type="button" aria-label="關閉提示" onClick={() => setNotice({ message: '', error: false })}>×</button></div> : null}
       <nav className="orderTabs" aria-label="點餐功能">
         {tabs.map(([key, label], index) => <button key={key} type="button" aria-current={tab === key ? 'page' : undefined} className={tab === key ? 'isActive' : ''} onClick={() => setTab(key)}><span>{String(index + 1).padStart(2, '0')}</span>{label}</button>)}
       </nav>
@@ -184,9 +187,9 @@ export default function OrderClient() {
         </div>
         <aside className="orderAside">
           <div><span>本次點餐</span><strong>{cartCount} 項</strong></div>
-          <dl><div><dt>預估小計</dt><dd>{money(cartSubtotal)}</dd></div><div><dt>可折抵的餐點費用</dt><dd>{money(Math.min(session.remainingMealCredit, cart.meals.filter(line => !line.isChampagneTower).reduce((sum, line) => sum + line.price * line.quantity, 0)))}</dd></div></dl>
-          <button className="isSecondary" type="button" onClick={() => setTab('orders')}>查看全部訂單</button>
-          <button type="button" onClick={() => setTab('cart')}>購物車結帳</button>
+          <dl><div><dt>小計</dt><dd>{money(cartSubtotal)}</dd></div><div><dt>可折抵餐費</dt><dd>{money(Math.min(session.remainingMealCredit, cart.meals.filter(line => !line.isChampagneTower).reduce((sum, line) => sum + line.price * line.quantity, 0)))}</dd></div></dl>
+          <button className="isSecondary" type="button" onClick={() => setTab('orders')}>今日全部訂單</button>
+          <button type="button" onClick={() => setTab('cart')}>購物車</button>
         </aside>
       </section>
     </main>
@@ -257,11 +260,11 @@ function RoomBookingPage({ rooms, settings, cart, setCart, onNotice }) {
     <section className="nominationSection roomBookingSection"><header><span>01</span><div><h2>選擇包廂</h2><p>共用與專屬包廂皆可直接選擇，實際可用性會在送出訂單時再次確認。</p></div></header>
       <div className="roomBookingGrid">{rooms.map((room) => <button type="button" key={room.id} className={`roomBookingCard ${room.id === roomId ? 'isActive' : ''}`} onClick={() => { setRoomId(room.id); setSegments(1); }}>
         <span className="roomBookingImage">{room.photos?.[0]?.imageUrl ? <img src={room.photos[0].imageUrl} alt="" /> : <b>ROOM</b>}</span>
-        <span className="roomBookingCopy"><small>{room.ownershipType === 'dedicated' ? `專屬包廂 · ${room.ownerStaffName || '指定店員'}` : '店內共用包廂'}</small><strong>{room.roomName}</strong><em>{room.shortDescription}</em></span>
+        <span className="roomBookingCopy"><span className="roomBookingHeading"><strong>{room.roomName}</strong><small>{room.ownershipType === 'dedicated' ? `專屬包廂 · ${room.ownerStaffName || '指定店員'}` : '店內共用包廂'}</small></span><em>{room.shortDescription}</em></span>
         <span className="roomBookingPrice">{Number(room.segmentPrice) > 0 ? `${money(room.segmentPrice)}／節` : '請洽店員'}</span>
       </button>)}</div>
     </section>
-    {selectedRoom ? <section className="nominationComposer roomBookingComposer"><div><span>02 / 選擇時段</span><h2>{selectedRoom.roomName}｜包廂使用</h2></div><div className="nominationControls">
+    {selectedRoom ? <section className="nominationSection roomBookingSection roomBookingComposer"><header><span>02</span><div><h2>選擇時段</h2><p>{selectedRoom.roomName}｜包廂使用</p></div></header><div className="nominationControls">
       <label>開始時間<input type="datetime-local" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} /></label>
       <label>節數<div className="stepper"><button type="button" onClick={() => setSegments(Math.max(1, safeSegments - 1))}>−</button><strong>{safeSegments}</strong><button type="button" onClick={() => setSegments(Math.min(72, safeSegments + 1))}>＋</button></div></label>
       <div className="stepperWithDuration nominationDurationField"><span>使用時間</span><strong>{duration} 分鐘</strong></div>
@@ -297,14 +300,17 @@ function NominationPage({ session, settings, businessContext, staff, cart, setCa
     onNotice({ message: mode === 'companionship' ? '純陪伴與基礎指名費已加入本次點餐；成立後仍可在原時段內追加服務。' : '指名服務與基礎指名費已分列加入本次點餐。', error: false });
   };
   return <div className="orderPage"><PageHeading kicker="STAFF FIRST" title="指名服務" text={`先選店員，再查看該店員提供的服務。每節 ${settings.segmentMinutes} 分鐘，最多同時指名 ${session.maxNominatedStaff} 人。`} />
-    <section className="nominationSection"><header><span>01</span><div><h2>選擇店員</h2><p>顯示開放指名人員；目前忙碌仍可選擇班內稍後的空檔。</p></div></header>
+    <section className="nominationSection"><header><span>01</span><div className="orderSectionTitle"><h2>選擇店員</h2><InlineHelp title="選擇店員說明">顯示開放指名人員；目前忙碌仍可選擇班內稍後的空檔。</InlineHelp></div></header>
       <div className="nominationStaffGrid">{visibleStaff.map((person) => { const label = person.currentStatus === 'busy' ? '目前忙碌，可選未來空檔' : person.isWorkingToday ? '可指名' : '班內可預約'; return <button key={person.id} className={staffId === person.id ? 'isActive' : ''} onClick={() => setStaffId(person.id)}><span>{person.avatarUrl ? <img src={person.avatarUrl} alt="" /> : person.displayName.slice(0, 1)}</span><strong>{person.displayName}</strong><small>{label}</small></button>; })}</div>
     </section>
-    {selectedStaff ? <section className="nominationSection"><header><span>02</span><div><h2>選擇指名方式(二擇一)</h2><p>純陪伴只收基礎指名費；服務成立後仍可在原本時段內追加服務，不會再收一次基礎費。</p></div></header>
-      <div className="nominationModeGrid"><button type="button" className={mode === 'companionship' ? 'isActive' : ''} onClick={() => { setMode('companionship'); setServiceId(''); setSegments(1); }}><span>COMPANIONSHIP</span><strong>純陪伴</strong><p>先保留陪伴時段，稍後再視現場需求追加服務。</p></button><button type="button" className={mode === 'service' ? 'isActive' : ''} onClick={() => setMode('service')}><span>SERVICE</span><strong>指名+加購服務</strong><p>現在就選擇服務；基礎指名費與服務費分列。</p></button></div>
+    {selectedStaff ? <section className="nominationSection"><header><span>02</span><div className="orderSectionTitle"><h2>選擇指名方式(二擇一)</h2><InlineHelp title="選擇指名方式說明">純陪伴只收基礎指名費；服務成立後仍可在原本時段內追加服務，不會再收一次基礎費。</InlineHelp></div></header>
+      <div className="nominationModeGrid">
+        <NominationModeCard kicker="COMPANIONSHIP" title="純陪伴" description="先保留陪伴時段，稍後再視現場需求追加服務。" selected={mode === 'companionship'} onSelect={() => { setMode('companionship'); setServiceId(''); setSegments(1); }} />
+        <NominationModeCard kicker="SERVICE" title="指名+加購服務" description="現在就選擇服務；基礎指名費與服務費分列。" selected={mode === 'service'} onSelect={() => setMode('service')} />
+      </div>
       {mode === 'service' ? <div className="nominationServiceGrid">{services.map((item) => <button key={item.id} className={serviceId === item.id ? 'isActive' : ''} onClick={() => { setServiceId(item.id); setSegments(item.durationMinutes ? Math.ceil(item.durationMinutes / settings.segmentMinutes) : 1); }}><span>{item.serviceType === 'special' ? 'SPECIAL' : 'SERVICE'}</span><strong>{item.serviceName}</strong><p>{item.serviceDescription}</p><footer><b>{money(item.price)}</b><small>{item.durationMinutes ? `${item.durationMinutes} 分鐘／單次` : '每節計費'}</small></footer></button>)}</div> : null}
     </section> : null}
-    {selectedStaff && (mode === 'companionship' || service) ? <section className="nominationComposer"><div><span>03 / 排程與節數</span><h2>{selectedStaff.displayName}｜{mode === 'companionship' ? '純陪伴' : service.serviceName}</h2>{needsCloseCoordination ? <p className="nominationCoordinationHint">此時段會超過目前預計關店時間；可以送出，但需現場協調並由店員接受後才成立。</p> : null}</div><div className="nominationControls">
+    {selectedStaff && (mode === 'companionship' || service) ? <section className="nominationSection"><header><span>03</span><div><h2>排程與節數</h2><p>{selectedStaff.displayName}｜{mode === 'companionship' ? '純陪伴' : service.serviceName}</p></div></header>{needsCloseCoordination ? <p className="nominationCoordinationHint">此時段會超過目前預計關店時間；可以送出，但需現場協調並由店員接受後才成立。</p> : null}<div className="nominationControls">
       <label>開始時間<input type="datetime-local" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} /></label>
       <label>節數<div className="stepper"><button type="button" onClick={() => setSegments(Math.max(minimumSegments, segments - 1))}>−</button><strong>{safeSegments}</strong><button type="button" onClick={() => setSegments(Math.min(72, segments + 1))}>＋</button></div><small>涵蓋 {safeSegments * settings.segmentMinutes} 分鐘{service?.durationMinutes ? `；服務需 ${service.durationMinutes} 分鐘` : ''}</small></label>
       {mode === 'service' ? <label>參與人數<div className="stepper"><button type="button" onClick={() => setParticipants(Math.max(1, participants - 1))}>−</button><strong>{participants}</strong><button type="button" onClick={() => setParticipants(Math.min(20, participants + 1))}>＋</button></div></label> : null}
@@ -322,11 +328,11 @@ function TipPage({ staff, settings, setCart, onAdded }) {
   const staffAmount = Math.floor(amount * effectiveStaff / 100);
   const storeAmount = amount - staffAmount;
   const add = () => { setCart((current) => ({ ...current, tips: [...current.tips, { id: crypto.randomUUID(), staffId, staffName: selected?.displayName || '', amount, staffPercentage: effectiveStaff }] })); onAdded(); };
-  return <div className="orderPage"><PageHeading kicker="TIP ALLOCATION" title="小費" text="先選金額，再選店員與比例；未指定店員時，小費 100% 歸店家。" />
+  return <div className="orderPage"><PageHeading kicker="TIP ALLOCATION" title="小費" text="先選金額，再選店員與比例；未指定店員時，小費分配給出勤店員。" />
     <section className="tipComposer"><div className="tipAmountButtons">{presetAmounts.map((value) => <button type="button" className={amount === value ? 'isActive' : ''} key={value} onClick={() => setAmount(value)}>{tipMoney(value)}</button>)}<label>自訂<input type="number" min="1" value={amount} onChange={(event) => setAmount(Math.max(1, Number(event.target.value)))} /></label></div>
-      <label className="tipStaffSelect">指定店員（選填）<select value={staffId} onChange={(event) => setStaffId(event.target.value)}><option value="">不指定，店家 100%</option>{staff.map((person) => <option key={person.id} value={person.id}>{person.displayName}</option>)}</select></label>
-      <div className="tipSplit"><div><strong>{selected?.displayName || '店員'}</strong><span>{effectiveStaff}% · {money(staffAmount)}</span></div><div className="tipRange"><input aria-label="店員小費比例" type="range" min="0" max="100" value={effectiveStaff} disabled={!selected} onChange={(event) => setStaffPercentage(Number(event.target.value))} /><small><span>店員比例增加</span><span>店家比例增加</span></small></div><div><strong>店家</strong><span>{100 - effectiveStaff}% · {money(storeAmount)}</span></div></div>
-      <div className="tipResult"><span>分配後實際金額</span><strong>{selected ? `${selected.displayName} ${money(staffAmount)} ／ ` : ''}店家 {money(storeAmount)}</strong></div>
+      <label className="tipStaffSelect">指定店員（選填）<select value={staffId} onChange={(event) => setStaffId(event.target.value)}><option value="">店員均分</option>{staff.map((person) => <option key={person.id} value={person.id}>{person.displayName}</option>)}</select></label>
+      <div className="tipSplit"><div><strong>{selected?.displayName || '店員'}</strong><span>{effectiveStaff}% · {money(staffAmount)}</span></div><div className="tipRange"><input aria-label="店員小費比例" type="range" min="0" max="100" value={effectiveStaff} disabled={!selected} onChange={(event) => setStaffPercentage(Number(event.target.value))} /><small><span>店員比例增加</span><span>店員均分比例增加</span></small></div><div><strong>{selected ? '店員均分' : '全員均分'}</strong><span>{100 - effectiveStaff}% · {money(storeAmount)}</span></div></div>
+      <div className="tipResult"><span>分配後實際金額</span><strong>{selected ? `${selected.displayName} ${money(staffAmount)} ／ 店員均分 ${money(storeAmount)}` : `全員均分 ${money(storeAmount)}`}</strong></div>
       <button className="orderPrimaryAction" type="button" onClick={add}>將此分配結果加入本次點餐</button>
     </section>
   </div>;
@@ -342,13 +348,13 @@ function CartPage({ cart, setCart, session, businessContext, subtotal, onSubmit,
   const empty = cart.meals.length + cart.nominations.length + cart.rooms.length + cart.tips.length === 0;
   const customerSubmitBlocked = session.status !== 'active' || businessContext?.periodStatus !== 'open' || businessContext?.intakeMode === 'staff_only';
   const coordination = businessContext?.intakeMode === 'coordination' || businessContext?.requiresStoreConfirmation;
-  return <div className="orderPage"><PageHeading kicker="REVIEW" title="查看明細" text="快速刪除每個選項；指名服務必須先刪除服務項目，才能刪除相依的基礎指名費。" />
+  return <div className="orderPage"><PageHeading kicker="REVIEW" title="查看明細" text="可刪除選項；指名服務必須先刪除服務項目，才能刪除相依的基礎指名費。" />
     {empty ? <EmptyState title="本次點餐還是空的" text="從一般點餐、訂購包廂、指名服務或小費頁加入項目。" /> : <div className="cartLayout"><div className="cartLines">
       {cart.meals.map((item, index) => <CartLine key={`${item.referenceId}-${index}`} label={item.isChampagneTower ? "香檳塔（不可折抵）" : "餐點"} title={`${item.name} × ${item.quantity}${item.isChampagneTower ? ` · 贈送：${item.recipientStaffName || "店家"}` : ""}`} price={item.price * item.quantity} onRemove={() => removeMeal(index)} />)}
       {cart.rooms.map((item) => <div className="cartRoomGroup" key={item.id}><header><span>{item.roomName}</span><small>{item.segments} 節 · {item.duration} 分鐘 · {new Date(item.startsAt).toLocaleString('zh-TW')}</small></header><CartLine label="包廂服務" title={`${money(item.unitPrice)} × ${item.segments} 節`} price={item.total} onRemove={() => removeRoom(item.id)} /></div>)}
       {cart.nominations.map((item) => <div className="cartNominationGroup" key={item.id}><header><span>{item.staffName}</span><small>{item.segments} 節 · {item.duration} 分鐘 · {new Date(item.startsAt).toLocaleString('zh-TW')}</small></header>{item.mode === 'service' ? (!item.serviceRemoved ? <CartLine label="服務項目" title={item.serviceName} price={item.serviceTotal} onRemove={() => removeNominationPart(item.id, 'service')} /> : <div className="cartRemoved">服務項目已刪除，現在可刪除基礎指名費。</div>) : <div className="cartCompanionship"><strong>純陪伴</strong><span>成立後可在原指名時段內附掛加購服務。</span></div>}{!item.baseRemoved ? <CartLine label="基礎指名費" title={`${money(item.baseFee)} × ${item.segments} 節`} price={item.baseTotal} disabled={item.mode === 'service' && !item.serviceRemoved} removeHint={item.mode === 'service' && !item.serviceRemoved ? '請先刪除服務項目' : ''} onRemove={() => removeNominationPart(item.id, 'base')} /> : null}</div>)}
-      {cart.tips.map((item, index) => <CartLine key={item.id} label="小費" title={item.staffName ? `${item.staffName} ${item.staffPercentage}%／店家 ${100 - item.staffPercentage}%` : '店家 100%'} price={item.amount} onRemove={() => removeTip(index)} />)}
-    </div><aside className="cartSummary"><h2>{quoteRequired?'預估金額':'本次結算'}</h2>{quoteRequired&&<p>實際收費與可售內容以送出前的正式報價為準。</p>}<dl><div><dt>品項小計</dt><dd>{money(subtotal)}</dd></div><div className="isCredit"><dt>信物折抵（僅餐點）</dt><dd>− {money(credit)}</dd></div><div className="isTotal"><dt>{quoteRequired?'預估應付':'本次應付'}</dt><dd>{money(subtotal - credit)}</dd></div></dl><div className="cartCustomerDetails"><label>送餐位置（選填）<input maxLength={200} value={cart.customerLocation || ''} onChange={(event) => setCart((current) => ({ ...current, customerLocation: event.target.value }))} placeholder="例：A 區 3 號桌、吧台左側" /></label><label>給店員的備註（選填）<textarea maxLength={500} rows={3} value={cart.customerNote || ''} onChange={(event) => setCart((current) => ({ ...current, customerNote: event.target.value }))} placeholder="例：餐點請先送，指名服務照原時段。" /></label></div><p>{customerSubmitBlocked ? '本次內容會保留；請洽店員從後台協助送出。' : coordination ? '目前為協調接單；送出後需店員接受才成立，指名仍需被指名店員確認。' : '指名訂單送出後仍須等待被指名店員確認。追加服務時數請另開新訂單。'}</p><button disabled={loading || customerSubmitBlocked} type="button" onClick={onSubmit}>{customerSubmitBlocked ? '請洽店員協助送出' : quoteRequired ? '取得報價／確認金額' : coordination ? '送出並等待店員確認' : '確認並送出訂單'}</button></aside></div>}
+      {cart.tips.map((item, index) => <CartLine key={item.id} label="小費" title={item.staffName ? `${item.staffName} ${item.staffPercentage}%／店員均分 ${100 - item.staffPercentage}%` : '全員均分'} price={item.amount} onRemove={() => removeTip(index)} />)}
+    </div><aside className="cartSummary"><h2>{quoteRequired?'預估金額':'本次結算'}</h2><dl><div><dt>品項小計</dt><dd>{money(subtotal)}</dd></div><div className="isCredit"><dt>入場費折抵（僅餐點）</dt><dd>− {money(credit)}</dd></div><div className="isTotal"><dt>{quoteRequired?'預估應付':'本次應付'}</dt><dd>{money(subtotal - credit)}</dd></div></dl><div className="cartCustomerDetails"><label>送餐位置（選填）<input maxLength={200} value={cart.customerLocation || ''} onChange={(event) => setCart((current) => ({ ...current, customerLocation: event.target.value }))} placeholder="例：A 區 3 號桌、吧台左側" /></label><label>給店員的備註（選填）<textarea maxLength={500} rows={3} value={cart.customerNote || ''} onChange={(event) => setCart((current) => ({ ...current, customerNote: event.target.value }))} placeholder="例：餐點請先送，指名服務照原時段。" /></label></div><p>{customerSubmitBlocked ? '本次內容會保留；請洽店員從後台協助送出。' : coordination ? '目前為協調接單；送出後需店員接受才成立，指名仍需被指名店員確認。' : '指名訂單送出後仍須等待被指名店員確認。追加服務時數請另開新訂單。'}</p><button disabled={loading || customerSubmitBlocked} type="button" onClick={onSubmit}>{customerSubmitBlocked ? '請洽店員協助送出' : quoteRequired ? '取得報價／確認金額' : coordination ? '送出並等待店員確認' : '確認並送出訂單'}</button></aside></div>}
   </div>;
 }
 
@@ -359,7 +365,7 @@ function CartLine({ label, title, price, onRemove, disabled, removeHint }) {
 function CustomerBill({ bill }) {
   if (!bill) return null;
   const labels = { charge_add: '加收', charge_reduce: '折讓', cash_receipt: '實收', cash_refund: '實退' };
-  return <section className="orderPage customerBill"><PageHeading kicker="ACCOUNT" title="今日帳單" text="顯示原始應付、每次調整與現場實收；待確認款項不會重複向您收取。" />
+  return <section className="orderPage customerBill"><PageHeading kicker="ACCOUNT" title="今日帳單" />
     <div className="cartSummary"><dl><div><dt>原訂單應付</dt><dd>{money(bill.orderReceivable)}</dd></div><div><dt>加收／折讓後應付</dt><dd>{money(bill.receivable)}</dd></div><div><dt>現場實收</dt><dd>{money(bill.cashReceived)}</dd></div><div><dt>已實退</dt><dd>{money(bill.cashRefunded)}</dd></div><div className="isTotal"><dt>{bill.refundDue > 0 ? '待退金額' : '尚待收取'}</dt><dd>{money(bill.refundDue > 0 ? bill.refundDue : Math.max(0, bill.balance))}</dd></div></dl>
     {bill.pendingCount > 0 ? <p>有 {bill.pendingCount} 筆款項待店員確認歸屬；現金已按實際收退計算。</p> : null}
     {bill.hasUnresolvedCase ? <p>部分帳務已轉未決案件，處理完成後會更新分潤，不會新增第二次收退款。</p> : null}</div>
@@ -369,7 +375,7 @@ function CustomerBill({ bill }) {
 
 function MyOrders({ orders, catalog, loading, token, onAddon }) {
   const [open, setOpen] = useState(orders[0]?.id || '');
-  return <div className="orderPage"><PageHeading kicker="ORDER HISTORY" title="我的訂單" text="查看今天每次加點的狀態、包廂時段、金額與狀態歷程。" />
+  return <div className="orderPage"><PageHeading kicker="ORDER HISTORY" title="我的訂單" />
     {orders.length === 0 ? <EmptyState title="今天還沒有訂單" text="完成本次點餐後，訂單會出現在這裡。" /> : <div className="myOrderList">{orders.map((order) => <article key={order.id} className={`myOrderCard status-${order.status}`}><button className="myOrderHead" type="button" onClick={() => setOpen(open === order.id ? '' : order.id)}><div><span>{order.orderKind === 'service_addon' ? '附掛加購服務單' : order.orderNumber}</span><strong>{order.storeConfirmationStatus === 'pending' ? '等待店員接受協調單' : statusLabels[order.status] || order.status}</strong></div><div><small>{new Date(order.submittedAt).toLocaleString('zh-TW')}</small><b>{money(order.totalAmount)}</b></div></button>{open === order.id ? <div className="myOrderDetail"><CustomerOrderDetails order={order} token={token} loading={loading} />{order.storeConfirmationStatus === 'pending' ? <div className="myOrderCoordination"><strong>此單尚未成立</strong><span>店員接受後，才會進入一般成立／指名確認流程。</span></div> : null}<div className="myOrderStage"><span>{order.queueStage}</span>{order.queueMinutes ? <small>已等待 {order.queueMinutes} 分鐘</small> : null}</div>{order.flowVersion >= 2 && <div className="myOrderItems">{order.fulfillment?.map(unit => <div key={unit.id}><span>{unit.name}</span><b>已完成 {unit.completedQuantity}／{unit.quantity}{unit.cancelledQuantity ? ` · 取消 ${unit.cancelledQuantity}` : ""}{unit.startedQuantity > unit.completedQuantity ? " · 處理中" : ""}</b></div>)}</div>}<div className="myOrderItems">{order.items.map((item) => <div key={item.id}><span>{item.name}{item.isChampagneTower && <small> · 贈送：{item.recipientStaffName || "店家"} · 不可使用信物折抵</small>}</span><b>{money(item.lineTotal)}</b></div>)}</div>{order.menuSnapshot?.lines?.some(line=>line.components.length>0)&&<details><summary>提交當時套餐內容</summary>{order.menuSnapshot.lines.filter(line=>line.components.length>0).map((line,index)=><div key={index}><strong>{line.name} × {line.quantity}</strong><ul>{line.components.map((part,i)=><li key={i}>{part.itemName} × {part.quantity}</li>)}</ul></div>)}</details>}{order.roomBookings?.map((item) => <div className="myOrderRoom" key={item.id}><span>ROOM / {item.roomName}</span><strong>{item.segmentCount} 節 · {item.segmentMinutes} 分鐘</strong><small>{new Date(item.startsAt).toLocaleString('zh-TW')} ～ {new Date(item.endsAt).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}</small></div>)}{order.addons?.map((item) => <div className="myOrderAddon" key={item.id}><span>ADD-ON</span><strong>{item.staffName}｜{item.serviceName}</strong><small>{item.serviceDurationMinutes} 分鐘 · {item.participantCount} 人 · {statusLabels[item.status] || item.status}</small></div>)}{order.nominees.map((item) => <div className="myOrderNominee" key={item.id}><strong>{item.staffName}｜{item.serviceName}</strong><span>{item.segmentCount} 節 · {new Date(item.requestedStartsAt).toLocaleString('zh-TW')}</span><small>店員狀態：{item.confirmationStatus}</small>{['confirmed', 'in_service'].includes(order.status) && new Date(item.requestedServiceEndsAt).getTime() > Date.now() ? <CustomerAddonComposer nominee={item} catalog={catalog} loading={loading} onAddon={onAddon} /> : null}</div>)}<dl><div><dt>小計</dt><dd>{money(order.subtotal)}</dd></div><div><dt>信物折抵</dt><dd>− {money(order.mealCreditApplied)}</dd></div><div><dt>應付</dt><dd>{money(order.totalAmount)}</dd></div></dl><ol className="orderTimeline">{order.history.map((item, index) => <li key={`${item.createdAt}-${index}`}><span>{new Date(item.createdAt).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}</span><div><strong>{statusLabels[item.toStatus] || item.toStatus}</strong><p>{item.reason}</p></div></li>)}</ol></div> : null}</article>)}</div>}
   </div>;
 }
@@ -423,9 +429,9 @@ function CustomerAddonComposer({ nominee, catalog, loading, onAddon }) {
 
 function HelpPage({ currentGameId, onRecover, loading }) {
   return <div className="orderPage"><PageHeading kicker="STAFF ASSIST" title="請洽店員" text="點餐碼遺失時，店員可依人物 ID 與角色所屬伺服器找到今日資料並提供六位數協助碼。" />
-    <section className="helpCard"><div><h2>找回今天的點餐碼</h2><p>仍需由店員核對後提供協助碼。</p></div><OrderRecoveryForm key={currentGameId} currentGameId={currentGameId} onRecover={onRecover} loading={loading} /></section>
+    <section className="helpCard"><div className="orderSectionTitle"><h2>找回今天的點餐碼</h2><InlineHelp title="找回今天的點餐碼說明">仍需由店員核對後提供協助碼。</InlineHelp></div><OrderRecoveryForm key={currentGameId} currentGameId={currentGameId} onRecover={onRecover} loading={loading} /></section>
   </div>;
 }
 
-function PageHeading({ kicker, title, text }) { return <header className="orderPageHeading"><span>{kicker}</span><h1>{title}</h1><p>{text}</p></header>; }
+
 function EmptyState({ title, text }) { return <div className="orderEmpty"><span className="orderEmptyLogo"><img src="/favicon.ico" alt="清醒夢" /></span><h2>{title}</h2><p>{text}</p></div>; }

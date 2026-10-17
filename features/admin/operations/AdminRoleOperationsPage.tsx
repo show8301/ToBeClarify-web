@@ -5,7 +5,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { requireBusinessDate } from "@/features/admin/shared/businessDay";
 import { adminApi, adminRequest, ApiError } from "@/features/admin/api/client.js";
 import { useAdminAuth } from "@/features/admin/auth/AdminAuthContext";
-import { AdminButton, AdminPage, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
+import { AdminButton, AdminPage } from "@/features/admin/shared/AdminShared.jsx";
+import { AdminDisclosureSummary } from "@/features/admin/shared/AdminDisclosureSummary";
 import {
   AdminManagerDashboard,
   AdminServiceDashboard,
@@ -294,9 +295,13 @@ export function AdminRoleOperationsPage({ navigate }: { navigate: Navigate }) {
     </div> : null}
     {preferenceError && <div className="adminFormError" role="alert">偏好尚未保存：{preferenceError} <AdminButton variant="ghost" onClick={() => selectDashboardRole(dashboardRole)}>重試保存偏好</AdminButton></div>}
     {!isDeveloperPreview && currentStaff?.todayWorkMode?.isWorking && !currentStaff.todayWorkMode.activeRoles.length ? <div className="adminRoleDashboardNotice" role="status">目前尚未啟用支援工作，可在「目前支援工作」調整廣播受眾。</div> : null}
-    {dashboardRole !== "manager" && currentStaff && !isDeveloperPreview ? <AdminPanel title="我的當班狀態" description="接單與支援工作開關即時儲存；計薪職位由值班規劃核准。">
-      <StaffWorkStatusPanel key={`${currentStaff.id}:${currentStaff.todayWorkMode?.businessDate || "pending"}`} staff={currentStaff} disabled={state.loading || Boolean(state.error) || Boolean(actionState.busyId)} onChanged={() => load(true)} />
-    </AdminPanel> : null}
+    {dashboardRole !== "manager" && currentStaff && !isDeveloperPreview ? <details className="adminSettlementDisclosure adminWorkStatusDisclosure" key={currentStaff.id}>
+      <AdminDisclosureSummary>我的當班狀態 · {currentStaff.isWorkingToday ? "執勤中" : "未執勤"}</AdminDisclosureSummary>
+      <div className="adminSettlementDisclosureBody">
+        <p className="adminSettlementHint">接單與支援工作開關即時儲存；計薪職位由值班規劃核准。</p>
+        <StaffWorkStatusPanel key={`${currentStaff.id}:${currentStaff.todayWorkMode?.businessDate || "pending"}`} staff={currentStaff} disabled={state.loading || Boolean(state.error) || Boolean(actionState.busyId)} onChanged={() => load(true)} />
+      </div>
+    </details> : null}
     {dashboardRole === "designated" ? <AdminDesignatedWorkbench data={state.data} user={adminUser} onChanged={() => load(true)} loading={state.loading} loadError={state.error} /> : null}
     {dashboardRole === "service" ? <AdminServiceDashboard data={state.data} user={adminUser} navigate={navigate} runAction={runAction} actionState={actionState} onChanged={() => load(true)} disabled={state.loading || Boolean(state.error)} /> : null}
     {dashboardRole === "manager" ? <AdminManagerDashboard disabled={state.loading || Boolean(state.error)} staffingBlockedReason={state.authorizationError} onChanged={() => load(true)} data={state.data} user={adminUser} navigate={navigate} runAction={runAction} actionState={actionState} onOpenCreatePass={openCreatePass} onOpenCreateRoomService={openCreateRoomService} /> : null}

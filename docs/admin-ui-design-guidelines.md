@@ -18,6 +18,8 @@
 
 ## 標準行內說明：小驚嘆號
 
+互動核心為中立的 [InlineHelp](../components/InlineHelp.tsx)，`AdminHelp` 保留後台樣式包裝。點餐等非後台畫面使用同一核心及 [共用樣式](../styles/shared/inline-help.css)，遵守下列幾何與互動規格，避免跨功能匯入後台實作。
+
 - 補充填寫說明、規則與名詞解釋統一使用 [AdminHelp](../features/admin/shared/AdminHelp.tsx)，以圓圈驚嘆號（CircleAlert）置於標題或標籤右側，水平間距 6px、垂直置中。避免在表單下方常駐整段補充文字；載入、錯誤及操作結果仍直接顯示。
 - 沿用 `iconActionButton` 的尺寸來源，行內說明以 token 設定桌面 24px 點擊區、16px 圖示，無可見外框或底色；觸控／混合輸入裝置點擊區為 44px。這是使用者確認的行內說明標準，不變更一般純圖示操作按鈕的尺寸。
 - 使用 Base UI Popover，滑鼠移入 150ms、鍵盤 focus-visible 或點擊均可開啟；支援 Escape、點擊外部及浮層內「關閉」。預設朝下，透過 portal 避開容器裁切並自動處理視窗邊緣。

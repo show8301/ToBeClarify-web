@@ -1,4 +1,5 @@
 @import "./base.css";
 @import "./modern.css";
+@import "../shared/inline-help.css";
 @import "../shared/select.css";
 @import "../shared/icon-actions.css";

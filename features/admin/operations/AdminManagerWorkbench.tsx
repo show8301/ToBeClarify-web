@@ -41,6 +41,7 @@ export function AdminManagerDashboard({ data, user, navigate, actionState, onOpe
   const orderAmount = activeOrders.reduce((sum, order) => sum + order.totalAmount, 0);
   const waitingText = disabled ? "確認中" : `${context?.waitingOrderCount ?? 0}／${context?.unfinishedOrderCount ?? 0}`;
   return <div className="adminRoleDashboard adminRoleDashboard-manager managerWorkbench" aria-busy={disabled}>
+    <WorkbenchShiftBar businessDate={date} staffId={user?.staffMemberId || ""} name={user?.displayName || "我的出勤"} periodStatus={context?.periodStatus || ""} disabled={disabled || Boolean(actionState.busyId)} onChanged={change} />
     <div className="managerDayHeading"><div><span className="managerEyebrow">DAILY OPERATIONS</span><h2>{date || "讀取營業日…"}</h2><p>{context && !disabled ? `${periodStatusLabel(context.periodStatus)} · ${intakeModeLabel(context.intakeMode)}` : "營業狀態尚未確認"}</p></div><small>資料更新 {data.refreshedAt ? formatDateTime(new Date(data.refreshedAt).toISOString()) : "尚未取得"} · 顯示中每 30 秒同步</small></div>
     <div className="adminRoleDashboardMetrics managerTopMetrics">
       {[{ label: "待處理／未完成", value: waitingText, detail: "本營業日訂單" },
@@ -48,7 +49,6 @@ export function AdminManagerDashboard({ data, user, navigate, actionState, onOpe
         { label: "包廂未完成", value: disabled ? "確認中" : `${data.roomOrders.filter((o) => !["completed", "cancelled"].includes(o.status)).length} 筆`, detail: "預約與進行中服務" },
         { label: "帳款待辦顧客", value: overview.loading ? "核對中" : `${financeCount} 位`, detail: financeErrors ? `另有 ${financeErrors} 位帳款無法確認` : "待收、待退與未決案件" }].map((metric) => <article key={metric.label}><span>{metric.label}</span><strong>{metric.value}</strong><small>{metric.detail}</small></article>)}
     </div>
-    <WorkbenchShiftBar businessDate={date} staffId={user?.staffMemberId || ""} name={user?.displayName || "我的出勤"} periodStatus={context?.periodStatus || ""} disabled={disabled || Boolean(actionState.busyId)} onChanged={change} />
     {actionState.error && <p className="adminOrderMessage isError" role="alert">{actionState.error}</p>}
     {actionState.message && <p className="adminOrderMessage" role="status">{actionState.message}</p>}
     {businessFeedback && <p className="adminOrderMessage" role="status">{businessFeedback}</p>}

@@ -59,6 +59,16 @@ export function AdminNotificationProvider({children}:{children:React.ReactNode})
   useEffect(()=>{prefs.current={enabled,desktop};},[enabled,desktop]);
   const presented=useRef(new Set<string>());const cursor=useRef('');const active=useRef(true);
   const enableAudio=async()=>{try{audio.current??=new AudioContext();await audio.current.resume();setEnabled(audio.current.state==='running');setAudioError('');}catch{setAudioError('此裝置無法啟用音效，請檢查瀏覽器設定。');}};
+  const enableDesktop=async()=>{if(!('Notification'in window))return;try{setDesktop(await Notification.requestPermission()==='granted');}catch{setDesktop(false);}};
+  useEffect(()=>{
+    const syncDesktopPermission=()=>setDesktop('Notification'in window&&Notification.permission==='granted');
+    // Restore the browser-managed permission after hydration and when returning to the tab.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    syncDesktopPermission();
+    document.addEventListener('visibilitychange',syncDesktopPermission);
+    return()=>document.removeEventListener('visibilitychange',syncDesktopPermission);
+  },[]);
+  useEffect(()=>()=>{const context=audio.current;audio.current=null;void context?.close().catch(()=>{});},[]);
   const play=(delivery:NotificationDelivery)=>{
     if(!prefs.current.enabled||!delivery.content.soundId||queued.current>=3)return;
     queued.current++;
@@ -71,7 +81,7 @@ export function AdminNotificationProvider({children}:{children:React.ReactNode})
   useEffect(()=>{
     active.current=true;let stopped=false,baseline=true;let timer:ReturnType<typeof setTimeout>|undefined;const controller=new AbortController();let stream:EventSource|undefined;let streamCapable=false;
     cursor.current='';presented.current.clear();
-    // Account/leader changes must clear account-scoped UI before opening the new subscription.
+    // Account changes must clear account-scoped UI before opening the new subscription.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setInbox({items:[],unreadCount:0});setToasts([]);setCritical([]);setState('連線中');
     const channel=typeof BroadcastChannel!=='undefined'?new BroadcastChannel(`lucid-notification-events:${account}`):undefined;
@@ -118,7 +128,7 @@ export function AdminNotificationProvider({children}:{children:React.ReactNode})
     });
     const pollOnce=async()=>{
       try{receive(await notificationRequest<NotificationInbox>('',undefined,{signal:controller.signal}));}
-      catch(error){if(stopped)return;const status=error instanceof NotificationApiError?error.status:0;setState(status===401?'登入已失效':'連線中斷，稍後重試');if(status===401){setInbox({items:[],unreadCount:0});setToasts([]);setCritical([]);cursor.current='';void audio.current?.close().catch(()=>{});}}};
+      catch(error){if(stopped)return;const status=error instanceof NotificationApiError?error.status:0;setState(status===401?'登入已失效':'連線中斷，稍後重試');if(status===401){setInbox({items:[],unreadCount:0});setToasts([]);setCritical([]);cursor.current='';setEnabled(false);void audio.current?.close().catch(()=>{});audio.current=null;}}};
     const connectStream=()=>{
       if(stopped||!streamCapable||typeof EventSource==='undefined')return;
       const query=cursor.current?`?cursor=${encodeURIComponent(cursor.current)}`:'';
@@ -132,13 +142,20 @@ export function AdminNotificationProvider({children}:{children:React.ReactNode})
     void notificationRequest<NotificationCapabilities>('/capabilities',undefined,{signal:controller.signal}).then(cap=>{if(stopped)return;if(!cap.enabled){setState('通知尚未啟用');return;}
       streamCapable=(cap.delivery==='sse'||cap.delivery==='sse-v2')&&typeof EventSource!=='undefined';
       if(streamCapable)connectStream();else void poll();}).catch(()=>{if(!stopped)setState('通知服務尚未就緒');});
-    return()=>{stopped=true;active.current=false;controller.abort();stream?.close();channel?.close();clearTimeout(timer);void audio.current?.close().catch(()=>{});audio.current=null;};
-  },[account,leaderState.isLeader,leader]);
+    return()=>{stopped=true;active.current=false;controller.abort();stream?.close();channel?.close();clearTimeout(timer);};
+  },[account,leader]);
+  useEffect(()=>{
+    // Only the elected tab should display critical dialogs; restore active ones on leadership changes.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if(!leaderState.isLeader){setCritical([]);return;}
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCritical(inbox.items.filter(item=>item.content.requiresAck&&!item.acknowledgedAt&&!item.withdrawnAt&&new Date(item.expiresAt)>new Date()));
+  },[inbox.items,leaderState.isLeader]);
   const refresh=async()=>{const next=await notificationRequest<NotificationInbox>();if(next.snapshotCursor)cursor.current=next.snapshotCursor;setInbox(next);};
   const loadMore=async()=>{if(!inbox.nextPageToken)return;const next=await notificationRequest<NotificationInbox>(`?pageToken=${encodeURIComponent(inbox.nextPageToken)}&limit=100`);if(next.snapshotCursor)cursor.current=next.snapshotCursor;setInbox(current=>{const seen=new Set(current.items.map(item=>item.id));return {...next,items:[...current.items,...next.items.filter(item=>!seen.has(item.id))]};});};
   const read=async (ids:string[])=>{await notificationRequest('/read',{ids});await refresh();};
   const acknowledge=async(id:string)=>{await notificationRequest(`/${encodeURIComponent(id)}/acknowledge`,{}, {method:'POST'});await refresh();setCritical(current=>current.filter(x=>x.id!==id));};
-  return <Context.Provider value={{inbox,state,read,acknowledge,loadMore,enableAudio,enabled,audioError,desktop,enableDesktop:async()=>{if(!('Notification'in window))return;const permission=await Notification.requestPermission();setDesktop(permission==='granted');}}}>{children}<div className="notification-banners" aria-live="polite">{toasts.filter(item=>item.content.isBroadcast).map(item=><NotificationToast key={item.id} item={item} onClose={()=>setToasts(current=>current.filter(x=>x.id!==item.id))}/>)}</div><div className="notification-toasts" aria-live="polite">{toasts.filter(item=>!item.content.isBroadcast).map(item=><NotificationToast key={item.id} item={item} onClose={()=>setToasts(current=>current.filter(x=>x.id!==item.id))}/>)}</div>{critical[0]&&<NotificationCriticalModal item={critical[0]} onAcknowledge={acknowledge}/>}</Context.Provider>;
+  return <Context.Provider value={{inbox,state,read,acknowledge,loadMore,enableAudio,enabled,audioError,desktop,enableDesktop}}>{children}<div className="notification-banners" aria-live="polite">{toasts.filter(item=>item.content.isBroadcast).map(item=><NotificationToast key={item.id} item={item} onClose={()=>setToasts(current=>current.filter(x=>x.id!==item.id))}/>)}</div><div className="notification-toasts" aria-live="polite">{toasts.filter(item=>!item.content.isBroadcast).map(item=><NotificationToast key={item.id} item={item} onClose={()=>setToasts(current=>current.filter(x=>x.id!==item.id))}/>)}</div>{critical[0]&&<NotificationCriticalModal item={critical[0]} onAcknowledge={acknowledge}/>}</Context.Provider>;
 }
 function NotificationToast({item,onClose}:{item:NotificationDelivery;onClose:()=>void}){
   const [paused,setPaused]=useState(false);

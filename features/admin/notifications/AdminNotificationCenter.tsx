@@ -2,7 +2,7 @@
 import type {NotificationCenterValue,NotificationRule,NotificationSettings,NotificationInbox,NotificationDelivery,NotificationCapabilities,NotificationSound,NotificationChange,BroadcastSendRequest,BroadcastSendResult,BroadcastReceiptSummary} from '@/features/admin/notifications/types';
 import {NotificationApiError} from '@/features/admin/notifications/api';
 import {createContext,useContext,useEffect,useRef,useState} from 'react';
-import {useAdminAuth} from '@/features/admin/auth/AdminAuthContext.jsx';
+import {useAdminAuth} from '@/features/admin/auth/AdminAuthContext';
 import {adminApi} from '@/features/admin/api/client.js';
 import {AdminButton,AdminField,AdminPage,AdminPanel} from '@/features/admin/shared/AdminShared.jsx';
 import {notificationRequest,notificationSoundUrl} from '@/features/admin/notifications/api';

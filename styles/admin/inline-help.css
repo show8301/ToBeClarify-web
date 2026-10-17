@@ -1,4 +1,11 @@
 /* Standard supplemental help: geometry comes from the shared icon tokens. */
+.adminFieldHeading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+}
+.adminFieldHeading > label { margin: 0; }
 .adminHelpTrigger {
   --icon-action-size: 24px;
   --icon-action-glyph-size: 16px;
@@ -33,6 +40,7 @@
 .adminHelpPopup p { margin: 0; font-size: 13px; line-height: 1.7; }
 .adminHelpPopup button { justify-self: end; min-height: 36px; padding: 6px 10px; border: 1px solid var(--color-border); border-radius: 6px; color: var(--color-fg); background: var(--color-surface-input); }
 @media (any-pointer: coarse) {
+  .adminFieldHeading { min-height: 44px; }
   .adminHelpTrigger { --icon-action-size: 44px; }
   .adminHelpPopup button { min-height: 44px; }
 }

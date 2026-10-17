@@ -3,7 +3,7 @@
 import { AdminRefreshButton } from "@/features/admin/shared/AdminRefreshButton";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { adminApi } from "@/features/admin/api/client.js";
-import { useAdminAuth } from "@/features/admin/auth/AdminAuthContext.jsx";
+import { useAdminAuth } from "@/features/admin/auth/AdminAuthContext";
 import { AdminButton, AdminPage, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
 
 type DashboardRole = "designated" | "service" | "manager" | "developer";

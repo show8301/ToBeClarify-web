@@ -1,6 +1,6 @@
 import {AdminNotificationBell} from '@/features/admin/notifications/AdminNotificationCenter';
 import { useEffect, useMemo, useState } from 'react';
-import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
+import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext';
 import { AdminButton } from '@/features/admin/shared/AdminShared.jsx';
 import { AdminToolbarRefreshSlot } from '@/features/admin/shared/AdminToolbar';
 import { AdminBackToTop } from '@/features/admin/shared/AdminBackToTop';

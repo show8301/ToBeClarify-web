@@ -1,5 +1,6 @@
 import { isRecord } from "./operationsFormat";
 import type { StaffDailyWorkMode, WorkRole } from "./operationsTypes";
+import { isPayrollRole } from "@/features/admin/shared/workRoles";
 
 export const workRoleOptions: ReadonlyArray<{ id: WorkRole; label: string }> = [
   { id: "service", label: "服務員" },
@@ -19,15 +20,18 @@ export function parseStaffDailyWorkMode(value: unknown): StaffDailyWorkMode | nu
     || !/^\d{4}-\d{2}-\d{2}$/.test(mode.businessDate)
     || typeof mode.stopAcceptingNewOrders !== "boolean"
     || !Array.isArray(mode.scheduledRoles) || !mode.scheduledRoles.every(isWorkRole)
-    || !Array.isArray(mode.activeRoles) || !mode.activeRoles.every(isWorkRole)) return null;
+    || !Array.isArray(mode.activeRoles) || !mode.activeRoles.every(isWorkRole)
+    || !Array.isArray(mode.allowedSupportRoles) || !mode.allowedSupportRoles.every(isWorkRole)
+    || (mode.payrollRole !== null && !isPayrollRole(mode.payrollRole))) return null;
   const scheduledRoles = mode.scheduledRoles;
   const activeRoles = mode.activeRoles;
-  if (activeRoles.some((role) => !scheduledRoles.includes(role))) return null;
   return {
     businessDate: mode.businessDate,
     isWorking: value.isWorkingToday,
     stopAcceptingNewOrders: mode.stopAcceptingNewOrders,
     scheduledRoles: [...new Set(scheduledRoles)],
     activeRoles: [...new Set(activeRoles)],
+    payrollRole: mode.payrollRole,
+    allowedSupportRoles: [...new Set(mode.allowedSupportRoles)],
   };
 }

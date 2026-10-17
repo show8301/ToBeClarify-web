@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { adminApi } from '@/features/admin/api/client.js';
-import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
+import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext';
 import { AdminAvatarPicker } from '@/features/admin/media/AdminAvatarPicker.jsx';
 import { cleanupAdminMedia } from '@/features/admin/media/adminMedia.js';
 import { useAdminToast } from '@/features/admin/shared/AdminToastProvider.jsx';
@@ -536,7 +536,7 @@ export function AdminStaffSettingsPage() {
                 <AdminAvatarPicker label="頭像" value={form.avatarUrl} pendingFile={form.avatarFile} hint="選擇圖片後會開啟 4:5 裁切框，輸出固定為 1200 × 1500px WebP；既有頭像也能重新調整。儲存店員資料後才會正式上傳。" disabled={isReadOnly} onChange={updateAvatarFile} onClear={() => { update('avatarFile', null); update('avatarPreviewUrl', ''); update('avatarUrl', ''); update('avatarMediaId', null); }} />
                 <AdminAvatarPicker kind="signature" label="顯示名稱簽名圖" value={form.signatureUrl} pendingFile={form.signatureFile} hint={form.signatureSupported ? "選擇帶透明背景的 PNG 或 WebP 後會開啟 3:2 裁切框，輸出為保留透明通道的 1200 × 800px WebP。上傳後公開卡片會用簽名圖取代文字顯示名稱；未上傳時仍顯示文字。" : "目前 API 尚未提供簽名圖欄位；待 API 更新後此功能會自動啟用。"} disabled={isReadOnly || !form.signatureSupported} onChange={updateSignatureFile} onClear={() => { update('signatureFile', null); update('signaturePreviewUrl', ''); update('signatureUrl', ''); update('signatureMediaId', null); }} />
               </div>
-              <p className="adminWorkStatusHint">當班接單與職位請至<a href="/admin">營業工作台</a>操作；日期、時段及排班允許職位請至<a href="/admin/duty-planning">值班規劃</a>管理。</p>
+              <p className="adminWorkStatusHint">當班接單與支援工作請至<a href="/admin">營業工作台</a>操作；班次、計薪職位與預排支援請至<a href="/admin/duty-planning">值班規劃</a>管理。</p>
             </AdminPanel>
 
             <AdminPanel title="服務內容" description={canEditSelected ? '拖曳卡片調整服務順序；指名資格統一由基本資料的「開放指名」控制。' : '可查看服務內容；指名資格統一由基本資料控制。'} actions={canEditSelected ? <AdminButton variant="secondary" onClick={() => { const item = { id: newId(), serviceType: 'special', serviceName: '', serviceDescription: '', priceText: '', price: '', durationMinutes: '', isNominatable: true, additionalPersonPrice: '', sortOrder: form.services.length, isEnabled: true }; update('services', [...form.services, item]); setEditingService(item); }}>新增服務</AdminButton> : null}>

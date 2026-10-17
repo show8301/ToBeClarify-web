@@ -65,13 +65,13 @@ export function AdminServiceDashboard({ data, user, navigate, runAction, actionS
   const roomOrders = data.roomOrders.filter((order) => !["completed", "cancelled"].includes(order.status)).sort((left, right) => new Date(left.startsAt).getTime() - new Date(right.startsAt).getTime()).slice(0, 6);
   const waitingCount = data.context?.waitingOrderCount ?? data.sessions.reduce((total, session) => total + session.waitingOrderCount, 0);
   return <div className="adminRoleDashboard adminRoleDashboard-service">
+    <WorkbenchShiftBar businessDate={data.context?.referenceBusinessDate || ""} staffId={user?.staffMemberId || ""} name={user?.displayName || "我的出勤"} periodStatus={data.context?.periodStatus || ""} disabled={disabled || Boolean(actionState.busyId)} onChanged={onChanged} />
     <Metrics items={[
       { label: "待處理訂單", value: waitingCount, detail: "需要現場接手或確認" },
       { label: "協調單", value: coordinationOrders.length, detail: "等待店家承接" },
       { label: "包廂服務", value: roomOrders.length, detail: "尚未完成的服務時段" },
       { label: "開啟中的顧客", value: data.context?.openSessionCount ?? data.sessions.length, detail: intakeModeLabel(data.context?.intakeMode || "") },
     ]} />
-    <WorkbenchShiftBar businessDate={data.context?.referenceBusinessDate || ""} staffId={user?.staffMemberId || ""} name={user?.displayName || "我的出勤"} periodStatus={data.context?.periodStatus || ""} disabled={disabled || Boolean(actionState.busyId)} onChanged={onChanged} />
     <ActionFeedback state={actionState} />
     <AdminPanel className="adminRoleDashboardServiceCoordination" title="現場待辦" description="先處理協調單，再依顧客或訂單進入完整操作。">
         <div className="adminRoleDashboardRows">

@@ -8,7 +8,7 @@ export function AdminNotificationOrderRoute({orderId}) {
 
 import { useCallback, useEffect } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
+import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext';
 import { AdminGuestbookPage } from '@/features/admin/guestbook/AdminGuestbookPage';
 import { AdminCustomersPage } from '@/features/admin/customers/AdminCustomersPage';
 import { AdminDeliveriesPage } from '@/features/admin/deliveries/AdminDeliveriesPage';
@@ -53,7 +53,7 @@ function AdminProtectedRoute({ children, roles }) {
   if (loading) return <AdminLoading />;
   if (error) return <AdminError error={error} />;
   if (!user || !isAllowed) return null;
-  return <AdminLayout route={pathname} navigate={navigate}>{children}</AdminLayout>;
+  return <AdminLayout key={`${user.id}:${user.role}`} route={pathname} navigate={navigate}>{children}</AdminLayout>;
 }
 
 function AdminAnonymousRoute({ children, redirectAuthenticated = false }) {

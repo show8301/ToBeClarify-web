@@ -1,3 +1,5 @@
+export type WorkbenchRole = "service" | "designated" | "manager";
+
 export type AdminIdentity = {
   id: string;
   loginName: string;
@@ -5,6 +7,8 @@ export type AdminIdentity = {
   role: "developer" | "manager" | "clerk";
   roleLabel: string;
   staffMemberId: string | null;
+  preferredWorkbench: WorkbenchRole | null;
+  availableWorkbenchRoles: WorkbenchRole[];
 };
 
 export type AdminAuthState = {
@@ -17,4 +21,5 @@ export type AdminAuthValue = AdminAuthState & {
   login: (credentials: { loginName: string; password: string }) => Promise<AdminIdentity>;
   logout: () => Promise<void>;
   refresh: (signal?: AbortSignal) => Promise<AdminIdentity | null>;
+  updateWorkbenchPreference: (role: WorkbenchRole) => Promise<AdminIdentity>;
 };

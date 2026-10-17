@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowDown, ArrowUp, Plus, Settings } from "lucide-react";
 import type { ReactNode } from "react";
 import { ApiError } from "@/features/admin/api/client.js";
-import { useAdminAuth } from "@/features/admin/auth/AdminAuthContext.jsx";
+import { useAdminAuth } from "@/features/admin/auth/AdminAuthContext";
 import { adminGuestbookPath, adminGuestbookRequest as request } from "@/features/admin/guestbook/api";
 import { AdminGuestbookMessage } from "@/features/admin/guestbook/AdminGuestbookMessage";
 import {

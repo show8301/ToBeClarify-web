@@ -6,7 +6,7 @@ import { FinancialRecordsPanel } from "./FinancialRecordsPanel";
 import { SessionHeader } from "./SessionHeader";
 import { AdminOrderItemRow } from "./AdminOrderItemRow";
 import { ChevronDown, SlidersHorizontal } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { adminApi } from '@/features/admin/api/client.js';
 import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext';
@@ -54,6 +54,8 @@ export function AdminOrdersPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const canManage = user.role === 'developer' || user.role === 'manager';
+  const focusedOrder = searchParams.get('order') || '';
+  const focusedRef = useRef('');
   const requestedDate = searchParams.get('date');
   const [businessDate, setBusinessDate] = useState(() => /^\d{4}-\d{2}-\d{2}$/.test(requestedDate || '') ? requestedDate : '');
   const [search, setSearch] = useState('');
@@ -65,11 +67,21 @@ export function AdminOrdersPage() {
   const [settingsError, setSettingsError] = useState('');
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ text: '', error: false });
+  const [createBusy, setCreateBusy] = useState(false);
   const [showCreate, setShowCreate] = useState(() => searchParams.get('focus') === 'create');
   const [showSettings, setShowSettings] = useState(false);
   const [groupsOpen, setGroupsOpen] = useState({ attention: true, others: true });
   const [issued, setIssued] = useState(null);
   const [showAssisted, setShowAssisted] = useState(false);
+
+  useEffect(() => {
+    if (!focusedOrder || !orders.some(order => order.id === focusedOrder) || focusedRef.current === focusedOrder) return;
+    const timer = window.setTimeout(() => {
+      const target = document.getElementById('admin-order-' + focusedOrder);
+      if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); focusedRef.current = focusedOrder; }
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [focusedOrder, orders]);
 
   const loadSessions = async (preferredId) => {
     if (!businessDate) return;
@@ -128,12 +140,12 @@ export function AdminOrdersPage() {
   };
 
   return <section className="adminPage adminOrdersPage">
-    <header className="adminPageHeading"><div><p className="eyebrow">ORDER CONTROL</p><h1>完整點單管理</h1><p>查看顧客訂單、逐項接待，並記錄現場收款、退款及待確認費用。</p></div><div className="adminPageActions"><AdminRefreshButton loading={loading} onClick={() => loadSessions(selectedId)} /><AdminButton variant="secondary" onClick={() => router.push('/admin/rooms/service')}>包廂訂購</AdminButton>{canManage ? <AdminButton variant="ghost" onClick={() => setShowSettings(!showSettings)}>營運參數</AdminButton> : null}<AdminButton onClick={() => setShowCreate(!showCreate)}>＋ 開立點餐碼</AdminButton></div></header>
+    <header className="adminPageHeading"><div><p className="eyebrow">ORDER CONTROL</p><h1>完整點單管理</h1><p>查看顧客訂單、逐項接待，並記錄現場收款、退款及待確認費用。</p></div><div className="adminPageActions"><AdminRefreshButton loading={loading} onClick={() => loadSessions(selectedId)} /><AdminButton variant="secondary" onClick={() => router.push('/admin/rooms/service')}>包廂訂購</AdminButton>{canManage ? <AdminButton variant="ghost" onClick={() => setShowSettings(!showSettings)}>營運參數</AdminButton> : null}<AdminButton disabled={createBusy} onClick={() => setShowCreate(!showCreate)}>＋ 開立點餐碼</AdminButton></div></header>
     {message.text ? <div className={message.error ? 'adminOrderMessage isError' : 'adminOrderMessage'} role="status">{message.text}<button onClick={() => setMessage({ text: '', error: false })}>×</button></div> : null}
     {businessContext ? <BusinessOperationsBar context={businessContext} canManage={canManage} onChanged={(value, text) => { setBusinessContext(value); setBusinessDate(value.referenceBusinessDate); setMessage({ text, error: false }); }} onError={(error) => setMessage({ text: error.message, error: true })}>
       {canManage ? <BusinessDayPlanPanel businessDate={businessContext.referenceBusinessDate} onOpened={loadBusinessContext} /> : null}
     </BusinessOperationsBar> : null}
-    {showCreate ? <CreateSessionPanel canManage={canManage} onClose={() => setShowCreate(false)} onIssued={(result) => { setIssued(result); setShowCreate(false); loadSessions(result.session.id); }} /> : null}
+    {showCreate ? <CreateSessionPanel canManage={canManage} onBusyChange={setCreateBusy} onClose={() => setShowCreate(false)} onIssued={(result) => { setCreateBusy(false); setIssued(result); setShowCreate(false); loadSessions(result.session.id); }} /> : null}
     {issued ? <IssuedPanel issued={issued} onClose={() => setIssued(null)} /> : null}
     {canManage && showSettings && settings ? <SettingsPanel settings={settings} onSaved={(value) => { setSettings(value); setSettingsError(''); setMessage({ text: '營運參數已更新。', error: false }); }} /> : null}
     {canManage && showSettings && settingsError ? <div className="adminOrderMessage isError" role="alert">營運參數載入失敗：{settingsError}</div> : null}
@@ -166,7 +178,7 @@ export function AdminOrdersPage() {
           {showAssisted ? <AdminAssistedOrderPanel sessionId={selectedId} businessDate={businessDate} onSaved={refreshSelected} onClose={() => setShowAssisted(false)} /> : null}
           <section className="adminOrderCustomerOrders" aria-label="顧客訂單">
             <header className="adminOrderSectionHeading"><h3>顧客訂單</h3><span>{orders.length} 張</span></header>
-            <div className="adminOrderCards">{orders.length ? orders.map((order) => order.flowVersion >= 2 ? <AdminFulfillmentOrderCard key={order.id} order={order} user={user} loading={loading} canManage={canManage} act={act} onChanged={refreshSelected} /> : <AdminOrderCard key={order.id} order={order} user={user} loading={loading} act={act} />) : <div className="adminOrderEmpty isCompact"><h2>尚未下單</h2><p>此點餐碼今天還沒有送出訂單。</p></div>}</div>
+            <div className="adminOrderCards">{orders.length ? orders.map((order) => <div id={`admin-order-${order.id}`} key={order.id}>{order.flowVersion >= 2 ? <AdminFulfillmentOrderCard key={order.id} order={order} user={user} loading={loading} canManage={canManage} act={act} onChanged={refreshSelected} /> : <AdminOrderCard key={order.id} order={order} user={user} loading={loading} act={act} focused={focusedOrder === order.id} />}</div>) : <div className="adminOrderEmpty isCompact"><h2>尚未下單</h2><p>此點餐碼今天還沒有送出訂單。</p></div>}</div>
           </section>
           <FinancialRecordsPanel key={selectedId} sessionId={selectedId} refreshKey={orders.map(o => `${o.id}:${o.totalAmount}:${o.status}`).join("|")} />
         </>}
@@ -240,8 +252,8 @@ function AdminFulfillmentOrderCard({ order, user, loading, canManage, act, onCha
   </article>;
 }
 
-function AdminOrderCard({ order, user, loading, act }) {
-  const [open, setOpen] = useState(order.status === 'submitted' || order.status === 'needs_reschedule' || order.status === 'expired');
+function AdminOrderCard({ order, user, loading, act, focused = false }) {
+  const [open, setOpen] = useState(focused || order.status === 'submitted' || order.status === 'needs_reschedule' || order.status === 'expired');
   const [note, setNote] = useState(order.internalNote || '');
   const [transitionReason, setTransitionReason] = useState('');
   const [storeDecisionReason, setStoreDecisionReason] = useState('');

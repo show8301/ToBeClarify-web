@@ -46,7 +46,7 @@ export function AdminCustomersPage() {
           <tbody>{data.items.map((visit) => <tr key={visit.sessionId}>
             <td><strong>{visit.businessDate.slice(0, 10)}</strong><small>{formatCustomerTime(visit.createdAt)}</small><small>{entryLabel(visit.entryStatus)}</small></td>
             <td><strong>{visit.customerName}</strong><small>填寫 ID：{visit.gameId || "未填寫"}</small>{!readCharacterIdentity(visit.gameId) ? <small>伺服器未確認（舊紀錄）</small> : null}{visit.customerUid ? <button className="adminCustomerUid" type="button" onClick={() => setSelectedUid(visit.customerUid)}>{visit.customerUid}</button> : <small>尚未綁定長期 UID</small>}</td>
-            <td><strong>{visit.orderCount} 單 · {formatMoney(visit.orderAmount)}</strong><small>未完成作品 {visit.pendingDeliveryCount} 件</small></td>
+            <td><strong>{visit.orderCount} 單 · {formatMoney(visit.orderAmount)}</strong><small>入場應付 {formatMoney(visit.admissionReceivable)} · 實收 {formatMoney(visit.admissionReceived)} · 實退 {formatMoney(visit.admissionRefunded)}</small><small>{visit.admissionStatus === "unrecorded" ? "入場帳尚未登錄" : `本次消費應付 ${formatMoney(visit.consumptionAmount)}`}</small><small>未完成作品 {visit.pendingDeliveryCount} 件</small></td>
             <td><strong>{visit.hasRecoveryCode ? "已建立" : "未建立"}</strong><small>第 {visit.recoveryCodeVersion || 1} 版</small>{visit.recoveryCodeIssuedAt ? <small>發行 {formatCustomerTime(visit.recoveryCodeIssuedAt)}</small> : null}</td>
             <td><strong>{visit.hasCashRecords ? formatMoney(visit.netReceived) : "尚無收退款紀錄"}</strong><small>依帳款紀錄扣除退款</small></td>
             <td><strong>{visit.gameIdVisitCount} 次入場</strong><small>{formatMoney(visit.gameIdOrderAmount)} 訂單金額</small><small>自填 ID 群組，未驗證身分</small></td>
@@ -112,7 +112,7 @@ function CustomerDetails({ uid, onClose, onViewHistory }: { uid: string; onClose
         <div><dt>入場次數</dt><dd>{data.summary.visitCount}</dd></div>
         <div><dt>訂單數</dt><dd>{data.summary.orderCount}</dd></div>
         <div><dt>訂單金額</dt><dd>{formatMoney(data.summary.orderAmount)}</dd></div>
-        <div><dt>實收扣退款</dt><dd>{formatMoney(data.summary.netReceived)}</dd></div>
+        <div><dt>入場應付／實收／實退</dt><dd>{formatMoney(data.summary.admissionReceivable)}／{formatMoney(data.summary.admissionReceived)}／{formatMoney(data.summary.admissionRefunded)}</dd></div><div><dt>消費應付（含入場）</dt><dd>{formatMoney(data.summary.consumptionAmount)}</dd></div><div><dt>入場帳未登錄</dt><dd>{data.summary.unrecordedAdmissionCount} 次</dd></div><div><dt>實收扣退款</dt><dd>{formatMoney(data.summary.netReceived)}</dd></div>
         <div><dt>待交付作品</dt><dd>{data.summary.pendingDeliveryCount}</dd></div>
       </dl>
       <p className="adminCustomerHint">實收淨額只加總收退款紀錄；歷史資料若未登錄收款，不推定已收款。填寫 ID 可供查詢，CRM 歸戶以明確綁定的 UID 為準。</p>

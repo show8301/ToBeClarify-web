@@ -57,22 +57,26 @@ const labels: Record<string, string> = {
 };
 const showTime = (value?: string | null) => value ? new Date(value).toLocaleString("zh-TW", { hour12: false }) : "—";
 
-export function OrderFulfillmentPanel({ orderId, onChanged }: { orderId: string; onChanged: () => Promise<void> | void }) {
+export function OrderFulfillmentPanel({ orderId, onChanged, disabled = false, onBusy }: { orderId: string; onChanged: () => Promise<void> | void; disabled?: boolean; onBusy?: (busy: boolean) => void }) {
   const [units, setUnits] = useState<Unit[]>([]);
   const [error, setError] = useState("");
   const [revision, setRevision] = useState(0);
   const [batchBusy, setBatchBusy] = useState(false);
+  const [loadedFor, setLoadedFor] = useState("");
+  const loadKey = `${orderId}:${revision}`;
+  const ready = loadedFor === loadKey;
   useEffect(() => {
     const controller = new AbortController();
     adminRequest(`/orders/${encodeURIComponent(orderId)}/fulfillment`, { signal: controller.signal })
-      .then((data: unknown) => { setUnits(parseUnits(data)); setError(""); })
-      .catch((e: Error) => { if (!controller.signal.aborted) setError(e.message); });
+      .then((data: unknown) => { if (!controller.signal.aborted) { setUnits(parseUnits(data)); setError(""); setLoadedFor(loadKey); } })
+      .catch((e: Error) => { if (!controller.signal.aborted) { setError(e.message); setLoadedFor(loadKey); } });
     return () => controller.abort();
-  }, [orderId, revision]);
+  }, [orderId, revision, loadKey]);
   const batchMeals = async (action: "accept" | "complete") => {
+    if (disabled || batchBusy || !ready || error) return;
     const candidates = units.filter(unit => unit.kind === "meal" && unit.allowedActions.includes(action));
     if (candidates.length === 0) return;
-    setBatchBusy(true); setError("");
+    setBatchBusy(true); onBusy?.(true); setError("");
     try {
       for (const unit of candidates) {
         const quantity = action === "accept"
@@ -86,21 +90,23 @@ export function OrderFulfillmentPanel({ orderId, onChanged }: { orderId: string;
       }
       setRevision(n => n + 1); await onChanged();
     } catch (e) { setError(e instanceof Error ? e.message : "批次餐點操作失敗"); }
-    finally { setBatchBusy(false); }
+    finally { setBatchBusy(false); onBusy?.(false); setRevision(n => n + 1); }
   };
   return <section className="adminOrderCard" aria-label="分項接待進度">
     <h3>餐點與指名分開處理</h3>
     <p>原預約時間會保留；晚開始可在這裡保留完整購買分鐘並調整休息，折讓會同次寫入帳務。</p>
-    {error && <p role="alert">{error}</p>}
-    {units.some(unit => unit.kind === "meal" && unit.allowedActions.includes("accept")) || units.some(unit => unit.kind === "meal" && unit.allowedActions.includes("complete")) ? <div className="adminPageActions"><button type="button" disabled={batchBusy} onClick={() => void batchMeals("accept")}>批次接單餐點</button><button type="button" disabled={batchBusy} onClick={() => void batchMeals("complete")}>批次送達已處理餐點</button></div> : null}
-    {units.map(unit => <UnitControls key={`${unit.id}-${unit.version}`} orderId={orderId} unit={unit} onChanged={async () => {
+    {!ready && <p role="status">讀取分項履約中…</p>}
+    {ready && error && <p role="alert">{error}</p>}
+    <AdminButton variant="ghost" disabled={disabled || batchBusy} onClick={() => setRevision(n => n + 1)}>重讀履約進度</AdminButton>
+    {units.some(unit => unit.kind === "meal" && unit.allowedActions.includes("accept")) || units.some(unit => unit.kind === "meal" && unit.allowedActions.includes("complete")) ? <div className="adminPageActions"><button type="button" disabled={disabled || batchBusy || !ready || Boolean(error)} onClick={() => void batchMeals("accept")}>批次接單餐點</button><button type="button" disabled={disabled || batchBusy || !ready || Boolean(error)} onClick={() => void batchMeals("complete")}>批次送達已處理餐點</button></div> : null}
+    {units.map(unit => <UnitControls key={`${unit.id}-${unit.version}`} orderId={orderId} unit={unit} disabled={disabled || batchBusy || !ready || Boolean(error)} onBusy={onBusy} onChanged={async () => {
       setRevision(n => n + 1);
       await onChanged();
     }} />)}
   </section>;
 }
 
-function UnitControls({ orderId, unit, onChanged }: { orderId: string; unit: Unit; onChanged: () => Promise<void> }) {
+function UnitControls({ orderId, unit, onChanged, disabled, onBusy }: { orderId: string; unit: Unit; onChanged: () => Promise<void>; disabled: boolean; onBusy?: (busy: boolean) => void }) {
   const [quantity, setQuantity] = useState(1);
   const [reason, setReason] = useState("");
   const [startsAt, setStartsAt] = useState("");
@@ -117,22 +123,32 @@ function UnitControls({ orderId, unit, onChanged }: { orderId: string; unit: Uni
   const [error, setError] = useState("");
   useEffect(() => {
     if (!unit.allowedActions.includes("reschedule") && !unit.allowedActions.includes("carry_forward")) return;
-    adminRequest(`/orders/${encodeURIComponent(orderId)}/fulfillment/period-options`)
-      .then(value => { if (Array.isArray(value)) setPeriods(value as PeriodOption[]); })
-      .catch(() => setPeriods([]));
+    const controller = new AbortController();
+    adminRequest(`/orders/${encodeURIComponent(orderId)}/fulfillment/period-options`, { signal: controller.signal })
+      .then((value: unknown) => {
+        if (!Array.isArray(value)) throw new Error("營業期資料格式不正確。");
+        const options: PeriodOption[] = value.map((entry: unknown) => {
+          if (!entry || typeof entry !== "object" || !("id" in entry) || !("businessDate" in entry) || !("status" in entry) ||
+              typeof entry.id !== "string" || typeof entry.businessDate !== "string" || typeof entry.status !== "string") throw new Error("營業期資料格式不正確。");
+          return { id: entry.id, businessDate: entry.businessDate, status: entry.status };
+        });
+        if (!controller.signal.aborted) setPeriods(options);
+      }).catch(() => { if (!controller.signal.aborted) setPeriods([]); });
+    return () => controller.abort();
   }, [orderId, unit.allowedActions, unit.id]);
   type RequestBody = { operationId: string; expectedVersion: number; action: string; quantity: number; reason: string | null; scheduledStartsAt: string | null; targetBusinessPeriodId: string | null; restMinutes: number; compensationAmount: number; compensationReason: string | null; actualStartsAt: string | null; actualEndsAt: string | null };
   const [retry, setRetry] = useState<RequestBody | null>(null);
 
   const loadPreview = async () => {
-    setBusy(true); setPendingAction("start-preview"); setError("");
+    onBusy?.(true); setBusy(true); setPendingAction("start-preview"); setError("");
     try {
       const value = await adminRequest(`/orders/${encodeURIComponent(orderId)}/fulfillment/${encodeURIComponent(unit.id)}/start-preview`) as Preview;
       setPreview(value);
     } catch (e) { setError(e instanceof Error ? e.message : "無法預覽現在接待"); }
-    finally { setBusy(false); setPendingAction(null); }
+    finally { setBusy(false); onBusy?.(false); setPendingAction(null); }
   };
   const run = async (action: string) => {
+    if (disabled || busy) return;
     if (action === "start_now" && !preview) { await loadPreview(); return; }
     if (action === "backfill" && !actualStartsAt) { setError("補登請填寫實際開始時間。"); return; }
     const body: RequestBody = retry ?? { operationId: crypto.randomUUID(), expectedVersion: unit.version, action, quantity,
@@ -141,24 +157,24 @@ function UnitControls({ orderId, unit, onChanged }: { orderId: string; unit: Uni
       compensationAmount, compensationReason: compensationReason.trim() || null,
       actualStartsAt: actualStartsAt ? `${actualStartsAt}:00+08:00` : null,
       actualEndsAt: actualEndsAt ? `${actualEndsAt}:00+08:00` : null };
-    setBusy(true); setPendingAction(retry ? `retry:${action}` : action); setRetry(body);
+    onBusy?.(true); setBusy(true); setPendingAction(retry ? `retry:${action}` : action); setRetry(body);
     try {
       await adminRequest(`/orders/${encodeURIComponent(orderId)}/fulfillment/${encodeURIComponent(unit.id)}/transition`, { method: "POST", body: JSON.stringify(body) });
       setRetry(null); setPreview(null); setError(""); await onChanged();
     } catch (e) {
       setError(e instanceof Error ? e.message : "操作失敗");
       if (e && typeof e === "object" && "status" in e && typeof e.status === "number" && e.status >= 400 && e.status < 500) setRetry(null);
-    } finally { setBusy(false); setPendingAction(null); }
+    } finally { setBusy(false); onBusy?.(false); setPendingAction(null); }
   };
   const disabledReason = (action: string) => {
-    if (busy) return "操作處理中，請稍候。";
+    if (disabled || busy) return "操作處理中，請稍候。";
     if (retry) return "上一筆操作結果尚未確認，請先查回或重試同一筆操作。";
     if (["cancel", "decline", "reschedule", "carry_forward"].includes(action) && !reason.trim()) return "請先填寫操作原因。";
     if (action === "reschedule" && unit.kind === "nominee" && !startsAt) return "請先填寫改期開始時間。";
     if (action === "carry_forward" && targetBusinessPeriodId && unit.kind === "nominee" && !startsAt) return "請先填寫跨期履約開始時間。";
     return undefined;
   };
-  return <div className="adminOrderEmergency">
+  return <fieldset className="adminOrderEmergency" disabled={disabled || busy}>
     <strong>{unit.name} · {labels[unit.status] || unit.status}</strong>
     <p>共 {unit.quantity} 份／項 · 已接 {unit.acceptedQuantity} · 處理中 {unit.startedQuantity - unit.completedQuantity} · 完成 {unit.completedQuantity} · 取消 {unit.cancelledQuantity}{unit.purchasedMinutes > 0 ? ` · 購買 ${unit.purchasedMinutes} 分鐘` : ""}</p>
     {unit.originalScheduledStartsAt && <p>原預約：{showTime(unit.originalScheduledStartsAt)}～{showTime(unit.originalScheduledEndsAt)} · 預留休息 {unit.restMinutesReserved} 分鐘</p>}
@@ -173,5 +189,5 @@ function UnitControls({ orderId, unit, onChanged }: { orderId: string; unit: Uni
     </>}
     {error && <p role="alert">{error}</p>}
     {retry && <AdminButton busy={pendingAction === `retry:${retry.action}`} busyLabel="查回中…" disabled={busy} onClick={() => void run(retry.action)}>查回／重試同一筆操作</AdminButton>}
-  </div>;
+  </fieldset>;
 }

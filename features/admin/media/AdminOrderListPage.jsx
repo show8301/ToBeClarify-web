@@ -1,3 +1,5 @@
+import { AdmissionSummary } from "@/features/admin/orders/AdmissionSummary";
+import { AdmissionDailyList } from "@/features/admin/orders/AdmissionDailyList";
 import { AdminRefreshButton } from "@/features/admin/shared/AdminRefreshButton";
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -94,6 +96,7 @@ export function AdminOrderListPage() {
 
     {sessionFilter ? <p className="adminCustomerActions">目前只顯示指定入場紀錄的訂單。<button type="button" className="adminButton adminButton-ghost" onClick={() => setSessionFilter('')}>查看當日全部顧客</button></p> : null}
 
+    {sessionFilter || selected ? <AdmissionSummary sessionId={sessionFilter || selected.sessionId} /> : <AdmissionDailyList key={businessDate} businessDate={businessDate} />}
     {error ? <div className="adminOrderMessage isError" role="alert">{error}</div> : null}
     <div className="adminOrderListLayout">
       <section className="adminOrderListTableWrap" aria-busy={loading}>

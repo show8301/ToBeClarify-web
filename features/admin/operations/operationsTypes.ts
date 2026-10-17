@@ -29,6 +29,7 @@ export type OperationsContext = {
 };
 
 export type OperationsSession = {
+  businessDate?: string;
   businessPeriodId?: string;
   id: string;
   customerName: string;
@@ -68,6 +69,7 @@ export type OperationsAddon = {
 };
 
 export type OperationsOrder = {
+  sessionBusinessDate?: string;
   businessPeriodId?: string;
   id: string;
   sessionId: string;
@@ -97,6 +99,7 @@ export type OperationsOrder = {
 
 export type OperationsRoomOrder = {
   id: string;
+  orderId?: string;
   roomName: string;
   startsAt: string;
   endsAt: string;

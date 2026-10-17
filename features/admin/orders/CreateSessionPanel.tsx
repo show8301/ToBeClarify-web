@@ -1,47 +1,27 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import type { FormEvent } from "react";
 import { AdminHelp } from "@/features/admin/shared/AdminHelp";
 import { CharacterIdentityFields } from "@/components/customer/CharacterIdentityFields";
 import { composeCharacterIdentity } from "@/lib/customer-identity";
-import { adminApi } from "@/features/admin/api/client.js";
+import { AdmissionPaymentFields } from "./AdmissionPaymentFields";
+import { useAdmissionCreation } from "./useAdmissionCreation";
+import type { IssuedAdmissionSession } from "./admission-creation-types";
 import { customerApi } from "@/features/admin/customers/api";
 import type { CustomerIdentityCandidate } from "@/features/admin/customers/types";
 import { AdminButton } from "@/features/admin/shared/AdminShared.jsx";
 
-type IssuedSession = {
-  session: { id: string; gameId: string; customerName: string };
-  orderUrl: string;
-  orderToken: string;
-  recoveryCode: string;
-};
-type Props = { canManage: boolean; onClose: () => void; onIssued: (issued: IssuedSession) => void };
+type Props = { canManage: boolean; onClose: () => void; onIssued: (issued: IssuedAdmissionSession) => void; onBusyChange?: (busy: boolean) => void };
 type CandidateState = { key: string; items: CustomerIdentityCandidate[]; error: string };
 
-function parseIssued(value: unknown): IssuedSession {
-  if (!value || typeof value !== "object" || !("session" in value)
-    || !value.session || typeof value.session !== "object"
-    || !("id" in value.session) || typeof value.session.id !== "string"
-    || !("gameId" in value.session) || typeof value.session.gameId !== "string"
-    || !("customerName" in value.session) || typeof value.session.customerName !== "string"
-    || !("orderUrl" in value) || typeof value.orderUrl !== "string"
-    || !("orderToken" in value) || typeof value.orderToken !== "string"
-    || !("recoveryCode" in value) || typeof value.recoveryCode !== "string") {
-    throw new Error("點餐碼回應格式不正確，請先查詢今日入場紀錄，避免重複開碼。");
-  }
-  return {
-    session: { id: value.session.id, gameId: value.session.gameId, customerName: value.session.customerName },
-    orderUrl: value.orderUrl, orderToken: value.orderToken, recoveryCode: value.recoveryCode,
-  };
-}
-
-export function CreateSessionPanel({ canManage, onClose, onIssued }: Props) {
+export function CreateSessionPanel({ canManage, onClose, onIssued, onBusyChange }: Props) {
   const uidInputId = useId();
   const [form, setForm] = useState({ gameId: "", serverName: "", customerName: "", customerUid: "", maxNominatedStaff: 1 });
   const [result, setResult] = useState<CandidateState | null>(null);
   const [candidateRevision, setCandidateRevision] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const payment = useAdmissionCreation(onIssued, onBusyChange);
+  const loading = payment.locked || Boolean(payment.result);
   const [error, setError] = useState("");
-  const submission = useRef<AbortController | null>(null);
+
   let identity = null;
   let identityError = "";
   try { identity = composeCharacterIdentity(form.gameId, form.serverName); }
@@ -66,30 +46,18 @@ export function CreateSessionPanel({ canManage, onClose, onIssued }: Props) {
     return () => { window.clearTimeout(timer); controller.abort(); };
   }, [identityKey, candidateRevision]);
 
-  useEffect(() => () => submission.current?.abort(), []);
+
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (submission.current || candidateLoading || candidateError) return;
-    const controller = new AbortController();
-    submission.current = controller;
-    setLoading(true);
+    if (payment.busy || candidateLoading || candidateError) return;
     setError("");
     try {
       const current = composeCharacterIdentity(form.gameId, form.serverName);
-      const value: unknown = await adminApi.createOrderSession({
-        gameId: current.characterName, serverName: current.serverName,
-        customerName: form.customerName.trim() || null,
-        customerUid: canManage ? form.customerUid || null : null,
-        maxNominatedStaff: form.maxNominatedStaff,
-      }, controller.signal);
-      if (!controller.signal.aborted) onIssued(parseIssued(value));
-    } catch (reason) {
-      if (!controller.signal.aborted) setError(reason instanceof Error ? reason.message : "無法開立點餐碼。");
-    } finally {
-      if (!controller.signal.aborted) setLoading(false);
-      submission.current = null;
-    }
+      await payment.submit({ gameId: current.characterName, serverName: current.serverName,
+        customerName: form.customerName.trim() || null, customerUid: canManage ? form.customerUid || null : null,
+        maxNominatedStaff: form.maxNominatedStaff });
+    } catch (e) { setError(e instanceof Error ? e.message : "無法開立點餐碼。"); }
   }
 
   return <div className="adminOrderInlinePanel adminCreateSessionPanel">
@@ -100,7 +68,7 @@ export function CreateSessionPanel({ canManage, onClose, onIssued }: Props) {
           <AdminHelp title="點餐碼填寫說明">人物 ID 最多 6 字，顧客顯示名稱最多 12 字，可同時指名人數為 0–9 人。選擇角色所屬伺服器後，系統以「人物 ID@伺服器」查詢歸戶；唯一候選會自動沿用，多個候選未選擇時先不歸戶。</AdminHelp>
         </div>
       </div>
-      <button type="button" aria-label="關閉發點餐碼" disabled={loading} onClick={onClose}>×</button>
+      <button type="button" aria-label="關閉發點餐碼" disabled={payment.locked} onClick={onClose}>×</button>
     </header>
     <form onSubmit={(event) => { void submit(event); }}>
       <CharacterIdentityFields gameId={form.gameId} serverName={form.serverName} disabled={loading} gameIdMaxLength={6} showPreview={false}
@@ -121,7 +89,8 @@ export function CreateSessionPanel({ canManage, onClose, onIssued }: Props) {
         </div>
         <input id={uidInputId} value={form.customerUid} maxLength={40} disabled={loading} autoComplete="off" onChange={(event) => setForm({ ...form, customerUid: event.target.value.trim().toUpperCase() })} />
       </div> : null}
-      <AdminButton type="submit" disabled={loading || !identityKey || candidateLoading || Boolean(candidateError)}>{loading ? "開立中…" : "產生點餐網址"}</AdminButton>
+      <AdmissionPaymentFields payment={payment} canManage={canManage} />
+      <AdminButton type="submit" disabled={payment.busy || Boolean(payment.result) || !identityKey || candidateLoading || Boolean(candidateError) || !payment.pending && (!payment.preview?.confirmedCreationAvailable || payment.mode === "received" && !payment.confirmed)}>{payment.busy ? "開立中…" : payment.pending ? "查回／重試同一筆開碼" : payment.mode === "received" ? "確認收款並開立點餐碼" : "確認例外並開立點餐碼"}</AdminButton>
       <div className="adminSessionIdentityFeedback" aria-live="polite">
         {identityError ? <p className="adminFormError">{identityError}</p> : null}
         {identityKey ? <p className="adminSessionQualifiedId">顧客 ID：<strong>{identityKey}</strong></p> : null}

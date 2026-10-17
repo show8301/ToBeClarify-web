@@ -1,4 +1,5 @@
 import { adminRequest, ApiError } from "@/features/admin/api/client.js";
+import { notifyFinanceUpdated } from "./finance-events";
 import type {
   FinanceAccount, FinanceAllocation, FinanceHoldScope, FinanceKind, FinanceOperation,
   FinanceOrderOption, FinancePeriodOption, FinanceRecord, FinanceRevision, FinanceSaveRequest, FinanceSourceKind,
@@ -89,6 +90,7 @@ function parseCase(value: unknown): FinanceCase {
 }
 async function request<T>(path: string, parse: (value: unknown) => T, options: RequestInit = {}): Promise<T> {
   const value: unknown = await adminRequest(path, options);
+  if (options.method && options.method !== "GET") notifyFinanceUpdated(path);
   try { return parse(value); }
   catch { throw new ApiError("帳款回應格式不正確，請查回操作結果。", { status: 502, code: "INVALID_RESPONSE" }); }
 }

@@ -1,0 +1,269 @@
+{
+  "preparedDate": "2026-10-18",
+  "status": "release-candidate-not-migrated-or-deployed",
+  "notes": "Review these paths and task-specific hunks; unrelated working changes are excluded. Candidate is based on current origin/dev. Recompute hashes if any source changes. This file is not a deployment record.",
+  "web": [
+    {
+      "path": "docs/service-workbench-admission-plan-20261017.md",
+      "sha256": "00287ff1f1c15c4d74e2c18860a7c05a2f313976920397e33241cc43d001fcc5"
+    },
+    {
+      "path": "docs/service-workbench-admission-implementation-20261017.md",
+      "sha256": "c591066035839e23453790e1a8615a5753997f8afed07782ff7e05c950b2c8cc"
+    },
+    {
+      "path": "docs/admin-ui-design-guidelines.md",
+      "sha256": "8f8518ad02f818737a1d0a41d24fb79781e10f8e964a23c9440ec081c88e7da8"
+    },
+    {
+      "path": "docs/local-ui-preview.md",
+      "sha256": "915ec973bb97bd0ce60643cd8bced91b271843eb23d69a56965e4e47c2c5abf3"
+    },
+    {
+      "path": "features/admin/operations/AdminOperationsDashboards.tsx",
+      "sha256": "da7a6af90a2d4058de237292283977697061135aba07c0a5202f2e615189abdd"
+    },
+    {
+      "path": "features/admin/operations/AdminRoleOperationsPage.tsx",
+      "sha256": "26e017cdb70be340bc35bd3579039dcc6c7dcd1307989f7b5952843c452ccd61"
+    },
+    {
+      "path": "features/admin/operations/operationsTypes.ts",
+      "sha256": "b827b083f2a51756d0e4fbede014a9c10603ae6a8519f1585cd86fcb492ec90f"
+    },
+    {
+      "path": "features/admin/operations/AdminCreateOrderPassDrawer.jsx",
+      "sha256": "99e9255f9c91cdfd403699ab67f42317a19e99f7441e9013c9d847e111e79aeb"
+    },
+    {
+      "path": "features/admin/operations/WorkbenchGuestOrders.tsx",
+      "sha256": "e79a9d11975954b35ad7d50dc1bcda584dd5385f0572c576d61ab6c4005ce922"
+    },
+    {
+      "path": "features/admin/operations/AdminServiceWorkbench.tsx",
+      "sha256": "9886b8750a277b77936d082d60552303f0ff32680913024a0926927e8904151c"
+    },
+    {
+      "path": "features/admin/operations/ServiceGuestPanel.tsx",
+      "sha256": "5561cfe3a3b446116ba6c42660302dba01f8d3c7a882b0ccdb3782750bf1f22b"
+    },
+    {
+      "path": "features/admin/operations/ServiceOrderDetail.tsx",
+      "sha256": "b326f6e1537c9a7f1ed66da17ac57a092df918685bb90165fd3de2afbf95231b"
+    },
+    {
+      "path": "features/admin/operations/StandaloneRoomTask.tsx",
+      "sha256": "c8a11228cf7c6ca9b0a7a2c91f762f1071a1e5deecaea17999dbbe1b4105c6f4"
+    },
+    {
+      "path": "features/admin/operations/serviceQueue.ts",
+      "sha256": "ae0d21a59f7ad33c7f96efd7f31eb219562b50d43439e6cac01d59f3b88495eb"
+    },
+    {
+      "path": "features/admin/orders/CreateSessionPanel.tsx",
+      "sha256": "11a3a653dd6258809167b23dc5260ec6535e6121a20df5d3a3c5ee2c5f3d70cf"
+    },
+    {
+      "path": "features/admin/orders/AdminOrderPassPanels.jsx",
+      "sha256": "16fd6dc1169ec4e1e982f6fdeaa536659c1783e7a0f9f0b9e0df6ca753392f8e"
+    },
+    {
+      "path": "features/admin/orders/AdminOrdersPage.jsx",
+      "sha256": "ab83a5f1c64023702afcc5211feade5bd174b6034dbd7c0d7b0711e21ecdb192"
+    },
+    {
+      "path": "features/admin/orders/OrderFulfillmentPanel.tsx",
+      "sha256": "d30351161269f757456aa68224f4dad290d4ac0dc04b6b5baad3e54427b7d990"
+    },
+    {
+      "path": "features/admin/orders/SessionHeader.tsx",
+      "sha256": "9727a649a923dc4c6522c2f1b6ae1e08ce9cd45257f5d06eb31a46c5300516f6"
+    },
+    {
+      "path": "features/admin/orders/finance-api.ts",
+      "sha256": "7a601a47e0ce2220a74795f43d1f181c26504857f009122bd812f6d1d727d755"
+    },
+    {
+      "path": "features/admin/orders/finance-events.ts",
+      "sha256": "a079910771ce4743b86c146852a3217b9469364abb5a65f5d9e751921883fe8d"
+    },
+    {
+      "path": "features/admin/orders/AdmissionDailyList.tsx",
+      "sha256": "90fe655ecfd1568bb4a00b7adf4420555c708698003c658a5622a1964d735598"
+    },
+    {
+      "path": "features/admin/orders/AdmissionPaymentFields.tsx",
+      "sha256": "04d837c7c9b073ef44ebf6667a5996538a9573eb998d3fbc62abec0220a31fd5"
+    },
+    {
+      "path": "features/admin/orders/AdmissionSummary.tsx",
+      "sha256": "9ab3c6f9bcc04925af982a390284c3f1d3a8e8d9d8c741ba0fc30d15dd957851"
+    },
+    {
+      "path": "features/admin/orders/admission-creation-api.ts",
+      "sha256": "a856fa3715499a45c5f984d8c908bfa942342ad29f93193e057a081e5de59971"
+    },
+    {
+      "path": "features/admin/orders/admission-creation-contract.ts",
+      "sha256": "f0d1da86f3c60c06881db2654455f83f34e6eda84a2ebfe83f360c157f673216"
+    },
+    {
+      "path": "features/admin/orders/admission-creation-types.ts",
+      "sha256": "55f75e04a0cbcc9af594572c2550f4108aa562e40232b5ef8cad5b2681b91f0a"
+    },
+    {
+      "path": "features/admin/orders/useAdmissionCreation.ts",
+      "sha256": "c66a05ed2a0af49f68816fb7dc101542db00f4f93f0b93258bef0472ec4136c8"
+    },
+    {
+      "path": "features/admin/customers/AdminCustomersPage.tsx",
+      "sha256": "25d6fdb788e8f175fc9ba0a42bc56730cf7ccf35843cfeca9efe35645136b4b9"
+    },
+    {
+      "path": "features/admin/customers/types.ts",
+      "sha256": "92c5c9f0555ea084113a762b46783e0efd7134422b72371e6205895c67df421b"
+    },
+    {
+      "path": "features/admin/customers/validation.ts",
+      "sha256": "a8075fe12d46f129b798389133943bfbf526a26282951e49d5322165e18c450e"
+    },
+    {
+      "path": "features/admin/media/AdminOrderListPage.jsx",
+      "sha256": "fb2d97d755c74f64b94c9d1f20867066239d4ead87cd116a93c930a164a3c644"
+    },
+    {
+      "path": "features/ordering/components/OrderClient.jsx",
+      "sha256": "015bcf9b45fe8b5c17c8a6206199b2336711358839d66e110415505e962dfe03"
+    },
+    {
+      "path": "styles/admin/site.css",
+      "sha256": "d0eb7d0259dde0b4c2f3aa8fbc6e0c0e0f0f4640b61a60623d02071ead5c3c41"
+    },
+    {
+      "path": "styles/admin/layers/96-service-workbench.css",
+      "sha256": "e1b392dcf2cafbaec8aaa200a8b84070b1c55eb975d5ec2511a98c2db529703f"
+    },
+    {
+      "path": "scripts/preview-css/service-workbench.json",
+      "sha256": "14809fe7a88ec5d79524056d5320e1b822006823d4de3fd96a155ed0d6ab8704"
+    },
+    {
+      "path": "tests/admission-creation-contract.test.mjs",
+      "sha256": "86930661ceda0a6b9ffb970b700e7c70eecee0ae3b2b8d736d3f795bf849f7a2"
+    },
+    {
+      "path": "tests/service-queue.test.mjs",
+      "sha256": "e6a31f40bbbb72138c2d2279e0b7c4993bd822942c3eaf6fb9d4c1a272cdff23"
+    }
+  ],
+  "api": [
+    {
+      "path": "Program.cs",
+      "sha256": "c11a494cb31cc75e228a13eb951c2642c93ab8c40730bd9a600faf0acb03c0cc"
+    },
+    {
+      "path": "docs/ADMISSION-CREATION-CONTRACT.md",
+      "sha256": "dd6813ebea75385ca334640dbe97dd6e6f07f4308c5b615ff0acf8197a601303"
+    },
+    {
+      "path": "db/migrations/20261017_03_admission_creation_contract.sql",
+      "sha256": "3b3f39179f3128aa82aac8340b6bb2e6fbc06a8600f33283759a6417ed5518e5"
+    },
+    {
+      "path": "src/Controllers/Admin/AdmissionContractsController.cs",
+      "sha256": "c9d7b93aed9734d810cc9f1947ec91e09490e1e95024a1474ca6f8819dfff9c3"
+    },
+    {
+      "path": "src/Controllers/Admin/OrdersController.cs",
+      "sha256": "3ad1113dc4cdc44a95c63145896b2d09cb3436af2311dc921587a7ef70234ce7"
+    },
+    {
+      "path": "src/Models/Dtos/AdmissionCreationDtos.cs",
+      "sha256": "4768779c1974d7d48ba433aa247fc604ad13408f2b6603b76de051ad2c75c89a"
+    },
+    {
+      "path": "src/Models/Dtos/CustomerDeliveryDtos.cs",
+      "sha256": "0536702debe6d30adf0af01f68f8ff5084ede8cfdf13eb8196b581e4b9c7e3c4"
+    },
+    {
+      "path": "src/Models/Dtos/OrderingDtos.cs",
+      "sha256": "91e1d42e1f26a84a5342dedd3a6caac36cb8580cdee2f0a7bc513a93dade2664"
+    },
+    {
+      "path": "src/Models/Dtos/RoomDtos.cs",
+      "sha256": "78277cab138feeae9ed277a2198d371134426ae0bd831cc15e8cd6517c4ca7f7"
+    },
+    {
+      "path": "src/Models/Entities/SettlementEntities.cs",
+      "sha256": "7c15b353e19ca879c89fafa7e7fc94251db48a85486c9a79eb463e7318bdea0d"
+    },
+    {
+      "path": "src/Repositories/Ordering/AdmissionContractRepository.cs",
+      "sha256": "4537859e99658b0e0be6d6aa4b5f4066efdf4a55ec4f443efffde8d472574007"
+    },
+    {
+      "path": "src/Repositories/Ordering/IOrderingRepository.cs",
+      "sha256": "1c5eb0ab108981c42e393801f9c8b8693a02f595bdff6890da2642d4d1442070"
+    },
+    {
+      "path": "src/Repositories/Ordering/OrderingFinanceRepository.cs",
+      "sha256": "e8597ed7ddad74c9801da409d971348e4922888864f72f13c6268d4793aa38ee"
+    },
+    {
+      "path": "src/Repositories/Ordering/OrderingRepository.cs",
+      "sha256": "955c02a101d9d5b2963ae16becb484a378c26d690fa16adeb2235cf47b285107"
+    },
+    {
+      "path": "src/Repositories/Ordering/OrderingRepository.ServiceWorkbench.cs",
+      "sha256": "52e2ca11c4a8f8d368126be310bf4999e229149be20f174ee2b072043684cecc"
+    },
+    {
+      "path": "src/Repositories/Customers/CustomerDeliveryRepository.cs",
+      "sha256": "415672c74f5bb9a0403d6dfa4c7d08c402eabdda976386c11d29a230528811cb"
+    },
+    {
+      "path": "src/Repositories/Admin/Settlement/SettlementRepository.cs",
+      "sha256": "be7e2eadf18d9113f05ab2b07be006e22237147cbeb6d9b9c86458156a37428b"
+    },
+    {
+      "path": "src/Services/Ordering/AdmissionContractService.cs",
+      "sha256": "b924e0a56d2d7627bef10c58bc3f4de6e5701264b6611f3d2ae0abc64c27315d"
+    },
+    {
+      "path": "src/Services/Ordering/AdmissionCreationService.cs",
+      "sha256": "902a1721bb37dc019d89478d38e702f8f52205840cc759647422a8e3edc61aac"
+    },
+    {
+      "path": "src/Services/Ordering/IOrderingService.cs",
+      "sha256": "17a15a3887621439719b941a4d7c5253e89bc9613925b67e849f1be25f1ae197"
+    },
+    {
+      "path": "src/Services/Ordering/OrderingService.cs",
+      "sha256": "ef4673b92a8ba37477ec16e3103053f32a2821ffb9dd43cee0efba2067f7c851"
+    },
+    {
+      "path": "src/Services/Ordering/OrderingService.Fulfillment.cs",
+      "sha256": "9ac2f7e64f4fd7d0e9b22814e877420da50f689faba935f33a30a2e4f3c6067e"
+    },
+    {
+      "path": "src/Services/Admin/Rooms/AdminRoomService.cs",
+      "sha256": "49d01c88006c93974dc58c7cc22812b4760f724f9fcac2d44a05063f7d6b2cc3"
+    },
+    {
+      "path": "src/Services/Admin/Settlement/SettlementService.cs",
+      "sha256": "5e8dfa2eaeed912a970d59110ee7a49dcc64711265d19e39d9620712528c5295"
+    },
+    {
+      "path": "tests/AdmissionContracts/AdmissionContracts.csproj",
+      "sha256": "545d94c725b9e0243ba992713dca6afaa3404713b9b371192187048fe782cf7e"
+    },
+    {
+      "path": "tests/AdmissionContracts/Program.cs",
+      "sha256": "75a7731d3b86ee4570f2e6315715217658c27d0c0c465a317f1d6ea3a4e0663a"
+    },
+    {
+      "path": "tests/ChampagneAccounting/Program.cs",
+      "sha256": "b40daa05e368eb7082bb5f4ac531a0cedd750726ec2323feffbd19f4d9b77f46"
+    }
+  ]
+}

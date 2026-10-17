@@ -1,0 +1,11 @@
+[
+  { "selector": ".serviceMetrics > button", "declarations": { "display": "grid", "grid-template-areas": "\"title value\" \"detail value\"", "min-height": "112px" } },
+  { "selector": ".serviceTaskHead", "declarations": { "display": "flex", "justify-content": "space-between" } },
+  { "selector": ".serviceTaskDetail", "declarations": { "display": "grid", "gap": "14px" } },
+  { "selector": ".serviceGuestFilters", "declarations": { "display": "grid", "grid-template-columns": "repeat(3, minmax(0, 1fr))" } },
+  { "selector": ".adminAdmissionSummary dl", "declarations": { "display": "grid", "grid-template-columns": "repeat(2, minmax(0, 1fr))" } },
+  { "selector": ".adminCreateSessionPanel > form > .adminAdmissionPayment", "declarations": { "flex": "1 0 100%", "box-sizing": "border-box" } },
+  { "selector": ".adminCreateSessionPanel .adminAdmissionConfirm input[type=\"checkbox\"]", "declarations": { "width": "20px", "min-height": "20px" } },
+  { "selector": ".serviceGuestFilters", "context": ["@media (max-width: 760px)"], "declarations": { "grid-template-columns": "minmax(0, 1fr)" } },
+  { "selector": ".serviceTaskActions .adminButton", "context": ["@media (max-width: 760px)"], "declarations": { "min-height": "44px" } }
+]

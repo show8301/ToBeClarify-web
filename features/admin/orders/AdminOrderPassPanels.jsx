@@ -17,6 +17,7 @@ export function IssuedPanel({ issued, onClose }) {
       <div><span>ORDER PASS READY</span><h2>{issued.session.customerName} 的今日點餐資料</h2></div>
       <button type="button" aria-label="關閉點餐資料" onClick={onClose}>×</button>
     </header>
+    {issued.admission ? <p role="status">入場實收 {Number(issued.admission.receivedAmount).toLocaleString('zh-TW')} G · {new Date(issued.admission.recordedAt).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' })} · 經手帳號 {issued.admission.recordedBy}</p> : null}
     <div className="adminIssuedFields">
       <div className="adminIssuedField adminIssuedUrlField"><div className="adminIssuedFieldLabel"><strong>點餐網址</strong><small>複製可直接分享給顧客</small></div><code title={orderUrl}>{compactUrl}</code><button className="adminCopyIconButton" type="button" aria-label="複製點餐網址" title="複製點餐網址" onClick={() => copy(orderUrl, 'url')}><CopyIcon />{copied === 'url' ? <span className="adminCopyStatus">已複製</span> : null}</button></div>
       <div className="adminIssuedField adminRecoveryField"><div className="adminIssuedFieldLabel"><strong>六位數協助碼</strong><small>顧客遺失網址時提供</small></div><code>{issued.recoveryCode}</code><button className="adminCopyIconButton" type="button" aria-label="複製協助碼" title="複製協助碼" onClick={() => copy(issued.recoveryCode, 'recovery')}><CopyIcon />{copied === 'recovery' ? <span className="adminCopyStatus">已複製</span> : null}</button></div>

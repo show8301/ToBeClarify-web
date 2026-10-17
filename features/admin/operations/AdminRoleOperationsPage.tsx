@@ -80,6 +80,7 @@ function normalizeSession(value: unknown): OperationsSession | null {
   if (!id) return null;
   return {
     id,
+    businessDate: stringValue(session.businessDate).slice(0, 10),
     customerName: stringValue(session.customerName, "未命名顧客"),
     gameId: stringValue(session.gameId, "—"),
     status: stringValue(session.status),
@@ -131,6 +132,7 @@ function normalizeOrder(value: unknown, session: OperationsSession): OperationsO
   return {
     id,
     sessionId: session.id,
+    sessionBusinessDate: session.businessDate,
     customerName: session.customerName,
     gameId: session.gameId,
     orderNumber: stringValue(value.orderNumber, id),
@@ -161,7 +163,14 @@ function normalizeRoomOrder(value: unknown): OperationsRoomOrder | null {
   if (!isRecord(value)) return null;
   const id = stringValue(value.id);
   if (!id) return null;
-  return { id, roomName: stringValue(value.roomName, "包廂"), startsAt: stringValue(value.startsAt), endsAt: stringValue(value.endsAt), segmentCount: numberValue(value.segmentCount, 1), totalAmount: numberValue(value.totalAmount), status: stringValue(value.status), note: stringValue(value.note) };
+  const instant = (value: unknown) => {
+    const raw = stringValue(value);
+    // Legacy room endpoints return Taiwan wall time without an offset.
+    const result = raw && !/(Z|[+-]\d{2}:\d{2})$/.test(raw) ? `${raw}+08:00` : raw;
+    if (!result || !Number.isFinite(Date.parse(result))) throw new Error("包廂時段資料格式異常，請重新整理。");
+    return result;
+  };
+  return { id, orderId: stringValue(value.orderId), roomName: stringValue(value.roomName, "包廂"), startsAt: instant(value.startsAt), endsAt: instant(value.endsAt), segmentCount: numberValue(value.segmentCount, 1), totalAmount: numberValue(value.totalAmount), status: stringValue(value.status), note: stringValue(value.note) };
 }
 
 
@@ -203,7 +212,9 @@ export function AdminRoleOperationsPage({ navigate }: { navigate: Navigate }) {
       const [sessionResult, roomResult, staffResult] = await Promise.allSettled([
         dashboardRole === "designated"
           ? adminRequest(`/designated-order-sessions?businessDate=${encodeURIComponent(businessDate)}`, { signal: controller.signal })
-          : adminApi.getOrderSessions({ businessDate }, controller.signal),
+          : dashboardRole === "service"
+            ? adminRequest(`/service-order-sessions?businessDate=${encodeURIComponent(businessDate)}`, { signal: controller.signal })
+            : adminApi.getOrderSessions({ businessDate }, controller.signal),
         adminApi.getRoomOrders({ businessDate }, controller.signal),
         adminApi.getStaffMembers(controller.signal),
       ]);
@@ -220,15 +231,23 @@ export function AdminRoleOperationsPage({ navigate }: { navigate: Navigate }) {
       if (!Array.isArray(sessionResult.value) || !Array.isArray(staffResult.value)) throw new Error("營業資料格式異常，請重新整理。");
       const sessions = arrayValue(sessionResult.status === "fulfilled" ? sessionResult.value : undefined).map(normalizeSession).filter((item): item is OperationsSession => Boolean(item));
       const staff = staffResult.value.map(normalizeStaffMember).filter((item): item is OperationsStaffMember => Boolean(item));
-      const ordersBySession = await Promise.all(sessions.map(async (session) => {
+      const ordersBySession = dashboardRole === "service" ? [] : await Promise.all(sessions.map(async (session) => {
         const value = await adminApi.getSessionOrders(session.id, controller.signal);
         if (!Array.isArray(value)) throw new Error("顧客訂單資料格式異常，請重新整理。");
         return value.map((item) => normalizeOrder(item, session)).filter((item): item is OperationsOrder => Boolean(item));
       }));
+      const serviceOrders = dashboardRole === "service" ? await adminRequest('/service-orders?' + new URLSearchParams({ businessDate }), { signal: controller.signal }) : null;
+      if (dashboardRole === "service" && !Array.isArray(serviceOrders)) throw new Error("服務員訂單資料格式異常。");
+      const normalizedOrders = Array.isArray(serviceOrders) ? serviceOrders.map((value: unknown) => {
+        if (!isRecord(value)) throw new Error("服務員訂單資料格式異常。");
+        const session = sessions.find((item) => item.id === value.sessionId);
+        if (!session) throw new Error("顧客資料已更新，請重新整理。");
+        return normalizeOrder(value, session);
+      }).filter((order): order is OperationsOrder => Boolean(order)) : ordersBySession.flat();
       const data: OperationsData = {
         context,
         sessions,
-        orders: ordersBySession.flat(),
+        orders: normalizedOrders,
         roomOrders: arrayValue(roomResult.status === "fulfilled" ? roomResult.value : undefined).map(normalizeRoomOrder).filter((item): item is OperationsRoomOrder => Boolean(item)),
         staff,
         dutyPlans: null,

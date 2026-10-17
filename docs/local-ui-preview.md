@@ -54,6 +54,8 @@
 
 後台入口包含 `95-scrollbars.css`，統一整頁、側欄、抽屜與內部清單的捲軸明暗配色。根層規則以 `:root:has(.adminTheme)` 限定後台範圍，預覽時確認離開後台後公開頁面不受影響；桌面側欄的品牌區與帳號工具列固定，中間 `.adminNav` 獨立捲動，捲軸不得碰到外層圓角邊框。窄螢幕側欄仍使用展開式導覽選單。設計基準見[後台 UI 設計規範](admin-ui-design-guidelines.md)。
 
+服務員工作台新增 `96-service-workbench.css`，在捲軸層之後、既有指名工作台樣式之前載入。確認待辦篩選／展開、顧客區、開碼收款區及 760px 單欄規則；靜態產物檢查可用 [service-workbench.json](../scripts/preview-css/service-workbench.json)。此檢查不代表交易、computed styles 或 rendered fonts 已驗證。
+
 交付工作台樣式 `92-delivery-workspace.css` 置於 `91-customers-and-delivery.css` 與 `95-scrollbars.css` 之間；預覽時確認 `.adminDeliveryColumns`、範圍切換、詳情頁籤與共用展開箭頭均包含在後台 bundle。
 
 完整點單管理樣式 `93-orders-workspace.css` 在交付工作台之後、捲軸樣式之前載入。預覽時確認顧客資訊、現場帳款摘要、紀錄與表單樣式包含在 bundle；主要區塊沿用 18px 間距，表單與卡片內部使用緊湊配置。

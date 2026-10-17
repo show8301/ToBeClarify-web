@@ -25,6 +25,8 @@ export type SettlementStaff = {
 };
 
 export type SettlementRun = {
+  inputVersion?: number;
+  calculationVersion?: number;
   id: string;
   businessDate: string;
   sessionNo: number;
@@ -104,6 +106,7 @@ export type AttendanceBackfill = {
 };
 
 export type SettlementStaffInput = {
+  payrollSnapshotVersion?: number | null;
   staffId: string;
   displayName: string;
   roleTitle?: string | null;
@@ -131,7 +134,13 @@ export type SettlementAnomaly = {
   orders?: { orderId: string; orderNumber: string }[] | null;
 };
 
+export type SettlementPayrollAssignment = {
+  staffId: string; displayName: string; payrollRole: string | null; payrollSnapshotVersion: number | null;
+  canUseBackstage: boolean; startedAt: string | null;
+};
+
 export type SettlementOverview = {
+  payrollAssignments?: SettlementPayrollAssignment[];
   run: SettlementRun;
   rule: SettlementRule;
   summary: SettlementSummary;

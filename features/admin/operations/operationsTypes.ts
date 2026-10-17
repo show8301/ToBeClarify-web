@@ -126,6 +126,7 @@ export type OperationsStaffMember = {
   todayShift: string;
   todayWorkMode: StaffDailyWorkMode | null;
   canUseManagerPayrollRole: boolean;
+  canUseBackstage: boolean;
 };
 
 export type OperationsData = {

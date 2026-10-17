@@ -174,10 +174,10 @@ export function TemporaryDutyPlanDialog({ mode, disabledReason = "", staff, cont
         <AdminButton variant="ghost" disabled={busy || services.status === "loading"} onClick={() => { setServices({ status: "loading", items: [], error: "" }); setServiceReload((value) => value + 1); }}>重新核對服務</AdminButton>
       </div>}
       <AdminPayrollRoleField value={payrollRole} onChange={setPayrollRole} required={isWorking}
-        disabled={busy || needsReselect || !isWorking} canUseManagerRole={staff.canUseManagerPayrollRole} />
+        disabled={busy || needsReselect || !isWorking} canUseBackstage={staff.canUseBackstage} canUseManagerRole={staff.canUseManagerPayrollRole} />
       <fieldset className="adminWorkStatusRoles">
         <legend><span className="adminFieldHeading">預排支援工作（可複選）<AdminHelp title="預排支援工作說明">當班支援可以依資格調整，不必修改計薪職位。重新儲存班表會保留已設定的目前支援工作；休假則關閉支援。</AdminHelp></span></legend>
-        <div className="adminWorkStatusOptions">{workRoleOptions.map((option) => <AdminToggle
+        <div className="adminWorkStatusOptions">{workRoleOptions.filter((option) => option.id !== "backstage" || staff.canUseBackstage || roles.includes("backstage")).map((option) => <AdminToggle
           key={option.id}
           label={option.label}
           ariaLabel={`臨時排班預排支援${option.label}`}

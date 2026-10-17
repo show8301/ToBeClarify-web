@@ -2,6 +2,8 @@ export const settlementMoney = (value: number) => Math.ceil(Number(value || 0)).
 
 export const settlementRoles: Record<string, string> = {
   designated: "指名人員",
+  support_service_share: "額外服務分潤",
+  designated_tip: "指定小費",
   champagne_recipient: "香檳塔受贈分潤",
   service: "服務生",
   manager: "經理",

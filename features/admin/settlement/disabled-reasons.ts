@@ -23,7 +23,7 @@ export function getFinalizeDisabledReason(state: FinalizeState): string | undefi
       case "coordination":
         return "請先停止新單並完成關店，再確認正式結算。";
       case "settled":
-        return "本營業日已結算，請確認是否需要重新開放新的營業時段。";
+        return "本營業日已結算，後續差額請使用結算後更正流程。";
       default:
         return "系統尚未允許正式結算，請重新整理營業狀態後確認。";
     }

@@ -1,0 +1,50 @@
+# 單一計薪職位接入結算：實作與發布清單
+
+日期：2026-10-17。狀態：本地實作完成，尚未執行本階段 migration 或部署；資料庫交易與畫面整合仍待驗證。
+
+前階段帳號偏好、支援與通知已發布，Web 正式版本為 `f75ba9cfbd30ec6f6c83b91d1aac2faa3dbb56dc`。本文件描述後續結算變更，不代表已在正式環境生效。
+
+## 已確認規則
+
+- 每人每營業日以開始上班時的單一計薪職位決定主要公式，同班再次打卡沿用原快照。切換工作台、修改支援或之後改班表不改薪。
+- 一般日服務員／經理支援指名，保留該服務者額外直接服務分潤；主要底薪與職位池仍採原擇優公式。額外收入列不新增第二份底薪或小費。
+- 指名主職位沿用原本底薪與本人分潤擇優。活動日沿用活動池與確認的分配時數，不另創一般日分潤，並排除重複時薪及小費。
+- 幕後限目標店員綁定有效 `developer` 帳號。一般店員與僅有經理帳號者不得兼任；操作表單者的開發資格不能替目標人員取得資格。
+- 開發人員合法幕後參與不新增第二份時薪；開始時已核准的幕後參與可自動帶入，人工增修需經結算管理保存。
+- 同一營業日正式結算後，後續差額走結算後更正與補發／追回，不再建立下一時段全日計薪；已存在的其他草稿也不能再次正式結算。
+
+## 本地調整項目
+
+| 範圍 | 已實作行為 |
+| --- | --- |
+| 上班快照 | 新增人員＋營業日快照，保存職位、班表來源、開始時間、當時幕後資格／參與及版本；打卡、自動出勤與已開始班表修改共用鎖定邊界。 |
+| 舊出勤 | migration 僅建立職位未確認標記，不複製目前班表猜測歷史。經理在出勤區確認當時職位並填原因。 |
+| 職位更正 | 保存前後職位、原因、操作者與版本；未結算試算失效。已正式結算的非空職位不可直接改寫。歷史未確認標記仍可補確認，不變更原結算金額。 |
+| 幕後資格 | 班表保存／核准、目前支援、職位確認、結算輸入及通知均檢查目標資格；Web 隱藏不可用選項，舊違規選擇可移除。 |
+| 出勤同步 | 結算僅讀上班快照，不由預排或即時支援推測。未確認職位、舊多主職位衝突、快照版本改變分別提示。 |
+| 保存與核准 | 保存輸入、試算、補打卡核准與正式結算在交易內核對快照；每人一份主要職位輸入，僅開發人員允許額外幕後列。 |
+| 收入與小費 | 額外直接服務分潤另列；公共小費與指定小費各計一次；保留包廂、香檳塔、實收比例及原進位規則。 |
+| 並行更新 | 輸入版本防止過期保存／試算；職位更正、訂單金額調整、補登核准使舊試算失效。 |
+| 正式結算 | 正式結算與營業期鎖定在同一交易完成；同日已結算阻擋新時段、重新開放與既有其他草稿再次正式結算。 |
+| 結算畫面 | 新增輸入只提供凍結主職位與合法幕後；可移除衝突列；補打卡職位固定；個人帳目改為收入項目。保留結算後更正與支付／追回，移除全日重開按鈕。 |
+| 介面規範 | 沿用共用按鈕、AdminHelp、AdminDisclosureSummary、既有表單與樣式；未新增補償字級或間距覆寫。 |
+
+實作位置：API [快照與更正](../../ToBeClarify-api/src/Repositories/Shared/PayrollSnapshotStore.cs)、[結算驗證](../../ToBeClarify-api/src/Repositories/Admin/Settlement/SettlementPayrollValidation.cs)、[交易與持久化](../../ToBeClarify-api/src/Repositories/Admin/Settlement/SettlementRepository.cs)、[薪資公式](../../ToBeClarify-api/src/Services/Admin/Settlement/SettlementService.cs)；Web [出勤](../features/admin/settlement/AttendancePanel.tsx)、[結算入口](../features/admin/settlement/AdminSettlementPage.tsx)、[輸入表](../features/admin/settlement/SettlementStaffInputTable.tsx)。
+
+## Schema 與發布順序
+
+新增 [20261017_02_shift_payroll_snapshots.sql](../../ToBeClarify-api/db/migrations/20261017_02_shift_payroll_snapshots.sql)，採 additive 變更：兩張快照／稽核表、輸入與補登的快照版本、結算計算版本及輸入版本。保留既有正式結算輸入及金額。
+
+1. 在核准資料庫入口執行 migration，核對新增欄位、索引與舊出勤未確認標記。本輪尚未執行。
+2. 驗證 API 交易、並行更正／結算、跨午夜、自動出勤與舊草稿衝突處理。API 無測試主機，發布須按 API `main` 流程安排。
+3. API 新版要求保存輸入帶 `expectedInputVersion`；舊 Web 保存會被拒絕並要求刷新，不能假設無縫向下相容。需協調 API／Web 更新窗口。
+4. Web 本地整合依 [local-ui-preview.md](local-ui-preview.md) 驗證 API、CSS、字型及實際畫面後，累積修改推進 `dev`。使用者確認測試部署後才能由 `dev` → `main` 手動推進。
+5. 舊已結算資料只讀保存結果，不用新引擎重算。結算後差異以既有更正案件與支付紀錄處理。
+
+## 驗證結果與待辦
+
+已通過 API Release build、Web production build、TypeScript 與本次變更範圍 ESLint。API 有 NU1900 警告：受網路限制未能取得 NuGet 弱點索引；沒有停用稽核。
+
+已通過三組本地記憶體回歸：ShiftPayroll（職位公式、額外服務分潤、單次小費、活動幕後與快照驗證）、AttendanceSettlementSync（上班職位帶入、舊資料與衝突）、ChampagneAccounting（香檳塔、折抵、活動池與實收分配守恆）。這些測試不證明 SQL、資料庫鎖定或真實畫面已驗證，也不加入 dev 部署流程。
+
+待驗證：實際 migration、SQL 與交易鎖順序、多人並行操作、歷史資料確認、跨午夜班次、瀏覽器顯示與完整結算操作。本輪沒有 migration、API／Web 部署或薪資資料寫入；未交付本地畫面作為視覺驗收基準。

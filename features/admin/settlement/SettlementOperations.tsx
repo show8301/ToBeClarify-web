@@ -25,13 +25,13 @@ type Props = {
   flowVersion: number;
   onBusyChange: (busy: boolean) => void;
   onAttendanceChanged: () => Promise<boolean>;
+  onRemove: (index: number) => void;
   onAdd: (staffId: string, role: string) => void;
   onInputChange: (index: number, key: keyof SettlementStaffInput, value: unknown) => void;
   onSave: () => Promise<void>;
   onCalculate: () => Promise<void>;
   onClose: () => Promise<void>;
   onFinalize: () => Promise<void>;
-  onReopen: () => Promise<void>;
   onReview: (requestId: string, approved: boolean) => void;
   onViewPerson: (staffId: string) => void;
   children?: ReactNode;
@@ -44,10 +44,10 @@ const steps = [
   { title: "正式結算", description: "確認並鎖定時段" },
 ];
 
-export function SettlementOperations({ overview, inputs, staff, dayType, setDayType, fields, setFields, canManage, active, saving, dirty, flowVersion, onBusyChange, onAttendanceChanged, onAdd, onInputChange, onSave, onCalculate, onClose, onFinalize, onReopen, onReview, onViewPerson, children }: Props) {
+export function SettlementOperations({ overview, inputs, staff, dayType, setDayType, fields, setFields, canManage, active, saving, dirty, flowVersion, onBusyChange, onAttendanceChanged, onRemove, onAdd, onInputChange, onSave, onCalculate, onClose, onFinalize, onReview, onViewPerson, children }: Props) {
   const [step, setStep] = useState(0);
   const [inputsOpen, setInputsOpen] = useState(false);
-  type Action = "close" | "save" | "calculate" | "finalize" | "reopen";
+  type Action = "close" | "save" | "calculate" | "finalize";
   const [pendingAction, setPendingAction] = useState<Action | null>(null);
   const actionLock = useRef<Action | null>(null);
   const { run, summary, workflow, anomalies } = overview;
@@ -134,8 +134,8 @@ export function SettlementOperations({ overview, inputs, staff, dayType, setDayT
       <details className="adminSettlementDisclosure" open={inputsOpen} onToggle={event => setInputsOpen(event.currentTarget.open)}>
         <AdminDisclosureSummary>計薪輸入與人員角色 · {inputs.length} 筆</AdminDisclosureSummary>
         <div className="adminSettlementDisclosureBody">
-        <p className="adminSettlementHint">全天實際分鐘加總後，以半小時為切點計薪。有效出勤會依核准班表自動帶入單一前台角色，幕後參與可同時兼任；保存或重新計算時儲存。若同時擔任多個前台角色，請確認工時分配後保存。公共小費名單由核准出勤資料產生。</p>
-        <SettlementStaffInputTable inputs={inputs} staff={staff} editable={editable} isEvent={dayType === "event"} onAdd={onAdd} onChange={onInputChange} />
+        <p className="adminSettlementHint">有效出勤沿用現有時數換算，依上班開始時鎖定的單一職位計薪。支援不改主要職位公式，額外服務分潤另計；幕後參與僅限開發人員。舊輸入若與鎖定職位衝突，請先核對再移除，保存時保留異動紀錄。</p>
+        <SettlementStaffInputTable inputs={inputs} staff={staff} assignments={overview.payrollAssignments || []} onRemove={onRemove} editable={editable} isEvent={dayType === "event"} onAdd={onAdd} onChange={onInputChange} />
         {canManage && !finalized ? <div className="adminSettlementActionBar"><span>{dirty ? "有尚未保存的結算輸入。" : "核對完成後，在下一步重新計算。"}</span><AdminButton variant="secondary" disabled={saving} onClick={() => void onSave()}>保存結算輸入</AdminButton></div> : null}
       </div></details>
       {navigation}
@@ -192,7 +192,7 @@ export function SettlementOperations({ overview, inputs, staff, dayType, setDayT
         <div className="adminSettlementFinalTotal"><span>本時段應付薪資</span><strong>{money(summary.totalPayroll)} <small>G</small></strong></div>
         <dl className="adminSettlementDefinitionList"><div><dt>營業日期／時段</dt><dd>{run.businessDate} · 第 {run.sessionNo} 時段</dd></div><div><dt>規則版本</dt><dd>{overview.rule.effectiveFrom} 生效</dd></div><div><dt>營業狀態</dt><dd>{period ? settlementPeriodStatuses[period] || period : "由系統檢查"}</dd></div><div><dt>結算異常</dt><dd>{anomalies.length ? `${anomalies.length} 項待處理` : "無結算異常"}</dd></div><div><dt>計算狀態</dt><dd>{settlementStatuses[run.status] || run.status}</dd></div></dl>
         {!finalized && finalizeReason ? <p id="settlement-finalize-reason" className="adminSettlementInlineWarning" role="status">{finalizeReason}</p> : null}
-        {canManage ? <div className="adminSettlementActionBar"><span>{finalized ? "若繼續營業，可建立新的營業時段。" : "正式結算後，本時段輸入會鎖定。"}</span>{finalized ? <AdminButton variant="secondary" busy={pendingAction === "reopen"} busyLabel="重新開放中…" disabled={saving} onClick={() => void runAction("reopen", onReopen)}>重新開放新時段</AdminButton> : <AdminButton busy={pendingAction === "finalize"} busyLabel="結算中…" disabledReason={finalizeReason} aria-describedby={finalizeReason ? "settlement-finalize-reason" : undefined} disabled={!canFinalize} onClick={() => void runAction("finalize", onFinalize)}>確認正式結算</AdminButton>}</div> : null}
+        {canManage ? <div className="adminSettlementActionBar"><span>{finalized ? "後續差額請使用下方結算後更正流程，不再重新全日計薪。" : "正式結算後，本時段輸入會鎖定。"}</span>{!finalized ? <AdminButton busy={pendingAction === "finalize"} busyLabel="結算中…" disabledReason={finalizeReason} aria-describedby={finalizeReason ? "settlement-finalize-reason" : undefined} disabled={!canFinalize} onClick={() => void runAction("finalize", onFinalize)}>確認正式結算</AdminButton> : null}</div> : null}
       </AdminPanel>
       {finalized && canManage ? children : null}
       {navigation}

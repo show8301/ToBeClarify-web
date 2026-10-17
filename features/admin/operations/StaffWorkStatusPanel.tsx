@@ -84,7 +84,7 @@ export function StaffWorkStatusPanel({ staff, disabled, onChanged }: Props) {
     <div className="adminWorkStatusSummary">
       <strong>營業日 {mode?.businessDate || "尚無資料"} · {staff.isWorkingToday ? "執勤中" : "未執勤"}</strong>
       <span>核准班次：{staff.todayShift || "無核准上班時段"}</span>
-      <span className="adminFieldHeading">本班計薪職位：{payrollRoleLabel(mode?.payrollRole || null)}<AdminHelp title="計薪職位與支援工作">本班計薪職位由值班規劃提報並經理核准。此處僅調整接單及支援工作，不會改變計薪職位、打卡或帳號權限。</AdminHelp></span>
+      <span className="adminFieldHeading">本班計薪職位：{payrollRoleLabel(mode?.payrollRole || null)}<AdminHelp title="計薪職位與支援工作">本班計薪職位由值班規劃提報並經理核准，開始上班時鎖定。幕後工作僅限開發人員。此處僅調整接單及支援工作，不會改變計薪職位、打卡或帳號權限。</AdminHelp></span>
     </div>
     <div className="adminWorkStatusIntake">
       <div className="adminFieldHeading">
@@ -102,7 +102,7 @@ export function StaffWorkStatusPanel({ staff, disabled, onChanged }: Props) {
     <fieldset className="adminWorkStatusRoles">
       <legend><span className="adminFieldHeading">目前支援工作<AdminHelp title="目前支援工作說明">支援工作可複選，控制當班職位廣播受眾，不受單一計薪職位限制。只能在核准班次時段內調整；指名支援仍須具備開放指名資格。</AdminHelp></span></legend>
       <div className="adminWorkStatusOptions">
-        {workRoleOptions.map((option) => {
+        {workRoleOptions.filter((option) => option.id !== "backstage" || staff.canUseBackstage || mode?.activeRoles.includes("backstage")).map((option) => {
           const allowed = mode?.allowedSupportRoles.includes(option.id) === true;
           const enabled = mode?.activeRoles.includes(option.id) === true;
           return <div className="adminWorkStatusOption" key={option.id}>

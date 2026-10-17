@@ -29,5 +29,5 @@ export function normalizeStaffMember(value: unknown): OperationsStaffMember | nu
   const id = stringValue(value.id);
   if (!id) return null;
   const workMode = parseStaffDailyWorkMode(value);
-  return { id, displayName: stringValue(value.displayName, "未命名店員"), roleTitle: stringValue(value.roleTitle), statusText: stringValue(value.statusText), isWorkingToday: booleanValue(value.isWorkingToday, false), isActive: booleanValue(value.isActive, true), todayShift: stringValue(value.todayShift), todayWorkMode: workMode, canUseManagerPayrollRole: booleanValue(value.canUseManagerPayrollRole, false) };
+  return { id, displayName: stringValue(value.displayName, "未命名店員"), roleTitle: stringValue(value.roleTitle), statusText: stringValue(value.statusText), isWorkingToday: booleanValue(value.isWorkingToday, false), isActive: booleanValue(value.isActive, true), todayShift: stringValue(value.todayShift), todayWorkMode: workMode, canUseManagerPayrollRole: booleanValue(value.canUseManagerPayrollRole, false), canUseBackstage: booleanValue(value.canUseBackstage, false) };
 }

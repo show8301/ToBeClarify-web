@@ -1,3 +1,5 @@
+import type { PayrollRole } from "../shared/workRoles";
+
 export type DashboardRole = "designated" | "service" | "manager" | "developer";
 
 export type CurrentAdminUser = {
@@ -110,6 +112,8 @@ export type StaffDailyWorkMode = {
   stopAcceptingNewOrders: boolean;
   scheduledRoles: WorkRole[];
   activeRoles: WorkRole[];
+  payrollRole: PayrollRole | null;
+  allowedSupportRoles: WorkRole[];
 };
 
 export type OperationsStaffMember = {
@@ -121,6 +125,7 @@ export type OperationsStaffMember = {
   isActive: boolean;
   todayShift: string;
   todayWorkMode: StaffDailyWorkMode | null;
+  canUseManagerPayrollRole: boolean;
 };
 
 export type OperationsData = {
@@ -144,6 +149,7 @@ export type OperationsDutyPlan = {
   endTime: string | null;
   scheduledRoles: WorkRole[];
   approvalStatus: "pending" | "approved" | "rejected";
+  payrollRole: PayrollRole | null;
   startsAt: string | null;
   endsAt: string | null;
   submittedAt: string;

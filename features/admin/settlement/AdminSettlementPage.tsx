@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { SettlementBackfillReview, SettlementOverview, SettlementRule, SettlementRunFields, SettlementStaff, SettlementStaffInput, SettlementTab } from "./types";
 import { getAdminBusinessDate } from "@/features/admin/shared/businessDay";
 import { adminApi, adminRequest } from "@/features/admin/api/client.js";
-import { useAdminAuth } from "@/features/admin/auth/AdminAuthContext.jsx";
+import { useAdminAuth } from "@/features/admin/auth/AdminAuthContext";
 import { AdminButton, AdminField, AdminPage, AdminPanel, AdminState } from "@/features/admin/shared/AdminShared.jsx";
 import { AttendancePanel } from "./AttendancePanel";
 import { SettlementTabs } from "./SettlementTabs";

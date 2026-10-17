@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { adminApi, ApiError } from '@/features/admin/api/client.js';
-import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext.jsx';
+import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext';
 import { AdminButton, AdminDialog } from '@/features/admin/shared/AdminShared.jsx';
 
 export function AdminLoginPage({ navigate }) {

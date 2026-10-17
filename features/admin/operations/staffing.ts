@@ -1,5 +1,6 @@
 import { isRecord, formatDateTime } from "./operationsFormat";
 import type { OperationsDutyPlan, OperationsOrder, OperationsStaffMember, WorkRole } from "./operationsTypes";
+import { isPayrollRole } from "@/features/admin/shared/workRoles";
 
 const datePattern = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -15,7 +16,8 @@ export function parseDutyPlan(value: unknown): OperationsDutyPlan | null {
     || typeof value.isWorking !== "boolean"
     || (value.approvalStatus !== "approved" && value.approvalStatus !== "pending" && value.approvalStatus !== "rejected")
     || !Array.isArray(value.scheduledRoles)
-    || !value.scheduledRoles.every((role): role is WorkRole => role === "service" || role === "designated" || role === "backstage")) return null;
+    || !value.scheduledRoles.every((role): role is WorkRole => role === "service" || role === "designated" || role === "backstage")
+    || (value.payrollRole != null && !isPayrollRole(value.payrollRole))) return null;
   const startsAt = nullableString(value.startsAt);
   const endsAt = nullableString(value.endsAt);
   if ((startsAt && !Number.isFinite(Date.parse(startsAt))) || (endsAt && !Number.isFinite(Date.parse(endsAt)))) return null;
@@ -27,6 +29,7 @@ export function parseDutyPlan(value: unknown): OperationsDutyPlan | null {
     isWorking: value.isWorking,
     approvalStatus: value.approvalStatus,
     scheduledRoles: [...value.scheduledRoles],
+    payrollRole: isPayrollRole(value.payrollRole) ? value.payrollRole : null,
     startTime: nullableString(value.startTime),
     endTime: nullableString(value.endTime),
     startsAt,
@@ -54,7 +57,7 @@ export function isApprovedShift(plan: OperationsDutyPlan): boolean {
 
 export function dutyPlanRevision(plan: OperationsDutyPlan | null): string {
   return plan ? JSON.stringify([plan.id, plan.approvalStatus, plan.isWorking, plan.startTime, plan.endTime,
-    [...plan.scheduledRoles].sort(), plan.submittedAt, plan.approvedAt]) : "";
+    [...plan.scheduledRoles].sort(), plan.payrollRole, plan.submittedAt, plan.approvedAt]) : "";
 }
 
 export function shiftText(plan: OperationsDutyPlan): string {

@@ -56,7 +56,7 @@ export function AdminManagerDashboard({ data, user, navigate, actionState, onOpe
     <div className="managerColumns">
       <div className="managerControlStack">
         <div id="manager-business">{context && <ManagerBusinessPanel key={date} context={context} settings={settings} disabled={disabled} onAction={openBusinessAction} onChanged={change} />}</div>
-        <ManagerBroadcastPanel staff={data.staff} disabled={disabled} navigate={navigate} />
+        <ManagerBroadcastPanel disabled={disabled} navigate={navigate} />
         <ManagerRoomsPanel data={data} disabled={disabled} navigate={navigate} onCreate={onOpenCreateRoomService} />
       </div>
       <ManagerStaffingPanel key={`${user?.id || ""}:${user?.role || ""}`} blockedReason={staffingBlockedReason} onChanged={change} navigate={navigate} />

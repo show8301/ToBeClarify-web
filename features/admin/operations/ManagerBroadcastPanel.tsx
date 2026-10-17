@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { notificationRequest, NotificationApiError } from "@/features/admin/notifications/api";
 import type { BroadcastSendRequest, BroadcastReceiptSummary } from "@/features/admin/notifications/types";
 import { AdminButton, AdminDialog, AdminField, AdminPanel, AdminToggle } from "@/features/admin/shared/AdminShared.jsx";
+import { AdminHelp } from "@/features/admin/shared/AdminHelp";
 import { errorText, integer, list, record, textValue } from "./workbenchApi";
-import type { OperationsStaffMember } from "./operationsTypes";
 
 type Sound = { id: string; name: string };
 function parseReceipt(value: unknown): BroadcastReceiptSummary {
@@ -15,7 +15,7 @@ function parseReceipt(value: unknown): BroadcastReceiptSummary {
     expiredUnacknowledgedCount: integer(r.expiredUnacknowledgedCount), withdrawnCount: integer(r.withdrawnCount) };
 }
 
-export function ManagerBroadcastPanel({ staff, disabled, navigate }: { staff: OperationsStaffMember[]; disabled: boolean; navigate: (route: string) => void }) {
+export function ManagerBroadcastPanel({ disabled, navigate }: { disabled: boolean; navigate: (route: string) => void }) {
   const [open, setOpen] = useState(false);
   const [sounds, setSounds] = useState<Sound[]>([]);
   const [ready, setReady] = useState(false);
@@ -24,9 +24,7 @@ export function ManagerBroadcastPanel({ staff, disabled, navigate }: { staff: Op
   const [message, setMessage] = useState("");
   const [reason, setReason] = useState("");
   const [soundId, setSoundId] = useState("");
-  const [audience, setAudience] = useState<BroadcastSendRequest["audienceMode"]>("working_today");
-  const [staffIds, setStaffIds] = useState<string[]>([]);
-  const [roleIds, setRoleIds] = useState<string[]>([]);
+  const [audience, setAudience] = useState<"all" | "working_today">("working_today");
   const [emergency, setEmergency] = useState(false);
   const [requiresAck, setRequiresAck] = useState(false);
   const [expires, setExpires] = useState(15);
@@ -56,13 +54,14 @@ export function ManagerBroadcastPanel({ staff, disabled, navigate }: { staff: Op
 
   const send = async () => {
     if (lock.current || disabled || !ready) return;
-    if (emergency && !pending.current && !window.confirm("緊急廣播將通知所有有效後台帳號，要求逐人確認。確定發送？")) return;
+    const audienceLabel = audience === "working_today" ? "目前上班人員" : "全店人員";
+    if (emergency && !pending.current && !window.confirm(`緊急廣播將通知${audienceLabel}，要求逐人確認。確定發送？`)) return;
     lock.current = true; setBusy(true); setError("");
     const controller = new AbortController(); request.current = controller;
     try {
       pending.current ??= { idempotencyKey: crypto.randomUUID(), title: title.trim(), message: message.trim(), reason: reason.trim(),
-        audienceMode: emergency ? "all" : audience, audienceStaffIds: !emergency && audience === "staff" ? staffIds : [],
-        audienceRoles: !emergency && audience === "roles" ? roleIds : [], priority: emergency ? "high" : "normal", expiresAfterMinutes: expires,
+        audienceMode: audience, audienceStaffIds: [],
+        audienceRoles: [], priority: emergency ? "high" : "normal", expiresAfterMinutes: expires,
         soundId, action: "open_notifications", requiresAck: emergency || requiresAck, emergency };
       const result = record(await notificationRequest<unknown>("/broadcasts/send", pending.current, { method: "POST", signal: controller.signal }));
       const id = textValue(result.broadcastId), count = integer(result.recipientCount);
@@ -81,8 +80,8 @@ export function ManagerBroadcastPanel({ staff, disabled, navigate }: { staff: Op
     lock.current = true; setBusy(true); setError("");
     const controller = new AbortController(); request.current = controller;
     try {
-      if (withdraw) await notificationRequest(`/broadcasts/${encodeURIComponent(broadcastId)}/withdraw`, {}, { method: "POST", signal: controller.signal });
-      const next = parseReceipt(await notificationRequest<unknown>(`/broadcasts/${encodeURIComponent(broadcastId)}/receipts`, undefined, { signal: controller.signal }));
+      if (withdraw) await notificationRequest("/broadcasts/withdraw", { broadcastId }, { method: "POST", signal: controller.signal });
+      const next = parseReceipt(await notificationRequest<unknown>(`/broadcasts/receipts?broadcastId=${encodeURIComponent(broadcastId)}`, undefined, { signal: controller.signal }));
       if (next.broadcastId !== broadcastId) throw new Error("廣播確認進度與查詢不符。");
       setReceipt(next);
       if (withdraw) setFeedback("廣播已撤回。");
@@ -91,24 +90,21 @@ export function ManagerBroadcastPanel({ staff, disabled, navigate }: { staff: Op
   };
 
   const invalid = !title.trim() || !message.trim() || !soundId || emergency && !reason.trim()
-    || !Number.isInteger(expires) || expires < 1 || expires > 1440
-    || !emergency && (audience === "staff" && !staffIds.length || audience === "roles" && !roleIds.length);
-  return <AdminPanel className="managerBroadcastPanel" title="店內廣播" description="快速通知當班人員；緊急廣播要求所有收件者逐人確認。" actions={<><AdminButton disabled={disabled || busy} onClick={() => { setError(""); setReady(false); setOpen(true); }}>發送廣播</AdminButton><AdminButton variant="ghost" onClick={() => navigate("/admin/notifications")}>通知中心</AdminButton></>}>
+    || !Number.isInteger(expires) || expires < 1 || expires > 1440;
+  return <AdminPanel className="managerBroadcastPanel" title={<span className="adminFieldHeading">店內廣播<AdminHelp title="店內廣播說明">可選擇通知全店人員或送出當下的上班人員；需要逐人確認時預設選上班人員。緊急廣播要求每位收件者按「已知道」。</AdminHelp></span>} actions={<><AdminButton disabled={disabled || busy} onClick={() => { setError(""); setReady(false); setOpen(true); }}>發送廣播</AdminButton><AdminButton variant="ghost" onClick={() => navigate("/admin/notifications")}>通知中心</AdminButton></>}>
     {feedback && <p role="status">{feedback}</p>}
     {broadcastId ? <div className="managerBroadcastReceipt"><div className="adminRoleDashboardQuickLinks"><AdminButton variant="secondary" disabled={busy || disabled} onClick={() => void inspect()}>查詢確認進度</AdminButton><AdminButton variant="danger" disabled={busy || disabled} onClick={() => void inspect(true)}>撤回最近廣播</AdminButton></div>
       {receipt && <p>收件 {receipt.recipientCount} · 已讀 {receipt.readCount} · 已知道 {receipt.acknowledgedCount} · 待確認 {receipt.pendingAcknowledgementCount} · 到期未確認 {receipt.expiredUnacknowledgedCount} · 撤回 {receipt.withdrawnCount}</p>}</div> : <p className="managerHint">尚未從本工作台發送廣播。</p>}
     {!open && error && <p className="adminFormError" role="alert">{error}</p>}
-    <AdminDialog open={open} title="快速店內廣播" description="收件人依送出時的帳號與當班職位決定。" onClose={() => { if (!lock.current) { setOpen(false); setReady(false); } }} actions={null}>
+    <AdminDialog open={open} title="快速店內廣播" description="上班人員依送出當下的核准班次判定；全店人員包含所有有效後台帳號。" onClose={() => { if (!lock.current) { setOpen(false); setReady(false); } }} actions={null}>
       <form className="managerForm" onSubmit={(event) => { event.preventDefault(); void send(); }}>
         <fieldset className="managerFieldset managerForm" disabled={busy || retrying}>
           <AdminField label="標題" required><input required maxLength={120} value={title} onChange={(e) => setTitle(e.target.value)} /></AdminField>
           <AdminField label="內容" required><textarea required rows={4} maxLength={2000} value={message} onChange={(e) => setMessage(e.target.value)} /></AdminField>
-          <AdminToggle label="緊急廣播（全員逐人確認）" ariaLabel="緊急廣播全員逐人確認" checked={emergency} onChange={setEmergency} />
+          <AdminField label="通知對象"><select value={audience} onChange={(e) => { if (e.target.value === "all" || e.target.value === "working_today") setAudience(e.target.value); }}><option value="working_today">上班人員</option><option value="all">全店人員</option></select></AdminField>
+          <AdminToggle label="緊急廣播（需逐人確認）" ariaLabel="緊急廣播需逐人確認" checked={emergency} onChange={(checked: boolean) => { setEmergency(checked); if (checked) setAudience("working_today"); }} />
           {emergency ? <AdminField label="緊急原因" required><textarea required maxLength={500} value={reason} onChange={(e) => setReason(e.target.value)} /></AdminField> : <>
-            <AdminField label="廣播受眾"><select value={audience} onChange={(e) => { const v = e.target.value; if (v === "all" || v === "working_today" || v === "roles" || v === "staff") setAudience(v); }}><option value="working_today">今日上班店員</option><option value="all">所有有效後台帳號</option><option value="roles">指定當班職位</option><option value="staff">指定店員</option></select></AdminField>
-            {audience === "staff" && <AdminField label="指定店員"><select multiple value={staffIds} onChange={(e) => setStaffIds(Array.from(e.target.selectedOptions, (o) => o.value))}>{staff.map((s) => <option key={s.id} value={s.id}>{s.displayName}</option>)}</select></AdminField>}
-            {audience === "roles" && <AdminField label="指定職位"><select multiple value={roleIds} onChange={(e) => setRoleIds(Array.from(e.target.selectedOptions, (o) => o.value))}><option value="service">服務生</option><option value="designated">指名人員</option><option value="backstage">幕後</option></select></AdminField>}
-            <AdminToggle label="要求收件者按已知道" ariaLabel="要求廣播收件者按已知道" checked={requiresAck} onChange={setRequiresAck} />
+            <AdminToggle label="要求收件者按已知道" ariaLabel="要求廣播收件者按已知道" checked={requiresAck} onChange={(checked: boolean) => { setRequiresAck(checked); if (checked) setAudience("working_today"); }} />
           </>}
           <div className="managerTwoColumns"><AdminField label="有效期（分鐘）"><input type="number" required min={1} max={1440} step={1} value={expires} onChange={(e) => setExpires(Number(e.target.value))} /></AdminField><AdminField label="系統音效" required><select required value={soundId} onChange={(e) => setSoundId(e.target.value)}><option value="">選擇系統音效</option>{sounds.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select></AdminField></div>
         </fieldset>

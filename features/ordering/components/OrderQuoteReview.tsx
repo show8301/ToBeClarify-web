@@ -9,13 +9,11 @@ export type OrderQuote = {
   rules:{id:string;title:string;description:string;priceText:string|null}[];
 };
 const money=(value:number)=>`${value.toLocaleString('zh-TW')} Gil`;
-const demoRuleDescription = "第一版價格為 demo mock data，正式營運前可由後台或 API 維護。";
 export function OrderQuoteReview({quote,loading,onConfirm,onRefresh}:{quote:OrderQuote;loading:boolean;onConfirm:()=>void;onRefresh:()=>void}){
   const [now,setNow]=useState(()=>Date.now());
   useEffect(()=>{const timer=setInterval(()=>setNow(Date.now()),1000);return()=>clearInterval(timer);},[]);
   const expired=now>=new Date(quote.expiresAt).getTime();
-  return <section id="order-quote-review" className="orderQuoteReview" aria-label="正式報價確認"><h2>確認本次金額與消費規則</h2>
-    {quote.rules.map(rule=><article key={rule.id}><h3>{rule.title}</h3>{rule.description && rule.description.trim() !== demoRuleDescription ? <p>{rule.description}</p> : null}<strong>{rule.priceText}</strong></article>)}
+  return <section id="order-quote-review" className="orderQuoteReview" aria-label="正式報價確認"><h2>確認本次金額</h2>
     <dl>{quote.charges.map((line,index)=><div key={index}><dt>{line.name} × {line.quantity}</dt><dd>{money(line.lineTotal)}</dd></div>)}</dl>
     {quote.lines.filter(line => line.eventCategories?.includes("champagne_tower")).map((line,index) => <p key={`recipient:${index}`}><span className="orderQuoteItemName">{line.name} × {line.quantity}</span> · 贈送：{line.recipientStaffName || "店家"} · 實際折抵以本次報價為準</p>)}
     {quote.lines.filter(line=>line.components.length>0).map((line,index)=><details key={`${line.referenceId}:${index}`} open><summary>{line.name} × {line.quantity} 的完整內容</summary><ul>{line.components.map((item,i)=><li key={`${item.menuItemId}:${i}`}>{item.itemName} × {item.quantity}</li>)}</ul></details>)}

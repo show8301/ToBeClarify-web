@@ -5,19 +5,29 @@ import { adminApi, adminRequest } from "@/features/admin/api/client.js";
 import { AdminButton, AdminField } from "@/features/admin/shared/AdminShared.jsx";
 import { formatClock } from "./operationsFormat";
 import { errorText, fulfillmentPath, list, record, textValue, workbenchApi } from "./workbenchApi";
+import { unitProgressLabel } from "./workbenchOrderProgress";
 import type { StartPreview, WorkbenchUnit } from "./workbenchApi";
 import type { OperationsNominee, OperationsOrder } from "./operationsTypes";
 
 export type ServiceEntry = { order: OperationsOrder; nominee: OperationsNominee; unit: WorkbenchUnit | null; status: string };
 export type ServiceAction = "accept" | "decline" | "start" | "start_now" | "complete" | "cancel" | "reschedule" | "backfill" | "carry_forward" | "shorten";
 export const serviceActionLabels: Record<ServiceAction, string> = {
-  accept: "確認承接", decline: "無法承接", start_now: "開始服務", complete: "完成服務",
+  accept: "承接此指名", decline: "無法承接", start_now: "開始此指名", complete: "完成此指名",
   cancel: "取消未服務項目", reschedule: "調整時間", backfill: "補登已服務", carry_forward: "保留／轉入新營業期", shorten: "縮短未開始服務",
   start: "開始加購服務",
 };
 
-export function WorkbenchServiceDialog({ entry, action, onSaved, onBusy }: {
-  entry: ServiceEntry; action: ServiceAction; onSaved: () => Promise<void>; onBusy: (busy: boolean) => void;
+export function serviceActionLabel(action: ServiceAction, kind?: string) {
+  if (kind === "addon") {
+    if (action === "accept") return "承接此加購";
+    if (action === "complete") return "完成此加購";
+    if (action === "start" || action === "start_now") return "開始此加購";
+  }
+  return serviceActionLabels[action];
+}
+
+export function WorkbenchServiceDialog({ entry, action, orderUnits, onSaved, onBusy }: {
+  entry: ServiceEntry; action: ServiceAction; orderUnits?: WorkbenchUnit[]; onSaved: () => Promise<void>; onBusy: (busy: boolean) => void;
 }) {
   const { order, nominee, unit } = entry;
   const [reason, setReason] = useState("");
@@ -97,6 +107,11 @@ export function WorkbenchServiceDialog({ entry, action, onSaved, onBusy }: {
   };
   return <form className="dwForm" onSubmit={(e) => { e.preventDefault(); void save(); }}>
     <p className="dwHint">{order.customerName} · {nominee.serviceName} · {formatClock(unit?.scheduledStartsAt || nominee.requestedStartsAt)}–{formatClock(unit?.scheduledEndsAt || nominee.requestedServiceEndsAt)}</p>
+    <section className="dwServiceOrderContext" aria-label="同單內容與本次操作範圍">
+      <h4>本次處理：{unit?.kind === "addon" ? "此加購服務" : "此指名服務"}</h4>
+      <p>同單內容 · {order.orderNumber}</p>
+      <ul>{orderUnits?.length ? orderUnits.map((other) => <li key={other.id} className={other.id === unit?.id ? "isTarget" : undefined}><span>{other.name} × {other.quantity}{other.id === unit?.id ? "（本次處理）" : ""}</span><strong>{unitProgressLabel(other)}</strong></li>) : order.items?.map((item, index) => <li key={item.id || `${item.name}-${index}`}><span>{item.name} × {item.quantity}</span></li>)}</ul>
+    </section>
     {action === "decline" && <p className="dwNotice">這筆指名交回經理協調。顧客訂單、餐點及金額會保留。</p>}
     {early && <p className="dwNotice">目前尚未到預定結束時間。提早完成需填寫原因，金額不會自動減少。</p>}
     {action === "start_now" && !prepared && <p role="status">讀取現在接待的時間與衝突…</p>}
@@ -114,6 +129,6 @@ export function WorkbenchServiceDialog({ entry, action, onSaved, onBusy }: {
       {(requiredReason || action === "complete") && <AdminField label="原因" required={requiredReason}><textarea rows={3} maxLength={500} required={requiredReason} value={reason} onChange={(e) => setReason(e.target.value)} /></AdminField>}
     </fieldset>
     {error && <p className="adminFormError" role="alert">{error}</p>}
-    <AdminButton type="submit" busy={busy} disabledReason={!prepared ? "正在讀取接待預覽。" : preview?.canStartNow === false ? "仍有其他服務進行中，請先完成該服務。" : !retrying && requiredReason && !reason.trim() ? "請先填寫操作原因。" : undefined} disabled={busy || !prepared || preview?.canStartNow === false || !retrying && requiredReason && !reason.trim()}>{busy ? "處理中…" : retrying ? "查回／重試同一筆操作" : serviceActionLabels[action]}</AdminButton>
+    <AdminButton type="submit" busy={busy} disabledReason={!prepared ? "正在讀取接待預覽。" : preview?.canStartNow === false ? "仍有其他服務進行中，請先完成該服務。" : !retrying && requiredReason && !reason.trim() ? "請先填寫操作原因。" : undefined} disabled={busy || !prepared || preview?.canStartNow === false || !retrying && requiredReason && !reason.trim()}>{busy ? "處理中…" : retrying ? "查回／重試同一筆操作" : serviceActionLabel(action, unit?.kind)}</AdminButton>
   </form>;
 }

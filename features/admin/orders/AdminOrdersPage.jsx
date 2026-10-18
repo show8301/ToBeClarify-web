@@ -18,6 +18,7 @@ import { CreateSessionPanel } from './CreateSessionPanel';
 import { CustomerPane } from './CustomerPane';
 import { OrderCustomerDetails } from './OrderCustomerDetails';
 import { OrderDisclosure } from './OrderDisclosure';
+import { StoreConfirmationPanel } from './StoreConfirmationPanel';
 import { AdmissionFeeSettings } from './AdmissionFeeSettings';
 import { orderStatusLabels as labels } from './order-presentation';
 
@@ -235,20 +236,24 @@ function AdminFulfillmentOrderCard({ order, user, loading, canManage, act, onCha
   const [progress, setProgress] = useState({ kind: "loading" });
   const [note, setNote] = useState(order.customerNote || '');
   const [location, setLocation] = useState(order.customerLocation || '');
+  const storePending = order.storeConfirmationStatus === 'pending' && order.status !== 'cancelled';
   useEffect(() => { setNote(order.customerNote || ''); setLocation(order.customerLocation || ''); }, [order.customerNote, order.customerLocation]);
   return <OrderDisclosure orderNumber={order.orderNumber} status={order.status} amount={order.totalAmount} submittedAt={order.submittedAt}
-    storePending={order.storeConfirmationStatus === 'pending'} progress={progress}>
+    storePending={storePending} progress={progress}>
     <OrderCustomerDetails location={location} note={note} loading={loading} onLocationChange={setLocation} onNoteChange={setNote}
       onSave={() => act(() => adminApi.updateOrder(order.id, { customerNote: note, customerLocation: location }), '顧客位置與備註已更新。')} />
-    <OrderFulfillmentPanel orderId={order.id} onChanged={onChanged} onProgressChange={setProgress} refreshKey={`${order.status}:${order.totalAmount}:${order.fulfillment?.map((unit) => `${unit.id}:${unit.version}`).join("|") || ""}`} />
-    {order.nominees.filter(n => n.confirmationStatus === "confirmed" && (canManage || n.staffId === user.staffMemberId)).map(n => <AdminAddonComposer key={n.id} nominee={n} loading={loading} act={act} />)}
+    {storePending ? <StoreConfirmationPanel reasonId={`store-confirmation-reason-${order.id}`} loading={loading}
+      onApprove={() => act(() => adminApi.decideStoreConfirmation(order.id, 'approved', '現場確認可承接'), '已接受協調單。')}
+      onReject={(reason) => act(() => adminApi.decideStoreConfirmation(order.id, 'rejected', reason), '已拒絕協調單並退回本單餐點信物折抵。')} /> : null}
+    {storePending ? <p className="adminFulfillmentNotice" role="status">尚待店家承接；可先取消未服務項目，其他服務操作請先接受協調單。</p> : null}
+    <OrderFulfillmentPanel orderId={order.id} disabled={loading} storeConfirmationPending={storePending} onChanged={onChanged} onProgressChange={setProgress} refreshKey={`${order.status}:${order.totalAmount}:${order.fulfillment?.map((unit) => `${unit.id}:${unit.version}`).join("|") || ""}`} />
+    {!storePending && order.nominees.filter(n => n.confirmationStatus === "confirmed" && (canManage || n.staffId === user.staffMemberId)).map(n => <AdminAddonComposer key={n.id} nominee={n} loading={loading} act={act} />)}
   </OrderDisclosure>;
 }
 
 function AdminOrderCard({ order, user, loading, act }) {
   const [note, setNote] = useState(order.internalNote || '');
   const [transitionReason, setTransitionReason] = useState('');
-  const [storeDecisionReason, setStoreDecisionReason] = useState('');
   const [startsAt, setStartsAt] = useState(localDateTimeValue(order.nominees?.[0]?.requestedStartsAt));
   const [backfillMode, setBackfillMode] = useState('');
   const [backfillStartsAt, setBackfillStartsAt] = useState(localDateTimeValue(order.startedAt) || localDateTimeValue(order.nominees?.[0]?.requestedStartsAt));
@@ -276,7 +281,9 @@ function AdminOrderCard({ order, user, loading, act }) {
     storePending={order.storeConfirmationStatus === 'pending'}><div className="adminOrderCardBody">
      {order.orderKind === 'service_addon' && <p>附掛加購服務單</p>}
      {queueDetails && <p>{queueDetails}</p>}
-     {order.storeConfirmationStatus === 'pending' ? <div className="adminStoreConfirmation"><div><strong>關店時段協調單</strong><p>顧客已送出，但尚未成立。接受後，餐點／小費直接成立；指名與加購仍需被指名店員確認。</p></div><label>拒絕原因<input value={storeDecisionReason} maxLength="500" placeholder="拒絕時必填" onChange={(event) => setStoreDecisionReason(event.target.value)} /></label><div><AdminButton disabled={loading} onClick={() => act(() => adminApi.decideStoreConfirmation(order.id, 'approved', '現場確認可承接'), '已接受協調單。')}>接受協調單</AdminButton><AdminButton variant="danger" disabled={loading || !storeDecisionReason.trim()} onClick={() => act(() => adminApi.decideStoreConfirmation(order.id, 'rejected', storeDecisionReason.trim()), '已拒絕協調單並退回本單餐點信物折抵。')}>拒絕協調單</AdminButton></div></div> : null}
+     {order.storeConfirmationStatus === 'pending' ? <StoreConfirmationPanel reasonId={`store-confirmation-reason-${order.id}`} loading={loading}
+       onApprove={() => act(() => adminApi.decideStoreConfirmation(order.id, 'approved', '現場確認可承接'), '已接受協調單。')}
+       onReject={(reason) => act(() => adminApi.decideStoreConfirmation(order.id, 'rejected', reason), '已拒絕協調單並退回本單餐點信物折抵。')} /> : null}
      <div className="adminOrderItemList">{order.items.map((item) => <AdminOrderItemRow key={item.id} orderId={order.id} item={item} loading={loading} act={act} />)}</div>
      {order.addons?.length ? <div className="adminAddonSummary">{order.addons.map((item) => <article key={item.id}><span>ADD-ON · {labels[item.status] || item.status}</span><strong>{item.staffName}｜{item.serviceName}</strong><small>{item.serviceDurationMinutes} 分鐘 · {item.participantCount} 人 · 附掛於既有指名，不新增基礎費與忙碌區段</small></article>)}</div> : null}
       {order.nominees?.length ? <div className="adminNomineeGrid">{order.nominees.map((item) => <article key={item.id}><span>{item.confirmationStatus}</span><strong>{item.staffName}</strong><p>{item.serviceName} · {item.segmentCount} 節</p><small>{new Date(item.requestedStartsAt).toLocaleString('zh-TW')} ～ {new Date(item.busyUntil).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}</small><NominationShortenControl orderId={order.id} orderStatus={order.status} item={item} loading={loading} act={act} />{['confirmed', 'in_service'].includes(order.status) && new Date(item.requestedServiceEndsAt).getTime() > Date.now() && (item.staffId === user.staffMemberId || canManageAddons) ? <AdminAddonComposer nominee={item} loading={loading} act={act} /> : null}</article>)}</div> : null}

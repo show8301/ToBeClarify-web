@@ -28,6 +28,8 @@ export function customerProgress(value: unknown, expectedCount: number): Custome
     if (!entry || typeof entry !== "object" || !("status" in entry) || typeof entry.status !== "string") {
       throw new Error("訂單狀態格式異常。");
     }
+    // Cancellation preserves the original store decision for audit history.
+    if (entry.status === "cancelled") continue;
     if (["waiting", "submitted", "partially_confirmed", "needs_reschedule"].includes(entry.status)
       || "storeConfirmationStatus" in entry && entry.storeConfirmationStatus === "pending") attention++;
     else if (["confirmed", "in_service"].includes(entry.status)) active++;

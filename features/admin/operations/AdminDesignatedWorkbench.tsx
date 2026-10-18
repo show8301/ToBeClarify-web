@@ -208,7 +208,10 @@ export function AdminDesignatedWorkbench({ data, user, onChanged, loading, loadE
       </AdminPanel>
     </div>
     <AdminDialog open={Boolean(dialog)} title={dialogTitle} description="完成操作後留在指名人員工作台。" className="adminDesignatedWorkbenchDialog" onClose={closeDialog} actions={null}>
-      {dialog?.kind === "service" && <WorkbenchServiceDialog entry={dialog.entry} action={dialog.action} orderUnits={units[dialog.entry.order.id]} onSaved={() => saved(`${dialog.entry.nominee.serviceName}：${dialog.action === "accept" ? "已承接" : dialog.action === "complete" ? "此服務已完成" : "服務操作已記錄"}。`)} onBusy={onBusy} />}
+      {dialog?.kind === "service" && <WorkbenchServiceDialog key={dialog.action} entry={dialog.entry} action={dialog.action} orderUnits={units[dialog.entry.order.id]} recoveryActions={(["reschedule", "start_now"] as const).filter((action) => canAct(dialog.entry, action))} onChooseRecoveryAction={(action) => {
+        if (dialogBusyRef.current || !canAct(dialog.entry, action)) return;
+        setDirty(false); setDialog({ kind: "service", entry: dialog.entry, action });
+      }} onSaved={() => saved(`${dialog.entry.nominee.serviceName}：${dialog.action === "accept" ? "已承接" : dialog.action === "complete" ? "此服務已完成" : "服務操作已記錄"}。`)} onBusy={onBusy} />}
       {dialog?.kind === "addon" && <WorkbenchAddonForm entry={dialog.entry} onSaved={saved} onBusy={onBusy} />}
       {dialog?.kind === "composer" && <WorkbenchOrderComposer sessionId={dialog.session.id} businessDate={businessDate} mode={dialog.mode} staffId={user.staffMemberId} onSaved={saved} onBusy={onBusy} />}
       {dialog?.kind === "delivery" && <WorkbenchDeliveryAction session={dialog.session} orderId={dialog.orderId} businessDate={businessDate} user={user} onBusy={onBusy} onDirty={onDirty} />}

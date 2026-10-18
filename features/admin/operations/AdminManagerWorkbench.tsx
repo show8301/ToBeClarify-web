@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AdminButton, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
+import { AdminHelp } from "@/features/admin/shared/AdminHelp";
 import { WorkbenchShiftBar } from "./WorkbenchShiftBar";
 import { ManagerStaffingPanel } from "./ManagerStaffingPanel";
 import { WorkbenchManagerRequests } from "./WorkbenchManagerRequests";
@@ -65,7 +66,8 @@ export function AdminManagerDashboard({ data, user, navigate, actionState, onOpe
     {onChanged && <WorkbenchManagerRequests data={data} onChanged={change} />}
     <ManagerFinancePanel data={data} finance={overview.finance} loading={overview.loading || disabled} navigate={navigate} />
     <ManagerSettlementPanel data={data} settlement={disabled ? null : settlement} loading={overview.settlementLoading || disabled} error={overview.settlement.error} sessionNo={sessionNo} onSessionChange={setSessionNo} navigate={navigate} canClose={canClose} onCloseBusiness={() => openBusinessAction({ type: "close" })} />
-    <AdminPanel title="今日營運摘要" description={`營業日 ${date || "尚未取得"}；訂單應付與實際金流分開呈現。`}>
+    <AdminPanel title={<span className="adminFieldHeading">今日營運摘要<AdminHelp title="今日營運摘要說明">訂單應付與實際金流分開呈現；有效訂單排除取消、退回與失效訂單，金流依 API 結算口徑。</AdminHelp></span>}>
+      <p className="managerHint">營業日 {date || "尚未取得"}</p>
       <div className="managerSummaryGrid">
         <div><span>有效訂單／已完成</span><strong>{disabled ? "確認中" : `${activeOrders.length}／${activeOrders.filter((o) => o.status === "completed").length}`}</strong><small>排除取消、退回與失效訂單</small></div>
         <div><span>有效訂單應付</span><strong>{disabled ? "確認中" : formatMoney(orderAmount)}</strong><small>目前載入訂單的應付金額，未含另登費用</small></div>

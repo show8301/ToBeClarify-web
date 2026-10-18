@@ -1,6 +1,7 @@
 "use client";
 
 import { AdminButton, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
+import { AdminHelp } from "@/features/admin/shared/AdminHelp";
 import { formatMoney } from "./operationsFormat";
 import { managerOrderRoute, managerSettlementRoute } from "./managerOverview";
 import type { ManagerFinance, ManagerSettlement } from "./managerOverview";
@@ -22,7 +23,7 @@ export function ManagerFinancePanel({ data, finance, loading, navigate }: {
   const date = data.context?.referenceBusinessDate || "";
   const entries = finance.filter(financeNeedsAttention);
   const legacy = finance.filter((item) => item.account && item.account.flowVersion < 2).length;
-  return <AdminPanel title="帳款待辦" description="核對待收、待退、款項歸屬與分潤保留；加收、折讓及實際收退款由顧客明細處理。" actions={<AdminButton variant="secondary" onClick={() => navigate(managerOrderRoute(date))}>登記費用／收退款</AdminButton>}>
+  return <AdminPanel title={<span className="adminFieldHeading">帳款待辦<AdminHelp title="帳款待辦說明">核對待收、待退、款項歸屬與分潤保留；加收、折讓及實際收退款由顧客明細處理。</AdminHelp></span>} actions={<AdminButton variant="secondary" onClick={() => navigate(managerOrderRoute(date))}>登記費用／收退款</AdminButton>}>
     {loading && <p role="status">正在核對本營業日顧客帳款…</p>}
     {legacy > 0 && <p className="managerHint">有 {legacy} 位顧客沿用舊版流程，請至完整點單管理核對。</p>}
     <div className="managerQueue">{entries.map((item) => {
@@ -62,7 +63,7 @@ export function ManagerSettlementPanel({ data, settlement, loading, error, sessi
     { title: "工時與薪資核對", detail: settlement ? `結算異常 ${settlement.anomalies.length} 項；請在結算工作臺核對工時、薪資與小費` : "尚未取得結算檢核", done: finalized, unknown: !settlement },
     { title: "正式結算", detail: finalized ? `第 ${sessionNo} 時段已正式結算` : workflowMatches && workflow?.canFinalize && !settlement?.anomalies.length ? "可進入結算工作臺確認正式結算" : "請完成關店與異常核對，再進入正式結算", done: finalized, unknown: !settlement },
   ];
-  return <AdminPanel title="收班與正式結算" description="關店、帳款、工時與正式結算分開追蹤；最終可否結算仍以 API 檢核為準。" actions={<AdminButton disabled={!date} onClick={() => navigate(managerSettlementRoute(date, sessionNo))}>核對並完成正式結算</AdminButton>}>
+  return <AdminPanel title={<span className="adminFieldHeading">收班與正式結算<AdminHelp title="收班與正式結算說明">關店、帳款、工時與正式結算分開追蹤；最終可否結算仍以 API 檢核為準。</AdminHelp></span>} actions={<AdminButton disabled={!date} onClick={() => navigate(managerSettlementRoute(date, sessionNo))}>核對並完成正式結算</AdminButton>}>
     <div className="managerInlineForm"><label className="managerSessionField">結算時段<input type="number" min={1} max={2147483647} step={1} value={sessionNo} onChange={(event) => { const value = Number(event.target.value); if (Number.isSafeInteger(value) && value > 0 && value <= 2147483647) onSessionChange(value); }} /></label><span className="managerHint">營業日 {date || "尚未取得"} · 第 {sessionNo} 時段</span></div>
     {loading && <p role="status">正在讀取結算與收班檢核…</p>}
     {error && <p className="adminFormError" role="alert">結算無法確認：{error}</p>}

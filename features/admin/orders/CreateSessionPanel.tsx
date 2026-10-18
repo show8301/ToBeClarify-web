@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { AdminHelp } from "@/features/admin/shared/AdminHelp";
 import { CharacterIdentityFields } from "@/components/customer/CharacterIdentityFields";
@@ -10,17 +10,25 @@ import { customerApi } from "@/features/admin/customers/api";
 import type { CustomerIdentityCandidate } from "@/features/admin/customers/types";
 import { AdminButton } from "@/features/admin/shared/AdminShared.jsx";
 
-type Props = { canManage: boolean; onClose: () => void; onIssued: (issued: IssuedAdmissionSession) => void; onBusyChange?: (busy: boolean) => void };
+type Props = { canManage: boolean; admissionPolicyRevision?: number; onClose: () => void; onIssued: (issued: IssuedAdmissionSession) => void; onBusyChange?: (busy: boolean) => void };
 type CandidateState = { key: string; items: CustomerIdentityCandidate[]; error: string };
 
-export function CreateSessionPanel({ canManage, onClose, onIssued, onBusyChange }: Props) {
+export function CreateSessionPanel({ canManage, admissionPolicyRevision = 0, onClose, onIssued, onBusyChange }: Props) {
   const uidInputId = useId();
   const [form, setForm] = useState({ gameId: "", serverName: "", customerName: "", customerUid: "", maxNominatedStaff: 1 });
   const [result, setResult] = useState<CandidateState | null>(null);
   const [candidateRevision, setCandidateRevision] = useState(0);
   const payment = useAdmissionCreation(onIssued, onBusyChange);
+  const loadAdmissionPreview = payment.load;
+  const previousAdmissionPolicyRevision = useRef(admissionPolicyRevision);
   const loading = payment.locked || Boolean(payment.result);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (previousAdmissionPolicyRevision.current === admissionPolicyRevision) return;
+    previousAdmissionPolicyRevision.current = admissionPolicyRevision;
+    void loadAdmissionPreview();
+  }, [admissionPolicyRevision, loadAdmissionPreview]);
 
   let identity = null;
   let identityError = "";

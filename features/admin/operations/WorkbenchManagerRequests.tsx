@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { AdminButton, AdminDialog, AdminField, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
+import { AdminHelp } from "@/features/admin/shared/AdminHelp";
 import { WorkbenchOrderComposer } from "./WorkbenchOrderComposer";
 import { WorkbenchServiceDialog } from "./WorkbenchServiceDialog";
 import { errorText, workbenchApi } from "./workbenchApi";
@@ -30,7 +31,7 @@ export function WorkbenchManagerRequests({ data, onChanged }: { data: Operations
     finally { onBusy(false); }
   };
   const saved = async () => { await onChanged(); setEntry(null); setCreateOpen(false); };
-  return <AdminPanel title="指名承接協調" description="由經理建立新請求；指名人員無法承接時，在這裡重新協調。" actions={<AdminButton disabled={busy || !sessions.length || !data.context?.referenceBusinessDate} onClick={() => { setSessionId(sessions[0]?.id || ""); setCreateOpen(true); }}>建立承接請求</AdminButton>}>
+  return <AdminPanel title={<span className="adminFieldHeading">指名承接協調<AdminHelp title="指名承接協調說明">由經理建立新請求；指名人員無法承接時，在這裡重新協調。</AdminHelp></span>} actions={<AdminButton disabled={busy || !sessions.length || !data.context?.referenceBusinessDate} onClick={() => { setSessionId(sessions[0]?.id || ""); setCreateOpen(true); }}>建立承接請求</AdminButton>}>
     {error && <p className="adminFormError" role="alert">{error}</p>}
     <div className="adminRoleDashboardRows">{requests.map(({ order, nominee }) => <article className="adminRoleDashboardRow" key={nominee.id}><div className="adminRoleDashboardIdentity"><strong>{order.customerName} · {nominee.staffName}</strong><small>{nominee.serviceName} · 無法承接，訂單及金額保留</small></div><AdminButton variant="secondary" disabled={busy} onClick={() => void loadEntry(order, nominee)}>重新協調時間</AdminButton></article>)}{!requests.length && <p className="adminRoleDashboardEmpty">目前沒有退回的承接請求。</p>}</div>
     <AdminDialog open={createOpen} title="建立指名承接請求" description="由指定人員回覆承接，不變更既有指名的負責人。" onClose={() => { if (!busyRef.current) setCreateOpen(false); }} className="adminDesignatedWorkbenchDialog" actions={null}>

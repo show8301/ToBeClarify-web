@@ -55,7 +55,7 @@ export function AdminManagerDashboard({ data, user, navigate, actionState, onOpe
     {overview.settings.error && <p className="adminFormError" role="alert">營運提醒與暫停狀態無法確認：{overview.settings.error}</p>}
     <div className="managerColumns">
       <div className="managerControlStack">
-        <div id="manager-business">{context && <ManagerBusinessPanel key={date} context={context} settings={settings} disabled={disabled} onAction={openBusinessAction} onChanged={change} />}</div>
+        <div id="manager-business">{context && <ManagerBusinessPanel key={date} context={context} settings={settings} disabled={disabled} canClose={canClose} onAction={openBusinessAction} onChanged={change} />}</div>
         <ManagerBroadcastPanel disabled={disabled} navigate={navigate} />
         <ManagerRoomsPanel data={data} disabled={disabled} navigate={navigate} onCreate={onOpenCreateRoomService} />
       </div>

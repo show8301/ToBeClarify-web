@@ -51,6 +51,7 @@ function parseRecord(value: unknown): FinanceRecord {
     sourcePeriodId: str(row.sourcePeriodId), cashPeriodId: nullable(row.cashPeriodId), occurredAt: str(row.occurredAt),
     allocationStatus: financeAllocation(row.allocationStatus), holdScope: holdScope(row.holdScope), reason: str(row.reason),
     reversesRecordId: nullable(row.reversesRecordId), caseId: nullable(row.caseId), createdAt: str(row.createdAt), createdBy: str(row.createdBy),
+    createdByDisplayName: row.createdByDisplayName == null ? null : str(row.createdByDisplayName),
     updatedAt: str(row.updatedAt), updatedBy: str(row.updatedBy), confirmedAt: nullable(row.confirmedAt), confirmedBy: nullable(row.confirmedBy),
   };
 }

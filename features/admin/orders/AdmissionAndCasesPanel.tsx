@@ -4,6 +4,7 @@ import { useState } from "react";
 import { financeApi } from "./finance-api";
 import type { AdmissionEntry, FinanceAccount, FinanceCase, FinancePeriodOption } from "./finance-types";
 import { AdminButton } from "@/features/admin/shared/AdminShared.jsx";
+import { AdminHelp } from "@/features/admin/shared/AdminHelp";
 
 const money = (amount: number) => `${amount.toLocaleString("zh-TW")} G`;
 
@@ -41,8 +42,20 @@ export function AdmissionAndCasesPanel({ sessionId, account, periods, admission,
     finally { setBusy(false); }
   };
   return <section className="adminOrderFinanceAdmission" aria-label="入場實收與離店">
-    <h4>入場實收與離店</h4>
-    <p>同一顧客只建立一筆入場事件。折讓只調整應付；實收與實退代表現場已發生的金流。</p>
+    <header className="adminOrderAdmissionHeading">
+      <div className="adminFieldHeading">
+        <h4>入場實收與離店</h4>
+        <AdminHelp title="入場實收與離店說明">每位顧客只建立一筆入場紀錄。折讓調整應付金額；實收、實退記錄現場已發生的收退款。</AdminHelp>
+      </div>
+      {admission && <div className="adminOrderAdmissionFacts">
+        <dl>
+          <div><dt>入場費</dt><dd>{money(admission.amount)}</dd></div>
+          <div><dt>折讓</dt><dd>{money(admission.discountAmount)}</dd></div>
+          <div><dt>狀態</dt><dd>{{ received: "已收款", unpaid: "未收款", waived: "優惠／免收", reissue: "重發紀錄" }[admission.status]}</dd></div>
+        </dl>
+        <span>已防重複入帳</span>
+      </div>}
+    </header>
     {!admission ? <form className="adminOrderFinanceAdmissionForm" onSubmit={submitAdmission}>
       <label>入場費<input type="number" min="0" step="1" value={amount} onChange={e => setAmount(Number(e.target.value))} required /></label>
       <label>折讓／優惠<input type="number" min="0" step="1" value={discount} onChange={e => setDiscount(Number(e.target.value))} /></label>
@@ -51,7 +64,7 @@ export function AdmissionAndCasesPanel({ sessionId, account, periods, admission,
       {mode === "received" && <label>收款營業日<select value={cashPeriod} onChange={e => setCashPeriod(e.target.value)}><option value="">先記實收，稍後歸屬</option>{periods.map(p => <option key={p.id} value={p.id}>{p.businessDate}</option>)}</select></label>}
       <label>原因<input maxLength={500} value={reason} onChange={e => setReason(e.target.value)} required /></label>
       <AdminButton type="submit" disabled={busy}>記錄已收並完成入場</AdminButton>
-    </form> : <p>入場費 {money(admission.amount)} · 折讓 {money(admission.discountAmount)} · 狀態 {admission.status === "received" ? "已收款" : admission.status === "unpaid" ? "未收款" : "優惠／免收"} · 已防重複入帳</p>}
+    </form> : null}
     <div className="adminOrderFinanceActions"><AdminButton variant="secondary" disabled={busy} onClick={() => void updateDeparture("depart")}>正常離店／停新單</AdminButton><AdminButton variant="danger" disabled={busy} onClick={() => void updateDeparture("void")}>誤開碼作廢</AdminButton><AdminButton variant="ghost" disabled={busy} onClick={() => void updateDeparture("reopen")}>重新開放</AdminButton></div>
     {message && <p role="status">{message}</p>}
     {cases.length > 0 && <div className="adminOrderFinanceCases"><h5>未決案件</h5>{cases.map(item => <div key={item.id} className="adminOrderFinanceRecord"><div><strong>{item.caseKind}</strong><p>{item.description}</p></div><b>{money(item.amount)}</b>{item.status === "open" && <AdminButton variant="secondary" disabled={busy} onClick={() => void resolve(item)}>確認歸屬／結轉</AdminButton>}</div>)}</div>}

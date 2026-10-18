@@ -6,13 +6,17 @@ import { FinancialRecordsPanel } from "./FinancialRecordsPanel";
 import { SessionHeader } from "./SessionHeader";
 import { AdminOrderItemRow } from "./AdminOrderItemRow";
 import { ChevronDown, SlidersHorizontal } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { adminApi } from '@/features/admin/api/client.js';
 import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext';
 import { AdminButton } from '@/features/admin/shared/AdminShared.jsx';
 import { IssuedPanel } from './AdminOrderPassPanels.jsx';
 import { CreateSessionPanel } from './CreateSessionPanel';
+import { CustomerPane } from './CustomerPane';
+import { OrderCustomerDetails } from './OrderCustomerDetails';
+import { OrderDisclosure } from './OrderDisclosure';
+import { orderStatusLabels as labels } from './order-presentation';
 
 const today = () => new Intl.DateTimeFormat('en-CA', {
   timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit',
@@ -33,7 +37,6 @@ const normalizeTipPresetAmounts = (values) => {
   const next = Array.isArray(values) ? values.map(Number) : [];
   return next.length === 4 && next.every((value) => Number.isFinite(value) && value > 0) ? next : defaultTipPresetAmounts;
 };
-const labels = { waiting: '等待確認', submitted: '等待確認', partially_confirmed: '部分確認', needs_reschedule: '需重新排程', confirmed: '已成立', in_service: '服務中', completed: '已完成', cancelled: '已取消', expired: '已失效', rejected: '已退回' };
 const transitionLabels = { start: '開始服務', complete: '完成訂單', cancel: '取消訂單', reject: '退回訂單', return_to_reschedule: '重新排程' };
 const intakeLabels = { normal: '一般接單', coordination: '協調接單', staff_only: '僅店員接單' };
 
@@ -70,7 +73,6 @@ export function AdminOrdersPage() {
   const [createBusy, setCreateBusy] = useState(false);
   const [showCreate, setShowCreate] = useState(() => searchParams.get('focus') === 'create');
   const [showSettings, setShowSettings] = useState(false);
-  const [groupsOpen, setGroupsOpen] = useState({ attention: true, others: true });
   const [issued, setIssued] = useState(null);
   const [showAssisted, setShowAssisted] = useState(false);
 
@@ -115,10 +117,6 @@ export function AdminOrdersPage() {
   useEffect(() => { if (searchParams.get('focus') === 'create') setShowCreate(true); }, [searchParams]);
 
   const selected = sessions.find((item) => item.session.id === selectedId);
-  const groups = useMemo(() => ({
-    attention: sessions.filter((item) => item.waitingOrderCount > 0),
-    others: sessions.filter((item) => item.waitingOrderCount === 0),
-  }), [sessions]);
 
   const selectSession = async (id) => {
     setSelectedId(id); setLoading(true);
@@ -150,7 +148,7 @@ export function AdminOrdersPage() {
     {canManage && showSettings && settings ? <SettingsPanel settings={settings} onSaved={(value) => { setSettings(value); setSettingsError(''); setMessage({ text: '營運參數已更新。', error: false }); }} /> : null}
     {canManage && showSettings && settingsError ? <div className="adminOrderMessage isError" role="alert">營運參數載入失敗：{settingsError}</div> : null}
     <div className="adminOrderWorkspace">
-      <aside className="adminCustomerPane">
+      <CustomerPane sessions={sessions} selectedId={selectedId} businessDate={businessDate} loading={loading} onSelect={selectSession}>
         <div className="adminCustomerToolbar">
           <label>營業日<input type="date" value={businessDate} onChange={(event) => setBusinessDate(event.target.value)} /></label>
           {businessContext ? <p className={businessContext.orderingOpen ? 'adminBusinessPeriod isOpen' : 'adminBusinessPeriod'}>
@@ -167,18 +165,14 @@ export function AdminOrdersPage() {
           </form>
           <div><span>本營業日顧客</span><strong>{sessions.length}</strong></div>
         </div>
-        <div className="adminCustomerListScroll" role="region" aria-label="顧客清單" tabIndex={0}>
-          <CustomerGroup title="待處理" count={groups.attention.length} open={groupsOpen.attention} onToggle={() => setGroupsOpen((current) => ({ ...current, attention: !current.attention }))}>{groups.attention.map((item) => <CustomerRow key={item.session.id} item={item} active={item.session.id === selectedId} onClick={() => selectSession(item.session.id)} />)}</CustomerGroup>
-          <CustomerGroup title="其他顧客" count={groups.others.length} open={groupsOpen.others} onToggle={() => setGroupsOpen((current) => ({ ...current, others: !current.others }))}>{groups.others.map((item) => <CustomerRow key={item.session.id} item={item} active={item.session.id === selectedId} onClick={() => selectSession(item.session.id)} />)}</CustomerGroup>
-        </div>
-      </aside>
+      </CustomerPane>
       <div className="adminOrderDetailPane">
         {!selected ? <div className="adminOrderEmpty"><span>LD</span><h2>選擇一位顧客</h2><p>使用左側搜尋或分組快速定位顧客。</p></div> : <>
           <SessionHeader key={`${selectedId}:${selected.session.maxNominatedStaff}`} item={selected} loading={loading} onUpdate={(body) => act(() => adminApi.updateOrderSession(selectedId, body), '顧客點餐設定已更新。')} onReissue={async () => { try { setIssued(await adminApi.reissueOrderSession(selectedId)); } catch (error) { setMessage({ text: error.message, error: true }); } }} onAssisted={() => setShowAssisted((value) => !value)} />
           {showAssisted ? <AdminAssistedOrderPanel sessionId={selectedId} businessDate={businessDate} onSaved={refreshSelected} onClose={() => setShowAssisted(false)} /> : null}
           <section className="adminOrderCustomerOrders" aria-label="顧客訂單">
             <header className="adminOrderSectionHeading"><h3>顧客訂單</h3><span>{orders.length} 張</span></header>
-            <div className="adminOrderCards">{orders.length ? orders.map((order) => <div id={`admin-order-${order.id}`} key={order.id}>{order.flowVersion >= 2 ? <AdminFulfillmentOrderCard key={order.id} order={order} user={user} loading={loading} canManage={canManage} act={act} onChanged={refreshSelected} /> : <AdminOrderCard key={order.id} order={order} user={user} loading={loading} act={act} focused={focusedOrder === order.id} />}</div>) : <div className="adminOrderEmpty isCompact"><h2>尚未下單</h2><p>此點餐碼今天還沒有送出訂單。</p></div>}</div>
+            <div className="adminOrderCards">{orders.length ? orders.map((order) => <div id={`admin-order-${order.id}`} key={order.id}>{order.flowVersion >= 2 ? <AdminFulfillmentOrderCard key={order.id} order={order} user={user} loading={loading} canManage={canManage} act={act} onChanged={refreshSelected} /> : <AdminOrderCard key={order.id} order={order} user={user} loading={loading} act={act} />}</div>) : <div className="adminOrderEmpty isCompact"><h2>尚未下單</h2><p>此點餐碼今天還沒有送出訂單。</p></div>}</div>
           </section>
           <FinancialRecordsPanel key={selectedId} sessionId={selectedId} refreshKey={orders.map(o => `${o.id}:${o.totalAmount}:${o.status}`).join("|")} />
         </>}
@@ -233,27 +227,21 @@ function BusinessOperationsBar({ context, canManage, onChanged, onError, childre
   </section>;
 }
 
-function CustomerGroup({ title, count, open, onToggle, children }) {
-  return <section className="adminCustomerGroup"><button type="button" onClick={onToggle}><span>{open ? '−' : '+'} {title}</span><b>{count}</b></button>{open ? <div>{children.length ? children : <p>沒有顧客</p>}</div> : null}</section>;
-}
-function CustomerRow({ item, active, onClick }) {
-  return <button type="button" className={`adminCustomerRow ${active ? 'isActive' : ''}`} onClick={onClick}><span><strong>{item.session.customerName}</strong><small>ID {item.session.gameId}</small></span><span><b>{item.waitingOrderCount ? `${item.waitingOrderCount} 待處理` : `${item.orderCount} 單`}</b><small>{money(item.totalAmount)}</small></span></button>;
-}
-
 function AdminFulfillmentOrderCard({ order, user, loading, canManage, act, onChanged }) {
+  const [progress, setProgress] = useState({ kind: "loading" });
   const [note, setNote] = useState(order.customerNote || '');
   const [location, setLocation] = useState(order.customerLocation || '');
   useEffect(() => { setNote(order.customerNote || ''); setLocation(order.customerLocation || ''); }, [order.customerNote, order.customerLocation]);
-  return <article className="adminOrderCard">
-    <header className="adminOrderCardSimple"><div><h3>{order.orderNumber} · 應付 {money(order.totalAmount)}</h3><span>{order.storeConfirmationStatus === 'pending' ? '等待店員接受協調單' : labels[order.status] || order.status}</span></div><small>{new Date(order.submittedAt).toLocaleString('zh-TW')}</small></header>
-    <div className="adminOrderCustomerDetails"><label>顧客位置<input maxLength={200} value={location} onChange={(event) => setLocation(event.target.value)} placeholder="尚未提供位置" /></label><label>顧客備註<textarea maxLength={500} rows={2} value={note} onChange={(event) => setNote(event.target.value)} /></label><AdminButton variant="secondary" disabled={loading} onClick={() => act(() => adminApi.updateOrder(order.id, { customerNote: note, customerLocation: location }), '顧客位置與備註已更新。')}>儲存位置／備註</AdminButton></div>
-    <OrderFulfillmentPanel orderId={order.id} onChanged={onChanged} />
+  return <OrderDisclosure orderNumber={order.orderNumber} status={order.status} amount={order.totalAmount} submittedAt={order.submittedAt}
+    storePending={order.storeConfirmationStatus === 'pending'} progress={progress}>
+    <OrderCustomerDetails location={location} note={note} loading={loading} onLocationChange={setLocation} onNoteChange={setNote}
+      onSave={() => act(() => adminApi.updateOrder(order.id, { customerNote: note, customerLocation: location }), '顧客位置與備註已更新。')} />
+    <OrderFulfillmentPanel orderId={order.id} onChanged={onChanged} onProgressChange={setProgress} refreshKey={`${order.status}:${order.totalAmount}:${order.fulfillment?.map((unit) => `${unit.id}:${unit.version}`).join("|") || ""}`} />
     {order.nominees.filter(n => n.confirmationStatus === "confirmed" && (canManage || n.staffId === user.staffMemberId)).map(n => <AdminAddonComposer key={n.id} nominee={n} loading={loading} act={act} />)}
-  </article>;
+  </OrderDisclosure>;
 }
 
-function AdminOrderCard({ order, user, loading, act, focused = false }) {
-  const [open, setOpen] = useState(focused || order.status === 'submitted' || order.status === 'needs_reschedule' || order.status === 'expired');
+function AdminOrderCard({ order, user, loading, act }) {
   const [note, setNote] = useState(order.internalNote || '');
   const [transitionReason, setTransitionReason] = useState('');
   const [storeDecisionReason, setStoreDecisionReason] = useState('');
@@ -280,7 +268,10 @@ function AdminOrderCard({ order, user, loading, act, focused = false }) {
     queueStage !== statusLabel ? queueStage : '',
     order.queueMinutes > 0 ? `${order.queueMinutes} 分鐘` : '',
   ].filter(Boolean).join(' · ');
-  return <article className={`adminOrderCard is-${order.status}`}><button type="button" className="adminOrderCardHead" onClick={() => setOpen(!open)}><div><span>{order.orderKind === 'service_addon' ? '附掛加購服務單' : order.orderNumber}</span><strong>{statusLabel}</strong>{queueDetails ? <small>{queueDetails}</small> : null}</div><div><span>{new Date(order.submittedAt).toLocaleString('zh-TW')}</span><b>{money(order.totalAmount)}</b></div></button>{open ? <div className="adminOrderCardBody">
+  return <OrderDisclosure orderNumber={order.orderNumber} status={order.status} amount={order.totalAmount} submittedAt={order.submittedAt}
+    storePending={order.storeConfirmationStatus === 'pending'}><div className="adminOrderCardBody">
+     {order.orderKind === 'service_addon' && <p>附掛加購服務單</p>}
+     {queueDetails && <p>{queueDetails}</p>}
      {order.storeConfirmationStatus === 'pending' ? <div className="adminStoreConfirmation"><div><strong>關店時段協調單</strong><p>顧客已送出，但尚未成立。接受後，餐點／小費直接成立；指名與加購仍需被指名店員確認。</p></div><label>拒絕原因<input value={storeDecisionReason} maxLength="500" placeholder="拒絕時必填" onChange={(event) => setStoreDecisionReason(event.target.value)} /></label><div><AdminButton disabled={loading} onClick={() => act(() => adminApi.decideStoreConfirmation(order.id, 'approved', '現場確認可承接'), '已接受協調單。')}>接受協調單</AdminButton><AdminButton variant="danger" disabled={loading || !storeDecisionReason.trim()} onClick={() => act(() => adminApi.decideStoreConfirmation(order.id, 'rejected', storeDecisionReason.trim()), '已拒絕協調單並退回本單餐點信物折抵。')}>拒絕協調單</AdminButton></div></div> : null}
      <div className="adminOrderItemList">{order.items.map((item) => <AdminOrderItemRow key={item.id} orderId={order.id} item={item} loading={loading} act={act} />)}</div>
      {order.addons?.length ? <div className="adminAddonSummary">{order.addons.map((item) => <article key={item.id}><span>ADD-ON · {labels[item.status] || item.status}</span><strong>{item.staffName}｜{item.serviceName}</strong><small>{item.serviceDurationMinutes} 分鐘 · {item.participantCount} 人 · 附掛於既有指名，不新增基礎費與忙碌區段</small></article>)}</div> : null}
@@ -295,7 +286,7 @@ function AdminOrderCard({ order, user, loading, act, focused = false }) {
     <div className="adminOrderEmergency"><label>內部備註<textarea value={note} onChange={(event) => setNote(event.target.value)} /></label><AdminButton variant="secondary" disabled={loading} onClick={() => act(() => adminApi.updateOrder(order.id, { internalNote: note }), '內部備註已儲存並留下稽核紀錄。')}>儲存備註</AdminButton></div>
     {transitions.length ? <div className="adminOrderTransitions"><label>狀態操作原因（取消／退回／提早完成必填）<input value={transitionReason} maxLength="500" placeholder="例如：顧客改期、雙方同意提早結束" onChange={(event) => setTransitionReason(event.target.value)} /></label>{isEarlyCompletion ? <p>目前早於預約結束時間；完成後會記為「實際提早完成」，釋放店員但不自動改價。</p> : null}<div>{transitions.map((value) => { const needsReason = value === 'cancel' || value === 'reject' || value === 'return_to_reschedule' || (value === 'complete' && isEarlyCompletion); const actionLabel = value === 'complete' && isEarlyCompletion ? '實際提早完成' : transitionLabels[value]; return <AdminButton key={value} variant={value === 'cancel' || value === 'reject' ? 'danger' : 'secondary'} disabled={loading || (needsReason && !transitionReason.trim())} onClick={() => act(() => adminApi.transitionOrder(order.id, value, transitionReason.trim()), `已執行「${actionLabel}」，忙碌區段與訂單狀態已同步。`)}>{actionLabel}</AdminButton>; })}</div></div> : null}
     <div className="adminOrderTotals"><span>小計 {money(order.subtotal)}</span><span>信物折抵 −{money(order.mealCreditApplied)}</span><strong>應付 {money(order.totalAmount)}</strong></div>
-  </div> : null}</article>;
+  </div></OrderDisclosure>;
 }
 
 function AdminAddonComposer({ nominee, loading, act }) {

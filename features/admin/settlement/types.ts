@@ -76,6 +76,13 @@ export type SettlementWorkflow = {
   netCash: number;
   retainedAmount: number;
   pendingFinanceCount: number;
+  pendingFinanceItems?: {
+    sessionId: string;
+    customerName: string;
+    orderId: string | null;
+    orderNumber: string | null;
+    pendingRecordCount: number;
+  }[] | null;
   canStopNewOrders: boolean;
   canClose: boolean;
   canFinalize: boolean;

@@ -248,9 +248,81 @@
 .adminTheme .adminOrderHeadingWithHelp { display: flex; align-items: center; gap: 6px; min-width: 0; }
 .adminTheme .adminOrderHeadingWithHelp h3 { margin: 0; font-size: 20px; font-weight: 750; line-height: 1.4; }
 .adminTheme .adminOrderFulfillmentHeading > .iconActionButton { flex-shrink: 0; }
-.adminTheme .adminOrderFulfillment .adminOrderFulfillmentUnit.isUnfinished { border-left: 4px solid var(--color-accent-dark); background: rgba(var(--color-accent-rgb), .1); }
-.adminTheme .adminOrderUnitHeading { display: flex; flex: 1 1 100%; flex-wrap: wrap; align-items: center; gap: 8px; }
-.adminTheme .adminOrderUnitPendingLabel { padding: 3px 8px; border: 1px solid var(--color-border-strong); border-radius: 6px; color: var(--color-fg); font-size: 12px; font-weight: 650; }
+.adminTheme .adminOrderFulfillmentActions { gap: 8px; }
+.adminTheme .adminOrderFulfillmentActions > .adminButton,
+.adminTheme .adminOrderFulfillmentUnit .adminButton { min-height: 44px; font-size: 14px; font-weight: 650; }
+.adminTheme .adminOrderFulfillmentUnit {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  box-sizing: border-box;
+  min-width: 0;
+  margin: 0;
+  padding: 14px;
+  container-name: fulfillment-unit;
+  container-type: inline-size;
+}
+.adminTheme .adminOrderFulfillment .adminOrderFulfillmentUnit.isUnfinished { border-left: 4px solid var(--color-accent-dark); background-color: rgba(var(--color-accent-rgb), .08); }
+.adminTheme .adminOrderUnitHeading { display: flex; align-items: start; justify-content: space-between; gap: 12px; min-width: 0; }
+.adminTheme .adminOrderUnitHeading > strong { min-width: 0; color: var(--color-fg); font-size: 18px; font-weight: 700; line-height: 1.5; overflow-wrap: anywhere; }
+.adminTheme .adminOrderUnitStatus { flex-shrink: 0; padding: 3px 8px; border: 1px solid var(--color-border-strong); border-radius: 6px; color: var(--color-fg); font-size: 13px; font-weight: 650; line-height: 1.5; }
+.adminTheme .adminOrderUnitStatus.isComplete { color: var(--color-accent-2); border-color: currentColor; }
+.adminTheme .adminFulfillmentMetrics { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0; }
+.adminTheme .adminFulfillmentMetrics > div { display: flex; align-items: baseline; gap: 5px; font-size: 14px; line-height: 1.5; }
+.adminTheme .adminFulfillmentMetrics dt { color: var(--color-fg-soft); }
+.adminTheme .adminFulfillmentMetrics dd { margin: 0; color: var(--color-fg); font-size: 16px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.adminTheme .adminFulfillmentMetrics > .isZero :is(dt, dd) { color: var(--color-fg-mute); }
+.adminTheme .adminFulfillmentSchedule { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0; color: var(--color-fg-soft); font-size: 14px; line-height: 1.6; }
+.adminTheme .adminFulfillmentDailyBar { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px; min-width: 0; }
+.adminTheme .adminFulfillmentDailyActions,
+.adminTheme .adminFulfillmentAdvancedActions,
+.adminTheme .adminFulfillmentEditorActions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.adminTheme .adminFulfillmentDailyActions { margin-left: auto; }
+.adminTheme .adminFulfillmentMore { flex: 0 1 auto; align-self: end; min-width: 0; margin: 0; }
+.adminTheme .adminFulfillmentMore[open] { flex: 1 0 100%; }
+.adminTheme .adminFulfillmentMore > .adminDisclosureSummary { display: flex; align-items: center; gap: 8px; width: max-content; max-width: 100%; margin-left: auto; padding: 4px 10px; border: 1px solid var(--color-border-strong); border-radius: 8px; background-color: var(--color-surface); color: var(--color-fg); font-size: 14px; line-height: 1.4; }
+.adminTheme .adminFulfillmentMoreContent { display: grid; gap: 12px; padding-top: 12px; }
+.adminTheme .adminFulfillmentMore:not([open]) > .adminFulfillmentMoreContent { display: none; }
+.adminTheme .adminFulfillmentAdvancedActions > .adminButton[aria-pressed="true"] { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.adminTheme .adminFulfillmentEditor { display: grid; min-width: 0; gap: 12px; padding: 12px; border: 1px solid var(--color-border); border-radius: 10px; background-color: var(--color-surface); }
+.adminTheme .adminFulfillmentEditorHeading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.adminTheme .adminFulfillmentEditorHeading h4 { margin: 0; font-size: 16px; font-weight: 700; line-height: 1.5; }
+.adminTheme .adminFulfillmentEditorActions { justify-content: flex-end; }
+.adminTheme .adminFulfillmentEditorFields { display: grid; min-width: 0; gap: 12px; }
+.adminTheme .adminFulfillmentField { display: grid; align-content: start; gap: 6px; min-width: 0; }
+.adminTheme .adminFulfillmentFieldHeading { display: flex; align-items: center; gap: 6px; min-height: 24px; color: var(--color-fg-soft); font-size: 14px; line-height: 1.5; }
+.adminTheme .adminFulfillmentFieldHeading > label { display: block; flex: none; margin: 0; color: var(--color-fg-soft); font-size: 14px; font-weight: 600; line-height: 1.5; }
+.adminTheme .adminFulfillmentRequired { color: var(--color-accent-dark); }
+.adminTheme .adminOrderFulfillmentUnit :is(input:not([type="radio"]), textarea, select) { box-sizing: border-box; width: 100%; min-width: 0; min-height: 44px; padding: 9px 11px; border: 1px solid var(--color-border-strong); border-radius: 8px; background-color: var(--color-surface-input); color: var(--color-fg); font: inherit; font-size: 16px; line-height: 1.5; }
+.adminTheme .adminOrderFulfillmentUnit :is(input:not([type="radio"]), textarea, select):focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; border-color: var(--color-accent); }
+.adminTheme .adminFulfillmentQuantityField { width: max-content; max-width: 100%; }
+.adminTheme .adminFulfillmentQuantityInput { display: flex; align-items: center; gap: 8px; color: var(--color-fg-soft); font-size: 14px; }
+.adminTheme .adminFulfillmentQuantityInput > input { flex: 0 0 96px; width: 96px; text-align: center; font-variant-numeric: tabular-nums; }
+.adminTheme .adminFulfillmentFixedQuantity { display: flex; align-items: center; min-height: 44px; color: var(--color-fg); font-size: 16px; font-weight: 650; white-space: nowrap; }
+.adminTheme .adminFulfillmentDateFields { display: grid; grid-template-columns: repeat(2, minmax(0, 260px)); gap: 12px; min-width: 0; }
+.adminTheme .adminFulfillmentPeriodField,
+.adminTheme .adminFulfillmentDateField { width: 100%; max-width: 260px; }
+.adminTheme .adminFulfillmentAmountField { width: 192px; max-width: 100%; }
+.adminTheme .adminFulfillmentField textarea { min-height: 80px; max-height: 220px; resize: vertical; overflow-y: auto; }
+.adminTheme .adminFulfillmentField textarea::placeholder { color: var(--color-fg-mute); font-weight: 400; opacity: 1; }
+.adminTheme .adminFulfillmentCharacterCount { justify-self: end; color: var(--color-fg-mute); font-size: 13px; line-height: 1.4; }
+.adminTheme .adminFulfillmentRestSettings { display: grid; gap: 6px; }
+.adminTheme .adminFulfillmentRestOptions { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+.adminTheme .adminFulfillmentRestOptions > label { display: flex; flex: 0 1 auto; align-items: center; gap: 8px; min-height: 44px; color: var(--color-fg); font-size: 14px; line-height: 1.5; }
+.adminTheme .adminFulfillmentRestOptions input[type="radio"] { width: 18px; height: 18px; margin: 0; accent-color: var(--color-accent); }
+.adminTheme .adminFulfillmentNotice,
+.adminTheme .adminFulfillmentPreview { display: grid; gap: 10px; margin: 0; color: var(--color-fg-soft); font-size: 14px; line-height: 1.6; overflow-wrap: anywhere; }
+.adminTheme .adminFulfillmentNotice { padding: 10px 12px; border: 1px solid var(--color-border-strong); border-radius: 8px; background-color: var(--color-surface-input); }
+.adminTheme .adminFulfillmentNotice p,
+.adminTheme .adminFulfillmentPreview p { margin: 0; }
+.adminTheme .adminFulfillmentNotice.isError { color: var(--color-fg); border-color: var(--color-accent-dark); }
+@container fulfillment-unit (max-width: 560px) {
+  .adminTheme .adminFulfillmentDateFields { grid-template-columns: minmax(0, 260px); }
+}
+@media (any-pointer: coarse) {
+  .adminTheme .adminFulfillmentFieldHeading { min-height: 44px; }
+}
 .adminOrdersPage .adminOrderEmpty.isCompact { min-height: 150px; }
 .adminOrdersPage .adminOrderItemList > .adminOrderItemRow { grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 12px; padding: 12px; }
 .adminOrdersPage .adminOrderItemName { min-width: 0; overflow-wrap: anywhere; }

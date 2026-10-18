@@ -75,9 +75,11 @@
 .adminSettlementAttention strong { font-size: 14px; }
 .adminSettlementAttentionItems { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 5px; }
 .adminSettlementAttentionItems button { min-height: 32px; padding: 0; border: 0; background: transparent; color: var(--color-fg-soft); font-size: 13px; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
-.adminSettlementFinanceDisclosure { flex: 1 0 100%; min-width: 0; margin-top: 4px; border-top: 1px solid color-mix(in srgb, #c18b37 30%, var(--color-border)); }
-.adminSettlementFinanceDisclosure > summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; color: var(--color-fg); font-size: 13px; font-weight: 700; cursor: pointer; }
-.adminSettlementFinanceDisclosureBody { display: grid; gap: 8px; padding: 0 0 4px; }
+.adminSettlementFinanceDisclosure { min-width: 0; max-width: 100%; }
+.adminSettlementFinanceDisclosure[open] { flex-basis: 100%; }
+.adminTheme .adminSettlementFinanceDisclosure > summary { display: flex; align-items: center; justify-content: flex-start; gap: 8px; min-height: 32px; padding: 0; color: var(--color-fg-soft); font-size: 13px; cursor: pointer; }
+.adminSettlementFinanceDisclosure > summary > .adminDisclosureLabel { text-decoration: underline; text-underline-offset: 4px; }
+.adminSettlementFinanceDisclosureBody { display: grid; gap: 8px; padding: 8px 0 4px; border-top: 1px solid color-mix(in srgb, #c18b37 30%, var(--color-border)); }
 .adminSettlementFinanceDisclosureBody > p { margin: 0; color: var(--color-fg-mute); font-size: 12px; }
 .adminSettlementFinanceDisclosureBody > ul { display: grid; gap: 5px; max-height: min(40vh, 360px); overflow: auto; margin: 0; padding: 0; list-style: none; }
 .adminSettlementFinanceDisclosureBody > ul > li { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; padding: 7px 10px; border: 1px solid var(--color-border); border-radius: 7px; background: var(--color-surface); }

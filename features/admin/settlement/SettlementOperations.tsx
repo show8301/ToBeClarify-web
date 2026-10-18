@@ -95,7 +95,6 @@ export function SettlementOperations({ overview, inputs, staff, dayType, setDayT
       <div><strong>結算前需留意</strong><div className="adminSettlementAttentionItems">
         {anomalies.length ? <button type="button" disabled={saving} onClick={() => changeStep(2)}>結算異常 {anomalies.length} 項</button> : null}
         {pending.length ? <button type="button" disabled={saving} onClick={() => changeStep(1)}>補打卡待核准 {pending.length} 筆</button> : null}
-      </div></div>
       {pendingFinance ? <details className="adminSettlementFinanceDisclosure">
         <AdminDisclosureSummary>費用待確認 {pendingFinance} 筆</AdminDisclosureSummary>
         <div className="adminSettlementFinanceDisclosureBody">
@@ -116,6 +115,7 @@ export function SettlementOperations({ overview, inputs, staff, dayType, setDayT
           <button type="button" disabled={saving} onClick={() => changeStep(2)}>前往金額核對</button>
         </div>
       </details> : null}
+      </div></div>
     </aside> : null}
     <nav className="adminSettlementStepper" aria-label="營運結算流程">
       {steps.map((item, index) => <button key={item.title} type="button" aria-current={step === index ? "step" : undefined} aria-controls={`settlement-step-panel-${index}`} disabled={saving} onClick={() => changeStep(index)}>

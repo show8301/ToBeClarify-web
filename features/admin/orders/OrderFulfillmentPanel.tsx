@@ -66,9 +66,9 @@ const labels: Record<string, string> = {
 };
 const showTime = (value?: string | null) => value ? new Date(value).toLocaleString("zh-TW", { hour12: false, timeZone: "Asia/Taipei" }) : "—";
 
-export function OrderFulfillmentPanel({ orderId, onChanged, disabled = false, onBusy, onProgressChange, refreshKey = "" }: {
+export function OrderFulfillmentPanel({ orderId, onChanged, disabled = false, storeConfirmationPending = false, onBusy, onProgressChange, refreshKey = "" }: {
   orderId: string; onChanged: () => Promise<void> | void; disabled?: boolean; onBusy?: (busy: boolean) => void;
-  onProgressChange?: (progress: FulfillmentReadState) => void; refreshKey?: string;
+  storeConfirmationPending?: boolean; onProgressChange?: (progress: FulfillmentReadState) => void; refreshKey?: string;
 }) {
   const [units, setUnits] = useState<Unit[]>([]);
   const [error, setError] = useState("");
@@ -77,6 +77,9 @@ export function OrderFulfillmentPanel({ orderId, onChanged, disabled = false, on
   const [loadedFor, setLoadedFor] = useState("");
   const loadKey = `${orderId}:${revision}:${refreshKey}`;
   const ready = loadedFor === loadKey;
+  const actionableUnits = storeConfirmationPending
+    ? units.map(unit => ({ ...unit, allowedActions: unit.allowedActions.filter(action => action === "cancel") }))
+    : units;
   useEffect(() => {
     const controller = new AbortController();
     onProgressChange?.({ kind: "loading" });
@@ -93,7 +96,7 @@ export function OrderFulfillmentPanel({ orderId, onChanged, disabled = false, on
     return () => controller.abort();
   }, [orderId, revision, loadKey, onProgressChange]);
   const batchMeals = async (action: "accept" | "complete") => {
-    if (disabled || batchBusy || !ready || error) return;
+    if (disabled || storeConfirmationPending || batchBusy || !ready || error) return;
     const candidates = units.filter(unit => unit.kind === "meal" && unit.allowedActions.includes(action));
     if (candidates.length === 0) return;
     setBatchBusy(true); onBusy?.(true); setError("");
@@ -123,11 +126,11 @@ export function OrderFulfillmentPanel({ orderId, onChanged, disabled = false, on
     </header>
     {!ready && <p role="status">讀取分項履約中…</p>}
     {ready && error && <p role="alert">{error}</p>}
-    {units.some(unit => unit.kind === "meal" && unit.allowedActions.includes("accept")) || units.some(unit => unit.kind === "meal" && unit.allowedActions.includes("complete")) ? <div className="adminPageActions adminOrderFulfillmentActions">
+    {actionableUnits.some(unit => unit.kind === "meal" && unit.allowedActions.includes("accept")) || actionableUnits.some(unit => unit.kind === "meal" && unit.allowedActions.includes("complete")) ? <div className="adminPageActions adminOrderFulfillmentActions">
       <AdminButton disabled={disabled || batchBusy || !ready || Boolean(error)} onClick={() => void batchMeals("accept")}>批次接單餐點</AdminButton>
       <AdminButton variant="secondary" disabled={disabled || batchBusy || !ready || Boolean(error)} onClick={() => void batchMeals("complete")}>批次送達已處理餐點</AdminButton>
     </div> : null}
-    {units.map(unit => <UnitControls key={`${unit.id}-${unit.version}`} orderId={orderId} unit={unit} disabled={disabled || batchBusy || !ready || Boolean(error)} onBusy={onBusy} onChanged={async () => {
+    {actionableUnits.map(unit => <UnitControls key={`${unit.id}-${unit.version}-${storeConfirmationPending}`} orderId={orderId} unit={unit} disabled={disabled || batchBusy || !ready || Boolean(error)} onBusy={onBusy} onChanged={async () => {
       setRevision(n => n + 1);
       await onChanged();
     }} />)}

@@ -11,12 +11,13 @@ import type { ManagerBusinessAction } from "./ManagerBusinessActionDialog";
 type Props = {
   context: OperationsContext;
   disabled: boolean;
+  canClose: boolean;
   settings: ManagerSettings | null;
   onChanged: () => Promise<void>;
   onAction: (action: ManagerBusinessAction) => void;
 };
 
-export function ManagerBusinessPanel({ context, disabled, settings, onChanged, onAction }: Props) {
+export function ManagerBusinessPanel({ context, disabled, canClose, settings, onChanged, onAction }: Props) {
   const [planOpen, setPlanOpen] = useState(false);
   const [planBusy, setPlanBusy] = useState(false);
   const open = context.periodStatus === "open";
@@ -48,6 +49,12 @@ export function ManagerBusinessPanel({ context, disabled, settings, onChanged, o
       <div className="managerBusinessActions">
         {!open && <AdminButton disabled={unavailable} onClick={showPlan}>{closed ? "安排下次營業" : "營業計畫／開店"}</AdminButton>}
         {open && <AdminButton variant="secondary" disabled={unavailable} onClick={() => onAction({ type: "time" })}>調整時間</AdminButton>}
+        {open && <AdminButton
+          variant="danger"
+          disabled={unavailable || !canClose}
+          disabledReason={!canClose ? "請先完成未結束的訂單與服務，並確認最新營業狀態。" : undefined}
+          onClick={() => onAction({ type: "close" })}
+        >實際關店</AdminButton>}
         {!closed && <AdminButton
           variant="secondary"
           disabled={unavailable || !settings}

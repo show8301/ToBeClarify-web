@@ -1,5 +1,190 @@
 [
   {
+    "selector": ".adminOrdersPage .adminOrderCustomerName",
+    "declarations": { "display": "contents" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderCustomerName > .adminOrderStatus",
+    "declarations": { "font-size": "20px" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderFinanceRecordHeading",
+    "declarations": { "display": "flex", "flex-wrap": "nowrap", "align-items": "center", "justify-content": "space-between" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderFinanceRecordHeading h4",
+    "declarations": { "font-size": "20px", "line-height": "1.4" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderFinanceRecordHeadingTitle",
+    "declarations": { "display": "flex", "align-items": "center", "white-space": "nowrap" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderFinanceRecords > .adminOrderCashRecord",
+    "declarations": { "grid-template-columns": "minmax(0, 1fr) max-content auto" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderCashRecordContent",
+    "declarations": { "display": "flex", "flex-wrap": "nowrap", "overflow-x": "auto", "white-space": "nowrap" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderFinanceRecords > .adminOrderCashRecord > .adminButton",
+    "declarations": { "grid-column": "auto", "justify-self": "end" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderAdmissionHeading",
+    "declarations": { "display": "flex", "flex-wrap": "wrap", "align-items": "center" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderAdmissionHeading h4",
+    "declarations": { "font-size": "16px", "line-height": "1.5" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderAdmissionFacts",
+    "declarations": { "display": "flex", "font-size": "16px", "line-height": "1.5" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderAdmissionFacts :is(dt, dd)",
+    "declarations": { "font-size": "16px", "line-height": "1.5", "white-space": "nowrap" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderFinanceAdmission > .adminOrderFinanceActions",
+    "declarations": { "justify-content": "flex-end" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderFinanceBalance",
+    "declarations": { "display": "grid", "grid-template-columns": "minmax(0, 1fr) max-content", "grid-template-rows": "auto auto", "align-content": "start", "padding": "10px 12px" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderFinanceBalance > span",
+    "declarations": { "grid-area": "1 / 1", "font-size": "16px", "line-height": "1.4" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderFinanceFlags",
+    "declarations": { "flex-direction": "column", "align-items": "flex-end", "place-self": "start end", "grid-area": "1 / 2 / 3" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderFinanceMetrics > div",
+    "declarations": { "align-content": "start", "padding": "10px 12px" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderFinanceBalance > strong",
+    "context": ["@media (max-width: 480px)"],
+    "declarations": { "font-size": "20px" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderCustomerProfile",
+    "declarations": { "display": "flex", "flex-wrap": "nowrap", "align-items": "center", "gap": "14px", "min-width": "max-content", "white-space": "nowrap" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderCustomerGameId",
+    "declarations": { "font-size": "24px", "line-height": "1.4" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderCustomerName h2",
+    "declarations": { "font-size": "24px", "line-height": "1.4" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderSummaryLine",
+    "declarations": { "display": "flex", "flex-wrap": "nowrap", "white-space": "nowrap" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderSummaryStatus",
+    "declarations": { "font-size": "24px" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderSummaryAmount > strong",
+    "declarations": { "font-size": "22px" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderDisclosure:not([open]) > .adminOrderDisclosureBody",
+    "declarations": { "display": "none" }
+  },
+  {
+    "selector": ".adminTheme .adminOrderFulfillment .adminOrderFulfillmentUnit.isUnfinished",
+    "declarations": { "border-left": "4px solid var(--color-accent-dark)", "background": "rgba(var(--color-accent-rgb), .1)" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderCustomerTools",
+    "declarations": { "display": "grid", "align-content": "start", "gap": "14px" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderCustomerMetrics .adminOrderCustomerCount > dd",
+    "declarations": { "display": "flex", "font-size": "28px", "font-variant-numeric": "tabular-nums" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminSessionControls",
+    "context": ["@container (max-width: 420px)"],
+    "declarations": { "grid-template-columns": "minmax(0, 1fr)" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderCustomerPanels",
+    "declarations": { "display": "grid", "grid-template-columns": "minmax(0, 1.4fr) minmax(300px, 1fr)", "align-items": "stretch" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderCustomerPanels",
+    "context": ["@container (max-width: 760px)"],
+    "declarations": { "grid-template-columns": "minmax(0, 1fr)" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderCustomerGroupLabel",
+    "declarations": { "font-size": "18px" }
+  },
+  {
+    "selector": ".adminTheme .adminAdmissionSummary dl > div",
+    "declarations": { "display": "grid", "grid-template-columns": "minmax(0, 1fr) max-content", "align-items": "baseline" }
+  },
+  {
+    "selector": ".adminTheme .adminAdmissionSummary :is(dt, dd)",
+    "declarations": { "font-size": "18px", "white-space": "nowrap" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderSessionActions",
+    "declarations": { "display": "grid", "grid-template-columns": "minmax(0, 1fr)" }
+  },
+  {
+    "selector": ".adminTheme .adminOrderHeadingWithHelp",
+    "declarations": { "display": "flex", "align-items": "center", "gap": "6px" }
+  },
+  {
+    "selector": ".adminTheme .adminOrderHeadingWithHelp h3",
+    "declarations": { "font-size": "20px", "line-height": "1.4" }
+  },
+  {
+    "selector": ".adminTheme .adminOrderFulfillmentHeading",
+    "declarations": { "display": "flex", "align-items": "start", "justify-content": "space-between" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderCustomerDetails",
+    "declarations": { "align-items": "start", "grid-template-columns": "minmax(0, 1fr) minmax(0, 1fr) auto" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderCustomerDetails label",
+    "declarations": { "grid-template-rows": "24px auto", "align-content": "start" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderCustomerDetails label",
+    "context": ["@media (any-pointer: coarse)"],
+    "declarations": { "grid-template-rows": "44px auto" }
+  },
+  {
+    "selector": ".adminShell:has(.adminOrdersPage)",
+    "declarations": { "overflow-x": "clip" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminCustomerPane",
+    "declarations": { "position": "sticky", "top": "16px", "align-self": "start", "height": "var(--customer-pane-height, calc(100dvh - 32px))", "max-height": "none", "overflow": "hidden" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminCustomerListScroll",
+    "declarations": { "flex": "1 1 0", "overflow": "hidden auto", "scrollbar-gutter": "stable", "scrollbar-width": "auto" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminCustomerPane",
+    "context": ["@media (max-width: 760px)"],
+    "declarations": { "position": "static", "height": "min(65dvh, 520px)", "min-height": "360px" }
+  },
+  {
     "selector": ":root[data-admin-theme=\"dark\"] .adminButton-secondary",
     "declarations": { "background": "rgba(25, 133, 94, .24)", "color": "#d9fff1" }
   },
@@ -29,15 +214,15 @@
   },
   {
     "selector": ".adminOrdersPage .adminOrderCustomerServices",
-    "declarations": { "grid-column": "1 / -1", "display": "flex", "flex-wrap": "wrap", "padding-top": "14px" }
+    "declarations": { "display": "grid", "align-content": "start", "gap": "12px" }
   },
   {
     "selector": ".adminOrdersPage .adminOrderCustomerIdentity",
-    "declarations": { "display": "flex", "flex-wrap": "wrap" }
+    "declarations": { "min-width": "0", "overflow-x": "auto" }
   },
   {
     "selector": ".adminOrdersPage .adminSessionControls",
-    "declarations": { "display": "grid", "grid-template-columns": "auto minmax(0, 1fr)" }
+    "declarations": { "display": "grid", "grid-template-columns": "minmax(0, 1fr) minmax(0, 1fr)", "align-content": "start" }
   },
   {
     "selector": ".adminOrdersPage .adminOrderItemList > .adminOrderItemRow",
@@ -53,7 +238,7 @@
   },
   {
     "selector": ".adminOrdersPage .adminOrderCustomerServices > .adminCustomerActions",
-    "declarations": { "justify-content": "flex-end", "margin-block": "0" }
+    "declarations": { "display": "grid", "grid-template-columns": "repeat(2, minmax(0, 1fr))", "margin-block": "0" }
   },
   {
     "selector": ".adminOrdersPage .adminOrderNominationControl input",
@@ -73,7 +258,7 @@
   },
   {
     "selector": ".adminOrdersPage .adminCustomerPane",
-    "declarations": { "display": "flex", "max-height": "max(360px, calc(100dvh - 260px))", "overflow": "hidden" }
+    "declarations": { "display": "flex", "max-height": "none", "overflow": "hidden" }
   },
   {
     "selector": ".adminOrdersPage .adminCustomerListScroll",
@@ -97,7 +282,7 @@
   },
   {
     "selector": ".adminOrdersPage .adminOrderFinanceBalance > strong",
-    "declarations": { "font-size": "26px", "font-variant-numeric": "tabular-nums" }
+    "declarations": { "font-size": "24px", "font-variant-numeric": "tabular-nums" }
   },
   {
     "selector": ".adminOrdersPage .adminOrderFinanceMetrics",

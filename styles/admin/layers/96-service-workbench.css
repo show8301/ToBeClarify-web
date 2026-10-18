@@ -27,7 +27,7 @@
 }
 .serviceTaskFilters, .serviceSearch { margin-bottom: var(--admin-space-block, 18px); }
 .serviceSearch { display: grid; gap: 6px; }
-.serviceTaskRow, .serviceGuestOrder, .adminAdmissionPayment, .adminAdmissionSummary, .adminAdmissionDaily {
+.serviceTaskRow, .serviceGuestOrder, .adminAdmissionPayment, .adminAdmissionSummary, .adminAdmissionDaily, .adminCustomerSummaryCard {
   min-width: 0;
   padding: 14px 16px;
   border: 1px solid var(--admin-border, rgba(127, 149, 162, .3));
@@ -50,9 +50,11 @@
 .serviceGuestFilters, .adminAdmissionFields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .serviceGuestFilters label { display: grid; gap: 6px; }
 .serviceGuestPanel > div > .adminPageActions, .serviceGuestOrder, .adminAdmissionSummary, .adminAdmissionPayment { margin-top: var(--admin-space-block, 18px); }
-.adminAdmissionSummary dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.adminAdmissionSummary dl > div { display: grid; gap: 6px; }
-.adminAdmissionSummary dd { margin: 0; font-weight: 700; }
+.adminTheme .adminAdmissionSummary h3 { margin: 0; font-size: 18px; font-weight: 750; line-height: 1.5; }
+.adminTheme .adminAdmissionSummary dl { display: grid; grid-template-columns: minmax(0, 1fr); grid-row: auto; gap: 10px; margin: 12px 0 0; overflow-x: auto; }
+.adminTheme .adminAdmissionSummary dl > div { display: grid; grid-template-columns: minmax(0, 1fr) max-content; align-items: baseline; gap: 12px; min-width: max-content; padding: 10px 12px; }
+.adminTheme .adminAdmissionSummary :is(dt, dd) { margin: 0; font-size: 18px; font-weight: 700; line-height: 1.5; white-space: nowrap; }
+.adminTheme .adminAdmissionSummary dd { text-align: right; font-variant-numeric: tabular-nums; }
 .adminAdmissionConfirm { display: flex; align-items: center; gap: 8px; }
 .adminAdmissionConfirm input { width: auto; }
 .adminCreateSessionPanel > form > .adminAdmissionPayment { flex: 1 0 100%; box-sizing: border-box; }
@@ -62,7 +64,7 @@
 .serviceFulfillment fieldset { min-width: 0; border: 1px solid var(--admin-border, rgba(127, 149, 162, .3)); }
 @media (max-width: 760px) {
   .serviceTaskHead, .adminAdmissionDaily article { align-items: flex-start; flex-direction: column; }
-  .serviceGuestFilters, .adminAdmissionFields, .adminAdmissionSummary dl { grid-template-columns: minmax(0, 1fr); }
+  .serviceGuestFilters, .adminAdmissionFields { grid-template-columns: minmax(0, 1fr); }
   .serviceTaskActions .adminButton, .serviceTaskFilters .adminButton { min-height: 44px; }
-  .serviceTaskRow, .adminAdmissionPayment, .adminAdmissionSummary { padding: 12px; }
+  .serviceTaskRow, .adminAdmissionPayment, .adminAdmissionSummary, .adminCustomerSummaryCard { padding: 12px; }
 }

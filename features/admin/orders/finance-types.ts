@@ -21,6 +21,7 @@ export interface FinanceRecord {
   caseId: string | null;
   createdAt: string;
   createdBy: string;
+  createdByDisplayName?: string | null;
   updatedAt: string;
   updatedBy: string;
   confirmedAt: string | null;

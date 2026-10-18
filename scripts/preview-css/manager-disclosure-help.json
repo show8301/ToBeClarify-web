@@ -1,0 +1,8 @@
+[
+  { "selector": ".managerBusinessMore > .adminDisclosureSummary", "declarations": { "min-height": "44px", "padding": "4px 16px", "gap": "8px", "white-space": "nowrap" } },
+  { "selector": ".managerBusinessMore > .adminDisclosureSummary", "context": ["@media (max-width: 680px)"], "declarations": { "min-height": "48px" } },
+  { "selector": ".adminTheme .adminDisclosureChevron", "declarations": { "width": "34px", "height": "34px", "place-items": "center" } },
+  { "selector": ".adminTheme .adminDisclosureChevron > svg", "declarations": { "width": "16px", "height": "16px" } },
+  { "selector": ".adminTheme details[open] > .adminDisclosureSummary > .adminDisclosureChevron > svg", "declarations": { "transform": "rotate(180deg)" } },
+  { "selector": ".adminFieldHeading", "declarations": { "display": "flex", "align-items": "center", "gap": "6px" } }
+]

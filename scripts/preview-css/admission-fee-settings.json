@@ -1,0 +1,18 @@
+[
+  { "selector": ".adminOrderingSettings .adminAdmissionPolicy", "declarations": { "display": "grid", "gap": "12px", "padding": "16px", "border-radius": "14px" } },
+  { "selector": ".adminAdmissionPolicyFields", "declarations": { "display": "grid", "grid-template-columns": "repeat(2, minmax(0, 1fr))", "gap": "12px" } },
+  { "selector": ".adminAdmissionPolicyFields input", "declarations": { "min-height": "44px", "width": "100%" } },
+  { "selector": ".adminOrderingSettingsControls", "declarations": { "display": "grid", "grid-template-columns": "repeat(2, minmax(0, 1fr))", "gap": "14px 18px" } },
+  { "selector": ".adminOrderingSettingsControls", "context": ["@media (max-width: 900px)"], "declarations": { "grid-template-columns": "minmax(0, 1fr)" } },
+  { "selector": ".adminOrderingMaintenanceCopy", "declarations": { "display": "flex", "align-items": "center", "gap": "6px" } },
+  { "selector": ".adminOrderingSettings .adminBusinessHours > p", "declarations": { "font-size": "14px", "line-height": "1.5" } },
+  { "selector": ".adminOrderingSettings .adminBusinessOverride .adminFieldHeading", "declarations": { "align-items": "center", "flex-wrap": "wrap", "margin-top": "5px" } },
+  { "selector": ".adminOrderingSettings .adminBusinessOverride .adminOverrideStatus", "declarations": { "display": "inline-flex", "margin": "0", "font-size": "14px" } },
+  { "selector": ".adminBusinessOverrideDisclosure > .adminDisclosureSummary", "declarations": { "padding": "8px 0 0", "font-size": "13px", "font-weight": "700" } },
+  { "selector": ".adminBusinessOverrideDisclosure > .adminBusinessOverrideBody", "declarations": { "display": "grid", "gap": "12px" } },
+  { "selector": ".adminBusinessOverrideDisclosure[open] > .adminBusinessOverrideBody", "declarations": { "margin-top": "12px", "padding-top": "12px" } },
+  { "selector": ".adminBusinessOverrideGrid .adminBusinessOverrideFieldHeading", "declarations": { "display": "flex", "justify-content": "space-between", "gap": "8px" } },
+  { "selector": ".adminOrderingSettingsControls .adminNominationPause", "declarations": { "align-items": "center", "flex-flow": "row wrap" } },
+  { "selector": ".adminOrderingSettingsControls .adminNominationPause > span", "declarations": { "align-self": "center", "margin-left": "auto", "font-size": "14px", "text-align": "right" } },
+  { "selector": ".adminAdmissionPolicyFields", "context": ["@media (max-width: 480px)"], "declarations": { "grid-template-columns": "minmax(0, 1fr)" } }
+]

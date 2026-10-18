@@ -11,11 +11,14 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { adminApi } from '@/features/admin/api/client.js';
 import { useAdminAuth } from '@/features/admin/auth/AdminAuthContext';
 import { AdminButton } from '@/features/admin/shared/AdminShared.jsx';
+import { AdminHelp } from '@/features/admin/shared/AdminHelp';
+import { AdminDisclosureSummary } from '@/features/admin/shared/AdminDisclosureSummary';
 import { IssuedPanel } from './AdminOrderPassPanels.jsx';
 import { CreateSessionPanel } from './CreateSessionPanel';
 import { CustomerPane } from './CustomerPane';
 import { OrderCustomerDetails } from './OrderCustomerDetails';
 import { OrderDisclosure } from './OrderDisclosure';
+import { AdmissionFeeSettings } from './AdmissionFeeSettings';
 import { orderStatusLabels as labels } from './order-presentation';
 
 const today = () => new Intl.DateTimeFormat('en-CA', {
@@ -73,6 +76,7 @@ export function AdminOrdersPage() {
   const [createBusy, setCreateBusy] = useState(false);
   const [showCreate, setShowCreate] = useState(() => searchParams.get('focus') === 'create');
   const [showSettings, setShowSettings] = useState(false);
+  const [admissionPolicyRevision, setAdmissionPolicyRevision] = useState(0);
   const [issued, setIssued] = useState(null);
   const [showAssisted, setShowAssisted] = useState(false);
 
@@ -143,9 +147,9 @@ export function AdminOrdersPage() {
     {businessContext ? <BusinessOperationsBar context={businessContext} canManage={canManage} onChanged={(value, text) => { setBusinessContext(value); setBusinessDate(value.referenceBusinessDate); setMessage({ text, error: false }); }} onError={(error) => setMessage({ text: error.message, error: true })}>
       {canManage ? <BusinessDayPlanPanel businessDate={businessContext.referenceBusinessDate} onOpened={loadBusinessContext} /> : null}
     </BusinessOperationsBar> : null}
-    {showCreate ? <CreateSessionPanel canManage={canManage} onBusyChange={setCreateBusy} onClose={() => setShowCreate(false)} onIssued={(result) => { setCreateBusy(false); setIssued(result); setShowCreate(false); loadSessions(result.session.id); }} /> : null}
+    {showCreate ? <CreateSessionPanel canManage={canManage} admissionPolicyRevision={admissionPolicyRevision} onBusyChange={setCreateBusy} onClose={() => setShowCreate(false)} onIssued={(result) => { setCreateBusy(false); setIssued(result); setShowCreate(false); loadSessions(result.session.id); }} /> : null}
     {issued ? <IssuedPanel issued={issued} onClose={() => setIssued(null)} /> : null}
-    {canManage && showSettings && settings ? <SettingsPanel settings={settings} onSaved={(value) => { setSettings(value); setSettingsError(''); setMessage({ text: '營運參數已更新。', error: false }); }} /> : null}
+    {canManage && showSettings && settings ? <SettingsPanel settings={settings} disabled={createBusy} onAdmissionPolicySaved={() => setAdmissionPolicyRevision((revision) => revision + 1)} onSaved={(value) => { setSettings(value); setSettingsError(''); setMessage({ text: '營運參數已更新。', error: false }); }} /> : null}
     {canManage && showSettings && settingsError ? <div className="adminOrderMessage isError" role="alert">營運參數載入失敗：{settingsError}</div> : null}
     <div className="adminOrderWorkspace">
       <CustomerPane sessions={sessions} selectedId={selectedId} businessDate={businessDate} loading={loading} onSelect={selectSession}>
@@ -335,7 +339,7 @@ function NominationShortenControl({ orderId, orderStatus, item, loading, act }) 
   return <div className="adminNomineeShorten"><label>正式縮短為<input type="number" min={minimum} max={item.segmentCount - 1} value={segments} onChange={(event) => setSegments(Number(event.target.value))} /> 節</label><input value={reason} maxLength="500" placeholder="縮短原因（必填）" onChange={(event) => setReason(event.target.value)} /><button type="button" disabled={loading || !reason.trim() || segments < minimum || segments >= item.segmentCount} onClick={() => act(() => adminApi.shortenNomination(orderId, item.id, segments, reason.trim()), `已由 ${item.segmentCount} 節正式縮短為 ${segments} 節；金額與忙碌區段已同步。`)}>確認縮短</button></div>;
 }
 
-function SettingsPanel({ settings, onSaved }) {
+function SettingsPanel({ settings, disabled, onAdmissionPolicySaved, onSaved }) {
   const [form, setForm] = useState(settings);
   const [pause, setPause] = useState(30);
   const [override, setOverride] = useState(null);
@@ -409,14 +413,40 @@ function SettingsPanel({ settings, onSaved }) {
     <header><div><span>MANAGER / DEVELOPER</span><h2>點餐營運參數</h2><p>價格與時間變更只影響新營業日／新訂單；既有訂單保留送出時快照。</p></div><AdminButton onClick={save}>儲存參數</AdminButton></header>
     <div className="adminBusinessHours"><label>營業開始<input type="time" value={minutesToTime(form.businessDayStartMinute)} onChange={(event) => setForm({ ...form, businessDayStartMinute: timeToMinutes(event.target.value) })} /></label><label>營業結束<input type="time" value={minutesToTime(form.businessDayEndMinute)} onChange={(event) => setForm({ ...form, businessDayEndMinute: timeToMinutes(event.target.value) })} /></label><label className="adminBusinessNextDay"><input type="checkbox" checked={form.businessDayEndsNextDay} onChange={(event) => setForm({ ...form, businessDayEndsNextDay: event.target.checked })} />結束時間屬於隔日</label><p>例如 18:00～隔日 03:00：凌晨 02:00 的訂單仍歸前一個營業日。</p></div>
     <div className="adminBusinessOverride">
-      <header><div><span>PRODUCTION TEST OVERRIDE</span><h3>正式環境營業日測試覆寫</h3><p>啟用後會暫時覆寫全站營業日判定，包含顧客點餐、後台與使用營業日的訂單流程；不會修改原本的 BUSINESS_PERIODS 快照。</p></div><strong className={override?.enabled ? 'adminOverrideStatus isActive' : 'adminOverrideStatus'}>{override?.enabled ? '覆寫中' : '未啟用'}</strong></header>
+      <header>
+        <div>
+          <span>PRODUCTION TEST OVERRIDE</span>
+          <div className="adminFieldHeading">
+            <h3>正式環境營業日測試覆寫</h3>
+            <AdminHelp title="正式環境營業日測試覆寫說明">啟用後會暫時覆寫全站營業日判定，包含顧客點餐、後台與使用營業日的訂單流程；不會修改原本的 BUSINESS_PERIODS 快照。</AdminHelp>
+            <strong className={override?.enabled ? 'adminOverrideStatus isActive' : 'adminOverrideStatus'}>{override?.enabled ? '覆寫中' : '未啟用'}</strong>
+          </div>
+        </div>
+      </header>
       {override?.enabled ? <div className="adminOverrideWarning">目前所有顧客都會使用測試營業日。請完成測試後立即恢復，或等待自動失效。</div> : null}
-      <div className="adminBusinessOverrideGrid"><label>測試營業日<input type="date" value={overrideDate} onChange={(event) => setOverrideDate(event.target.value)} /></label><label>測試開始<input type="time" value={overrideStart} onChange={(event) => setOverrideStart(event.target.value)} /></label><label>測試結束<input type="time" value={overrideEnd} onChange={(event) => setOverrideEnd(event.target.value)} /><small>結束早於開始時視為隔日</small></label><label>自動失效（分鐘）<input type="number" min="1" max="1440" value={overrideDuration} onChange={(event) => setOverrideDuration(Number(event.target.value))} /></label><label className="adminBusinessOverrideReason">測試原因<input value={overrideReason} maxLength="500" onChange={(event) => setOverrideReason(event.target.value)} placeholder="例如：測試跨日營業日與點餐碼有效性" /></label></div>
-      <div className="adminBusinessOverrideActions"><AdminButton disabled={overrideBusy || !overrideDate || !overrideReason.trim()} onClick={saveOverride}>{overrideBusy ? '處理中…' : '啟用／更新測試覆寫'}</AdminButton>{override?.enabled ? <AdminButton variant="danger" disabled={overrideBusy} onClick={disableOverride}>立即恢復正常快照</AdminButton> : null}</div>
+      <details className="adminBusinessOverrideDisclosure">
+        <AdminDisclosureSummary>測試覆寫設定</AdminDisclosureSummary>
+        <div className="adminBusinessOverrideBody">
+          <div className="adminBusinessOverrideGrid">
+            <label>測試營業日<input type="date" value={overrideDate} onChange={(event) => setOverrideDate(event.target.value)} /></label>
+            <label>測試開始<input type="time" value={overrideStart} onChange={(event) => setOverrideStart(event.target.value)} /></label>
+            <label className="adminBusinessOverrideEnd">
+              <span className="adminBusinessOverrideFieldHeading"><span>測試結束</span><small>結束早於開始時視為隔日</small></span>
+              <input type="time" value={overrideEnd} onChange={(event) => setOverrideEnd(event.target.value)} />
+            </label>
+            <label>自動失效（分鐘）<input type="number" min="1" max="1440" value={overrideDuration} onChange={(event) => setOverrideDuration(Number(event.target.value))} /></label>
+            <label className="adminBusinessOverrideReason">測試原因<input value={overrideReason} maxLength="500" onChange={(event) => setOverrideReason(event.target.value)} placeholder="例如：測試跨日營業日與點餐碼有效性" /></label>
+          </div>
+          <div className="adminBusinessOverrideActions"><AdminButton disabled={overrideBusy || !overrideDate || !overrideReason.trim()} onClick={saveOverride}>{overrideBusy ? '處理中…' : '啟用／更新測試覆寫'}</AdminButton>{override?.enabled ? <AdminButton variant="danger" disabled={overrideBusy} onClick={disableOverride}>立即恢復正常快照</AdminButton> : null}</div>
+        </div>
+      </details>
       {overrideMessage ? <p className="adminOverrideMessage" role="status">{overrideMessage}</p> : null}{overrideError ? <p className="adminOverrideError" role="alert">{overrideError}</p> : null}
     </div>
-    <div className="adminOrderingSettingsGrid"><label>低消／信物可折抵金額<input type="number" min="0" value={form.minimumMealCredit} onChange={(event) => setForm({ ...form, minimumMealCredit: Number(event.target.value) })} /></label><label>每節基礎指名費<input type="number" min="0" value={form.baseNominationFee} onChange={(event) => setForm({ ...form, baseNominationFee: Number(event.target.value) })} /></label>{tipPresetAmounts.map((value, index) => <label key={`tip-preset-${index}`}>小費按鈕 {index + 1}（Gil）<input type="number" min="1" max="1000000" value={value} onChange={(event) => setForm({ ...form, tipPresetAmounts: tipPresetAmounts.map((current, currentIndex) => currentIndex === index ? Number(event.target.value) : current) })} /></label>)}<label>每節分鐘<input type="number" min="1" value={form.segmentMinutes} onChange={(event) => setForm({ ...form, segmentMinutes: Number(event.target.value) })} /></label><label>提醒（分鐘）<input type="number" min="1" value={form.reminderAfterMinutes} onChange={(event) => setForm({ ...form, reminderAfterMinutes: Number(event.target.value) })} /></label><label>升級（分鐘）<input type="number" min="1" value={form.escalateAfterMinutes} onChange={(event) => setForm({ ...form, escalateAfterMinutes: Number(event.target.value) })} /></label><label>失效（分鐘）<input type="number" min="1" value={form.expireAfterMinutes} onChange={(event) => setForm({ ...form, expireAfterMinutes: Number(event.target.value) })} /></label></div>
-    <div className="adminNominationPause"><label>暫停指名分鐘<input type="number" min="0" max="1440" value={pause} onChange={(event) => setPause(Number(event.target.value))} /></label><AdminButton variant="secondary" onClick={pauseNow}>{pause === 0 ? '立即解除暫停' : `暫停 ${pause} 分鐘`}</AdminButton><span>{settings.nominationPaused ? `目前暫停至 ${new Date(settings.nominationPausedUntil).toLocaleString('zh-TW')}` : '目前開放指名'}</span></div>
-    <div className="adminOrderingMaintenance"><div><strong>等待單逾時處理</strong><small>依目前「失效（分鐘）」與排程規則執行一次；不會提前使尚未到期的訂單失效。</small></div><AdminButton variant="secondary" disabled={expiryBusy} onClick={runExpiry}>{expiryBusy ? '處理中…' : '立即檢查逾時等待單'}</AdminButton>{expiryMessage ? <p role="status">{expiryMessage}</p> : null}</div>
+    <div className="adminOrderingSettingsGrid"><label>低消可折抵金額 (Gil)<input type="number" min="0" value={form.minimumMealCredit} onChange={(event) => setForm({ ...form, minimumMealCredit: Number(event.target.value) })} /></label><label>每節基礎指名費<input type="number" min="0" value={form.baseNominationFee} onChange={(event) => setForm({ ...form, baseNominationFee: Number(event.target.value) })} /></label>{tipPresetAmounts.map((value, index) => <label key={`tip-preset-${index}`}>小費按鈕 {index + 1}（Gil）<input type="number" min="1" max="1000000" value={value} onChange={(event) => setForm({ ...form, tipPresetAmounts: tipPresetAmounts.map((current, currentIndex) => currentIndex === index ? Number(event.target.value) : current) })} /></label>)}<label>每節分鐘<input type="number" min="1" value={form.segmentMinutes} onChange={(event) => setForm({ ...form, segmentMinutes: Number(event.target.value) })} /></label><label>提醒（分鐘）<input type="number" min="1" value={form.reminderAfterMinutes} onChange={(event) => setForm({ ...form, reminderAfterMinutes: Number(event.target.value) })} /></label><label>升級（分鐘）<input type="number" min="1" value={form.escalateAfterMinutes} onChange={(event) => setForm({ ...form, escalateAfterMinutes: Number(event.target.value) })} /></label><label>失效（分鐘）<input type="number" min="1" value={form.expireAfterMinutes} onChange={(event) => setForm({ ...form, expireAfterMinutes: Number(event.target.value) })} /></label></div>
+    <div className="adminOrderingSettingsControls">
+      <div className="adminNominationPause"><label>暫停指名分鐘<input type="number" min="0" max="1440" value={pause} onChange={(event) => setPause(Number(event.target.value))} /></label><AdminButton variant="secondary" onClick={pauseNow}>{pause === 0 ? '立即解除暫停' : `暫停 ${pause} 分鐘`}</AdminButton><span>{settings.nominationPaused ? `目前暫停至 ${new Date(settings.nominationPausedUntil).toLocaleString('zh-TW')}` : '目前開放指名'}</span></div>
+      <div className="adminOrderingMaintenance"><div className="adminOrderingMaintenanceCopy"><strong>等待單逾時處理</strong><AdminHelp title="等待單逾時處理說明">依目前「失效（分鐘）」與排程規則執行一次；不會提前使尚未到期的訂單失效。</AdminHelp></div><AdminButton variant="secondary" disabled={expiryBusy} onClick={runExpiry}>{expiryBusy ? '處理中…' : '立即檢查逾時等待單'}</AdminButton>{expiryMessage ? <p role="status">{expiryMessage}</p> : null}</div>
+    </div>
+    <AdmissionFeeSettings disabled={disabled} onSaved={onAdmissionPolicySaved} />
   </div>;
 }

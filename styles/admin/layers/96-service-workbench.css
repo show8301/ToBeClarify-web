@@ -76,7 +76,7 @@
 .serviceTaskDetail details > summary, .serviceGuestOrder > summary { cursor: pointer; padding: 10px 0; font-weight: 700; }
 .serviceTaskPagination { justify-content: flex-end; margin-top: var(--admin-space-block, 18px); }
 .serviceGuestFilters { display: grid; grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr)); gap: 12px; align-items: end; }
-.adminAdmissionFields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.adminAdmissionFields { display: flex; flex-wrap: wrap; align-items: end; gap: 8px 12px; }
 .serviceGuestFilters label { display: grid; gap: 6px; }
 .serviceGuestFilters > .adminField { min-width: 0; margin: 0; gap: 6px; }
 .serviceGuestFilters select { width: 100%; min-width: 0; box-sizing: border-box; }
@@ -156,6 +156,24 @@
 .adminTheme .adminAdmissionSummary dl > div { display: grid; grid-template-columns: minmax(0, 1fr) max-content; align-items: baseline; gap: 12px; min-width: max-content; padding: 10px 12px; }
 .adminTheme .adminAdmissionSummary :is(dt, dd) { margin: 0; font-size: 18px; font-weight: 700; line-height: 1.5; white-space: nowrap; }
 .adminTheme .adminAdmissionSummary dd { text-align: right; font-variant-numeric: tabular-nums; }
+.adminCreateSessionPanel .adminAdmissionPayment { display: grid; grid-template-columns: minmax(0, 1fr) max-content; align-items: end; gap: 8px 12px; }
+.adminAdmissionOverview { display: grid; grid-column: 1 / -1; min-width: 0; gap: 3px; }
+.adminAdmissionOverviewPrimary { display: flex; flex-wrap: wrap; min-width: 0; align-items: baseline; gap: 4px 16px; }
+.adminAdmissionOverviewPrimary h3 { margin: 0; color: var(--color-fg); font-size: 16px; line-height: 1.4; }
+.adminAdmissionOverviewPrimary p { display: flex; align-items: baseline; gap: 5px; margin: 0; color: var(--color-fg-soft); font-size: 14px; line-height: 1.4; white-space: nowrap; }
+.adminAdmissionOverviewPrimary strong { color: var(--color-fg); font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.adminAdmissionOverviewPrimary .adminAdmissionOverviewReceived { margin-left: auto; }
+.adminAdmissionOverviewReceived strong { font-size: 20px; }
+.adminAdmissionOverviewMeta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; color: var(--color-fg-mute); font-size: 12px; line-height: 1.4; }
+.adminAdmissionFields { grid-column: 1; min-width: 0; }
+.adminAdmissionFields > label { flex: 0 1 auto; width: max-content; max-width: 100%; }
+.adminCreateSessionPanel .adminAdmissionFields select { box-sizing: border-box; width: 15em; max-width: 100%; }
+.adminCreateSessionPanel .adminAdmissionFields input[type="number"] { box-sizing: border-box; width: 15ch; max-width: 100%; }
+.adminCreateSessionPanel .adminAdmissionPaymentReason { flex: 0 1 min(32ch, 100%); }
+.adminCreateSessionPanel .adminAdmissionPaymentReason input { box-sizing: border-box; width: 100%; }
+.adminAdmissionPaymentActions { display: flex; grid-column: 2; flex-wrap: wrap; align-items: center; align-self: end; justify-content: flex-end; gap: 8px; }
+.adminAdmissionPayment > :is(h3, p), .adminAdmissionPayment [role="status"] > p { margin: 0; }
+.adminAdmissionPayment [role="status"] { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .adminAdmissionConfirm { display: flex; align-items: center; gap: 8px; }
 .adminAdmissionConfirm input { width: auto; }
 .adminCreateSessionPanel > form > .adminAdmissionPayment { flex: 1 0 100%; box-sizing: border-box; }
@@ -168,7 +186,12 @@
 }
 @media (max-width: 760px) {
   .serviceTaskHead, .adminAdmissionDaily article { align-items: flex-start; flex-direction: column; }
-  .serviceGuestFilters, .adminAdmissionFields { grid-template-columns: minmax(0, 1fr); }
+  .serviceGuestFilters { grid-template-columns: minmax(0, 1fr); }
+  .adminCreateSessionPanel .adminAdmissionPayment { grid-template-columns: minmax(0, 1fr); align-items: start; }
+  .adminAdmissionPaymentActions { grid-column: 1; justify-content: space-between; }
+  .adminAdmissionFields { align-items: flex-start; }
+  .adminAdmissionOverviewPrimary .adminAdmissionOverviewReceived { margin-left: 0; }
+  .adminAdmissionOverviewMeta { column-gap: 10px; }
   .serviceTaskActions .adminButton, .serviceTaskFilters .adminButton { min-height: 44px; }
   .serviceTaskRow, .adminAdmissionPayment, .adminAdmissionSummary, .adminCustomerSummaryCard { padding: 12px; }
 }

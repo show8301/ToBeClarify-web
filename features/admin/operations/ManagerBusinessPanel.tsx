@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { BusinessDayPlanPanel } from "@/features/admin/orders/BusinessDayPlanPanel";
 import { AdminButton, AdminDialog, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
+import { AdminDisclosureSummary } from "@/features/admin/shared/AdminDisclosureSummary";
 import { formatDateTime, intakeModeLabel, periodStatusLabel } from "./operationsFormat";
 import type { OperationsContext } from "./operationsTypes";
 import type { ManagerSettings } from "./managerOverview";
@@ -61,7 +62,7 @@ export function ManagerBusinessPanel({ context, disabled, canClose, settings, on
           onClick={() => onAction({ type: settings?.nominationPaused ? "resume" : "pause" })}
         >{settings?.nominationPaused ? "解除暫停" : "暫停指名"}</AdminButton>}
         {(open || context.periodStatus === "closed") && <details className="managerBusinessMore">
-          <summary>更多操作</summary>
+          <AdminDisclosureSummary className="adminButton adminButton-secondary">更多操作</AdminDisclosureSummary>
           <div className="managerBusinessMoreContent">
             {open && <AdminButton variant="ghost" disabled={unavailable} onClick={showPlan}>營業計畫／開店</AdminButton>}
             {context.periodStatus === "closed" && <AdminButton variant="ghost" disabled={unavailable} onClick={() => onAction({ type: "reopen" })}>誤關重開</AdminButton>}

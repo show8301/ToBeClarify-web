@@ -157,6 +157,58 @@
 .adminOrdersPage .adminOrderFinanceActions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .adminOrdersPage .adminOrderSessionActions { display: grid; grid-template-columns: minmax(0, 1fr); }
 .adminOrdersPage .adminOrderSessionActions > .adminButton { width: 100%; }
+.adminOrderingSettings .adminAdmissionPolicy {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface);
+}
+.adminAdmissionPolicy > header { display: flex; align-items: start; margin: 0; }
+.adminAdmissionPolicy h3 { margin: 0; color: var(--color-fg); font-size: 17px; line-height: 1.4; }
+.adminAdmissionPolicyCurrent,
+.adminAdmissionPolicyMessage { margin: 0; color: var(--color-fg-soft); font-size: 13px; line-height: 1.6; }
+.adminAdmissionPolicyFields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.adminAdmissionPolicyFields label { display: grid; gap: 6px; min-width: 0; }
+.adminAdmissionPolicyFields input { box-sizing: border-box; width: 100%; min-height: 44px; padding: 9px 12px; border: 1px solid var(--color-border-strong); border-radius: 9px; color: var(--color-fg); background: var(--color-surface-input); font: inherit; }
+.adminAdmissionPolicyActions { display: flex; flex-wrap: wrap; gap: 8px; }
+.adminAdmissionPolicy .adminFormError { margin: 0; }
+.adminOrderingSettings .adminBusinessHours > p { font-size: 14px; line-height: 1.5; }
+.adminOrderingSettings .adminBusinessOverride .adminFieldHeading { align-items: center; flex-wrap: wrap; margin-top: 5px; }
+.adminOrderingSettings .adminBusinessOverride .adminFieldHeading > h3 { margin: 0; }
+.adminOrderingSettings .adminBusinessOverride .adminOverrideStatus { display: inline-flex; align-items: center; justify-content: center; margin: 0; font-size: 14px; }
+.adminBusinessOverrideDisclosure { border-top: 1px solid var(--color-border); }
+.adminBusinessOverrideDisclosure > .adminDisclosureSummary { padding: 8px 0 0; color: var(--color-fg); font-size: 13px; font-weight: 700; }
+.adminBusinessOverrideDisclosure > .adminBusinessOverrideBody { display: grid; gap: 12px; }
+.adminBusinessOverrideDisclosure[open] > .adminBusinessOverrideBody { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--color-border); }
+.adminBusinessOverrideGrid .adminBusinessOverrideFieldHeading { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; min-width: 0; }
+.adminBusinessOverrideGrid .adminBusinessOverrideFieldHeading > small { flex-shrink: 0; text-align: right; white-space: nowrap; }
+.adminOrderingSettingsControls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: center;
+  gap: 14px 18px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border);
+}
+.adminOrderingSettingsControls .adminNominationPause {
+  flex-flow: row wrap;
+  align-items: center;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.adminOrderingSettingsControls .adminNominationPause label { width: 150px; max-width: 100%; }
+.adminOrderingSettingsControls .adminNominationPause > span { align-self: center; margin-left: auto; color: var(--color-accent-2); font-size: 14px; line-height: 1.4; text-align: right; }
+.adminOrderingSettingsControls .adminOrderingMaintenance { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; min-width: 0; }
+.adminOrderingMaintenanceCopy { display: flex; align-items: center; gap: 6px; min-height: 24px; }
+.adminOrderingMaintenanceCopy strong { color: var(--color-fg); font-size: 13px; }
+.adminOrderingMaintenance > p { flex-basis: 100%; margin: 0; color: var(--color-fg-soft); font-size: 12px; }
+.adminAdmissionPolicy { margin-top: 18px; }
 .adminOrdersPage .adminButton { min-height: 40px; padding: 9px 12px; font-size: 14px; line-height: 1.4; }
 .adminOrdersPage .adminOrderSectionHeading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
 .adminOrdersPage .adminOrderSectionHeading h3 { margin: 0; font-size: 18px; font-weight: 750; }
@@ -304,6 +356,9 @@
   .adminOrdersPage .adminOrderItemList > .adminOrderItemRow { grid-template-columns: minmax(0, 1fr) auto auto; }
   .adminOrdersPage .adminOrderItemActions { justify-self: end; }
 }
+@media (max-width: 900px) {
+  .adminOrderingSettingsControls { grid-template-columns: minmax(0, 1fr); }
+}
 @container (max-width: 760px) {
   .adminOrdersPage .adminOrderCustomerPanels { grid-template-columns: minmax(0, 1fr); }
 }
@@ -311,6 +366,8 @@
   .adminOrdersPage .adminSessionControls { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 480px) {
+  .adminAdmissionPolicy { padding: 12px; }
+  .adminAdmissionPolicyFields { grid-template-columns: minmax(0, 1fr); }
   .adminOrdersPage .adminOrderCustomerDetails { grid-template-columns: minmax(0, 1fr) auto; }
   .adminOrdersPage .adminOrderCustomerDetails > label { grid-column: 1; }
   .adminOrdersPage .adminOrderCustomerDetails > .iconActionButton { grid-column: 2; grid-row: 1; }

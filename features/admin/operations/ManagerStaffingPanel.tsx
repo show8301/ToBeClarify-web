@@ -7,6 +7,7 @@ import { payrollRoleLabel } from "@/features/admin/shared/workRoles";
 import { workRoleOptions } from "./staffWorkStatus";
 import { AdminButton, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
 import { AdminDisclosureSummary } from "@/features/admin/shared/AdminDisclosureSummary";
+import { AdminHelp } from "@/features/admin/shared/AdminHelp";
 import { StaffWorkStatusPanel } from "./StaffWorkStatusPanel";
 import { TemporaryDutyPlanDialog } from "./TemporaryDutyPlanDialog";
 import { useStaffingWorkspace } from "./staffingWorkspace";
@@ -69,8 +70,7 @@ export function ManagerStaffingPanel({ blockedReason = "", onChanged, navigate }
 
   return <AdminPanel
     className="adminStaffingPanel"
-    title="當班人力"
-    description="顯示核准班次與單一計薪職位；展開店員可調整接單與目前支援工作。"
+    title={<span className="adminFieldHeading">當班人力<AdminHelp title="當班人力說明">顯示核准班次與單一計薪職位；展開店員可調整接單與目前支援工作。</AdminHelp></span>}
     actions={<><AdminButton variant="ghost" disabled={!canManage || workspace.refreshing || Boolean(draft)} onClick={() => void workspace.reload()}>重新讀取人力</AdminButton><AdminButton variant="ghost" onClick={() => navigate("/admin/duty-planning")}>值班規劃</AdminButton></>}
   >
     <div className="adminStaffingToolbar">

@@ -3,6 +3,10 @@
 import { useEffect, useState } from "react";
 import { adminRequest } from "@/features/admin/api/client.js";
 import { AdminButton } from "@/features/admin/shared/AdminButton";
+import { AdminHelp } from "@/features/admin/shared/AdminHelp";
+import { RefreshCw } from "lucide-react";
+import { isFulfillmentUnitFinished } from "./fulfillment-progress";
+import type { FulfillmentReadState } from "./fulfillment-progress";
 
 interface Unit {
   id: string;
@@ -57,21 +61,32 @@ const labels: Record<string, string> = {
 };
 const showTime = (value?: string | null) => value ? new Date(value).toLocaleString("zh-TW", { hour12: false }) : "—";
 
-export function OrderFulfillmentPanel({ orderId, onChanged, disabled = false, onBusy }: { orderId: string; onChanged: () => Promise<void> | void; disabled?: boolean; onBusy?: (busy: boolean) => void }) {
+export function OrderFulfillmentPanel({ orderId, onChanged, disabled = false, onBusy, onProgressChange, refreshKey = "" }: {
+  orderId: string; onChanged: () => Promise<void> | void; disabled?: boolean; onBusy?: (busy: boolean) => void;
+  onProgressChange?: (progress: FulfillmentReadState) => void; refreshKey?: string;
+}) {
   const [units, setUnits] = useState<Unit[]>([]);
   const [error, setError] = useState("");
   const [revision, setRevision] = useState(0);
   const [batchBusy, setBatchBusy] = useState(false);
   const [loadedFor, setLoadedFor] = useState("");
-  const loadKey = `${orderId}:${revision}`;
+  const loadKey = `${orderId}:${revision}:${refreshKey}`;
   const ready = loadedFor === loadKey;
   useEffect(() => {
     const controller = new AbortController();
+    onProgressChange?.({ kind: "loading" });
     adminRequest(`/orders/${encodeURIComponent(orderId)}/fulfillment`, { signal: controller.signal })
-      .then((data: unknown) => { if (!controller.signal.aborted) { setUnits(parseUnits(data)); setError(""); setLoadedFor(loadKey); } })
-      .catch((e: Error) => { if (!controller.signal.aborted) { setError(e.message); setLoadedFor(loadKey); } });
+      .then((data: unknown) => {
+        if (controller.signal.aborted) return;
+        const next = parseUnits(data);
+        if (!data || typeof data !== "object" || !("orderStatus" in data) || typeof data.orderStatus !== "string") throw new Error("無法確認訂單履約狀態。");
+        setUnits(next); setError(""); setLoadedFor(loadKey);
+        const unfinishedCount = next.filter((unit) => !isFulfillmentUnitFinished(unit)).length;
+        onProgressChange?.({ kind: "ready", orderStatus: data.orderStatus, allFinished: next.length > 0 && unfinishedCount === 0, unfinishedCount, totalCount: next.length });
+      })
+      .catch((e: Error) => { if (!controller.signal.aborted) { setError(e.message); setLoadedFor(loadKey); onProgressChange?.({ kind: "error" }); } });
     return () => controller.abort();
-  }, [orderId, revision, loadKey]);
+  }, [orderId, revision, loadKey, onProgressChange]);
   const batchMeals = async (action: "accept" | "complete") => {
     if (disabled || batchBusy || !ready || error) return;
     const candidates = units.filter(unit => unit.kind === "meal" && unit.allowedActions.includes(action));
@@ -92,12 +107,17 @@ export function OrderFulfillmentPanel({ orderId, onChanged, disabled = false, on
     } catch (e) { setError(e instanceof Error ? e.message : "批次餐點操作失敗"); }
     finally { setBatchBusy(false); onBusy?.(false); setRevision(n => n + 1); }
   };
-  return <section className="adminOrderCard" aria-label="分項接待進度">
-    <h3>餐點與指名分開處理</h3>
-    <p>原預約時間會保留；晚開始可在這裡保留完整購買分鐘並調整休息，折讓會同次寫入帳務。</p>
+  return <section className="adminOrderCard adminOrderFulfillment" aria-label="分項接待進度">
+    <header className="adminOrderFulfillmentHeading">
+      <div className="adminOrderHeadingWithHelp">
+        <h3>餐點與指名分開處理</h3>
+        <AdminHelp title="分項接待說明">原預約時間會保留；晚開始可在這裡保留完整購買分鐘並調整休息，折讓會同次寫入帳務。</AdminHelp>
+      </div>
+      <AdminButton variant="ghost" className="iconActionButton" aria-label="重讀履約進度" title="重讀履約進度"
+        disabled={disabled || batchBusy || !ready} onClick={() => setRevision(n => n + 1)}><RefreshCw aria-hidden="true" /></AdminButton>
+    </header>
     {!ready && <p role="status">讀取分項履約中…</p>}
     {ready && error && <p role="alert">{error}</p>}
-    <AdminButton variant="ghost" disabled={disabled || batchBusy} onClick={() => setRevision(n => n + 1)}>重讀履約進度</AdminButton>
     {units.some(unit => unit.kind === "meal" && unit.allowedActions.includes("accept")) || units.some(unit => unit.kind === "meal" && unit.allowedActions.includes("complete")) ? <div className="adminPageActions"><button type="button" disabled={disabled || batchBusy || !ready || Boolean(error)} onClick={() => void batchMeals("accept")}>批次接單餐點</button><button type="button" disabled={disabled || batchBusy || !ready || Boolean(error)} onClick={() => void batchMeals("complete")}>批次送達已處理餐點</button></div> : null}
     {units.map(unit => <UnitControls key={`${unit.id}-${unit.version}`} orderId={orderId} unit={unit} disabled={disabled || batchBusy || !ready || Boolean(error)} onBusy={onBusy} onChanged={async () => {
       setRevision(n => n + 1);
@@ -174,8 +194,9 @@ function UnitControls({ orderId, unit, onChanged, disabled, onBusy }: { orderId:
     if (action === "carry_forward" && targetBusinessPeriodId && unit.kind === "nominee" && !startsAt) return "請先填寫跨期履約開始時間。";
     return undefined;
   };
-  return <fieldset className="adminOrderEmergency" disabled={disabled || busy}>
-    <strong>{unit.name} · {labels[unit.status] || unit.status}</strong>
+  const unfinished = !isFulfillmentUnitFinished(unit);
+  return <fieldset className={`adminOrderEmergency adminOrderFulfillmentUnit${unfinished ? " isUnfinished" : ""}`} disabled={disabled || busy}>
+    <div className="adminOrderUnitHeading"><strong>{unit.name} · {labels[unit.status] || unit.status}</strong>{unfinished && <span className="adminOrderUnitPendingLabel">未完成</span>}</div>
     <p>共 {unit.quantity} 份／項 · 已接 {unit.acceptedQuantity} · 處理中 {unit.startedQuantity - unit.completedQuantity} · 完成 {unit.completedQuantity} · 取消 {unit.cancelledQuantity}{unit.purchasedMinutes > 0 ? ` · 購買 ${unit.purchasedMinutes} 分鐘` : ""}</p>
     {unit.originalScheduledStartsAt && <p>原預約：{showTime(unit.originalScheduledStartsAt)}～{showTime(unit.originalScheduledEndsAt)} · 預留休息 {unit.restMinutesReserved} 分鐘</p>}
     {unit.allowedActions.length > 0 && <>

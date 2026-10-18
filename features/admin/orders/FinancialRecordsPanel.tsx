@@ -5,6 +5,7 @@ import { financeApi, financeKind, financeSource } from "./finance-api";
 import type { FinanceAccount, FinanceOrderOption, FinancePeriodOption, FinanceRecord, FinanceSaveRequest } from "./finance-types";
 import { AdmissionAndCasesPanel } from "./AdmissionAndCasesPanel";
 import { AdminButton } from "@/features/admin/shared/AdminShared.jsx";
+import { AdminHelp } from "@/features/admin/shared/AdminHelp";
 
 const kindLabels = { charge_add: "加收應付", charge_reduce: "折讓應付", cash_receipt: "實際收款", cash_refund: "實際退款" };
 const money = (amount: number) => `${amount.toLocaleString("zh-TW")} G`;
@@ -36,7 +37,7 @@ export function FinancialRecordsPanel({ sessionId, refreshKey }: { sessionId: st
   }, [sessionId, requestKey]);
   return <section className="adminOrderCard adminOrderFinance" aria-label="現場帳款" aria-busy={loading}>
     <header className="adminOrderFinanceHeading">
-      <div><h3>現場帳款</h3><p>應付、實收與實退分開記錄，掌握待處理金額。</p></div>
+      <div className="adminOrderHeadingWithHelp"><h3>現場帳款</h3><AdminHelp title="現場帳款說明">加收、折讓用於調整應付金額；實收、實退用於記錄實際收退款。取消餐點會自動扣除應付，請勿重複登記折讓。</AdminHelp></div>
       <AdminButton variant="ghost" disabled={loading} onClick={() => setRevision(n => n + 1)}>{loading ? "讀取中…" : "重新讀取帳款"}</AdminButton>
     </header>
     {error && <p className="adminOrderFinanceNotice isError" role="alert">{error}</p>}
@@ -56,24 +57,30 @@ export function FinancialRecordsPanel({ sessionId, refreshKey }: { sessionId: st
         </dl>
       </div>
       {account.balanceIsProvisional && <p className="adminOrderFinanceNotice">金額仍待補齊或確認。入場費須登記應付，實際收退款各自記錄。</p>}
-      <div className="adminOrderFinanceGuide">
-        <strong>帳款登記說明</strong>
-        <p>加收／折讓調整應付；實收／實退記錄已發生的款項。</p>
-        <p>取消餐點已自動扣除應付，請勿重複登記折讓。</p>
-      </div>
       {account.canWrite && <AdmissionAndCasesPanel sessionId={sessionId} account={account} periods={periods} admission={admission} cases={cases} onSaved={() => setRevision(n => n + 1)} />}
       <div className="adminOrderFinanceRecordHeading">
-        <div><h4>帳款紀錄 <span>{account.records.length} 筆</span></h4><p>查看已登記款項與確認狀態。</p></div>
-        {account.canWrite && <AdminButton onClick={() => { setEditing(null); setShowForm(true); }}>＋ 登記費用／收退款</AdminButton>}
+        <div className="adminOrderFinanceRecordHeadingTitle">
+          <h4>帳款紀錄</h4>
+          <AdminHelp title="帳款紀錄說明">查看已登記款項與確認狀態。</AdminHelp>
+          <span className="adminOrderFinanceRecordCount">{account.records.length} 筆</span>
+        </div>
+        {account.canWrite && <AdminButton onClick={() => { setEditing(null); setShowForm(true); }}>登記收退款</AdminButton>}
       </div>
       {!account.canWrite && <p className="adminOrderFinanceNotice">此顧客沿用原營業日帳務；分項帳款在新開啟的分項接待營業日使用。</p>}
       {showForm && account.canWrite && <FinanceForm key={`${sessionId}-${editing?.id ?? "new"}`} account={account} periods={periods} orders={orders} record={editing}
         onSaved={() => { setShowForm(false); setRevision(n => n + 1); }} onClose={() => setShowForm(false)} />}
       <div className="adminOrderFinanceRecords">
         {!account.records.length && <p className="adminOrderFinanceEmpty">尚無額外帳款紀錄。</p>}
-        {account.records.map(record => <article key={record.id} className="adminOrderFinanceRecord">
-          <div><div className="adminOrderFinanceRecordTitle"><strong>{kindLabels[record.kind]}</strong><span className="adminOrderFinanceTag">{record.allocationStatus === "confirmed" ? "已確認" : "待確認"}</span></div>
-            <p>{record.reason}</p><small>{new Date(record.occurredAt).toLocaleString("zh-TW", { timeZone: "Asia/Taipei" })}{record.cashPeriodId === null && (record.kind === "cash_receipt" || record.kind === "cash_refund") ? " · 收退款營業日待歸屬" : ""}</small></div>
+        {account.records.map(record => <article key={record.id} className="adminOrderFinanceRecord adminOrderCashRecord">
+          {/* Focusable scrolling preserves long reasons and timestamps in a single row. */}
+          {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
+          <div className="adminOrderCashRecordContent" role="region" aria-label={`${kindLabels[record.kind]}詳細資訊`} tabIndex={0}>
+            <strong>{kindLabels[record.kind]}</strong>
+            <span className="adminOrderFinanceTag">{record.allocationStatus === "confirmed" ? "已確認" : "待確認"}</span>
+            <span>{record.reason}</span>
+            <time dateTime={record.occurredAt}>{new Date(record.occurredAt).toLocaleString("zh-TW", { timeZone: "Asia/Taipei", hour12: false })}</time>
+            {record.cashPeriodId === null && (record.kind === "cash_receipt" || record.kind === "cash_refund") && <span>收退款營業日待歸屬</span>}
+          </div>
           <b>{money(record.amount)}</b>
           {account.canWrite && <AdminButton variant="secondary" onClick={() => { setEditing(record); setShowForm(true); }}>更正／確認</AdminButton>}
         </article>)}

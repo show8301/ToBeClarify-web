@@ -58,14 +58,34 @@
   .adminCreateSessionPanel > form { --order-pass-label-height: 44px; }
 }
 .adminOrdersPage > .adminPageHeading { padding-right: 90px; }
+/* clip preserves page scrolling so the customer pane can stick to the viewport. */
+.adminShell:has(.adminOrdersPage) { overflow-x: clip; }
 .adminOrdersPage .adminOrderWorkspace {
   grid-template-columns: 280px minmax(0, 1fr);
   min-height: 0;
+  overflow: visible;
 }
-.adminOrdersPage .adminCustomerPane { display: flex; flex-direction: column; min-width: 0; min-height: 0; max-height: max(360px, calc(100dvh - 260px)); overflow: hidden; }
+.adminOrdersPage .adminCustomerPane {
+  position: sticky;
+  top: 16px;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  height: var(--customer-pane-height, calc(100dvh - 32px));
+  max-height: none;
+  overflow: hidden;
+  border-radius: 20px 0 0 20px;
+}
 .adminOrdersPage .adminCustomerToolbar { position: static; flex-shrink: 0; grid-template-columns: minmax(0, 1fr); min-width: 0; gap: 10px; padding: 14px; }
-.adminOrdersPage .adminCustomerListScroll { flex: 0 1 auto; min-width: 0; min-height: 0; margin: 8px 6px 8px 0; padding-right: 4px; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+.adminOrdersPage .adminCustomerListScroll { flex: 1 1 0; min-width: 0; min-height: 0; margin: 0 6px 0 0; padding-right: 4px; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; scrollbar-width: auto; }
 .adminOrdersPage .adminCustomerListScroll:focus-visible { outline: 2px solid var(--color-fg); outline-offset: -2px; }
+.adminOrdersPage .adminCustomerProgressNote,
+.adminOrdersPage .adminCustomerListPosition { display: grid; flex-shrink: 0; gap: 5px; padding: 10px 14px; color: var(--color-fg-soft); background: var(--color-surface); font-size: 12px; line-height: 1.5; }
+.adminOrdersPage .adminCustomerListPosition { border-top: 1px solid var(--color-border-strong); }
+.adminOrdersPage .adminCustomerListPosition strong { font-weight: 650; color: var(--color-fg); }
+.adminOrdersPage .adminCustomerListEmpty { padding: 20px 14px; color: var(--color-fg-soft); font-size: 13px; text-align: center; }
 .adminOrdersPage .adminCustomerToolbar > * { min-width: 0; }
 .adminOrdersPage .adminCustomerToolbar > label { grid-template-columns: auto minmax(0, 1fr); }
 .adminOrdersPage .adminCustomerToolbar > label,
@@ -78,7 +98,15 @@
 .adminOrdersPage .adminBusinessPeriod .adminBusinessPeriodRange { display: flex; flex-wrap: wrap; gap: 4px 6px; font-size: 14px; line-height: 1.5; letter-spacing: 0; white-space: normal; }
 .adminOrdersPage .adminBusinessPeriodRange time { white-space: nowrap; }
 .adminOrdersPage .adminCustomerToolbar > div { gap: 8px; }
-.adminOrdersPage .adminCustomerGroup > button { position: static; min-height: 40px; }
+.adminOrdersPage .adminCustomerGroup > button { position: sticky; top: 0; z-index: 2; min-height: 40px; gap: 8px; line-height: 1.4; background: var(--color-surface); border-block: 1px solid var(--color-border); }
+.adminOrdersPage .adminCustomerGroup > button > span { display: flex; align-items: center; gap: 6px; }
+.adminOrdersPage .adminCustomerGroup > button svg { flex-shrink: 0; transform: rotate(-90deg); }
+.adminOrdersPage .adminCustomerGroup > button svg.isOpen { transform: none; }
+.adminOrdersPage .adminCustomerGroup.is-attention > button,
+.adminOrdersPage .adminCustomerGroup.is-active > button { border-left: 3px solid var(--color-accent-dark); color: var(--color-fg); }
+.adminOrdersPage .adminCustomerGroup > div[hidden] { display: none; }
+.adminOrdersPage .adminCustomerRow[aria-current="true"] { outline: 2px solid var(--color-accent-dark); outline-offset: -2px; }
+.adminOrdersPage .adminCustomerRow .adminCustomerProgressLabel { margin-top: 5px; color: var(--color-fg-soft); font-size: 12px; }
 .adminOrdersPage .adminCustomerGroup > div > p { padding: 10px; font-size: 13px; }
 .adminOrdersPage .adminCustomerRow { gap: 8px; min-height: 44px; padding: 6px 12px; }
 .adminOrdersPage .adminCustomerRow strong { line-height: 1.35; }
@@ -95,32 +123,61 @@
   overflow: visible;
   padding: 18px;
 }
-.adminOrdersPage .adminOrderCustomerHeader { gap: 14px; padding: 16px; box-shadow: none; }
-.adminOrdersPage .adminOrderCustomerIdentity { display: flex; flex-wrap: wrap; align-items: center; align-content: center; gap: 8px 18px; min-width: 0; }
-.adminOrdersPage .adminOrderCustomerName { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 0; }
-.adminOrdersPage .adminOrderCustomerName h2 { margin: 0; overflow-wrap: anywhere; }
+.adminOrdersPage .adminOrderCustomerHeader { gap: 14px; padding: 16px; box-shadow: none; container-type: inline-size; }
+.adminOrdersPage .adminOrderCustomerIdentity { align-self: center; min-width: 0; overflow-x: auto; padding-block: 4px; }
+.adminOrdersPage .adminOrderCustomerProfile { display: flex; flex-wrap: nowrap; align-items: center; gap: 14px; min-width: max-content; white-space: nowrap; }
+.adminOrdersPage .adminOrderCustomerName { display: contents; }
+.adminOrdersPage .adminOrderCustomerName h2,
+.adminOrdersPage .adminOrderCustomerGameId { margin: 0; font-size: 24px; font-weight: 700; line-height: 1.4; }
+.adminOrdersPage .adminOrderCustomerName > .adminOrderStatus { display: inline-flex; align-items: center; min-height: 34px; padding: 4px 8px; font-size: 20px; line-height: 1.4; }
+.adminOrdersPage .adminOrderCustomerGameIdLabel { font-size: 14px; color: var(--color-fg-soft); }
+.adminOrdersPage .adminOrderCustomerIdentityWarning { font-size: 13px; color: var(--color-fg-soft); }
 .adminOrdersPage .adminOrderCustomerIdentity p { margin: 0; font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; }
-.adminOrdersPage .adminOrderCustomerMetrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-row: auto; gap: 10px; align-self: start; }
+.adminOrdersPage .adminOrderCustomerMetrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-row: auto; gap: 10px; align-self: start; }
 .adminOrdersPage .adminOrderCustomerMetrics > div { min-width: 130px; padding: 12px; }
 .adminOrdersPage .adminOrderCustomerMetrics dt { font-size: 13px; line-height: 1.4; }
 .adminOrdersPage .adminOrderCustomerMetrics dd { font-size: 18px; line-height: 1.4; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-.adminOrdersPage .adminSessionControls { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-row: auto; align-items: center; gap: 14px; padding-top: 14px; }
+.adminOrdersPage .adminOrderCustomerMetrics .adminOrderCustomerCount > dd { display: flex; align-items: baseline; gap: 6px; font-size: 28px; line-height: 1.3; font-variant-numeric: tabular-nums; }
+.adminOrdersPage .adminOrderCustomerCount > dd > span { font-size: 14px; font-weight: 500; }
+.adminOrdersPage .adminOrderCustomerPanels { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(300px, 1fr); align-items: stretch; gap: 14px; min-width: 0; }
+.adminOrdersPage .adminOrderCustomerTools { display: grid; align-content: start; gap: 14px; min-width: 0; }
+.adminOrdersPage .adminOrderCustomerPanels > .adminAdmissionSummary { margin-top: 0; }
+.adminOrdersPage .adminSessionControls { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-column: auto; grid-row: auto; align-content: start; align-items: start; gap: 14px; border-top: 1px solid var(--admin-border, rgba(127, 149, 162, .3)); }
 .adminOrdersPage .adminOrderCustomerGroupLabel { margin: 0; color: var(--color-fg); font-size: 18px; font-weight: 750; line-height: 1.5; }
-.adminOrdersPage .adminSessionControls > .adminOrderCustomerGroupLabel { text-align: right; }
-.adminOrdersPage .adminOrderManagementContent { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 14px; min-width: 0; }
-.adminOrdersPage .adminOrderCustomerServices { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; min-width: 0; padding-top: 14px; border-top: 1px solid var(--color-border); }
-.adminOrdersPage .adminOrderCustomerServices > .adminCustomerActions { flex: 1 1 auto; justify-content: flex-end; margin-block: 0; }
-.adminOrdersPage .adminOrderNominationControl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.adminOrdersPage .adminOrderNominationControl label { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; color: var(--color-fg-soft); }
+.adminOrdersPage .adminOrderManagementContent { display: grid; align-content: start; gap: 14px; min-width: 0; }
+.adminOrdersPage .adminOrderCustomerServices { display: grid; align-content: start; gap: 12px; min-width: 0; }
+.adminOrdersPage .adminOrderCustomerServices > .adminCustomerActions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-block: 0; }
+.adminOrdersPage .adminOrderCustomerServices .adminButton { width: 100%; }
+.adminOrdersPage .adminOrderCustomerServices .adminButton:last-child { grid-column: 1 / -1; }
+.adminOrdersPage .adminOrderNominationControl { display: flex; align-items: end; gap: 8px; }
+.adminOrdersPage .adminOrderNominationControl label { display: grid; gap: 6px; font-size: 13px; color: var(--color-fg-soft); }
 .adminOrdersPage .adminOrderNominationControl input { width: 64px; min-height: 40px; font-size: 14px; text-align: center; color: var(--color-fg); background: var(--color-surface-input); }
 .adminOrdersPage .adminOrderSessionActions,
 .adminOrdersPage .adminCustomerActions,
 .adminOrdersPage .adminOrderFinanceActions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.adminOrdersPage .adminOrderSessionActions { display: grid; grid-template-columns: minmax(0, 1fr); }
+.adminOrdersPage .adminOrderSessionActions > .adminButton { width: 100%; }
 .adminOrdersPage .adminButton { min-height: 40px; padding: 9px 12px; font-size: 14px; line-height: 1.4; }
 .adminOrdersPage .adminOrderSectionHeading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
 .adminOrdersPage .adminOrderSectionHeading h3 { margin: 0; font-size: 18px; font-weight: 750; }
 .adminOrdersPage .adminOrderSectionHeading > span { font-size: 13px; color: var(--color-fg-soft); }
 .adminOrdersPage .adminOrderCards { gap: 10px; margin: 0; }
+.adminOrdersPage .adminOrderSummary { min-height: 76px; padding: 14px 16px; }
+.adminOrdersPage .adminOrderSummary > .adminDisclosureLabel { flex: 1 1 auto; min-width: 0; overflow-x: auto; }
+.adminOrdersPage .adminOrderSummaryLine { display: flex; flex-wrap: nowrap; align-items: center; gap: 18px; min-width: max-content; white-space: nowrap; }
+.adminOrdersPage .adminOrderSummaryStatus { padding: 5px 10px; border: 1px solid var(--color-border-strong); border-radius: 8px; background: var(--color-surface-input); font-size: 24px; font-weight: 750; line-height: 1.4; }
+.adminOrdersPage .adminOrderSummaryNumber,
+.adminOrdersPage .adminOrderSummaryAmount { display: inline-flex; align-items: baseline; gap: 8px; }
+.adminOrdersPage .adminOrderSummaryNumber > span,
+.adminOrdersPage .adminOrderSummaryAmount > span { color: var(--color-fg-soft); font-size: 14px; }
+.adminOrdersPage .adminOrderSummaryNumber > strong { font-size: 20px; font-weight: 650; }
+.adminOrdersPage .adminOrderSummaryAmount > strong { font-size: 22px; font-weight: 750; font-variant-numeric: tabular-nums; }
+.adminOrdersPage .adminOrderSummaryLine > time { font-size: 16px; color: var(--color-fg-soft); }
+.adminOrdersPage .adminOrderSummaryProgress { font-size: 13px; color: var(--color-fg-soft); }
+.adminOrdersPage .adminOrderDisclosure[open] > .adminOrderSummary { border-bottom: 1px solid var(--color-border); }
+.adminOrdersPage .adminOrderDisclosureBody { display: grid; gap: 14px; padding: 16px; }
+.adminOrdersPage .adminOrderDisclosure:not([open]) > .adminOrderDisclosureBody { display: none; }
+.adminOrdersPage .adminOrderDisclosureBody > .adminOrderCardBody { padding: 0; border-top: 0; background: transparent; }
 .adminOrdersPage .adminOrderCardHead { min-height: 76px; gap: 12px; padding: 12px 16px; }
 .adminOrdersPage .adminOrderCardHead span,
 .adminOrdersPage .adminOrderCardHead small { font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
@@ -129,6 +186,19 @@
 .adminOrdersPage .adminOrderCardSimple h3 { font-size: 16px; line-height: 1.5; overflow-wrap: anywhere; }
 .adminOrdersPage .adminOrderCardSimple span,
 .adminOrdersPage .adminOrderCardSimple small { font-size: 13px; line-height: 1.5; }
+.adminOrdersPage .adminOrderCustomerDetails { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; align-items: start; gap: 12px; }
+.adminOrdersPage .adminOrderCustomerDetails label { grid-template-rows: 24px auto; align-content: start; gap: 6px; min-width: 0; font-size: 13px; }
+.adminOrdersPage .adminOrderCustomerDetails label > span { display: flex; align-items: center; }
+.adminOrdersPage .adminOrderCustomerDetails :is(input, textarea) { box-sizing: border-box; min-width: 0; min-height: 40px; font-size: 14px; }
+.adminOrdersPage .adminOrderCustomerDetails > .iconActionButton { margin-top: 30px; }
+.adminTheme .adminOrderFulfillment { display: grid; gap: 12px; padding: 16px; }
+.adminTheme .adminOrderFulfillmentHeading { display: flex; align-items: start; justify-content: space-between; gap: 12px; }
+.adminTheme .adminOrderHeadingWithHelp { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.adminTheme .adminOrderHeadingWithHelp h3 { margin: 0; font-size: 20px; font-weight: 750; line-height: 1.4; }
+.adminTheme .adminOrderFulfillmentHeading > .iconActionButton { flex-shrink: 0; }
+.adminTheme .adminOrderFulfillment .adminOrderFulfillmentUnit.isUnfinished { border-left: 4px solid var(--color-accent-dark); background: rgba(var(--color-accent-rgb), .1); }
+.adminTheme .adminOrderUnitHeading { display: flex; flex: 1 1 100%; flex-wrap: wrap; align-items: center; gap: 8px; }
+.adminTheme .adminOrderUnitPendingLabel { padding: 3px 8px; border: 1px solid var(--color-border-strong); border-radius: 6px; color: var(--color-fg); font-size: 12px; font-weight: 650; }
 .adminOrdersPage .adminOrderEmpty.isCompact { min-height: 150px; }
 .adminOrdersPage .adminOrderItemList > .adminOrderItemRow { grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 12px; padding: 12px; }
 .adminOrdersPage .adminOrderItemName { min-width: 0; overflow-wrap: anywhere; }
@@ -148,40 +218,58 @@
 .adminOrdersPage .adminOrderTransitions > div { justify-content: flex-end; }
 
 .adminOrdersPage .adminOrderFinance { display: grid; gap: 14px; padding: 16px; box-shadow: none; }
-.adminOrdersPage .adminOrderFinanceHeading,
-.adminOrdersPage .adminOrderFinanceRecordHeading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.adminOrdersPage .adminOrderFinanceHeading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.adminOrdersPage .adminOrderFinanceRecordHeading { display: flex; flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: 10px; }
 .adminOrdersPage .adminOrderFinanceHeading h3 { margin: 0; font-size: 20px; font-weight: 750; line-height: 1.4; }
 .adminOrdersPage .adminOrderFinance p { margin: 4px 0 0; color: var(--color-fg-soft); font-size: 13px; line-height: 1.65; overflow-wrap: anywhere; }
 .adminOrdersPage .adminOrderFinance h4 { margin: 0; font-size: 16px; line-height: 1.5; }
 .adminOrdersPage .adminOrderFinance h5 { margin: 0; font-size: 14px; line-height: 1.5; }
-.adminOrdersPage .adminOrderFinanceOverview { display: grid; grid-template-columns: minmax(190px, .9fr) minmax(0, 2fr); gap: 12px; }
-.adminOrdersPage .adminOrderFinanceBalance { display: grid; align-content: center; gap: 6px; padding: 14px; border: 1px solid var(--color-border-strong); border-radius: 10px; background: var(--color-surface-input); }
-.adminOrdersPage .adminOrderFinanceBalance > span { font-size: 14px; font-weight: 700; }
-.adminOrdersPage .adminOrderFinanceBalance > strong { font-size: 26px; line-height: 1.35; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-.adminOrdersPage .adminOrderFinanceFlags { display: flex; flex-wrap: wrap; gap: 6px; }
+.adminOrdersPage .adminOrderFinanceOverview { display: grid; grid-template-columns: minmax(190px, .9fr) minmax(0, 2fr); align-items: stretch; gap: 12px; }
+/* At most two flags stack beside the label/value rows, without adding a third row. */
+.adminOrdersPage .adminOrderFinanceBalance { display: grid; grid-template-columns: minmax(0, 1fr) max-content; grid-template-rows: auto auto; align-content: start; gap: 6px 10px; padding: 10px 12px; border: 1px solid var(--color-border-strong); border-radius: 10px; background: var(--color-surface-input); }
+.adminOrdersPage .adminOrderFinanceBalance > span { grid-column: 1; grid-row: 1; color: var(--color-fg-soft); font-size: 16px; font-weight: 650; line-height: 1.4; }
+.adminOrdersPage .adminOrderFinanceBalance > strong { grid-column: 1; grid-row: 2; font-size: 24px; font-weight: 750; line-height: 1.35; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.adminOrdersPage .adminOrderFinanceFlags { display: flex; flex-direction: column; align-items: flex-end; align-self: start; justify-self: end; grid-column: 2; grid-row: 1 / 3; gap: 4px; white-space: nowrap; }
 .adminOrdersPage .adminOrderFinanceFlags > span,
 .adminOrdersPage .adminOrderFinanceTag { display: inline-flex; align-items: center; padding: 3px 8px; border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-surface); color: var(--color-fg-soft); font-size: 12px; font-weight: 650; line-height: 1.5; }
 .adminOrdersPage .adminOrderFinanceMetrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin: 0; border: 1px solid var(--color-border); border-radius: 10px; overflow: hidden; }
-.adminOrdersPage .adminOrderFinanceMetrics > div { display: grid; align-content: center; gap: 6px; padding: 12px 14px; border-right: 1px solid var(--color-border); }
+.adminOrdersPage .adminOrderFinanceMetrics > div { display: grid; align-content: start; gap: 6px; padding: 10px 12px; border-right: 1px solid var(--color-border); }
 .adminOrdersPage .adminOrderFinanceMetrics > div:last-child { border-right: 0; }
 .adminOrdersPage .adminOrderFinanceMetrics dt { color: var(--color-fg-soft); font-size: 16px; font-weight: 650; line-height: 1.4; }
 .adminOrdersPage .adminOrderFinanceMetrics dd { margin: 0; font-size: 24px; font-weight: 750; line-height: 1.35; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-.adminOrdersPage .adminOrderFinanceGuide { padding: 10px 12px; border-left: 3px solid var(--color-border-strong); background: var(--color-surface); }
-.adminOrdersPage .adminOrderFinanceGuide > strong { font-size: 13px; font-weight: 700; }
 .adminOrdersPage .adminOrderFinanceNotice { margin: 0; padding: 10px 12px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-surface-input); }
 .adminOrdersPage .adminOrderFinanceNotice.isError { border-color: var(--color-accent-dark); color: var(--color-fg); }
 .adminOrdersPage .adminOrderFinanceRecordHeading { padding-top: 14px; border-top: 1px solid var(--color-border); }
-.adminOrdersPage .adminOrderFinanceRecordHeading h4 span { margin-left: 6px; color: var(--color-fg-soft); font-size: 13px; font-weight: 500; }
+.adminOrdersPage .adminOrderFinanceRecordHeadingTitle { display: flex; flex-wrap: nowrap; align-items: center; gap: 6px; min-width: 0; white-space: nowrap; }
+.adminOrdersPage .adminOrderFinanceRecordHeading h4 { font-size: 20px; font-weight: 750; line-height: 1.4; }
+.adminOrdersPage .adminOrderFinanceRecordCount { margin-left: 6px; color: var(--color-fg-soft); font-size: 16px; }
+.adminOrdersPage .adminOrderFinanceRecordHeading > .adminButton { flex-shrink: 0; white-space: nowrap; }
 .adminOrdersPage .adminOrderFinanceRecords,
 .adminOrdersPage .adminOrderFinanceCases { display: grid; gap: 10px; }
 .adminOrdersPage .adminOrderFinanceRecord { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--color-border); border-radius: 9px; }
-.adminOrdersPage .adminOrderFinanceRecordTitle { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .adminOrdersPage .adminOrderFinanceRecord strong { font-size: 14px; }
 .adminOrdersPage .adminOrderFinanceRecord b { font-size: 16px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .adminOrdersPage .adminOrderFinanceRecord small { display: block; margin-top: 4px; color: var(--color-fg-soft); font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.adminOrdersPage .adminOrderFinanceRecords > .adminOrderCashRecord { grid-template-columns: minmax(0, 1fr) max-content auto; padding-block: 10px; }
+.adminOrdersPage .adminOrderCashRecordContent { display: flex; flex-wrap: nowrap; align-items: center; gap: 12px; min-width: 0; overflow-x: auto; white-space: nowrap; font-size: 14px; line-height: 1.5; }
+.adminOrdersPage .adminOrderCashRecordContent > * { flex-shrink: 0; }
+.adminOrdersPage .adminOrderCashRecordContent > :is(span:not(.adminOrderFinanceTag), time) { color: var(--color-fg-soft); }
+.adminOrdersPage .adminOrderCashRecordContent:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
+.adminOrdersPage .adminOrderCashRecord > b { white-space: nowrap; }
+.adminOrdersPage .adminOrderFinanceRecords > .adminOrderCashRecord > .adminButton { grid-column: auto; justify-self: end; white-space: nowrap; }
 .adminOrdersPage .adminOrderFinanceEmpty { padding: 12px; text-align: center; border: 1px dashed var(--color-border); border-radius: 8px; }
 .adminOrdersPage .adminOrderFinanceForm,
 .adminOrdersPage .adminOrderFinanceAdmission { display: grid; gap: 12px; padding: 14px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-surface); }
+.adminOrdersPage .adminOrderAdmissionHeading { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; }
+.adminOrdersPage .adminOrderAdmissionHeading h4 { font-size: 16px; line-height: 1.5; }
+.adminOrdersPage .adminOrderAdmissionFacts { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; min-width: 0; font-size: 16px; line-height: 1.5; }
+.adminOrdersPage .adminOrderAdmissionFacts dl { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 0; }
+.adminOrdersPage .adminOrderAdmissionFacts dl > div { display: flex; align-items: baseline; gap: 6px; }
+.adminOrdersPage .adminOrderAdmissionFacts :is(dt, dd) { margin: 0; font-size: 16px; line-height: 1.5; white-space: nowrap; }
+.adminOrdersPage .adminOrderAdmissionFacts dt,
+.adminOrdersPage .adminOrderAdmissionFacts > span { color: var(--color-fg-soft); }
+.adminOrdersPage .adminOrderAdmissionFacts dd { color: var(--color-fg); font-weight: 700; font-variant-numeric: tabular-nums; }
+.adminOrdersPage .adminOrderFinanceAdmission > .adminOrderFinanceActions { justify-content: flex-end; }
 .adminOrdersPage .adminOrderFinanceForm fieldset,
 .adminOrdersPage .adminOrderFinanceAdmissionForm { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; gap: 12px; min-width: 0; margin: 0; padding: 0; border: 0; }
 .adminOrdersPage .adminOrderFinance label { display: grid; gap: 6px; min-width: 0; color: var(--color-fg-soft); font-size: 13px; line-height: 1.5; }
@@ -205,7 +293,7 @@
 }
 @media (max-width: 760px) {
   .adminOrdersPage .adminOrderWorkspace { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--admin-space-block); overflow: visible; }
-  .adminOrdersPage .adminCustomerPane { max-height: 380px; }
+  .adminOrdersPage .adminCustomerPane { position: static; height: min(65dvh, 520px); min-height: 360px; max-height: none; border-radius: 16px; }
   .adminOrdersPage .adminOrderDetailPane { margin: 0; padding: 0; }
   .adminOrdersPage .adminOrderFinanceOverview { grid-template-columns: minmax(0, 1fr); }
   .adminOrdersPage .adminOrderFinanceRecord { grid-template-columns: minmax(0, 1fr) auto; }
@@ -213,22 +301,34 @@
   .adminOrdersPage .adminOrderFinanceHeading > .adminButton { width: 100%; }
   .adminOrdersPage .adminOrderCardHead { flex-wrap: wrap; }
   .adminOrdersPage .adminOrderCustomerIdentity p { flex-basis: 100%; }
-  .adminOrdersPage .adminSessionControls { grid-template-columns: minmax(0, 1fr); gap: 10px; }
-  .adminOrdersPage .adminSessionControls > .adminOrderCustomerGroupLabel { text-align: left; }
   .adminOrdersPage .adminOrderItemList > .adminOrderItemRow { grid-template-columns: minmax(0, 1fr) auto auto; }
   .adminOrdersPage .adminOrderItemActions { justify-self: end; }
 }
+@container (max-width: 760px) {
+  .adminOrdersPage .adminOrderCustomerPanels { grid-template-columns: minmax(0, 1fr); }
+}
+@container (max-width: 420px) {
+  .adminOrdersPage .adminSessionControls { grid-template-columns: minmax(0, 1fr); }
+}
 @media (max-width: 480px) {
+  .adminOrdersPage .adminOrderCustomerDetails { grid-template-columns: minmax(0, 1fr) auto; }
+  .adminOrdersPage .adminOrderCustomerDetails > label { grid-column: 1; }
+  .adminOrdersPage .adminOrderCustomerDetails > .iconActionButton { grid-column: 2; grid-row: 1; }
   .adminOrdersPage .adminOrderCustomerHeader,
   .adminOrdersPage .adminOrderFinance { padding: 14px; }
   .adminOrdersPage .adminOrderCustomerMetrics dd { font-size: 16px; }
-  .adminOrdersPage .adminOrderFinanceMetrics dd { font-size: 20px; }
+  .adminOrdersPage .adminOrderFinanceMetrics dd,
+  .adminOrdersPage .adminOrderFinanceBalance > strong { font-size: 20px; }
   .adminOrdersPage .adminOrderFinanceForm fieldset,
   .adminOrdersPage .adminOrderFinanceAdmissionForm { grid-template-columns: minmax(0, 1fr); }
   .adminOrdersPage .adminOrderSessionActions,
   .adminOrdersPage .adminCustomerActions { width: 100%; }
   .adminOrdersPage .adminOrderSessionActions > .adminButton,
   .adminOrdersPage .adminCustomerActions > .adminButton { flex: 1 1 100%; text-align: center; }
+}
+@media (any-pointer: coarse) {
+  .adminOrdersPage .adminOrderCustomerDetails label { grid-template-rows: 44px auto; }
+  .adminOrdersPage .adminOrderCustomerDetails > .iconActionButton { margin-top: 50px; }
 }
 @media (pointer: coarse) {
   .adminOrdersPage .adminButton,

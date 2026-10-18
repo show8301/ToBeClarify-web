@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { adminApi } from "@/features/admin/api/client.js";
 import { AdminButton, AdminDialog, AdminField, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
+import { AdminHelp } from "@/features/admin/shared/AdminHelp";
 import { staffingServiceAlerts } from "./staffing";
 import { formatDateTime, orderStatusLabel, roomStatusLabel } from "./operationsFormat";
 import { managerOrderRoute } from "./managerOverview";
@@ -50,11 +51,11 @@ export function ManagerTasksPanel({ data, settings, disabled, navigate, onChange
   };
 
   return <>
-    <AdminPanel title="現場待辦與異常" description="先處理店家協調與積壓，再進入顧客明細處理改期、保留、跨期及取消。">
+    <AdminPanel title={<span className="adminFieldHeading">現場待辦與異常<AdminHelp title="現場待辦與異常說明">{`先處理店家協調與積壓，再進入顧客明細處理改期、保留、跨期及取消。${settings ? `等待 ${settings.reminderMinutes} 分鐘提醒，${settings.escalateMinutes} 分鐘升級關注；沿用店內設定。` : ""}`}</AdminHelp></span>}>
       <div className="managerFilters" role="group" aria-label="經理待辦範圍">
         {([ ["attention", "需處理", orders.filter(attention).length], ["coordination", "待協調", orders.filter(coordination).length], ["unfinished", "全部未完成", orders.length] ] as const).map(([value, label, count]) => <AdminButton key={value} variant={filter === value ? "primary" : "secondary"} aria-pressed={filter === value} onClick={() => setFilter(value)}>{label} {count}</AdminButton>)}
       </div>
-      <p className="managerHint">{settings ? `等待 ${settings.reminderMinutes} 分鐘提醒，${settings.escalateMinutes} 分鐘升級關注；沿用店內設定。` : "提醒門檻尚未取得，仍列出待確認與協調單。"}</p>
+      {!settings && <p className="managerHint" role="status">提醒門檻尚未取得，仍列出待確認與協調單。</p>}
       {alerts.map((alert) => <article className="managerAlert" key={alert.id}><div><strong>{alert.title}</strong><p>{alert.detail}</p></div><AdminButton variant="secondary" onClick={() => navigate("/admin/duty-planning")}>確認值班規劃</AdminButton></article>)}
       {error && <p className="adminFormError" role="alert">{error}</p>}
       <div className="managerQueue" aria-busy={disabled}>

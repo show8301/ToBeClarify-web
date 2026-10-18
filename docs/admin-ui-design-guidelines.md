@@ -173,6 +173,8 @@
 
 結算工作台的出勤修正、計薪輸入、分潤明細、薪資預覽、支付與更正差額，使用 `features/admin/shared/AdminDisclosureSummary.tsx` 沿用同一規範；個人帳目的出勤修正也由同一元件呈現。新增加的區塊展開標頭優先使用此元件，保留原生 `details/summary` 的開關行為，圓框與 SVG 樣式仍集中於 `80-controls.css`。
 
+經理工作台「更多操作」沿用 `AdminDisclosureSummary` 與 `adminButton-secondary`，桌面至少 44px 高、680px 以下至少 48px 高，與同列按鈕對齊；內部維持 34px 圓框及 16px SVG，避免上下內距使整體高度膨脹。主要面板的操作說明收至標題旁 `AdminHelp`，包含現場待辦提醒門檻；即時營業／帳款狀態、統計數字、讀取失敗及操作結果維持直接顯示。樣式產物可用 `scripts/preview-css/manager-disclosure-help.json` 核對；實際渲染仍依本機預覽流程確認。
+
 後台所有原生單選欄位使用[全站下拉選單設計標準](select-design-standard.md)：單一 16px 箭頭、右側 14px、垂直置中、至少 44px 高。樣式集中在 `styles/shared/select.css`，多選清單不套用。
 
 - 面板內距，例如 `.adminPanel` 的 `padding`。

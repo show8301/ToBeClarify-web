@@ -102,7 +102,7 @@
   },
   {
     "selector": ".adminTheme .adminOrderFulfillment .adminOrderFulfillmentUnit.isUnfinished",
-    "declarations": { "border-left": "4px solid var(--color-accent-dark)", "background": "rgba(var(--color-accent-rgb), .1)" }
+    "declarations": { "border-left": "4px solid var(--color-accent-dark)", "background-color": "rgba(var(--color-accent-rgb), .08)" }
   },
   {
     "selector": ".adminOrdersPage .adminOrderCustomerTools",
@@ -306,6 +306,48 @@
   {
     "selector": ".adminOrdersPage .adminButton",
     "context": ["@media (pointer: coarse)"],
+    "declarations": { "min-height": "44px" }
+  },
+  {
+    "selector": ".adminTheme .adminOrderFulfillmentActions > .adminButton",
+    "declarations": { "min-height": "44px", "font-size": "14px", "font-weight": "650" }
+  },
+  {
+    "selector": ".adminTheme .adminOrderFulfillmentUnit",
+    "declarations": { "display": "grid", "grid-template-columns": "minmax(0, 1fr)", "align-items": "start", "container": "fulfillment-unit / inline-size" }
+  },
+  {
+    "selector": ".adminTheme .adminFulfillmentFieldHeading > label",
+    "declarations": { "font-size": "14px", "font-weight": "600" }
+  },
+  {
+    "selector": ".adminTheme .adminOrderFulfillmentUnit :is(input:not([type=\"radio\"]), textarea, select)",
+    "declarations": { "min-height": "44px", "font-size": "16px", "border": "1px solid var(--color-border-strong)", "background-color": "var(--color-surface-input)" }
+  },
+  {
+    "selector": ".adminTheme .adminFulfillmentDateFields",
+    "declarations": { "grid-template-columns": "repeat(2, minmax(0, 260px))" }
+  },
+  {
+    "selector": ".adminTheme .adminFulfillmentDateFields",
+    "context": ["@container fulfillment-unit (max-width: 560px)"],
+    "declarations": { "grid-template-columns": "minmax(0, 260px)" }
+  },
+  {
+    "selector": ".adminTheme .adminFulfillmentQuantityInput > input",
+    "declarations": { "width": "96px", "text-align": "center" }
+  },
+  {
+    "selector": ".adminTheme .adminFulfillmentField textarea",
+    "declarations": { "min-height": "80px", "resize": "vertical" }
+  },
+  {
+    "selector": ".adminTheme .adminFulfillmentMore:not([open]) > .adminFulfillmentMoreContent",
+    "declarations": { "display": "none" }
+  },
+  {
+    "selector": ".adminTheme .adminFulfillmentFieldHeading",
+    "context": ["@media (any-pointer: coarse)"],
     "declarations": { "min-height": "44px" }
   }
 ]

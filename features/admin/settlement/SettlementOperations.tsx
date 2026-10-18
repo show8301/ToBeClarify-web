@@ -9,6 +9,7 @@ import { SettlementAnomalies } from "./SettlementAnomalies";
 import { settlementMoney as money, settlementPeriodStatuses, settlementRoles, settlementStatuses } from "./presentation";
 import type { SettlementOverview, SettlementRunFields, SettlementStaff, SettlementStaffInput } from "./types";
 import { getFinalizeDisabledReason } from "./disabled-reasons";
+import { SettlementRecalculation } from "./SettlementRecalculation";
 
 type Props = {
   overview: SettlementOverview;
@@ -32,6 +33,7 @@ type Props = {
   onCalculate: () => Promise<void>;
   onClose: () => Promise<void>;
   onFinalize: () => Promise<void>;
+  onRecalculated: () => Promise<boolean>;
   onReview: (requestId: string, approved: boolean) => void;
   onViewPerson: (staffId: string) => void;
   children?: ReactNode;
@@ -44,7 +46,7 @@ const steps = [
   { title: "正式結算", description: "確認並鎖定時段" },
 ];
 
-export function SettlementOperations({ overview, inputs, staff, dayType, setDayType, fields, setFields, canManage, active, saving, dirty, flowVersion, onBusyChange, onAttendanceChanged, onRemove, onAdd, onInputChange, onSave, onCalculate, onClose, onFinalize, onReview, onViewPerson, children }: Props) {
+export function SettlementOperations({ overview, inputs, staff, dayType, setDayType, fields, setFields, canManage, active, saving, dirty, flowVersion, onBusyChange, onAttendanceChanged, onRemove, onAdd, onInputChange, onSave, onCalculate, onClose, onFinalize, onRecalculated, onReview, onViewPerson, children }: Props) {
   const [step, setStep] = useState(0);
   const [inputsOpen, setInputsOpen] = useState(false);
   type Action = "close" | "save" | "calculate" | "finalize";
@@ -207,11 +209,12 @@ export function SettlementOperations({ overview, inputs, staff, dayType, setDayT
     </div>
 
     <div id="settlement-step-panel-3" hidden={step !== 3} className="adminSettlementStepBody">
-      <AdminPanel title={finalized ? "本時段已正式結算" : "確認並完成結算"} description={finalized ? "本時段的結算快照已鎖定，可記錄支付或事後差額。" : "核對本次應付與規則版本後，鎖定此營業時段。"}>
+      <AdminPanel title={finalized ? "本時段已正式結算" : "確認並完成結算"} description={finalized ? "目前正式結算可記錄支付、事後差額，或於資料補正後建立新的結算版本。" : "核對本次應付與規則版本後，鎖定此營業時段。"}>
         <div className="adminSettlementFinalTotal"><span>本時段應付薪資</span><strong>{money(summary.totalPayroll)} <small>G</small></strong></div>
         <dl className="adminSettlementDefinitionList"><div><dt>營業日期／時段</dt><dd>{run.businessDate} · 第 {run.sessionNo} 時段</dd></div><div><dt>規則版本</dt><dd>{overview.rule.effectiveFrom} 生效</dd></div><div><dt>營業狀態</dt><dd>{period ? settlementPeriodStatuses[period] || period : "由系統檢查"}</dd></div><div><dt>結算異常</dt><dd>{anomalies.length ? `${anomalies.length} 項待處理` : "無結算異常"}</dd></div><div><dt>計算狀態</dt><dd>{settlementStatuses[run.status] || run.status}</dd></div></dl>
         {!finalized && finalizeReason ? <p id="settlement-finalize-reason" className="adminSettlementInlineWarning" role="status">{finalizeReason}</p> : null}
-        {canManage ? <div className="adminSettlementActionBar"><span>{finalized ? "後續差額請使用下方結算後更正流程，不再重新全日計薪。" : "正式結算後，本時段輸入會鎖定。"}</span>{!finalized ? <AdminButton busy={pendingAction === "finalize"} busyLabel="結算中…" disabledReason={finalizeReason} aria-describedby={finalizeReason ? "settlement-finalize-reason" : undefined} disabled={!canFinalize} onClick={() => void runAction("finalize", onFinalize)}>確認正式結算</AdminButton> : null}</div> : null}
+        {canManage ? <div className="adminSettlementActionBar"><span>{finalized ? "出勤或帳款補正後，可核對差額並建立新的結算版本。" : "正式結算後，本時段輸入會鎖定。"}</span>{!finalized ? <AdminButton busy={pendingAction === "finalize"} busyLabel="結算中…" disabledReason={finalizeReason} aria-describedby={finalizeReason ? "settlement-finalize-reason" : undefined} disabled={!canFinalize} onClick={() => void runAction("finalize", onFinalize)}>確認正式結算</AdminButton> : null}</div> : null}
+        {finalized && canManage ? <SettlementRecalculation run={run} saving={saving} onBusyChange={onBusyChange} onRecalculated={onRecalculated} /> : null}
       </AdminPanel>
       {finalized && canManage ? children : null}
       {navigation}

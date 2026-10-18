@@ -95,7 +95,26 @@ export function SettlementOperations({ overview, inputs, staff, dayType, setDayT
       <div><strong>結算前需留意</strong><div className="adminSettlementAttentionItems">
         {anomalies.length ? <button type="button" disabled={saving} onClick={() => changeStep(2)}>結算異常 {anomalies.length} 項</button> : null}
         {pending.length ? <button type="button" disabled={saving} onClick={() => changeStep(1)}>補打卡待核准 {pending.length} 筆</button> : null}
-        {pendingFinance ? <button type="button" disabled={saving} onClick={() => changeStep(2)}>費用待確認 {pendingFinance} 筆</button> : null}
+      {pendingFinance ? <details className="adminSettlementFinanceDisclosure">
+        <AdminDisclosureSummary>費用待確認 {pendingFinance} 筆</AdminDisclosureSummary>
+        <div className="adminSettlementFinanceDisclosureBody">
+          <p>開啟相關顧客帳單，逐筆核對並更正費用紀錄。</p>
+          {workflow?.pendingFinanceItems?.length ? <ul>
+            {workflow.pendingFinanceItems.map(item => {
+              const query = new URLSearchParams({ date: run.businessDate, session: item.sessionId });
+              if (item.orderId) query.set("order", item.orderId);
+              const orderLabel = item.orderNumber || (item.orderId ? `訂單 ${item.orderId}` : "未連結訂單帳款");
+              return <li key={`${item.sessionId}-${item.orderId || "session"}`}>
+                <a href={`/admin/orders?${query.toString()}`} target="_blank" rel="noopener noreferrer">
+                  {item.customerName || "未命名顧客"} · {orderLabel}
+                </a>
+                <span>{item.pendingRecordCount} 筆待確認</span>
+              </li>;
+            })}
+          </ul> : <p role="status">此版本尚未提供逐筆費用清單，請前往金額核對查看。</p>}
+          <button type="button" disabled={saving} onClick={() => changeStep(2)}>前往金額核對</button>
+        </div>
+      </details> : null}
       </div></div>
     </aside> : null}
     <nav className="adminSettlementStepper" aria-label="營運結算流程">

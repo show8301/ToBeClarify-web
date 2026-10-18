@@ -1,0 +1,11 @@
+[
+  { "selector": ".serviceGuestFilters", "declarations": { "display": "grid", "grid-template-columns": "minmax(0, 2fr) repeat(2, minmax(0, 1fr))", "align-items": "end" } },
+  { "selector": ".serviceGuestPicker", "declarations": { "display": "flex", "min-height": "46px" } },
+  { "selector": ".serviceGuestPicker > input", "declarations": { "min-width": "0", "font-size": "14px" } },
+  { "selector": ".serviceGuestPicker > button", "declarations": { "width": "44px", "height": "44px" } },
+  { "selector": ".adminTheme.serviceGuestPickerPortal", "declarations": { "min-height": "0" } },
+  { "selector": ".serviceGuestPickerPositioner", "declarations": { "z-index": "1300", "width": "var(--anchor-width)" } },
+  { "selector": ".serviceGuestPickerPopup", "declarations": { "max-height": "min(320px, var(--available-height))", "overflow-y": "auto" } },
+  { "selector": ".serviceGuestPickerItem", "declarations": { "min-height": "44px", "overflow-wrap": "anywhere" } },
+  { "selector": ".serviceGuestFilters", "context": ["@media (max-width: 760px)"], "declarations": { "grid-template-columns": "minmax(0, 1fr)" } }
+]

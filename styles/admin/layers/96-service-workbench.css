@@ -1,9 +1,10 @@
 .serviceMetrics > button {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas: "title value" "detail value";
+  grid-template-columns: minmax(0, 1fr) minmax(2ch, max-content);
+  grid-template-areas: "topic quantity" "detail detail";
   align-content: center;
   gap: 8px 12px;
+  min-width: 0;
   min-height: 112px;
   padding: 14px 16px;
   border: 1px solid var(--admin-border, rgba(127, 149, 162, .3));
@@ -14,7 +15,8 @@
   font: inherit;
   cursor: pointer;
 }
-.serviceMetrics > button > strong { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
+.adminRoleDashboard-service .serviceMetrics > button > span { grid-area: topic; }
+.adminRoleDashboard-service .serviceMetrics > button > strong { grid-area: quantity; place-self: start end; }
 .serviceMetrics > button > small { color: var(--color-fg-mute); }
 .adminRoleDashboard-service .serviceMetrics > button:first-child span { font-size: 26px; }
 .adminRoleDashboard-service .serviceMetrics > button:first-child strong { font-size: 22px; color: var(--color-accent-2); }
@@ -27,6 +29,7 @@
 }
 .serviceTaskFilters, .serviceSearch { margin-bottom: var(--admin-space-block, 18px); }
 .serviceSearch { display: grid; gap: 6px; }
+.serviceSearch input { width: 100%; min-width: 0; box-sizing: border-box; }
 .serviceTaskRow, .serviceGuestOrder, .adminAdmissionPayment, .adminAdmissionSummary, .adminAdmissionDaily, .adminCustomerSummaryCard {
   min-width: 0;
   padding: 14px 16px;
@@ -43,12 +46,110 @@
 .serviceTaskHead small, .adminAdmissionDaily small, .adminAdmissionSummary > small { display: block; margin-top: 6px; color: var(--color-fg-mute); }
 .serviceTaskHead strong, .serviceTaskHead small { overflow-wrap: anywhere; }
 .serviceTaskDetail { display: grid; gap: 14px; margin-top: var(--admin-space-block, 18px); }
+.serviceCurrentOrder { scroll-margin-top: var(--admin-space-block, 18px); }
+.serviceOrderColumns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--admin-space-inline, 18px); align-items: start; }
+.serviceOrderService, .serviceOrderReceipt {
+  display: grid;
+  min-width: 0;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+}
+.serviceOrderService > h3, .serviceOrderReceipt > h3 { margin: 0; font-size: 18px; line-height: 1.5; }
+.serviceOrderService > .adminOrderFulfillment { min-width: 0; margin: 0; }
+.serviceOrderReceipt .dwOrderActionForm, .serviceOrderReceipt .dwOrderActionForm > fieldset { display: grid; min-width: 0; gap: 12px; }
+.serviceOrderReceipt .dwOrderActionForm > fieldset { padding: 0; margin: 0; border: 0; }
+.serviceOrderReceipt input { box-sizing: border-box; min-width: 0; max-width: 100%; }
+.serviceOrderReceipt .dwReceiptTotals { display: grid; gap: 8px; margin: 0; }
+.serviceOrderReceipt .dwReceiptTotals > div, .serviceOrderReceipt .dwReceiptItems > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: baseline; }
+.serviceOrderReceipt .dwReceiptTotals :is(dt, dd) { margin: 0; overflow-wrap: anywhere; }
+.serviceOrderReceipt .dwReceiptTotals dd { text-align: right; font-variant-numeric: tabular-nums; }
+.serviceOrderReceipt .dwReceiptTotals .isBalance { padding-top: 8px; border-top: 1px solid var(--color-border); font-weight: 700; }
+.serviceOrderReceipt .dwReceiptItems { display: grid; gap: 6px; font-size: 13px; color: var(--color-fg-soft); }
+.serviceOrderReceipt .dwActions, .serviceGuestOrderLink { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.serviceGuestOrderLink { justify-content: space-between; }
+.serviceOrderReceipt > p, .serviceOrderService > p { margin: 0; overflow-wrap: anywhere; }
 .serviceTaskDetail .adminOrderCard, .serviceTaskDetail .dwGuestOrder { margin: 0; }
 .serviceTaskDetail label, .adminAdmissionFields label, .adminAdmissionPayment details > label { display: grid; gap: 6px; }
 .serviceTaskDetail details > summary, .serviceGuestOrder > summary { cursor: pointer; padding: 10px 0; font-weight: 700; }
 .serviceTaskPagination { justify-content: flex-end; margin-top: var(--admin-space-block, 18px); }
-.serviceGuestFilters, .adminAdmissionFields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.serviceGuestFilters { display: grid; grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr)); gap: 12px; align-items: end; }
+.adminAdmissionFields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .serviceGuestFilters label { display: grid; gap: 6px; }
+.serviceGuestFilters > .adminField { min-width: 0; margin: 0; gap: 6px; }
+.serviceGuestFilters select { width: 100%; min-width: 0; box-sizing: border-box; }
+.serviceGuestPickerField { display: grid; min-width: 0; gap: 6px; }
+.serviceGuestPickerField > label { color: var(--color-fg-soft); font-size: 13px; }
+.serviceGuestPicker {
+  display: flex;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 46px;
+  align-items: center;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-input);
+}
+.serviceGuestPicker:focus-within { border-color: var(--color-accent); box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), .18); }
+.serviceGuestPicker > input {
+  box-sizing: border-box;
+  flex: 1 1 0;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: inherit;
+  outline: 0;
+  background: transparent;
+  color: var(--color-fg);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.serviceGuestPicker > button {
+  display: grid;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  color: var(--color-fg);
+}
+.serviceGuestPicker > button:focus-visible { outline: 2px solid var(--color-accent); outline-offset: -3px; }
+.serviceGuestPicker[data-disabled] { opacity: .6; }
+.adminTheme.serviceGuestPickerPortal { min-height: 0; }
+.serviceGuestPickerPositioner { z-index: 1300; width: var(--anchor-width); max-width: calc(100vw - 24px); }
+.serviceGuestPickerPopup {
+  box-sizing: border-box;
+  max-height: min(320px, var(--available-height));
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-strong);
+  color: var(--color-fg);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .2);
+}
+.serviceGuestPickerItem {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.serviceGuestPickerItem[data-highlighted], .serviceGuestPickerItem[data-selected] { outline: 0; background-color: rgba(var(--color-accent-rgb), .15); }
+.serviceGuestPickerEmpty { padding: 12px; color: var(--color-fg-mute); font-size: 14px; }
+.serviceGuestCount { margin: 8px 0 0; color: var(--color-fg-mute); font-size: 13px; }
 .serviceGuestPanel > div > .adminPageActions, .serviceGuestOrder, .adminAdmissionSummary, .adminAdmissionPayment { margin-top: var(--admin-space-block, 18px); }
 .adminTheme .adminAdmissionSummary h3 { margin: 0; font-size: 18px; font-weight: 750; line-height: 1.5; }
 .adminTheme .adminAdmissionSummary dl { display: grid; grid-template-columns: minmax(0, 1fr); grid-row: auto; gap: 10px; margin: 12px 0 0; overflow-x: auto; }
@@ -62,6 +163,9 @@
 .adminAdmissionDaily article { padding: 12px 0; border-bottom: 1px solid var(--admin-border, rgba(127, 149, 162, .3)); }
 .adminAdmissionDaily { margin-bottom: var(--admin-space-block, 18px); }
 .serviceFulfillment fieldset { min-width: 0; border: 1px solid var(--admin-border, rgba(127, 149, 162, .3)); }
+@media (max-width: 1100px) {
+  .serviceOrderColumns { grid-template-columns: minmax(0, 1fr); }
+}
 @media (max-width: 760px) {
   .serviceTaskHead, .adminAdmissionDaily article { align-items: flex-start; flex-direction: column; }
   .serviceGuestFilters, .adminAdmissionFields { grid-template-columns: minmax(0, 1fr); }

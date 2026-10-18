@@ -399,6 +399,11 @@ export function AdminSettlementPage() {
             fields={runFields} setFields={setRunFields} canManage={canManage} active={tab === "operations"} saving={saving} dirty={dirty} flowVersion={flowVersion}
             onBusyChange={setSaving} onAttendanceChanged={refreshSettlement} onAdd={addInput} onRemove={(index) => setInputs(current => current.filter((_, itemIndex) => itemIndex !== index))} onInputChange={updateInput} onSave={saveInputs} onCalculate={calculate}
             onClose={closeBusinessDay} onFinalize={finalize} onReview={openBackfillReview}
+            onRecalculated={async () => {
+              const refreshed = await refreshSettlement();
+              if (refreshed) setMessage("補正後重新結算完成，工時與薪資已更新；前後快照與支付紀錄已保留。");
+              return refreshed;
+            }}
             onViewPerson={id => { selectPerson(id); changeTab("personal"); }}
           >
             <SettlementPostActions staff={personalStaff} payment={paymentForm} setPayment={setPaymentForm} correction={correctionForm} setCorrection={setCorrectionForm} saving={saving} onPayment={recordPayment} onCorrection={recordCorrection} />

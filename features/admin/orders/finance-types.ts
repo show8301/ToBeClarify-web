@@ -1,7 +1,11 @@
-export type FinanceKind = "charge_add" | "charge_reduce" | "cash_receipt" | "cash_refund";
+export type FinanceKind = "charge_add" | "charge_reduce" | "cash_receipt" | "cash_refund" | "tip_supplement";
 export type FinanceSourceKind = "admission" | "order" | "item" | "unallocated";
 export type FinanceAllocation = "pending" | "confirmed";
 export type FinanceHoldScope = "none" | "session" | "order" | "item";
+export type FinanceTipDistributionMode = "equal" | "designated" | "custom";
+export interface FinanceTipAllocationInput { staffId: string; percentage: number | null }
+export interface FinanceTipAllocation { staffId: string; staffName: string; percentage: number | null; amount: number }
+export interface FinanceTipStaffOption { staffId: string; displayName: string; roles: string[] }
 
 export interface FinanceRecord {
   id: string;
@@ -22,6 +26,14 @@ export interface FinanceRecord {
   createdAt: string;
   createdBy: string;
   createdByDisplayName?: string | null;
+  isVoided: boolean;
+  voidedAt: string | null;
+  voidedBy: string | null;
+  voidedByDisplayName: string | null;
+  voidReason: string | null;
+  tipDistributionMode: FinanceTipDistributionMode | null;
+  linkedCashRecordId: string | null;
+  tipAllocations: FinanceTipAllocation[];
   updatedAt: string;
   updatedBy: string;
   confirmedAt: string | null;
@@ -68,6 +80,16 @@ export interface FinanceSaveRequest {
   holdScope: FinanceHoldScope;
   reason: string;
   reversesRecordId: string | null;
+  tipDistributionMode?: FinanceTipDistributionMode | null;
+  tipAllocations?: FinanceTipAllocationInput[];
+  linkedCashRecordId?: string | null;
+}
+
+export interface FinanceVoidRequest {
+  operationId: string;
+  expectedAccountVersion: number;
+  expectedRecordVersion: number;
+  reason: string;
 }
 
 export interface FinanceOperation { operationId: string; recordId: string; accountVersion: number }

@@ -54,6 +54,7 @@ export type SettlementSummary = {
   designatedRevenueBase: number;
   companyRevenue: number;
   serviceManagerPool: number;
+  activityNetRevenue: number;
   backstagePool: number;
   companyIncome: number;
   totalPayroll: number;
@@ -93,13 +94,31 @@ export type SettlementResult = {
   staffId: string | null;
   displayName: string | null;
   role: string;
+  payableHours: number;
+  hourlyRate: number;
   basePay: number;
+  revenueBase: number;
+  revenuePercentage: number;
   revenueShare: number;
   designatedTip: number;
   publicTip: number;
+  preferredPay: number;
+  beforeRounding: number;
   afterRounding: number;
+  sourceDetailsSnapshotted?: boolean;
+  sources?: SettlementResultSource[] | null;
   anomalyStatus: string;
   anomalyNote: string | null;
+};
+
+export type SettlementResultSource = {
+  kind: "designated_revenue" | "designated_tip";
+  orderId: string;
+  orderNumber: string;
+  label: string;
+  basisAmount: number;
+  percentage: number;
+  amount: number;
 };
 
 export type AttendanceBackfill = {

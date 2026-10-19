@@ -271,3 +271,20 @@
   overflow-wrap: anywhere;
   padding-block: 12px;
 }
+
+.adminSettlementSourceList { display: grid; gap: 8px; }
+.adminSettlementSourceDisclosure { min-width: 0; border: 1px solid var(--color-border); border-radius: 9px; background: var(--color-surface); }
+.adminSettlementSourceDisclosure > summary { padding: 11px 14px; color: var(--color-fg-soft); font-size: 12px; font-weight: 650; cursor: pointer; }
+.adminSettlementSourceDisclosure[open] > summary { border-bottom: 1px solid var(--color-border); }
+.adminSettlementSourceDetails { display: grid; width: 100%; box-sizing: border-box; gap: 12px; padding: 14px; background: var(--color-surface-strong); white-space: normal; }
+.adminSettlementSourceDetails section { display: grid; gap: 5px; }
+.adminSettlementSourceDetails h4 { margin: 0; color: var(--color-fg); font-size: 12px; }
+.adminSettlementSourceDetails p { margin: 0; color: var(--color-fg-soft); font-size: 12px; line-height: 1.65; }
+.adminSettlementSourceDetails strong { color: var(--color-fg); font-variant-numeric: tabular-nums; }
+.adminSettlementSourceOrders { display: grid; gap: 6px; max-height: 190px; overflow: auto; margin: 0; padding: 0; list-style: none; }
+.adminSettlementSourceOrders > li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 7px 9px; border: 1px solid var(--color-border); border-radius: 7px; background: var(--color-surface); }
+.adminSettlementSourceOrders > li > div { display: grid; gap: 3px; min-width: 0; }
+.adminSettlementSourceOrders a { color: var(--color-fg); font-size: 12px; font-weight: 700; overflow-wrap: anywhere; }
+.adminSettlementSourceOrders span { color: var(--color-fg-mute); font-size: 11px; }
+.adminSettlementSourceOrders > li > strong { flex: 0 0 auto; font-size: 12px; }
+.adminSettlementSourcePayFormula { padding-top: 9px; border-top: 1px solid var(--color-border); }

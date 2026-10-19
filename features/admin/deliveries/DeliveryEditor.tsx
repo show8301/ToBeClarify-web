@@ -20,6 +20,7 @@ type Props = {
   onBusy?: (busy: boolean) => void;
 };
 type Confirmation = { kind: "code" } | { kind: "remove"; asset: DeliveryAsset } | null;
+const MAX_DELIVERY_IMAGE_BYTES = 30 * 1024 * 1024;
 
 export function DeliveryEditor({ initial, canManage, onChanged, onIssued, onClose, embedded = false, locked = false, onDirty, onBusy }: Props) {
   const [delivery, setDelivery] = useState(initial);
@@ -54,8 +55,8 @@ export function DeliveryEditor({ initial, canManage, onChanged, onIssued, onClos
     setFile(null);
     setPreview("");
     if (!value) return;
-    if (!["image/jpeg", "image/png", "image/webp"].includes(value.type) || value.size > 10 * 1024 * 1024) {
-      setFileError("請選擇 10 MiB 以內的 JPEG、PNG 或 WebP 靜態圖片。");
+    if (!["image/jpeg", "image/png", "image/webp"].includes(value.type) || value.size > MAX_DELIVERY_IMAGE_BYTES) {
+      setFileError("請選擇 30 MiB 以內的 JPEG、PNG 或 WebP 靜態圖片。");
       return;
     }
     setFile(value);
@@ -130,7 +131,7 @@ export function DeliveryEditor({ initial, canManage, onChanged, onIssued, onClos
             setPreview("");
           });
         }}>
-          <AdminField label="私密作品圖片" hint="JPEG／PNG／WebP，10 MiB、2400 萬畫素以內的靜態圖片。伺服器以無損 PNG 保留畫素與透明度，清除圖片中繼資料。"><input type="file" accept="image/jpeg,image/png,image/webp" disabled={busy} onChange={(event) => { chooseFile(event.target.files?.[0] || null); event.target.value = ""; }} /></AdminField>
+          <AdminField label="私密作品圖片" hint="JPEG／PNG／WebP，單檔最多 30 MiB、2400 萬畫素以內的靜態圖片。伺服器會轉成無損 PNG 並清除中繼資料；轉檔後也須在 30 MiB 內。"><input type="file" accept="image/jpeg,image/png,image/webp" disabled={busy} onChange={(event) => { chooseFile(event.target.files?.[0] || null); event.target.value = ""; }} /></AdminField>
           {preview ? <Image unoptimized width={640} height={480} className="adminDeliveryUploadPreview" src={preview} alt="待上傳作品預覽" /> : null}
           {fileError ? <p role="alert">{fileError}</p> : null}
           <button type="submit" className="adminButton adminButton-secondary" disabled={busy || !file || !label.trim()}>上傳至私密作品空間</button>

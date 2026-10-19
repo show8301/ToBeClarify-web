@@ -1,5 +1,5 @@
 import { adminRequest } from "@/features/admin/api/client.js";
-import type { RecalculationConfirmation, RecalculationHistory, RecalculationPreview } from "./recalculation-types";
+import type { RecalculationAdjustments, RecalculationConfirmation, RecalculationHistory, RecalculationPreview } from "./recalculation-types";
 
 function object(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("重新結算資料格式錯誤。");
@@ -24,8 +24,12 @@ function array<T>(value: unknown, parse: (item: unknown) => T): T[] {
   if (!Array.isArray(value)) throw new Error("重新結算清單格式錯誤。");
   return value.map(parse);
 }
-function nullableText(value: unknown): string | null { return value === null ? null : text(value); }
+function nullableText(value: unknown): string | null { return value == null ? null : text(value); }
 function nullableMinutes(value: unknown): number | null { return value === null ? null : integer(value); }
+function nullableNumber(value: unknown): number | null { return value == null ? null : number(value); }
+function optionalArray<T>(value: unknown, parse: (item: unknown) => T): T[] | null {
+  return value == null ? null : array(value, parse);
+}
 
 export function parseRecalculationPreview(value: unknown): RecalculationPreview {
   const row = object(value);
@@ -47,6 +51,7 @@ export function parseRecalculationPreview(value: unknown): RecalculationPreview 
         previousMinutes: nullableMinutes(item.previousMinutes), correctedMinutes: nullableMinutes(item.correctedMinutes),
         previousHours: number(item.previousHours), correctedHours: number(item.correctedHours),
         previousPay: number(item.previousPay), correctedPay: number(item.correctedPay), payDelta: number(item.payDelta),
+        previousActivityHours: nullableNumber(item.previousActivityHours), correctedActivityHours: nullableNumber(item.correctedActivityHours),
       };
     }),
     balances: array(row.balances, value => {
@@ -58,7 +63,25 @@ export function parseRecalculationPreview(value: unknown): RecalculationPreview 
     }),
     anomalies: array(row.anomalies, value => {
       const item = object(value);
-      return { code: text(item.code), message: text(item.message), staffName: nullableText(item.staffName) };
+      return {
+        code: text(item.code), message: text(item.message), sourceId: nullableText(item.sourceId),
+        staffName: nullableText(item.staffName), sessionId: nullableText(item.sessionId),
+        customerName: nullableText(item.customerName), orderId: nullableText(item.orderId),
+        orderNumber: nullableText(item.orderNumber),
+        orders: optionalArray(item.orders, orderValue => {
+          const order = object(orderValue);
+          return { orderId: text(order.orderId), orderNumber: text(order.orderNumber) };
+        }),
+        financeSources: optionalArray(item.financeSources, sourceValue => {
+          const source = object(sourceValue);
+          return {
+            id: text(source.id), sourceKind: text(source.sourceKind), kind: text(source.kind), amount: number(source.amount),
+            reason: nullableText(source.reason), allocationStatus: text(source.allocationStatus), holdScope: text(source.holdScope),
+            orderId: nullableText(source.orderId), orderNumber: nullableText(source.orderNumber),
+            orderItemId: nullableText(source.orderItemId), itemName: nullableText(source.itemName),
+          };
+        }),
+      };
     }),
     existingCorrections: array(row.existingCorrections, value => {
       const item = object(value);
@@ -67,9 +90,9 @@ export function parseRecalculationPreview(value: unknown): RecalculationPreview 
   };
 }
 
-export async function previewRecalculation(businessDate: string, sessionNo: number, signal: AbortSignal) {
+export async function previewRecalculation(businessDate: string, sessionNo: number, adjustments: RecalculationAdjustments | undefined, signal: AbortSignal) {
   const result = parseRecalculationPreview(await adminRequest("/settlement/recalculation/preview", {
-    method: "POST", body: JSON.stringify({ businessDate, sessionNo }), signal,
+    method: "POST", body: JSON.stringify({ businessDate, sessionNo, adjustments }), signal,
   }));
   if (result.businessDate !== businessDate || result.sessionNo !== sessionNo) throw new Error("預覽與目前營業時段不符。");
   return result;

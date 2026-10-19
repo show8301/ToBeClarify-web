@@ -1,4 +1,5 @@
 export const settlementMoney = (value: number) => Math.ceil(Number(value || 0)).toLocaleString("zh-TW");
+export const settlementExactMoney = (value: number) => Number(value || 0).toLocaleString("zh-TW", { maximumFractionDigits: 2 });
 
 export const settlementRoles: Record<string, string> = {
   designated: "指名人員",

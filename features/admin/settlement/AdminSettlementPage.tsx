@@ -17,6 +17,7 @@ import { SettlementPostActions } from "./SettlementPostActions";
 import { SettlementBackfillReviewDialog } from "./SettlementBackfillReviewDialog";
 import { settlementPeriodStatuses, settlementRoles as roleLabel, settlementStatuses } from "./presentation";
 import { mergeRefreshedInputs } from "./refresh-inputs";
+import type { RecalculationAdjustments } from "./recalculation-types";
 
 type StaffInput = SettlementStaffInput;
 
@@ -156,7 +157,7 @@ export function AdminSettlementPage() {
     };
   }, [load]);
 
-  const refreshSettlement = async () => {
+  const refreshSettlement = async (preserveDraftInputs = true) => {
     if (!date || !overview || loading) return false;
     refreshController.current?.abort();
     const controller = new AbortController();
@@ -168,7 +169,8 @@ export function AdminSettlementPage() {
     try {
       const next: SettlementOverview = await adminApi.getSettlement({ businessDate: date, sessionNo }, controller.signal);
       if (controller.signal.aborted || sequence !== loadSequence.current) return false;
-      setInputs(current => mergeRefreshedInputs(current, previous, next.staffInputs || []));
+      if (preserveDraftInputs) setInputs(current => mergeRefreshedInputs(current, previous, next.staffInputs || []));
+      else setInputs(next.staffInputs || []);
       setOverview(next);
       setMessage("結算預覽已依最新出勤更新；尚未保存的輸入需保存後才會計入金額。");
       return true;
@@ -315,9 +317,9 @@ export function AdminSettlementPage() {
   };
 
   const finalize = async () => {
-    if (!window.confirm("正式結算後本時段會鎖定，確定要繼續嗎？")) return;
+    if (!window.confirm("將保存本次結算版本；之後仍可調整計薪輸入，並於最終步驟建立新版。確定完成正式結算嗎？")) return;
     setSaving(true); setMessage("");
-    try { const next = await adminApi.finalizeSettlement({ businessDate: date, sessionNo }); setOverview(next); setMessage("本營業時段已正式結算並鎖定。"); }
+    try { const next = await adminApi.finalizeSettlement({ businessDate: date, sessionNo }); setOverview(next); setMessage("本營業時段已正式結算；原版本已保留，可於同頁調整輸入並建立新版。"); }
     catch (nextError) { setMessage((nextError as Error).message); }
     finally { setSaving(false); }
   };
@@ -341,6 +343,46 @@ export function AdminSettlementPage() {
     runFields.companyShareHours !== (overview.run.companyShareHours == null ? "" : String(overview.run.companyShareHours)) ||
     runFields.activityHoursConfirmed !== Boolean(overview.run.activityHoursConfirmed)
   ));
+  const recalculationAdjustments = useMemo<RecalculationAdjustments | undefined>(() => {
+    if (!overview || overview.run.status !== "finalized") return undefined;
+    const original = overview.staffInputs || [];
+    const originalByKey = new Map(original.map(item => [`${item.staffId}|${item.role}`, item]));
+    const currentByKey = new Map(inputs.map(item => [`${item.staffId}|${item.role}`, item]));
+    const changedInputs = inputs.filter(item => {
+      const before = originalByKey.get(`${item.staffId}|${item.role}`);
+      return !before || before.actualMinutes !== item.actualMinutes
+        || (before.activityHours ?? null) !== (item.activityHours ?? null)
+        || before.isBackstageParticipant !== item.isBackstageParticipant;
+    }).map(item => {
+      const before = originalByKey.get(`${item.staffId}|${item.role}`);
+      const isNew = !before;
+      return {
+        payrollSnapshotVersion: item.payrollSnapshotVersion ?? null,
+        staffId: item.staffId, role: item.role, actualMinutes: item.actualMinutes,
+        activityHours: item.activityHours ?? null, isBackstageParticipant: item.isBackstageParticipant,
+        actualMinutesChanged: isNew || before!.actualMinutes !== item.actualMinutes,
+        activityHoursChanged: isNew || (before!.activityHours ?? null) !== (item.activityHours ?? null),
+        backstageParticipantChanged: isNew || before!.isBackstageParticipant !== item.isBackstageParticipant,
+      };
+    });
+    const removedInputs = original.filter(item => !currentByKey.has(`${item.staffId}|${item.role}`))
+      .map(item => ({ staffId: item.staffId, role: item.role }));
+    const hasRunInputChanges = dayType !== overview.run.dayType
+      || runFields.publicTipAmount !== (overview.run.publicTipAmount || 0)
+      || runFields.admissionFeeOverride !== (overview.run.admissionFeeOverride == null ? "" : String(overview.run.admissionFeeOverride))
+      || runFields.activityExpense !== (overview.run.activityExpense || 0)
+      || runFields.companyShareHours !== (overview.run.companyShareHours == null ? "" : String(overview.run.companyShareHours))
+      || runFields.activityHoursConfirmed !== Boolean(overview.run.activityHoursConfirmed);
+    if (!hasRunInputChanges && changedInputs.length === 0 && removedInputs.length === 0) return undefined;
+    return {
+      dayType, publicTipAmount: runFields.publicTipAmount,
+      admissionFeeOverride: runFields.admissionFeeOverride === "" ? null : Number(runFields.admissionFeeOverride),
+      activityExpense: runFields.activityExpense,
+      companyShareHours: runFields.companyShareHours === "" ? null : Number(runFields.companyShareHours),
+      activityHoursConfirmed: runFields.activityHoursConfirmed,
+      staffInputs: changedInputs, removedStaffInputs: removedInputs,
+    };
+  }, [overview, inputs, dayType, runFields]);
   const selectPerson = (id: string) => {
     setSelectedStaffId(id);
     setBackfillForm(current => ({ ...current, requestedMinutes: "", reason: "" }));
@@ -397,10 +439,11 @@ export function AdminSettlementPage() {
             key={`${date}-${sessionNo}`}
             overview={overview} inputs={inputs} staff={availableStaff} dayType={dayType} setDayType={setDayType}
             fields={runFields} setFields={setRunFields} canManage={canManage} active={tab === "operations"} saving={saving} dirty={dirty} flowVersion={flowVersion}
+            adjustments={recalculationAdjustments}
             onBusyChange={setSaving} onAttendanceChanged={refreshSettlement} onAdd={addInput} onRemove={(index) => setInputs(current => current.filter((_, itemIndex) => itemIndex !== index))} onInputChange={updateInput} onSave={saveInputs} onCalculate={calculate}
             onClose={closeBusinessDay} onFinalize={finalize} onReview={openBackfillReview}
             onRecalculated={async () => {
-              const refreshed = await refreshSettlement();
+              const refreshed = await refreshSettlement(false);
               if (refreshed) setMessage("補正後重新結算完成，工時與薪資已更新；前後快照與支付紀錄已保留。");
               return refreshed;
             }}
@@ -410,7 +453,7 @@ export function AdminSettlementPage() {
           </SettlementOperations>
         </div>
         <div id="settlement-panel-personal" role="tabpanel" aria-labelledby="settlement-tab-personal" hidden={tab !== "personal"} className="adminSettlementTabPanel" tabIndex={0}>
-          <SettlementPersonalAccounts staff={personalStaff} selectedId={selectedPersonId} results={overview.results} inputs={inputs} run={overview.run} summary={overview.summary} canManage={canManage} finalized={isFinalized} saving={saving} onSelect={selectPerson} />
+          <SettlementPersonalAccounts staff={personalStaff} selectedId={selectedPersonId} results={overview.results} inputs={overview.staffInputs} run={overview.run} summary={overview.summary} canManage={canManage} finalized={isFinalized} saving={saving} onSelect={selectPerson} />
           {selectedPersonId ? <AttendancePanel key={`${date}-${selectedPersonId}`} businessDate={date} staffId={selectedPersonId} canManage={canManage} locked={isFinalized} disabled={saving} active={tab === "personal"} onBusyChange={setSaving} onChanged={refreshSettlement} /> : null}
           <AdminPanel title="補打卡申請" description="填寫個人的出勤角色、分鐘與理由，送交開發人員或店經理核准。">
             {!isFinalized && availableStaff.some(member => member.id === selectedPersonId) ? <>

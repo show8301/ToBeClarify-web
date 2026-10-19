@@ -116,6 +116,11 @@ export type SettlementResultSource = {
   orderId: string;
   orderNumber: string;
   label: string;
+  orderItemId?: string | null;
+  itemName?: string | null;
+  originalAmount?: number | null;
+  orderPayableAmount?: number | null;
+  orderCollectedAmount?: number | null;
   basisAmount: number;
   percentage: number;
   amount: number;
@@ -158,6 +163,25 @@ export type SettlementAnomaly = {
   sourceId?: string | null;
   staffName?: string | null;
   orders?: { orderId: string; orderNumber: string }[] | null;
+  sessionId?: string | null;
+  customerName?: string | null;
+  orderId?: string | null;
+  orderNumber?: string | null;
+  financeSources?: SettlementFinanceSource[] | null;
+};
+
+export type SettlementFinanceSource = {
+  id: string;
+  sourceKind: string;
+  kind: string;
+  amount: number;
+  reason: string | null;
+  allocationStatus: string;
+  holdScope: string;
+  orderId: string | null;
+  orderNumber: string | null;
+  orderItemId: string | null;
+  itemName: string | null;
 };
 
 export type SettlementPayrollAssignment = {

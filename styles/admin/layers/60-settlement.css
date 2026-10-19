@@ -281,10 +281,15 @@
 .adminSettlementSourceDetails h4 { margin: 0; color: var(--color-fg); font-size: 12px; }
 .adminSettlementSourceDetails p { margin: 0; color: var(--color-fg-soft); font-size: 12px; line-height: 1.65; }
 .adminSettlementSourceDetails strong { color: var(--color-fg); font-variant-numeric: tabular-nums; }
-.adminSettlementSourceOrders { display: grid; gap: 6px; max-height: 190px; overflow: auto; margin: 0; padding: 0; list-style: none; }
-.adminSettlementSourceOrders > li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 7px 9px; border: 1px solid var(--color-border); border-radius: 7px; background: var(--color-surface); }
-.adminSettlementSourceOrders > li > div { display: grid; gap: 3px; min-width: 0; }
+.adminSettlementSourceOrders { display: grid; gap: 6px; max-height: 300px; overflow: auto; margin: 0; padding: 0; list-style: none; }
+.adminSettlementSourceOrders > li { display: grid; gap: 8px; padding: 9px; border: 1px solid var(--color-border); border-radius: 7px; background: var(--color-surface); }
+.adminSettlementSourceOrderHeading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; min-width: 0; }
+.adminSettlementSourceOrderHeading strong { font-size: 12px; }
+.adminSettlementSourceItems { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.adminSettlementSourceItems > li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; padding-top: 7px; border-top: 1px solid var(--color-border); }
+.adminSettlementSourceItems > li > div { display: grid; gap: 3px; min-width: 0; overflow-wrap: anywhere; }
+.adminSettlementSourceItems > li > strong { font-size: 12px; }
 .adminSettlementSourceOrders a { color: var(--color-fg); font-size: 12px; font-weight: 700; overflow-wrap: anywhere; }
 .adminSettlementSourceOrders span { color: var(--color-fg-mute); font-size: 11px; }
-.adminSettlementSourceOrders > li > strong { flex: 0 0 auto; font-size: 12px; }
+.adminSettlementSourceOrders .adminSettlementSourceItemName { color: var(--color-fg); font-size: 12px; font-weight: 650; }
 .adminSettlementSourcePayFormula { padding-top: 9px; border-top: 1px solid var(--color-border); }

@@ -1,6 +1,7 @@
 import { AdminField, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
-import type { SettlementResult, SettlementResultSource, SettlementRun, SettlementStaff, SettlementStaffInput, SettlementSummary } from "./types";
-import { settlementMoney as money, settlementRoles } from "./presentation";
+import type { SettlementResult, SettlementRun, SettlementStaff, SettlementStaffInput, SettlementSummary } from "./types";
+import { settlementExactMoney as exactMoney, settlementMoney as money, settlementRoles } from "./presentation";
+import { SettlementOrderSources as OrderSources } from "./SettlementOrderSources";
 
 type Props = {
   staff: SettlementStaff[];
@@ -15,29 +16,11 @@ type Props = {
   onSelect: (id: string) => void;
 };
 
-const exactMoney = (value: number) => Number(value || 0).toLocaleString("zh-TW", { maximumFractionDigits: 2 });
 const attendanceSourceLabels: Record<SettlementStaffInput["attendanceSource"], string> = {
   clock: "打卡紀錄",
   backfill_approved: "已核准補打卡",
   manual: "手動登錄",
 };
-
-function OrderSources({ sources, kind }: { sources: SettlementResultSource[]; kind: SettlementResultSource["kind"] }) {
-  const rows = sources.filter((source) => source.kind === kind);
-  if (!rows.length) return <p className="adminSettlementHint">沒有此項目的逐筆訂單來源。</p>;
-
-  return <ul className="adminSettlementSourceOrders">
-    {rows.map((source, index) => <li key={`${source.orderId}-${source.label}-${index}`}>
-      <div>
-        <a href={`/admin/notifications/orders/${encodeURIComponent(source.orderId)}`} target="_blank" rel="noopener noreferrer">
-          {source.orderNumber || `未提供單號（${source.orderId}）`}
-        </a>
-        <span>{source.label} · {exactMoney(source.basisAmount)} G × {exactMoney(source.percentage)}%</span>
-      </div>
-      <strong>{exactMoney(source.amount)} G</strong>
-    </li>)}
-  </ul>;
-}
 
 function SourceDetails({ item, inputs, run, summary, finalized }: {
   item: SettlementResult;
@@ -52,8 +35,8 @@ function SourceDetails({ item, inputs, run, summary, finalized }: {
   const tipSources = sources.filter((source) => source.kind === "designated_tip");
   const serviceManagerInputs = inputs.filter((candidate) => candidate.role === "service" || candidate.role === "manager");
   const serviceManagerHours = serviceManagerInputs.reduce((total, candidate) => total + candidate.payableHours, 0);
-  const publicTipInputs = inputs.filter((candidate) => candidate.publicTipEligible
-    && ["designated", "service", "manager"].includes(candidate.role) && candidate.payableHours > 0);
+  const publicTipInputs = inputs.filter((candidate) =>
+    ["designated", "service", "manager"].includes(candidate.role) && candidate.payableHours > 0);
   const publicTipHours = publicTipInputs.reduce((total, candidate) => total + candidate.payableHours, 0);
   const activityHours = inputs.reduce((total, candidate) => total + (candidate.activityHours || 0), 0);
   const activityDenominator = activityHours + (run.companyShareHours || 0);
@@ -132,6 +115,7 @@ export function SettlementPersonalAccounts({ staff, selectedId, results, inputs,
         </section>
       ) : <p className="adminEmptyText">目前帳號未連結結算人員。</p>}
       <AdminPanel title="薪資組成" description="服務員／經理薪資為時薪 × 計薪時數＋營收分成；指名職位維持底薪與營收分成擇優。額外服務分潤及小費另計。幕後參與僅限開發人員。">
+        {finalized && (run.calculationVersion ?? 1) < 3 ? <p className="adminSettlementInlineWarning">此結算沿用舊版全日實收比例調整，來源金額可能已受其他帳款影響。請由結算管理預覽並確認重新結算，更新後才會套用逐單實收計算。</p> : null}
         {personalResults.length ? <>
           <div className="adminSettlementTableWrap"><table className="adminSettlementTable adminSettlementCompactTable"><thead><tr><th>計薪／收入項目</th><th className="adminSettlementNumber">底薪</th><th className="adminSettlementNumber">營收分成</th><th className="adminSettlementNumber">指定小費</th><th className="adminSettlementNumber">公共小費</th><th className="adminSettlementNumber">應付</th></tr></thead><tbody>{personalResults.map((item) => <tr key={`${item.staffId}-${item.role}`}>
           <td>{settlementRoles[item.role] || item.role}</td>
@@ -143,7 +127,7 @@ export function SettlementPersonalAccounts({ staff, selectedId, results, inputs,
         </tr>)}</tbody></table></div>
           <div className="adminSettlementSourceList">{personalResults.map((item) => <details className="adminSettlementSourceDisclosure" key={`sources-${item.staffId}-${item.role}`}>
             <summary>{settlementRoles[item.role] || item.role} · 查看金額來源</summary>
-            <SourceDetails item={item} inputs={personalInputs} run={run} summary={summary} finalized={finalized} />
+            <SourceDetails item={item} inputs={inputs} run={run} summary={summary} finalized={finalized} />
           </details>)}</div>
         </> : <p className="adminEmptyText">這位人員在本時段尚無薪資結果。</p>}
         {personalResults.filter((item) => item.anomalyStatus !== "normal").map((item) => <p key={`${item.staffId}-${item.role}`} className="adminSettlementInlineWarning">{item.anomalyNote || item.anomalyStatus}</p>)}

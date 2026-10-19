@@ -116,6 +116,11 @@ export type SettlementResultSource = {
   orderId: string;
   orderNumber: string;
   label: string;
+  orderItemId?: string | null;
+  itemName?: string | null;
+  originalAmount?: number | null;
+  orderPayableAmount?: number | null;
+  orderCollectedAmount?: number | null;
   basisAmount: number;
   percentage: number;
   amount: number;

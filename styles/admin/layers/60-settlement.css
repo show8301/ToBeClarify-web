@@ -233,3 +233,41 @@
   .adminSettlementRuleRates > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   .adminSettlementRuleRates strong { margin: 0; font-size: 22px; }
 }
+.adminSettlementRecalculation {
+  display: grid;
+  gap: var(--admin-space-block);
+  margin-top: var(--admin-space-block);
+}
+
+.adminDialog.adminSettlementRecalculationDialog {
+  width: min(1080px, calc(100vw - 32px));
+  max-width: 1080px;
+}
+
+.adminSettlementRecalculationBody {
+  display: grid;
+  gap: var(--admin-space-block);
+}
+
+.adminSettlementRecalculationTable {
+  min-width: 760px;
+}
+
+.adminSettlementRecalculationTable caption {
+  text-align: left;
+  font-weight: 700;
+  padding-bottom: 12px;
+}
+
+.adminSettlementRecalculationRole {
+  display: block;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.adminSettlementRecalculationHistory {
+  display: grid;
+  gap: 6px;
+  overflow-wrap: anywhere;
+  padding-block: 12px;
+}

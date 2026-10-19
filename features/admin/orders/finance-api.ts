@@ -3,7 +3,7 @@ import { notifyFinanceUpdated } from "./finance-events";
 import type {
   FinanceAccount, FinanceAllocation, FinanceHoldScope, FinanceKind, FinanceOperation,
   FinanceOrderOption, FinancePeriodOption, FinanceRecord, FinanceRevision, FinanceSaveRequest, FinanceSourceKind,
-  AdmissionEntry, AdmissionSaveRequest, FinanceCase,
+  AdmissionEntry, AdmissionSaveRequest, FinanceCase, FinanceTipDistributionMode, FinanceTipStaffOption, FinanceVoidRequest,
 } from "./finance-types";
 
 function object(value: unknown): Record<string, unknown> {
@@ -19,6 +19,10 @@ function num(value: unknown): number {
   if (typeof value !== "number" || !Number.isSafeInteger(value)) throw new Error("Expected integer");
   return value;
 }
+function decimal(value: unknown): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) throw new Error("Expected number");
+  return value;
+}
 function bool(value: unknown): boolean {
   if (typeof value !== "boolean") throw new Error("Expected boolean");
   return value;
@@ -28,8 +32,13 @@ function array<T>(value: unknown, parse: (entry: unknown) => T): T[] {
   return value.map(parse);
 }
 export function financeKind(value: unknown): FinanceKind {
-  if (value === "charge_add" || value === "charge_reduce" || value === "cash_receipt" || value === "cash_refund") return value;
+  if (value === "charge_add" || value === "charge_reduce" || value === "cash_receipt" || value === "cash_refund" || value === "tip_supplement") return value;
   throw new Error("Invalid finance kind");
+}
+function tipDistributionMode(value: unknown): FinanceTipDistributionMode | null {
+  if (value === null) return null;
+  if (value === "equal" || value === "designated" || value === "custom") return value;
+  throw new Error("Invalid tip distribution mode");
 }
 export function financeSource(value: unknown): FinanceSourceKind {
   if (value === "admission" || value === "order" || value === "item" || value === "unallocated") return value;
@@ -52,6 +61,15 @@ function parseRecord(value: unknown): FinanceRecord {
     allocationStatus: financeAllocation(row.allocationStatus), holdScope: holdScope(row.holdScope), reason: str(row.reason),
     reversesRecordId: nullable(row.reversesRecordId), caseId: nullable(row.caseId), createdAt: str(row.createdAt), createdBy: str(row.createdBy),
     createdByDisplayName: row.createdByDisplayName == null ? null : str(row.createdByDisplayName),
+    isVoided: bool(row.isVoided), voidedAt: nullable(row.voidedAt), voidedBy: nullable(row.voidedBy),
+    voidedByDisplayName: nullable(row.voidedByDisplayName), voidReason: nullable(row.voidReason),
+    tipDistributionMode: tipDistributionMode(row.tipDistributionMode),
+    linkedCashRecordId: nullable(row.linkedCashRecordId),
+    tipAllocations: array(row.tipAllocations, entry => {
+      const allocation = object(entry);
+      return { staffId: str(allocation.staffId), staffName: str(allocation.staffName),
+        percentage: allocation.percentage === null ? null : decimal(allocation.percentage), amount: num(allocation.amount) };
+    }),
     updatedAt: str(row.updatedAt), updatedBy: str(row.updatedBy), confirmedAt: nullable(row.confirmedAt), confirmedBy: nullable(row.confirmedBy),
   };
 }
@@ -103,6 +121,10 @@ export const financeApi = {
     const result: FinancePeriodOption = { id: str(row.id), businessDate: str(row.businessDate) };
     return result;
   }), { signal }),
+  tipStaff: (id: string, signal?: AbortSignal) => request(`${base(id)}/tip-staff-options`, value => array(value, entry => {
+    const row = object(entry);
+    return { staffId: str(row.staffId), displayName: str(row.displayName), roles: array(row.roles, str) } satisfies FinanceTipStaffOption;
+  }), { signal }),
   orders: (id: string, signal?: AbortSignal) => request(`/order-sessions/${encodeURIComponent(id)}/orders`, value => array(value, entry => {
     const row = object(entry);
     const result: FinanceOrderOption = { id: str(row.id), orderNumber: str(row.orderNumber), items: array(row.items, item => {
@@ -114,6 +136,10 @@ export const financeApi = {
   save: (id: string, recordId: string | null, body: FinanceSaveRequest, signal?: AbortSignal) => request(
     `${base(id)}/records${recordId ? `/${encodeURIComponent(recordId)}` : ""}`, parseOperation,
     { method: recordId ? "PUT" : "POST", body: JSON.stringify(body), signal },
+  ),
+  voidRecord: (id: string, recordId: string, body: FinanceVoidRequest, signal?: AbortSignal) => request(
+    `${base(id)}/records/${encodeURIComponent(recordId)}/void`, parseOperation,
+    { method: "POST", body: JSON.stringify(body), signal },
   ),
   operation: (id: string, operationId: string, signal?: AbortSignal) => request(
     `${base(id)}/operations/${encodeURIComponent(operationId)}`, value => value === null ? null : parseOperation(value), { signal },

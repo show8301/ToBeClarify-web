@@ -380,6 +380,17 @@
 .adminOrdersPage .adminOrderCashRecordContent > :is(span:not(.adminOrderFinanceTag), time) { color: var(--color-fg-soft); }
 .adminOrdersPage .adminOrderCashRecordContent:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
 .adminOrdersPage .adminOrderCashRecord > b { white-space: nowrap; }
+.adminOrdersPage .adminOrderFinanceRecordActions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.adminOrdersPage .adminOrderFinanceRecord.isVoided { border-style: dashed; opacity: .72; }
+.adminOrdersPage .adminOrderFinanceTipStaff { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; min-width: 0; margin: 0; padding: 10px; border: 1px solid var(--color-border); border-radius: 8px; }
+.adminOrdersPage .adminOrderFinanceTipStaff > legend { padding-inline: 4px; color: var(--color-fg-soft); font-size: 13px; }
+.adminOrdersPage .adminOrderFinanceTipStaffChoice { display: flex !important; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 14px !important; }
+.adminOrdersPage .adminOrderFinanceTipStaffChoice > span { display: flex; align-items: center; gap: 8px; }
+.adminOrdersPage .adminOrderFinanceTipStaffChoice input[type="checkbox"] { width: 18px; min-height: 18px; }
+.adminOrdersPage .adminOrderFinanceTipStaffChoice > input[type="number"] { max-width: 120px; }
+.adminOrdersPage .adminOrderFinanceVoidForm { grid-column: 1 / -1; display: grid; gap: 10px; padding: 12px; border: 1px solid var(--color-border-strong); border-radius: 8px; background: var(--color-surface-input); }
+.adminOrdersPage .adminOrderFinanceVoidForm > label { max-width: 560px; }
+.adminOrdersPage .adminOrderFinanceVoidForm .adminOrderFinanceActions { justify-content: flex-start; }
 .adminOrdersPage .adminOrderFinanceRecords > .adminOrderCashRecord > .adminButton { grid-column: auto; justify-self: end; white-space: nowrap; }
 .adminOrdersPage .adminOrderFinanceEmpty { padding: 12px; text-align: center; border: 1px dashed var(--color-border); border-radius: 8px; }
 .adminOrdersPage .adminOrderFinanceForm,
@@ -421,7 +432,8 @@
   .adminOrdersPage .adminOrderDetailPane { margin: 0; padding: 0; }
   .adminOrdersPage .adminOrderFinanceOverview { grid-template-columns: minmax(0, 1fr); }
   .adminOrdersPage .adminOrderFinanceRecord { grid-template-columns: minmax(0, 1fr) auto; }
-  .adminOrdersPage .adminOrderFinanceRecord > .adminButton { grid-column: 1 / -1; justify-self: start; }
+  .adminOrdersPage .adminOrderFinanceRecord > .adminButton,
+  .adminOrdersPage .adminOrderFinanceRecord > .adminOrderFinanceRecordActions { grid-column: 1 / -1; justify-self: start; justify-content: flex-start; }
   .adminOrdersPage .adminOrderFinanceHeading > .adminButton { width: 100%; }
   .adminOrdersPage .adminOrderCardHead { flex-wrap: wrap; }
   .adminOrdersPage .adminOrderCustomerIdentity p { flex-basis: 100%; }

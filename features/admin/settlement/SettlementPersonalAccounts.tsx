@@ -33,6 +33,7 @@ function SourceDetails({ item, inputs, run, summary, finalized }: {
   const sources = item.sources || [];
   const revenueSources = sources.filter((source) => source.kind === "designated_revenue");
   const tipSources = sources.filter((source) => source.kind === "designated_tip");
+  const supplementalTipSources = tipSources.filter((source) => source.label.startsWith("補登小費"));
   const serviceManagerInputs = inputs.filter((candidate) => candidate.role === "service" || candidate.role === "manager");
   const serviceManagerHours = serviceManagerInputs.reduce((total, candidate) => total + candidate.payableHours, 0);
   const publicTipInputs = inputs.filter((candidate) =>
@@ -72,7 +73,9 @@ function SourceDetails({ item, inputs, run, summary, finalized }: {
       <h4>指定小費來源</h4>
       {item.designatedTip > 0
         ? (item.role === "service" || item.role === "manager")
-          ? <p>本階段不展開服務員／經理的逐筆小費訂單；此金額已納入個人小費合計。</p>
+          ? supplementalTipSources.length
+            ? <OrderSources sources={supplementalTipSources} kind="designated_tip" />
+            : <p>本階段不展開既有服務員／經理的逐筆訂單小費；此金額已納入個人小費合計。</p>
           : !item.sourceDetailsSnapshotted && finalized
           ? <p>這筆既有結算尚未保存逐單小費來源快照。</p>
           : <OrderSources sources={tipSources} kind="designated_tip" />

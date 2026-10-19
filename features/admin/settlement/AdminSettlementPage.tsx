@@ -410,7 +410,7 @@ export function AdminSettlementPage() {
           </SettlementOperations>
         </div>
         <div id="settlement-panel-personal" role="tabpanel" aria-labelledby="settlement-tab-personal" hidden={tab !== "personal"} className="adminSettlementTabPanel" tabIndex={0}>
-          <SettlementPersonalAccounts staff={personalStaff} selectedId={selectedPersonId} results={overview.results} inputs={inputs} run={overview.run} summary={overview.summary} canManage={canManage} finalized={isFinalized} saving={saving} onSelect={selectPerson} />
+          <SettlementPersonalAccounts staff={personalStaff} selectedId={selectedPersonId} results={overview.results} inputs={overview.staffInputs} run={overview.run} summary={overview.summary} canManage={canManage} finalized={isFinalized} saving={saving} onSelect={selectPerson} />
           {selectedPersonId ? <AttendancePanel key={`${date}-${selectedPersonId}`} businessDate={date} staffId={selectedPersonId} canManage={canManage} locked={isFinalized} disabled={saving} active={tab === "personal"} onBusyChange={setSaving} onChanged={refreshSettlement} /> : null}
           <AdminPanel title="補打卡申請" description="填寫個人的出勤角色、分鐘與理由，送交開發人員或店經理核准。">
             {!isFinalized && availableStaff.some(member => member.id === selectedPersonId) ? <>

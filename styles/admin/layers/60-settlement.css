@@ -166,6 +166,10 @@
 .adminSettlementActionBar > span { flex: 1 1 240px; color: var(--color-fg-mute); font-size: 12px; }
 .adminSettlementAnomalies { border-color: color-mix(in srgb, #c18b37 60%, var(--color-border)); }
 .adminSettlementAnomalies ul { display: grid; gap: 8px; margin: 0; padding-left: 20px; font-size: 13px; }
+.adminSettlementAnomalyDetails { display: grid; gap: 7px; margin: 8px 0; }
+.adminSettlementAnomalySource { display: grid; gap: 4px; padding: 9px 11px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-surface); }
+.adminSettlementAnomalySource > span { color: var(--color-fg-mute); font-size: 12px; overflow-wrap: anywhere; }
+.adminSettlementAnomalyDetails a, .adminSettlementAnomalySource a { width: fit-content; color: var(--color-fg); font-size: 12px; font-weight: 650; text-decoration: underline; text-underline-offset: 3px; }
 .adminSettlementInlineWarning { margin: 0; padding: 12px 14px; border-left: 3px solid #c18b37; background: color-mix(in srgb, #c18b37 9%, var(--color-surface)); color: var(--color-fg); font-size: 13px; line-height: 1.65; overflow-wrap: anywhere; }
 
 .adminSettlementRequestList { display: grid; gap: 12px; }

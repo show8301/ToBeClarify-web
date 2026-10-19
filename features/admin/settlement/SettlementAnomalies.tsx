@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { AdminButton, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
 import { AdminHelp } from "@/features/admin/shared/AdminHelp";
 import { settlementMoney as money } from "./presentation";
+import { SettlementAnomalyDetails } from "./SettlementAnomalyDetails";
 import type { SettlementOverview, SettlementStaff } from "./types";
 
 type Props = {
@@ -38,7 +39,7 @@ export function SettlementAnomalies({ overview, staff, onAttendance, saving, onR
 
   return <AdminPanel title={<>
     {overview.anomalies.length ? `需處理的結算異常 · ${overview.anomalies.length} 項` : "結算異常檢核 · 0 項"}
-    <AdminHelp title="結算異常檢核說明">重新檢核會依最新出勤與上班計薪職位帶入預覽；自動帶入的輸入會在保存或重新計算時儲存。尚未保存的人工修改不納入檢核。異常會阻止正式結算。</AdminHelp>
+    <AdminHelp title="結算異常檢核說明">重新檢核會依最新出勤、帳款與上班計薪職位更新結果。帳款問題會列出顧客、訂單、金額與來源原因，並可直接開啟帳單；異常會阻止正式結算或建立新版。</AdminHelp>
   </>} className="adminSettlementAnomalies"
     actions={<AdminButton variant="secondary" busy={refreshing} busyLabel="重新檢核中…" disabled={saving} onClick={() => void refresh()}>重新檢核</AdminButton>}>
     {!overview.anomalies.length ? <p className="adminSettlementHint" role="status">目前沒有需處理的結算異常。</p> : <ul>{overview.anomalies.map((item, index) => {
@@ -54,6 +55,7 @@ export function SettlementAnomalies({ overview, staff, onAttendance, saving, onR
       return <li key={`${item.code}-${item.sourceId || index}`}>
         <strong>{staffIssue ? `${staffName || "姓名未提供"}：${item.message}` : backstageMissing ? "幕後技術分潤尚無參與人員" : item.message}</strong>
         {staffIssue ? <AdminHelp title="異常處理說明">{staffAnomalyHelp[item.code]}</AdminHelp> : null}
+        <SettlementAnomalyDetails anomaly={item} businessDate={overview.run.businessDate} />
         {backstageMissing ? <>
           <p className="adminSettlementHint">幕後技術池 {money(overview.summary.backstagePool)} G 待分配；本次結算預覽的幕後技術角色 {backstage.length} 人，其中勾選「幕後參與」{participants.length} 人。</p>
           <AdminHelp title="幕後技術分配說明">分配人數只計入角色為「幕後技術」且勾選「幕後參與」的結算輸入，不以全店人員名單或打卡人數計算。請到出勤核對實際參與人員，保存後重新計算。若當日確實無人參與，需先確認分潤規則，系統不會自動分配給其他角色。</AdminHelp>

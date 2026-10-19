@@ -11,6 +11,29 @@ export type RecalculationChange = {
   previousPay: number;
   correctedPay: number;
   payDelta: number;
+  previousActivityHours: number | null;
+  correctedActivityHours: number | null;
+};
+
+export type RecalculationAdjustments = {
+  dayType: string;
+  publicTipAmount: number;
+  admissionFeeOverride: number | null;
+  activityExpense: number;
+  companyShareHours: number | null;
+  activityHoursConfirmed: boolean;
+  staffInputs: {
+    payrollSnapshotVersion?: number | null;
+    staffId: string;
+    role: string;
+    actualMinutes: number;
+    activityHours: number | null;
+    isBackstageParticipant: boolean;
+    actualMinutesChanged: boolean;
+    activityHoursChanged: boolean;
+    backstageParticipantChanged: boolean;
+  }[];
+  removedStaffInputs: { staffId: string; role: string }[];
 };
 
 export type RecalculationBalance = {
@@ -48,6 +71,7 @@ export type RecalculationConfirmation = {
   expectedCorrectionVersion: number;
   operationId: string;
   reason: string;
+  adjustments?: RecalculationAdjustments;
 };
 
 export type RecalculationHistory = {

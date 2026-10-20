@@ -154,6 +154,7 @@
 .adminSettlementTable th.adminSettlementNumber, .adminSettlementTable td.adminSettlementNumber { text-align: right; font-variant-numeric: tabular-nums; }
 .adminSettlementTable input:not([type="checkbox"]) { width: 92px; padding: 9px; border: 1px solid var(--color-border-strong); border-radius: 8px; background: var(--color-surface-input); color: var(--color-fg); }
 .adminSettlementTable select { min-width: 150px; }
+.adminSettlementPayrollRole { display: grid; grid-template-columns: minmax(max-content, 1fr) auto; align-items: center; column-gap: 8px; }
 .adminSettlementWorkspace input[type="checkbox"] { width: 18px; height: 18px; min-height: 18px; flex: 0 0 18px; accent-color: var(--color-accent); }
 .adminSettlementAddInput { width: min(360px, 100%); }
 .adminSettlementConfirm { display: flex; align-items: center; gap: 9px; font-size: 13px; }

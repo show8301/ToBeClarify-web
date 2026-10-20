@@ -190,6 +190,7 @@ export type SettlementPayrollAssignment = {
 };
 
 export type SettlementOverview = {
+  pendingPayrollRoleCorrections?: { staffId: string; displayName: string; beforeRole: string; afterRole: string }[];
   payrollAssignments?: SettlementPayrollAssignment[];
   run: SettlementRun;
   rule: SettlementRule;

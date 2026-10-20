@@ -26,11 +26,12 @@ interface SessionHeaderProps {
   onUpdate: (body: { maxNominatedStaff: number } | { status: string }) => void;
   onReissue: () => void;
   onAssisted: () => void;
+  onBackfill: () => void;
 }
 
 const money = (value: number) => `${Number(value || 0).toLocaleString("zh-TW")} G`;
 
-export function SessionHeader({ item, onUpdate, onReissue, onAssisted, loading }: SessionHeaderProps) {
+export function SessionHeader({ item, onUpdate, onReissue, onAssisted, onBackfill, loading }: SessionHeaderProps) {
   const [max, setMax] = useState(item.session.maxNominatedStaff);
   const active = item.session.status === "active";
   const customerQuery = new URLSearchParams({ session: item.session.id, date: item.session.businessDate });
@@ -70,6 +71,7 @@ export function SessionHeader({ item, onUpdate, onReissue, onAssisted, loading }
             </div>
             <div className="adminOrderSessionActions">
               <AdminButton disabled={loading || !active} onClick={onAssisted}>代客點餐</AdminButton>
+              <AdminButton variant="secondary" disabled={loading || !["active", "readonly"].includes(item.session.status)} onClick={onBackfill}>補登已成交訂單</AdminButton>
               <AdminButton variant="ghost" disabled={loading} onClick={onReissue}>尋回點餐碼</AdminButton>
               <AdminButton variant={active ? "danger" : "secondary"} disabled={loading} onClick={() => onUpdate({ status: active ? "readonly" : "active" })}>{active ? "顧客離店／停止點餐" : "重開點餐"}</AdminButton>
             </div>

@@ -1,4 +1,5 @@
 import type { SettlementStaff, SettlementStaffInput, SettlementPayrollAssignment } from "./types";
+import { Pencil } from "lucide-react";
 import { AdminButton } from "@/features/admin/shared/AdminShared.jsx";
 import { settlementRoles } from "./presentation";
 
@@ -6,6 +7,7 @@ type Props = {
   inputs: SettlementStaffInput[];
   assignments: SettlementPayrollAssignment[];
   onRemove: (index: number) => void;
+  onCorrectRole: (item: SettlementStaffInput) => void;
   staff: SettlementStaff[];
   editable: boolean;
   isEvent: boolean;
@@ -13,7 +15,7 @@ type Props = {
   onChange: (index: number, key: keyof SettlementStaffInput, value: unknown) => void;
 };
 
-export function SettlementStaffInputTable({ inputs, staff, assignments, editable, isEvent, onAdd, onChange, onRemove }: Props) {
+export function SettlementStaffInputTable({ inputs, staff, assignments, editable, isEvent, onAdd, onChange, onRemove, onCorrectRole }: Props) {
   return (
     <>
       {editable ? (
@@ -41,7 +43,19 @@ export function SettlementStaffInputTable({ inputs, staff, assignments, editable
             <tbody>
               {inputs.map((item, index) => (
                 <tr key={`${item.staffId}-${item.role}`}>
-                  <td>{item.displayName}</td><td>{settlementRoles[item.role] || item.role}</td>
+                  <td>{item.displayName}</td>
+                  <td>
+                    <div className="adminSettlementPayrollRole">
+                      <span>{settlementRoles[item.role] || item.role}</span>
+                      {editable && (item.role !== "backstage" || assignments.find(assignment => assignment.staffId === item.staffId)?.payrollRole === "backstage") ? (
+                        <AdminButton variant="ghost" className="iconActionButton"
+                          aria-label={`更正${item.displayName}的計薪職位`} title="更正職位"
+                          onClick={() => onCorrectRole(item)}>
+                          <Pencil aria-hidden="true" />
+                        </AdminButton>
+                      ) : null}
+                    </div>
+                  </td>
                   <td><input aria-label={`${item.displayName} ${settlementRoles[item.role] || item.role} 實際分鐘`} type="number" min="0" value={item.actualMinutes} disabled={!editable} onChange={(event) => onChange(index, "actualMinutes", Number(event.target.value) || 0)} /></td>
                   <td className="adminSettlementNumber">{item.payableHours}</td>
                   {isEvent ? <td><input aria-label={`${item.displayName} 活動分配時數`} type="number" min="0" step="0.5" value={item.activityHours ?? ""} disabled={!editable} onChange={(event) => onChange(index, "activityHours", event.target.value === "" ? null : Number(event.target.value))} /></td> : null}

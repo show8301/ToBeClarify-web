@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, CircleAlert, CircleCheck } from "lucide-react";
 import { AdminButton, AdminField, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
 import { AdminDisclosureSummary } from "@/features/admin/shared/AdminDisclosureSummary";
 import { AttendancePanel } from "./AttendancePanel";
+import { PayrollRoleCorrection } from "./PayrollRoleCorrection";
 import { SettlementStaffInputTable } from "./SettlementStaffInputTable";
 import { SettlementAnomalies } from "./SettlementAnomalies";
 import { settlementMoney as money, settlementPeriodStatuses, settlementRoles, settlementStatuses } from "./presentation";
@@ -51,6 +52,7 @@ const steps = [
 export function SettlementOperations({ overview, inputs, staff, dayType, setDayType, fields, setFields, canManage, active, saving, dirty, flowVersion, adjustments, onBusyChange, onAttendanceChanged, onRemove, onAdd, onInputChange, onSave, onCalculate, onClose, onFinalize, onRecalculated, onReview, onViewPerson, children }: Props) {
   const [step, setStep] = useState(0);
   const [inputsOpen, setInputsOpen] = useState(false);
+  const [roleCorrection, setRoleCorrection] = useState<SettlementStaffInput | null>(null);
   type Action = "close" | "save" | "calculate" | "finalize";
   const [pendingAction, setPendingAction] = useState<Action | null>(null);
   const actionLock = useRef<Action | null>(null);
@@ -93,7 +95,15 @@ export function SettlementOperations({ overview, inputs, staff, dayType, setDayT
   </div>;
 
   return <>
+    {roleCorrection ? <PayrollRoleCorrection key={`${run.businessDate}-${roleCorrection.staffId}`} businessDate={run.businessDate}
+      staffId={roleCorrection.staffId} displayName={roleCorrection.displayName} finalized={finalized}
+      onClose={() => setRoleCorrection(null)} onChanged={onAttendanceChanged} onBusyChange={onBusyChange} /> : null}
     <div className="adminSettlementSectionHeading"><div><h2>營運結算</h2><p>依序關店、核對出勤與金額，再完成正式結算。</p></div><span className="adminSettlementBadge">{settlementStatuses[run.status] || run.status}</span></div>
+    {!!overview.pendingPayrollRoleCorrections?.length && <aside className="adminSettlementAttention" role="status"><div>
+      <strong>有 {overview.pendingPayrollRoleCorrections.length} 位人員的計薪職位待重新結算</strong>
+      <ul>{overview.pendingPayrollRoleCorrections.map(item => <li key={item.staffId}>{item.displayName}：{settlementRoles[item.beforeRole] || item.beforeRole} → {settlementRoles[item.afterRole] || item.afterRole}</li>)}</ul>
+      <p>輸入已帶入更正後職位，金額仍為原正式結算。請於最終步驟核對全員差額、填寫原因並重新結算；同日其他時段也須核對。</p>
+    </div></aside>}
     {!!overview.pendingOrderBackfillCount && <aside className="adminSettlementAttention" role="status"><div><strong>有 {overview.pendingOrderBackfillCount} 筆補登訂單待重新結算</strong><p>目前仍顯示原正式結算金額。請由經理核對補登與帳款，於最終步驟填寫原因並重新結算。</p></div></aside>}
     {anomalies.length || pending.length || pendingFinance ? <aside className="adminSettlementAttention" aria-label="待處理事項">
       <CircleAlert size={21} aria-hidden="true" />
@@ -159,7 +169,7 @@ export function SettlementOperations({ overview, inputs, staff, dayType, setDayT
         <AdminDisclosureSummary>計薪輸入與人員角色 · {inputs.length} 筆</AdminDisclosureSummary>
         <div className="adminSettlementDisclosureBody">
         <p className="adminSettlementHint">有效出勤沿用現有時數換算，依上班開始時鎖定的單一職位計薪。支援不改主要職位公式，額外服務分潤另計；幕後參與僅限開發人員。{finalized ? "已結算版本的輸入可在此調整，最終步驟預覽並填寫原因後才會建立新版。" : "未正式結算前，保存後重新計算即可更新預覽。"}</p>
-        <SettlementStaffInputTable inputs={inputs} staff={staff} assignments={overview.payrollAssignments || []} onRemove={onRemove} editable={editable} isEvent={dayType === "event"} onAdd={onAdd} onChange={onInputChange} />
+        <SettlementStaffInputTable inputs={inputs} staff={staff} assignments={overview.payrollAssignments || []} onRemove={onRemove} editable={editable} isEvent={dayType === "event"} onAdd={onAdd} onChange={onInputChange} onCorrectRole={setRoleCorrection} />
         {canManage && finalized && dirty ? <p className="adminNotice" role="status">調整已暫存在本頁；前往最終步驟重新計算，填寫原因後才會建立新版。</p> : null}
         {canManage && !finalized ? <div className="adminSettlementActionBar"><span>{dirty ? "有尚未保存的結算輸入。" : "核對完成後，在下一步重新計算。"}</span><AdminButton variant="secondary" disabled={saving} onClick={() => void onSave()}>保存結算輸入</AdminButton></div> : null}
       </div></details>

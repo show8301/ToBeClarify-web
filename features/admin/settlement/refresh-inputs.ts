@@ -12,10 +12,15 @@ export function mergeRefreshedInputs(
   const previousByKey = new Map(previous.map(item => [inputKey(item), item]));
   const refreshedKeys = new Set(refreshed.map(inputKey));
   const merged = refreshed.map(item => {
-    const local = currentByKey.get(inputKey(item));
-    const baseline = previousByKey.get(inputKey(item));
+    const oldRows = previous.filter(old => old.staffId === item.staffId
+      && (old.payrollSnapshotVersion ?? 0) < (item.payrollSnapshotVersion ?? 0));
+    const former = oldRows.filter(old => old.role !== "backstage");
+    const isPrimary = item.role !== "backstage" || !refreshed.some(next => next.staffId === item.staffId && next.role !== "backstage");
+    const migrated = isPrimary ? (former.length === 1 ? former[0] : oldRows.length === 1 ? oldRows[0] : undefined) : undefined;
+    const baseline = migrated || previousByKey.get(inputKey(item));
+    const local = baseline ? currentByKey.get(inputKey(baseline)) : currentByKey.get(inputKey(item));
     if (!local) return item;
-    if (!baseline) return local;
+    if (!baseline) return { ...local, payrollSnapshotVersion: item.payrollSnapshotVersion };
     return {
       ...item,
       actualMinutes: local.actualMinutes !== baseline.actualMinutes ? local.actualMinutes : item.actualMinutes,
@@ -26,5 +31,7 @@ export function mergeRefreshedInputs(
       note: local.note !== baseline.note ? local.note : item.note,
     };
   });
-  return [...merged, ...current.filter(item => !refreshedKeys.has(inputKey(item)))];
+  return [...merged, ...current.filter(item => !refreshedKeys.has(inputKey(item))
+    && !refreshed.some(next => next.staffId === item.staffId
+      && (next.payrollSnapshotVersion ?? 0) > (item.payrollSnapshotVersion ?? 0)))];
 }

@@ -2,6 +2,8 @@ import { AdminRefreshButton } from "@/features/admin/shared/AdminRefreshButton";
 import { BusinessDayPlanPanel } from "./BusinessDayPlanPanel";
 import { OrderFulfillmentPanel } from "./OrderFulfillmentPanel";
 import { AdminAssistedOrderPanel } from "./AdminAssistedOrderPanel";
+import { AdminOrderBackfillPanel } from "./AdminOrderBackfillPanel";
+import { OrderBackfillNotice } from "./OrderBackfillNotice";
 import { FinancialRecordsPanel } from "./FinancialRecordsPanel";
 import { SessionHeader } from "./SessionHeader";
 import { AdminOrderItemRow } from "./AdminOrderItemRow";
@@ -80,6 +82,7 @@ export function AdminOrdersPage() {
   const [admissionPolicyRevision, setAdmissionPolicyRevision] = useState(0);
   const [issued, setIssued] = useState(null);
   const [showAssisted, setShowAssisted] = useState(false);
+  const [showBackfill, setShowBackfill] = useState(false);
 
   useEffect(() => {
     if (!focusedOrder || !orders.some(order => order.id === focusedOrder) || focusedRef.current === focusedOrder) return;
@@ -173,8 +176,9 @@ export function AdminOrdersPage() {
       </CustomerPane>
       <div className="adminOrderDetailPane">
         {!selected ? <div className="adminOrderEmpty"><span>LD</span><h2>選擇一位顧客</h2><p>使用左側搜尋或分組快速定位顧客。</p></div> : <>
-          <SessionHeader key={`${selectedId}:${selected.session.maxNominatedStaff}`} item={selected} loading={loading} onUpdate={(body) => act(() => adminApi.updateOrderSession(selectedId, body), '顧客點餐設定已更新。')} onReissue={async () => { try { setIssued(await adminApi.reissueOrderSession(selectedId)); } catch (error) { setMessage({ text: error.message, error: true }); } }} onAssisted={() => setShowAssisted((value) => !value)} />
-          {showAssisted ? <AdminAssistedOrderPanel sessionId={selectedId} businessDate={businessDate} onSaved={refreshSelected} onClose={() => setShowAssisted(false)} /> : null}
+          <SessionHeader key={`${selectedId}:${selected.session.maxNominatedStaff}`} item={selected} loading={loading} onUpdate={(body) => act(() => adminApi.updateOrderSession(selectedId, body), '顧客點餐設定已更新。')} onReissue={async () => { try { setIssued(await adminApi.reissueOrderSession(selectedId)); } catch (error) { setMessage({ text: error.message, error: true }); } }} onAssisted={() => { setShowBackfill(false); setShowAssisted((value) => !value); }} onBackfill={() => { setShowAssisted(false); setShowBackfill((value) => !value); }} />
+          {showAssisted ? <AdminAssistedOrderPanel key={selectedId} sessionId={selectedId} businessDate={businessDate} onSaved={refreshSelected} onClose={() => setShowAssisted(false)} /> : null}
+          {showBackfill ? <AdminOrderBackfillPanel key={selectedId} sessionId={selectedId} businessDate={businessDate} onSaved={refreshSelected} onClose={() => setShowBackfill(false)} /> : null}
           <section className="adminOrderCustomerOrders" aria-label="顧客訂單">
             <header className="adminOrderSectionHeading"><h3>顧客訂單</h3><span>{orders.length} 張</span></header>
             <div className="adminOrderCards">{orders.length ? orders.map((order) => <div id={`admin-order-${order.id}`} key={order.id}>{order.flowVersion >= 2 ? <AdminFulfillmentOrderCard key={order.id} order={order} user={user} loading={loading} canManage={canManage} act={act} onChanged={refreshSelected} /> : <AdminOrderCard key={order.id} order={order} user={user} loading={loading} act={act} />}</div>) : <div className="adminOrderEmpty isCompact"><h2>尚未下單</h2><p>此點餐碼今天還沒有送出訂單。</p></div>}</div>
@@ -240,6 +244,7 @@ function AdminFulfillmentOrderCard({ order, user, loading, canManage, act, onCha
   useEffect(() => { setNote(order.customerNote || ''); setLocation(order.customerLocation || ''); }, [order.customerNote, order.customerLocation]);
   return <OrderDisclosure orderNumber={order.orderNumber} status={order.status} amount={order.totalAmount} submittedAt={order.submittedAt}
     storePending={storePending} progress={progress}>
+    <OrderBackfillNotice value={order.backfill} />
     <OrderCustomerDetails location={location} note={note} loading={loading} onLocationChange={setLocation} onNoteChange={setNote}
       onSave={() => act(() => adminApi.updateOrder(order.id, { customerNote: note, customerLocation: location }), '顧客位置與備註已更新。')} />
     {storePending ? <StoreConfirmationPanel reasonId={`store-confirmation-reason-${order.id}`} loading={loading}
@@ -279,6 +284,7 @@ function AdminOrderCard({ order, user, loading, act }) {
   ].filter(Boolean).join(' · ');
   return <OrderDisclosure orderNumber={order.orderNumber} status={order.status} amount={order.totalAmount} submittedAt={order.submittedAt}
     storePending={order.storeConfirmationStatus === 'pending'}><div className="adminOrderCardBody">
+     <OrderBackfillNotice value={order.backfill} />
      {order.orderKind === 'service_addon' && <p>附掛加購服務單</p>}
      {queueDetails && <p>{queueDetails}</p>}
      {order.storeConfirmationStatus === 'pending' ? <StoreConfirmationPanel reasonId={`store-confirmation-reason-${order.id}`} loading={loading}

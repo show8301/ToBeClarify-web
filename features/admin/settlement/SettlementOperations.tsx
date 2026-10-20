@@ -94,6 +94,7 @@ export function SettlementOperations({ overview, inputs, staff, dayType, setDayT
 
   return <>
     <div className="adminSettlementSectionHeading"><div><h2>營運結算</h2><p>依序關店、核對出勤與金額，再完成正式結算。</p></div><span className="adminSettlementBadge">{settlementStatuses[run.status] || run.status}</span></div>
+    {!!overview.pendingOrderBackfillCount && <aside className="adminSettlementAttention" role="status"><div><strong>有 {overview.pendingOrderBackfillCount} 筆補登訂單待重新結算</strong><p>目前仍顯示原正式結算金額。請由經理核對補登與帳款，於最終步驟填寫原因並重新結算。</p></div></aside>}
     {anomalies.length || pending.length || pendingFinance ? <aside className="adminSettlementAttention" aria-label="待處理事項">
       <CircleAlert size={21} aria-hidden="true" />
       <div><strong>{finalized ? "正式結算後待處理" : "結算前需留意"}</strong><div className="adminSettlementAttentionItems">

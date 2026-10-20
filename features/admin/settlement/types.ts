@@ -199,6 +199,7 @@ export type SettlementOverview = {
   anomalies: SettlementAnomaly[];
   attendanceBackfillRequests: AttendanceBackfill[];
   workflow?: SettlementWorkflow | null;
+  pendingOrderBackfillCount?: number;
 };
 
 export type SettlementRunFields = {

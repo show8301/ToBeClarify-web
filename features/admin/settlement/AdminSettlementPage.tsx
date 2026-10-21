@@ -12,6 +12,7 @@ import { AttendancePanel } from "./AttendancePanel";
 import { SettlementTabs } from "./SettlementTabs";
 import { SettlementOperations } from "./SettlementOperations";
 import { SettlementPersonalAccounts } from "./SettlementPersonalAccounts";
+import { parseSettlementRule } from "./rule-api";
 import { SettlementRuleSettings } from "./SettlementRuleSettings";
 import { SettlementPostActions } from "./SettlementPostActions";
 import { SettlementBackfillReviewDialog } from "./SettlementBackfillReviewDialog";
@@ -82,6 +83,7 @@ export function AdminSettlementPage() {
   const [staff, setStaff] = useState<SettlementStaff[]>([]);
   const [inputs, setInputs] = useState<StaffInput[]>([]);
   const [runFields, setRunFields] = useState<SettlementRunFields>({ publicTipAmount: 0, admissionFeeOverride: "", activityExpense: 0, companyShareHours: "", activityHoursConfirmed: false });
+  const [selectedRule, setSelectedRule] = useState<SettlementRule | null>(null);
   const [ruleForm, setRuleForm] = useState<Omit<SettlementRule, "id">>(emptyRule(null, "normal", ""));
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -129,6 +131,7 @@ export function AdminSettlementPage() {
       if (!dayContext || typeof dayContext.flowVersion !== "number") throw new Error("無法確認營業日模式。");
       setFlowVersion(dayContext.flowVersion);
       setOverview(nextOverview);
+      setSelectedRule(null);
       setDayType(nextOverview.run.dayType || "normal");
       setInputs(nextOverview.staffInputs || []);
       setStaff(canManage ? (nextStaff || []) : (user?.staffMemberId ? [{ id: user.staffMemberId, displayName: user.displayName, isActive: true }] : []));
@@ -170,7 +173,7 @@ export function AdminSettlementPage() {
       const next: SettlementOverview = await adminApi.getSettlement({ businessDate: date, sessionNo }, controller.signal);
       if (controller.signal.aborted || sequence !== loadSequence.current) return false;
       if (preserveDraftInputs) setInputs(current => mergeRefreshedInputs(current, previous, next.staffInputs || []));
-      else setInputs(next.staffInputs || []);
+      else { setInputs(next.staffInputs || []); setSelectedRule(null); setDayType(next.run.dayType); }
       setOverview(next);
       setMessage("結算預覽已依最新出勤更新；尚未保存的輸入需保存後才會計入金額。");
       return true;
@@ -207,7 +210,7 @@ export function AdminSettlementPage() {
     setSaving(true); setMessage("");
     try {
       const next = await adminApi.saveSettlementInputs({
-        businessDate: date, sessionNo, dayType, ...runFields,
+        businessDate: date, sessionNo, dayType, ruleVersionId: selectedRule?.id ?? (dayType === overview?.run.dayType ? overview?.rule.id : null), ...runFields,
         admissionFeeOverride: runFields.admissionFeeOverride === "" ? null : Number(runFields.admissionFeeOverride),
         companyShareHours: runFields.companyShareHours === "" ? null : Number(runFields.companyShareHours),
         expectedInputVersion: overview?.run.inputVersion,
@@ -219,7 +222,7 @@ export function AdminSettlementPage() {
           attendanceSource: item.attendanceSource || "manual", note: item.note || null,
         })),
       });
-      setOverview(next); setInputs(next.staffInputs || inputs); setMessage("結算輸入已保存。");
+      setOverview(next); setSelectedRule(null); setInputs(next.staffInputs || inputs); setMessage("結算輸入與規則版本已保存。");
     } catch (nextError) { setMessage((nextError as Error).message); }
     finally { setSaving(false); }
   };
@@ -326,8 +329,12 @@ export function AdminSettlementPage() {
 
   const saveRule = async () => {
     setSaving(true); setMessage("");
-    try { const saved = await adminApi.saveSettlementRule({ ...ruleForm, effectiveFrom: ruleForm.effectiveFrom || date }); setRuleForm(emptyRule(saved, saved.dayType, saved.effectiveFrom)); setMessage("新規則版本已建立；既有規則不會被覆蓋。"); }
-    catch (nextError) { setMessage((nextError as Error).message); }
+    try {
+      const saved = parseSettlementRule(await adminApi.saveSettlementRule({ ...ruleForm, effectiveFrom: ruleForm.effectiveFrom || date }));
+      setRuleForm(emptyRule(saved, saved.dayType, saved.effectiveFrom));
+      setMessage(`規則 ${saved.id.slice(0, 8)} 已儲存，生效日 ${saved.effectiveFrom}。可在版本列表查看並選用；既有正式結算尚未變更。`);
+      return saved;
+    } catch (nextError) { setMessage((nextError as Error).message); return null; }
     finally { setSaving(false); }
   };
 
@@ -335,6 +342,7 @@ export function AdminSettlementPage() {
   const isFinalized = overview?.run.status === "finalized";
   const tab = !canManage && activeTab === "settings" ? "personal" : activeTab;
   const dirty = Boolean(overview && (
+    (selectedRule !== null && selectedRule.id !== overview.rule.id) ||
     dayType !== overview.run.dayType ||
     JSON.stringify(inputs) !== JSON.stringify(overview.staffInputs || []) ||
     runFields.publicTipAmount !== (overview.run.publicTipAmount || 0) ||
@@ -367,7 +375,7 @@ export function AdminSettlementPage() {
     });
     const removedInputs = original.filter(item => !currentByKey.has(`${item.staffId}|${item.role}`))
       .map(item => ({ staffId: item.staffId, role: item.role }));
-    const hasRunInputChanges = dayType !== overview.run.dayType
+    const hasRunInputChanges = (selectedRule !== null && selectedRule.id !== overview.rule.id) || dayType !== overview.run.dayType
       || runFields.publicTipAmount !== (overview.run.publicTipAmount || 0)
       || runFields.admissionFeeOverride !== (overview.run.admissionFeeOverride == null ? "" : String(overview.run.admissionFeeOverride))
       || runFields.activityExpense !== (overview.run.activityExpense || 0)
@@ -375,14 +383,14 @@ export function AdminSettlementPage() {
       || runFields.activityHoursConfirmed !== Boolean(overview.run.activityHoursConfirmed);
     if (!hasRunInputChanges && changedInputs.length === 0 && removedInputs.length === 0) return undefined;
     return {
-      dayType, publicTipAmount: runFields.publicTipAmount,
+      ruleVersionId: selectedRule?.id ?? null, dayType, publicTipAmount: runFields.publicTipAmount,
       admissionFeeOverride: runFields.admissionFeeOverride === "" ? null : Number(runFields.admissionFeeOverride),
       activityExpense: runFields.activityExpense,
       companyShareHours: runFields.companyShareHours === "" ? null : Number(runFields.companyShareHours),
       activityHoursConfirmed: runFields.activityHoursConfirmed,
       staffInputs: changedInputs, removedStaffInputs: removedInputs,
     };
-  }, [overview, inputs, dayType, runFields]);
+  }, [overview, inputs, dayType, runFields, selectedRule]);
   const selectPerson = (id: string) => {
     setSelectedStaffId(id);
     setBackfillForm(current => ({ ...current, requestedMinutes: "", reason: "" }));
@@ -431,13 +439,14 @@ export function AdminSettlementPage() {
           <span className="adminSettlementBadge">{settlementStatuses[overview.run.status] || overview.run.status}</span>
         </div> : null}
       </div>
+      {selectedRule && overview && selectedRule.id !== overview.rule.id ? <div className="adminNotice" role="status">待套用規則 {selectedRule.effectiveFrom} · {selectedRule.id.slice(0, 8)}；目前結算仍使用 {overview.rule.effectiveFrom} · {overview.rule.id.slice(0, 8)}。請在最終步驟預覽並保存新結果。</div> : null}
       {message ? <div className="adminNotice" role="status">{message}</div> : null}
       <AdminState loading={loading} error={error} onRetry={() => { setLoading(true); void load(); }} />
       {!loading && !error && overview ? <>
         <div id="settlement-panel-operations" role="tabpanel" aria-labelledby="settlement-tab-operations" hidden={tab !== "operations"} className="adminSettlementTabPanel" tabIndex={0}>
           <SettlementOperations
             key={`${date}-${sessionNo}`}
-            overview={overview} inputs={inputs} staff={availableStaff} dayType={dayType} setDayType={setDayType}
+            overview={overview} inputs={inputs} staff={availableStaff} dayType={dayType} setDayType={next => { setDayType(next); setSelectedRule(null); }}
             fields={runFields} setFields={setRunFields} canManage={canManage} active={tab === "operations"} saving={saving} dirty={dirty} flowVersion={flowVersion}
             adjustments={recalculationAdjustments}
             onBusyChange={setSaving} onAttendanceChanged={refreshSettlement} onAdd={addInput} onRemove={(index) => setInputs(current => current.filter((_, itemIndex) => itemIndex !== index))} onInputChange={updateInput} onSave={saveInputs} onCalculate={calculate}
@@ -468,7 +477,9 @@ export function AdminSettlementPage() {
           </AdminPanel>
         </div>
         {canManage ? <div id="settlement-panel-settings" role="tabpanel" aria-labelledby="settlement-tab-settings" hidden={tab !== "settings"} className="adminSettlementTabPanel" tabIndex={0}>
-          <SettlementRuleSettings rule={overview.rule} form={ruleForm} setForm={setRuleForm} saving={saving} onSave={saveRule} />
+          <SettlementRuleSettings key={`${date}-${sessionNo}`} rule={overview.rule} form={ruleForm} setForm={setRuleForm} saving={saving} onSave={saveRule}
+            selected={selectedRule} businessDate={date} finalized={Boolean(isFinalized)} onCreate={value => setRuleForm(emptyRule(value, value.dayType, date))}
+            onSelect={value => { setSelectedRule(value); setDayType(value?.dayType ?? overview.run.dayType); setMessage(value ? "規則版本已選取，請到營運結算預覽；尚未變更已結算金額。" : "已取消待套用的規則變更。"); }} />
         </div> : null}
       </> : null}
     </div>

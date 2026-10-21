@@ -123,7 +123,7 @@ export function SettlementRecalculation({ run, saving, adjustments, onBusyChange
   return <section className="adminSettlementRecalculation" aria-label="結算補正">
     <div className="adminSettlementActionBar">
       <span className="adminFieldHeading">已結算資料調整 · V{currentVersion}
-        <AdminHelp title="建立新結算版本">以本頁調整與最新帳款重新計算全員薪資，沿用原結算規則。確認時填寫原因；系統保存前後快照，已登記支付繼續保留，差額另行補付或追回。</AdminHelp>
+        <AdminHelp title="建立新結算版本">以本頁調整與最新帳款重新計算全員薪資，依本次選取的規則計算；未變更時沿用原規則。確認時填寫原因；系統保存前後快照，已登記支付繼續保留，差額另行補付或追回。</AdminHelp>
       </span>
       <AdminButton variant="secondary" disabled={saving || busy} onClick={() => void loadPreview()}>重新計算並建立新版</AdminButton>
     </div>
@@ -156,6 +156,7 @@ export function SettlementRecalculation({ run, saving, adjustments, onBusyChange
         {error ? <p className="adminSettlementInlineWarning" role="alert">{error}</p> : null}
         {uncertain ? <p className="adminSettlementInlineWarning">結果尚未確認，再次確認會沿用同一操作編號。也可重新讀取預覽核對最新結算。</p> : null}
         {preview ? <>
+          {preview.previousRuleVersionId && preview.correctedRuleVersionId ? <p className="adminSettlementHint">規則版本：{preview.previousRuleEffectiveFrom}（{preview.previousRuleVersionId.slice(0, 8)}）→ {preview.correctedRuleEffectiveFrom}（{preview.correctedRuleVersionId.slice(0, 8)}）。確認後才套用，原規則保留於上一版快照。</p> : null}
           <div className="adminSettlementSummary">
             <div><span>原應付薪資</span><strong>{money(preview.previousPayroll)} G</strong></div>
             <div><span>補正後應付</span><strong>{money(preview.correctedPayroll)} G</strong></div>

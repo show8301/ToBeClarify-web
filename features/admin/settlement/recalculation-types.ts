@@ -16,6 +16,7 @@ export type RecalculationChange = {
 };
 
 export type RecalculationAdjustments = {
+  ruleVersionId?: string | null;
   dayType: string;
   publicTipAmount: number;
   admissionFeeOverride: number | null;
@@ -49,6 +50,10 @@ export type RecalculationPreview = {
   businessDate: string;
   sessionNo: number;
   sourceToken: string;
+  previousRuleVersionId?: string | null;
+  correctedRuleVersionId?: string | null;
+  previousRuleEffectiveFrom?: string | null;
+  correctedRuleEffectiveFrom?: string | null;
   correctionVersion: number;
   hasChanges: boolean;
   previousPayroll: number;

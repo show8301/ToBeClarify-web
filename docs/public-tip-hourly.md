@@ -12,7 +12,11 @@
 
 舊手動公共小費仍顯示原值，需核對來源訂單與實收並填「舊手動公共小費核對原因」，再保存／重新結算，不能直接忽略或與新訂單重複相加。畫面不再提供手動金額欄位，請求 publicTipAmount 固定為 0。
 
-本次沿用共用 Admin 控制項與既有樣式，不新增 CSS。兩份原有大型 JSX（OrderClient、AdminAssistedOrderPanel）只調整小費文案，未擴大改寫其狀態管理；新增邏輯維持 TS/TSX。
+沿用共用 Admin 按鈕、欄位與 AdminHelp；訂單小費分配採摘要卡片及整列展開的更正表單，原因使用兩行文字框。帳款明細與小費分配明細使用共用 AdminDisclosureSummary 圓形箭頭收合；小費收合後保留筆數、總額及更正中提示，表單持續掛載以保留草稿。樣式集中於 `styles/admin/layers/93-orders-workspace.css`，使用主題色變數，依卡片容器寬度調整摘要與操作排列；自訂比例的員工及數值分欄對齊。補充規則使用共用說明圖示，錯誤與結果直接顯示。切換顧客時重建區塊的表單狀態，重送仍沿用原操作編號。
+
+小費分配 UI 的 CSS 產物診斷使用 `node scripts/check-preview-css.mjs --url http://127.0.0.1:3001/admin/orders --expect scripts/preview-css/order-tip-distributions.json`。只解析宣告與容器／觸控條件，不代表已確認實際瀏覽器樣式或字型。
+
+兩份原有大型 JSX（OrderClient、AdminAssistedOrderPanel）只調整小費文案，未擴大改寫其狀態管理；新增邏輯維持 TS/TSX。
 
 驗證入口：`node --test tests/settlement-public-tips.test.mjs tests/settlement-role-refresh.test.mjs`，包含新 API 來源資料驗證、伺服器元件靜態輸出、舊手動值提示、不可用狀態及出勤刷新。靜態輸出檢查不等同真實瀏覽器樣式／字型驗收；另執行 TypeScript、受影響 TS/TSX lint 及 production build。
 

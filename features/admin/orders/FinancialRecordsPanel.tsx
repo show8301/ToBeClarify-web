@@ -7,6 +7,7 @@ import type { FinanceAccount, FinanceOrderOption, FinancePeriodOption, FinanceRe
 import { AdmissionAndCasesPanel } from "./AdmissionAndCasesPanel";
 import { AdminButton } from "@/features/admin/shared/AdminShared.jsx";
 import { AdminHelp } from "@/features/admin/shared/AdminHelp";
+import { AdminDisclosureSummary } from "@/features/admin/shared/AdminDisclosureSummary";
 
 const kindLabels = { charge_add: "增加應收", charge_reduce: "減少應收", cash_receipt: "實際收款", cash_refund: "實際退款", tip_supplement: "舊版小費分配" };
 const tipDistributionLabels: Record<FinanceTipDistributionMode, string> = { public: "公共小費（按工時分配）", equal: "舊版人頭均分", designated: "指定店員", custom: "自訂比例" };
@@ -101,9 +102,9 @@ export function FinancialRecordsPanel({ sessionId, refreshKey }: { sessionId: st
       {account.records.some(x => x.kind === "tip_supplement" && !x.isVoided) && <p className="adminOrderFinanceNotice isError" role="alert">存在舊版小費分配：只影響薪資，不代表已收款。請核對原訂單，重複分配可填原因作廢；請勿未核對就再新增訂單。</p>}
       <div className="adminOrderFinanceRecords">
         {!account.records.length && <p className="adminOrderFinanceEmpty">尚無額外帳款紀錄。</p>}
-        {[false, ...(account.records.some(x => x.kind === "tip_supplement") ? [true] : [])].map(legacy => <details key={String(legacy)} open={!legacy}>
-          <summary>{legacy ? "舊版小費分配（不影響應收／實收，核對後可作廢）" : "應收調整與收退款明細"}</summary>
-          {account.records.filter(record => (record.kind === "tip_supplement") === legacy).map(record => {
+        {[false, ...(account.records.some(x => x.kind === "tip_supplement") ? [true] : [])].map(legacy => <details key={String(legacy)} className="adminOrderFinanceDisclosure" open={!legacy}>
+          <AdminDisclosureSummary>{legacy ? "舊版小費分配（不影響應收／實收，核對後可作廢）" : "應收調整與收退款明細"}</AdminDisclosureSummary>
+          <div className="adminOrderFinanceDisclosureBody">{account.records.filter(record => (record.kind === "tip_supplement") === legacy).map(record => {
           const sourceOrder = orders.find(order => order.id === record.orderId);
           const sourceItem = sourceOrder?.items.find(item => item.id === record.orderItemId);
           const linkedCashRecord = account.records.find(item => item.id === record.linkedCashRecordId);
@@ -129,7 +130,7 @@ export function FinancialRecordsPanel({ sessionId, refreshKey }: { sessionId: st
           {voidingRecord?.id === record.id && <FinanceVoidControl account={account} record={record}
             onSaved={() => { setVoidingRecord(null); setRevision(value => value + 1); }} onCancel={() => setVoidingRecord(null)} />}
         </article>;
-        })}</details>)}
+        })}</div></details>)}
       </div>
     </>}
   </section>;

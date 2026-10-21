@@ -4,6 +4,7 @@ import { OrderFulfillmentPanel } from "./OrderFulfillmentPanel";
 import { AdminAssistedOrderPanel } from "./AdminAssistedOrderPanel";
 import { AdminOrderBackfillPanel } from "./AdminOrderBackfillPanel";
 import { OrderBackfillNotice } from "./OrderBackfillNotice";
+import { OrderTipDistributionsPanel } from "./OrderTipDistributionsPanel";
 import { FinancialRecordsPanel } from "./FinancialRecordsPanel";
 import { SessionHeader } from "./SessionHeader";
 import { AdminOrderItemRow } from "./AdminOrderItemRow";
@@ -183,6 +184,7 @@ export function AdminOrdersPage() {
             <header className="adminOrderSectionHeading"><h3>顧客訂單</h3><span>{orders.length} 張</span></header>
             <div className="adminOrderCards">{orders.length ? orders.map((order) => <div id={`admin-order-${order.id}`} key={order.id}>{order.flowVersion >= 2 ? <AdminFulfillmentOrderCard key={order.id} order={order} user={user} loading={loading} canManage={canManage} act={act} onChanged={refreshSelected} /> : <AdminOrderCard key={order.id} order={order} user={user} loading={loading} act={act} />}</div>) : <div className="adminOrderEmpty isCompact"><h2>尚未下單</h2><p>此點餐碼今天還沒有送出訂單。</p></div>}</div>
           </section>
+          <OrderTipDistributionsPanel key={`tips:${selectedId}`} sessionId={selectedId} refreshKey={orders.map(o => `${o.id}:${o.totalAmount}:${o.status}`).join("|")} onSaved={refreshSelected} />
           <FinancialRecordsPanel key={selectedId} sessionId={selectedId} refreshKey={orders.map(o => `${o.id}:${o.totalAmount}:${o.status}`).join("|")} />
         </>}
       </div>

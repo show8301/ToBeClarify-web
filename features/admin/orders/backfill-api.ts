@@ -1,3 +1,4 @@
+import type { TipDistributionInput } from "./TipDistributionFields";
 import { adminRequest } from "@/features/admin/api/client.js";
 
 export interface BackfillChoice {
@@ -22,6 +23,7 @@ export interface BackfillLine {
   endsAt: string;
   staffPercentage: number;
   recipientStaffId?: string;
+  distribution?: TipDistributionInput;
 }
 export interface BackfillRequest {
   backfill: {
@@ -32,7 +34,7 @@ export interface BackfillRequest {
   nominations: { staffId: string; mode: string; serviceId: string | null; segmentCount: number;
     baseUnitPrice: number; serviceUnitPrice: number; requestedStartsAt: string; actualEndsAt: string }[];
   rooms: { roomId: string; segmentCount: number; unitPrice: number; requestedStartsAt: string; actualEndsAt: string }[];
-  tips: { staffId: string | null; amount: number; staffPercentage: number }[];
+  tips: { staffId: string | null; amount: number; staffPercentage: number; distributionMode?: string; allocations?: TipDistributionInput["allocations"] }[];
 }
 export interface BackfillQuote {
   quoteToken: string; totalAmount: number; mealCreditApplied: number; expiresAt: string;
@@ -78,11 +80,11 @@ export function parseBackfillCatalog(value: unknown): { choices: BackfillChoice[
         unitPrice: num(offer.price), basePrice: num(settings.baseNominationFee),
         duration: offer.durationMinutes == null ? undefined : num(offer.durationMinutes) });
     }
-    choices.push({ key: `tip:${staffId}`, kind: "tip", referenceId: staffId, staffId,
-      label: `小費｜${name}`, unitPrice: 100000 });
+
   }
   for (const room of list(row.rooms)) choices.push({ key: `room:${str(room.id)}`, kind: "room",
     referenceId: str(room.id), label: `包廂｜${str(room.roomName)}`, unitPrice: num(room.segmentPrice) });
+  choices.push({ key: "tip:staff", kind: "tip", referenceId: "", label: "小費｜員工分配", unitPrice: 100000 });
   choices.push({ key: "tip:store", kind: "tip", referenceId: "", label: "小費｜店家", unitPrice: 100000 });
   return { choices, segmentMinutes: num(settings.segmentMinutes) };
 }

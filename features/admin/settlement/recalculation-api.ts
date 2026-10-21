@@ -44,6 +44,8 @@ export function parseRecalculationPreview(value: unknown): RecalculationPreview 
     payrollDelta: number(row.payrollDelta), previousNetCash: number(row.previousNetCash),
     correctedNetCash: number(row.correctedNetCash), previousCompanyIncome: number(row.previousCompanyIncome),
     correctedCompanyIncome: number(row.correctedCompanyIncome),
+    previousRuleVersionId: nullableText(row.previousRuleVersionId), correctedRuleVersionId: nullableText(row.correctedRuleVersionId),
+    previousRuleEffectiveFrom: nullableText(row.previousRuleEffectiveFrom), correctedRuleEffectiveFrom: nullableText(row.correctedRuleEffectiveFrom),
     changes: array(row.changes, value => {
       const item = object(value);
       return {

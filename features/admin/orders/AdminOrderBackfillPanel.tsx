@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { AdminButton } from "@/features/admin/shared/AdminButton";
 import { ApiError } from "@/features/admin/api/client.js";
 import { financeApi } from "./finance-api";
+import { TipDistributionFields } from "./TipDistributionFields";
+import type { FinanceTipStaffOption } from "./finance-types";
 import type { FinanceAccount } from "./finance-types";
 import { backfillApi } from "./backfill-api";
 import type { BackfillChoice, BackfillLine, BackfillQuote, BackfillRequest } from "./backfill-api";
@@ -25,6 +27,7 @@ const taiwanIso = (value: string) => iso(value ? `${value}:00+08:00` : "");
 
 export function AdminOrderBackfillPanel({ sessionId, businessDate, onSaved, onClose }: Props) {
   const [catalog, setCatalog] = useState<{ choices: BackfillChoice[]; segmentMinutes: number } | null>(null);
+  const [tipStaff, setTipStaff] = useState<FinanceTipStaffOption[]>([]);
   const [account, setAccount] = useState<FinanceAccount | null>(null);
   const [lines, setLines] = useState<BackfillLine[]>([]);
   const [choiceKey, setChoiceKey] = useState("");
@@ -48,8 +51,8 @@ export function AdminOrderBackfillPanel({ sessionId, businessDate, onSaved, onCl
 
   useEffect(() => {
     const controller = new AbortController();
-    Promise.all([backfillApi.catalog(businessDate, controller.signal), financeApi.account(sessionId, controller.signal)])
-      .then(([menu, finance]) => { if (!controller.signal.aborted) { setCatalog(menu); setAccount(finance); } })
+    Promise.all([backfillApi.catalog(businessDate, controller.signal), financeApi.account(sessionId, controller.signal), financeApi.tipStaff(sessionId, controller.signal)])
+      .then(([menu, finance, staff]) => { if (!controller.signal.aborted) { setCatalog(menu); setAccount(finance); setTipStaff(staff); } })
       .catch((failure: unknown) => { if (!controller.signal.aborted) setError(failure instanceof Error ? failure.message : "資料載入失敗。"); });
     return () => controller.abort();
   }, [sessionId, businessDate]);
@@ -67,7 +70,8 @@ export function AdminOrderBackfillPanel({ sessionId, businessDate, onSaved, onCl
     setLines(current => [...current, { id: crypto.randomUUID(), choice,
       quantity: choice.kind === "nomination" ? Math.max(1, Math.ceil(duration / (catalog?.segmentMinutes || 20))) : 1,
       unitPrice: choice.unitPrice, basePrice: choice.basePrice || 0, startsAt: occurredAt,
-      endsAt: localTime(new Date(start.getTime() + duration * 60000)), staffPercentage: choice.staffId ? 100 : 0 }]);
+      endsAt: localTime(new Date(start.getTime() + duration * 60000)), staffPercentage: choice.staffId ? 100 : 0,
+      distribution: choice.key === "tip:staff" ? { mode: "public", allocations: [] } : undefined }]);
     changed();
   }
   async function preview() {
@@ -89,7 +93,8 @@ export function AdminOrderBackfillPanel({ sessionId, businessDate, onSaved, onCl
         rooms: lines.filter(x => x.choice.kind === "room").map(x => ({ roomId: x.choice.referenceId,
           segmentCount: x.quantity, unitPrice: x.unitPrice, requestedStartsAt: taiwanIso(x.startsAt), actualEndsAt: taiwanIso(x.endsAt) })),
         tips: lines.filter(x => x.choice.kind === "tip").map(x => ({ staffId: x.choice.staffId || null,
-          amount: x.unitPrice, staffPercentage: x.staffPercentage })),
+          amount: x.unitPrice, staffPercentage: x.staffPercentage,
+          distributionMode: x.distribution?.mode, allocations: x.distribution?.allocations })),
       };
       const result = await backfillApi.quote(sessionId, body);
       quotedRequest.current = body; setQuote(result);
@@ -131,6 +136,7 @@ export function AdminOrderBackfillPanel({ sessionId, businessDate, onSaved, onCl
       <AdminButton variant="ghost" disabled={busy} onClick={onClose}>關閉</AdminButton></header>
     <p className="adminOrderFinanceNotice">請核對原成交價格；下方預設價格來自現行菜單，可修改為當時金額。所有時間均為台灣時間。已正式結算的金額保留，由經理重新結算後產生新版本。</p>
     <fieldset disabled={locked || !catalog || !account} className="adminOrderBackfillFields">
+      <p>新增小費請加入「小費｜員工分配」，選擇均分、指定店員或自訂比例。本次只增加應收；儲存後請在帳款紀錄登記實收，或關聯已登錄收款。</p>
       <label>實際發生時間<input type="datetime-local" required value={occurredAt} onChange={e => { setOccurredAt(e.target.value); changed(); }} /></label>
       <label>補登原因（必填）<textarea required rows={2} maxLength={500} value={reason} onChange={e => { setReason(e.target.value); changed(); }} /></label>
       <div className="adminInlineFields"><label>加入品項<select value={choiceKey} onChange={e => setChoiceKey(e.target.value)}>
@@ -154,8 +160,8 @@ export function AdminOrderBackfillPanel({ sessionId, businessDate, onSaved, onCl
           <label>實際開始<input type="datetime-local" value={line.startsAt} onChange={e => updateLine(line.id, { startsAt: e.target.value })} /></label>
           <label>實際結束<input type="datetime-local" value={line.endsAt} onChange={e => updateLine(line.id, { endsAt: e.target.value })} /></label>
         </>}
-        {line.choice.kind === "tip" && line.choice.staffId && <label>指定店員比例 %<input type="number" min={0} max={100} value={line.staffPercentage}
-          onChange={e => updateLine(line.id, { staffPercentage: Number(e.target.value) })} /></label>}
+        {line.distribution && <TipDistributionFields value={line.distribution} staff={tipStaff}
+          onChange={distribution => updateLine(line.id, { distribution })} />}
         <AdminButton variant="ghost" onClick={() => { setLines(current => current.filter(x => x.id !== line.id)); changed(); }}>移除此項</AdminButton>
       </fieldset>)}
       <label>關聯已登錄收款（選填）<select value={cashId} onChange={e => { setCashId(e.target.value); changed(); }}>
@@ -164,15 +170,18 @@ export function AdminOrderBackfillPanel({ sessionId, businessDate, onSaved, onCl
         </option>)}
       </select></label>
       <p>只可整筆關聯本顧客已確認、未作廢且未歸屬的收款，金額不可超過本訂單。混合收款請先在帳款拆分；未登錄收款請於補登後另外登記。</p>
+      {account?.records.some(x => !x.isVoided && x.kind === "tip_supplement") &&
+        <p className="adminFormError">此顧客還有舊版小費分配，請先核對原訂單與收款，再作廢已由訂單取代的分配，以免重複計薪。</p>}
       {account?.records.some(x => !x.isVoided && x.kind === "charge_add" && x.sourceKind === "unallocated") &&
         <p className="adminFormError">本顧客已有未歸屬加收應付；若就是本次漏單，請先核對並更正，避免重複增加應收。</p>}
       <AdminButton disabled={!lines.length || !reason.trim() || !occurredAt} onClick={() => void preview()}>預覽補登金額</AdminButton>
-      <AdminButton variant="ghost" onClick={() => { setBusy(true); financeApi.account(sessionId).then(value => { setAccount(value); changed(); })
-        .catch((failure: unknown) => setError(failure instanceof Error ? failure.message : "帳款讀取失敗。" )).finally(() => setBusy(false)); }}>重新讀取帳款</AdminButton>
+      <AdminButton variant="ghost" onClick={() => { setBusy(true); Promise.all([financeApi.account(sessionId), financeApi.tipStaff(sessionId)]).then(([value, staff]) => {
+        setAccount(value); setTipStaff(staff); changed(); })
+        .catch((failure: unknown) => setError(failure instanceof Error ? failure.message : "帳款讀取失敗。" )).finally(() => setBusy(false)); }}>重新讀取帳款與出勤</AdminButton>
     </fieldset>
     {quote && !savedNumber && !uncertain && <div className="adminAssistedQuote"><ul>{quote.charges.map((charge, index) => <li key={index}>
       {charge.name} · {money(charge.unitPrice)} × {charge.quantity} = {money(charge.lineTotal)}</li>)}</ul>
-      <strong>應收 {money(quote.totalAmount)} · 信物折抵 {money(quote.mealCreditApplied)}</strong>
+      <strong>應收 +{money(quote.totalAmount)} · 實收不變 · 信物折抵 {money(quote.mealCreditApplied)}</strong>
       <AdminButton disabled={busy} onClick={() => void submit()}>確認補登已成交訂單</AdminButton></div>}
     {error && <p className="adminFormError" role="alert">{error}</p>}
     {uncertain && <div role="status"><p>送出結果尚未確認，已保留原操作。請查回同一筆，避免另建訂單。</p>

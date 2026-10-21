@@ -1,4 +1,5 @@
 import { AdminField, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
+import { AdminDisclosureSummary } from "@/features/admin/shared/AdminDisclosureSummary";
 import type { SettlementResult, SettlementRun, SettlementStaff, SettlementStaffInput, SettlementSummary } from "./types";
 import { settlementExactMoney as exactMoney, settlementMoney as money, settlementRoles } from "./presentation";
 import { SettlementOrderSources as OrderSources } from "./SettlementOrderSources";
@@ -32,6 +33,7 @@ function SourceDetails({ item, inputs, run, summary, finalized }: {
   const input = inputs.find((candidate) => candidate.staffId === item.staffId && candidate.role === item.role);
   const sources = item.sources || [];
   const revenueSources = sources.filter((source) => source.kind === "designated_revenue");
+  const publicTipSources = sources.filter(source => source.kind === "public_tip");
   const tipSources = sources.filter((source) => source.kind === "designated_tip");
   const supplementalTipSources = tipSources.filter((source) => source.label.startsWith("補登小費"));
   const serviceManagerInputs = inputs.filter((candidate) => candidate.role === "service" || candidate.role === "manager");
@@ -85,7 +87,10 @@ function SourceDetails({ item, inputs, run, summary, finalized }: {
     <section>
       <h4>公共小費來源</h4>
       {item.publicTip > 0
-        ? <p>{publicTipShare} 公共小費池 {exactMoney(run.publicTipAmount)} G × 本人 {exactMoney(item.payableHours)} 小時 ÷ 合計 {exactMoney(publicTipHours)} 小時 = <strong>{exactMoney(item.publicTip)} G</strong></p>
+        ? publicTipSources.length ? <>
+          <p>{publicTipShare} 金額及工時以本版結算快照為準；整數尾差依最大餘數及固定順序分配。來源合計 <strong>{exactMoney(item.publicTip)} G</strong>。</p>
+          <OrderSources sources={publicTipSources} kind="public_tip" />
+        </> : <p>舊版公共小費池 {exactMoney(run.publicTipAmount)} G × 本人 {exactMoney(item.payableHours)} 小時 ÷ 合計 {exactMoney(publicTipHours)} 小時 = <strong>{exactMoney(item.publicTip)} G</strong>。此版本尚無逐單來源快照。</p>
         : <p>本項沒有公共小費。</p>}
     </section>
 
@@ -119,6 +124,7 @@ export function SettlementPersonalAccounts({ staff, selectedId, results, inputs,
       ) : <p className="adminEmptyText">目前帳號未連結結算人員。</p>}
       <AdminPanel title="薪資組成" description="服務員／經理薪資為時薪 × 計薪時數＋營收分成；指名職位維持底薪與營收分成擇優。額外服務分潤及小費另計。幕後參與僅限開發人員。">
         {finalized && (run.calculationVersion ?? 1) < 3 ? <p className="adminSettlementInlineWarning">此結算沿用舊版全日實收比例調整，來源金額可能已受其他帳款影響。請由結算管理預覽並確認重新結算，更新後才會套用逐單實收計算。</p> : null}
+        {finalized && (run.calculationVersion ?? 1) < 5 ? <p className="adminSettlementInlineWarning">此結算沿用舊版餐飲折抵分攤公式，含餐飲折抵與非餐飲項目的訂單需核對。由經理預覽並填寫原因重新結算後，才會套用僅折抵一般餐飲的新版公式。</p> : null}
         {personalResults.length ? <>
           <div className="adminSettlementTableWrap"><table className="adminSettlementTable adminSettlementCompactTable"><thead><tr><th>計薪／收入項目</th><th className="adminSettlementNumber">底薪</th><th className="adminSettlementNumber">營收分成</th><th className="adminSettlementNumber">指定小費</th><th className="adminSettlementNumber">公共小費</th><th className="adminSettlementNumber">應付</th></tr></thead><tbody>{personalResults.map((item) => <tr key={`${item.staffId}-${item.role}`}>
           <td>{settlementRoles[item.role] || item.role}</td>
@@ -129,7 +135,7 @@ export function SettlementPersonalAccounts({ staff, selectedId, results, inputs,
           <td className="adminSettlementNumber"><strong>{money(item.afterRounding)} G</strong></td>
         </tr>)}</tbody></table></div>
           <div className="adminSettlementSourceList">{personalResults.map((item) => <details className="adminSettlementSourceDisclosure" key={`sources-${item.staffId}-${item.role}`}>
-            <summary>{settlementRoles[item.role] || item.role} · 查看金額來源</summary>
+            <AdminDisclosureSummary>{settlementRoles[item.role] || item.role} · 查看金額來源</AdminDisclosureSummary>
             <SourceDetails item={item} inputs={inputs} run={run} summary={summary} finalized={finalized} />
           </details>)}</div>
         </> : <p className="adminEmptyText">這位人員在本時段尚無薪資結果。</p>}

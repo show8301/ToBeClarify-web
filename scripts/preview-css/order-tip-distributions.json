@@ -1,0 +1,45 @@
+[
+  {
+    "selector": ".adminOrdersPage .adminOrderFinanceDisclosureBody",
+    "declarations": { "display": "grid", "gap": "10px", "padding-top": "10px" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderTipDisclosure > .adminOrderTipList",
+    "declarations": { "padding-top": "12px" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderTipPanel",
+    "declarations": { "display": "grid", "padding": "16px", "container": "order-tip-panel / inline-size" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderTipCard",
+    "declarations": { "display": "grid", "min-width": "0", "background": "var(--color-surface)" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderTipSummary.hasAction",
+    "declarations": { "grid-template-columns": "minmax(0, 1fr) max-content max-content" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderTipCorrectionFields",
+    "declarations": { "display": "grid", "grid-template-columns": "minmax(0, 1fr)" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderTipCorrection textarea",
+    "declarations": { "min-height": "88px", "resize": "vertical" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderTipSummary.hasAction",
+    "context": ["@container order-tip-panel (max-width: 560px)"],
+    "declarations": { "grid-template-columns": "minmax(0, 1fr) max-content" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderTipSummary > .adminButton",
+    "context": ["@container order-tip-panel (max-width: 560px)"],
+    "declarations": { "grid-column": "1 / -1", "justify-self": "end" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderTipStaffChoice > .adminOrderTipStaffName",
+    "context": ["@media (any-pointer: coarse)"],
+    "declarations": { "min-height": "44px" }
+  }
+]

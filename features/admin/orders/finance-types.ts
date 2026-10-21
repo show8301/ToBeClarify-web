@@ -2,7 +2,7 @@ export type FinanceKind = "charge_add" | "charge_reduce" | "cash_receipt" | "cas
 export type FinanceSourceKind = "admission" | "order" | "item" | "unallocated";
 export type FinanceAllocation = "pending" | "confirmed";
 export type FinanceHoldScope = "none" | "session" | "order" | "item";
-export type FinanceTipDistributionMode = "equal" | "designated" | "custom";
+export type FinanceTipDistributionMode = "public" | "equal" | "designated" | "custom";
 export interface FinanceTipAllocationInput { staffId: string; percentage: number | null }
 export interface FinanceTipAllocation { staffId: string; staffName: string; percentage: number | null; amount: number }
 export interface FinanceTipStaffOption { staffId: string; displayName: string; roles: string[] }

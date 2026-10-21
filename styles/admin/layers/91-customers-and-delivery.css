@@ -1,8 +1,28 @@
 .adminCustomers { display: grid; gap: 22px; min-width: 0; }
 .adminCustomerFilters { display: flex; align-items: end; flex-wrap: wrap; gap: 14px; }
-.adminCustomerFilters .adminField { flex: 1 1 200px; }
+.adminCustomerFilters .adminField { flex: 1 1 200px; min-width: 0; max-width: 100%; }
 .adminCustomerActions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-block: 16px; }
-.adminCustomerForm { display: grid; gap: 16px; max-width: 900px; }
+.adminCustomerForm { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; min-width: 0; max-width: 900px; }
+.adminCustomerForm .adminField { grid-template-columns: minmax(0, 1fr); min-width: 0; }
+/* Native iOS date controls must shrink inside the delivery form's grid/flex items. */
+.adminCustomerForm input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+/* Safari's native date value has its own sizing; constrain it without replacing the picker. */
+.adminCustomerForm input[type="date"]::-webkit-date-and-time-value {
+  min-width: 0;
+  max-width: 100%;
+  text-align: left;
+}
+.adminCustomerForm input[type="date"]::-webkit-datetime-edit {
+  min-width: 0;
+  padding: 0;
+}
 .adminCustomerForm textarea { resize: vertical; }
 .adminCustomerForm > .adminButton { justify-self: start; }
 .adminCustomerHint { color: var(--color-fg-soft); font-size: 13px; line-height: 1.8; overflow-wrap: anywhere; }

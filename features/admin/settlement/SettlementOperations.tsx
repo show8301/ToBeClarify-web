@@ -11,6 +11,7 @@ import { settlementMoney as money, settlementPeriodStatuses, settlementRoles, se
 import type { SettlementOverview, SettlementRunFields, SettlementStaff, SettlementStaffInput } from "./types";
 import type { RecalculationAdjustments } from "./recalculation-types";
 import { getFinalizeDisabledReason } from "./disabled-reasons";
+import { SettlementPublicTips } from "./SettlementPublicTips";
 import { SettlementRecalculation } from "./SettlementRecalculation";
 
 type Props = {
@@ -183,10 +184,14 @@ export function SettlementOperations({ overview, inputs, staff, dayType, setDayT
       </section>
       <SettlementAnomalies overview={overview} staff={staff} saving={saving} onRefresh={onAttendanceChanged} onAttendance={() => { setInputsOpen(true); setStep(1); }} />
       {pendingFinance ? <p className="adminSettlementInlineWarning">有 {pendingFinance} 筆費用待確認；已發生金流列入淨實收，受影響分潤保留。</p> : null}
-      <AdminPanel title="核對本日輸入" description="確認公共小費與入場費；活動日會顯示活動分配欄位。">
+      <AdminPanel title="公共小費（按工時分配）">
+        <SettlementPublicTips overview={overview} reason={fields.publicTipReconciliationReason || ""} editable={editable}
+          onReasonChange={publicTipReconciliationReason => setFields(current => ({ ...current, publicTipReconciliationReason }))} />
+      </AdminPanel>
+      <AdminPanel title="核對本日輸入" description="公共小費依訂單實收自動彙總；活動日會顯示活動分配欄位。">
         <div className="adminFormGrid">
           <AdminField label="日期類型"><select value={dayType} disabled={!editable} onChange={event => setDayType(event.target.value)}><option value="normal">非活動日</option><option value="event">活動日</option></select></AdminField>
-          <AdminField label="公共小費" hint="不包含指定店員小費。"><input type="number" min="0" value={fields.publicTipAmount} disabled={!editable} onChange={event => setFields(current => ({ ...current, publicTipAmount: Number(event.target.value) || 0 }))} /></AdminField>
+
           <AdminField label="入場費覆寫" hint="留白時沿用啟用中的入場費。"><input type="number" min="0" value={fields.admissionFeeOverride} disabled={!editable} onChange={event => setFields(current => ({ ...current, admissionFeeOverride: event.target.value }))} /></AdminField>
           {dayType === "event" ? <>
             <AdminField label="活動費用"><input type="number" min="0" value={fields.activityExpense} disabled={!editable} onChange={event => setFields(current => ({ ...current, activityExpense: Number(event.target.value) || 0 }))} /></AdminField>

@@ -124,6 +124,7 @@ export function SettlementPersonalAccounts({ staff, selectedId, results, inputs,
       ) : <p className="adminEmptyText">目前帳號未連結結算人員。</p>}
       <AdminPanel title="薪資組成" description="服務員／經理薪資為時薪 × 計薪時數＋營收分成；指名職位維持底薪與營收分成擇優。額外服務分潤及小費另計。幕後參與僅限開發人員。">
         {finalized && (run.calculationVersion ?? 1) < 3 ? <p className="adminSettlementInlineWarning">此結算沿用舊版全日實收比例調整，來源金額可能已受其他帳款影響。請由結算管理預覽並確認重新結算，更新後才會套用逐單實收計算。</p> : null}
+        {finalized && (run.calculationVersion ?? 1) < 5 ? <p className="adminSettlementInlineWarning">此結算沿用舊版餐飲折抵分攤公式，含餐飲折抵與非餐飲項目的訂單需核對。由經理預覽並填寫原因重新結算後，才會套用僅折抵一般餐飲的新版公式。</p> : null}
         {personalResults.length ? <>
           <div className="adminSettlementTableWrap"><table className="adminSettlementTable adminSettlementCompactTable"><thead><tr><th>計薪／收入項目</th><th className="adminSettlementNumber">底薪</th><th className="adminSettlementNumber">營收分成</th><th className="adminSettlementNumber">指定小費</th><th className="adminSettlementNumber">公共小費</th><th className="adminSettlementNumber">應付</th></tr></thead><tbody>{personalResults.map((item) => <tr key={`${item.staffId}-${item.role}`}>
           <td>{settlementRoles[item.role] || item.role}</td>

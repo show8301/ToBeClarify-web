@@ -121,6 +121,11 @@ export type SettlementResultSource = {
   originalAmount?: number | null;
   orderPayableAmount?: number | null;
   orderCollectedAmount?: number | null;
+  cancelledAmount?: number | null;
+  mealCreditAmount?: number | null;
+  afterCreditAmount?: number | null;
+  orderRevenueAmount?: number | null;
+  adjustedRevenueAmount?: number | null;
   basisAmount: number;
   percentage: number;
   amount: number;

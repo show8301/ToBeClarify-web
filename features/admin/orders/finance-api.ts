@@ -37,7 +37,7 @@ export function financeKind(value: unknown): FinanceKind {
 }
 function tipDistributionMode(value: unknown): FinanceTipDistributionMode | null {
   if (value === null) return null;
-  if (value === "equal" || value === "designated" || value === "custom") return value;
+  if (value === "public" || value === "equal" || value === "designated" || value === "custom") return value;
   throw new Error("Invalid tip distribution mode");
 }
 export function financeSource(value: unknown): FinanceSourceKind {

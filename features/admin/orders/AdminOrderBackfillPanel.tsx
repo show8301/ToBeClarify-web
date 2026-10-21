@@ -71,7 +71,7 @@ export function AdminOrderBackfillPanel({ sessionId, businessDate, onSaved, onCl
       quantity: choice.kind === "nomination" ? Math.max(1, Math.ceil(duration / (catalog?.segmentMinutes || 20))) : 1,
       unitPrice: choice.unitPrice, basePrice: choice.basePrice || 0, startsAt: occurredAt,
       endsAt: localTime(new Date(start.getTime() + duration * 60000)), staffPercentage: choice.staffId ? 100 : 0,
-      distribution: choice.key === "tip:staff" ? { mode: "equal", allocations: tipStaff.map(x => ({ staffId: x.staffId, percentage: null })) } : undefined }]);
+      distribution: choice.key === "tip:staff" ? { mode: "public", allocations: [] } : undefined }]);
     changed();
   }
   async function preview() {
@@ -176,8 +176,7 @@ export function AdminOrderBackfillPanel({ sessionId, businessDate, onSaved, onCl
         <p className="adminFormError">本顧客已有未歸屬加收應付；若就是本次漏單，請先核對並更正，避免重複增加應收。</p>}
       <AdminButton disabled={!lines.length || !reason.trim() || !occurredAt} onClick={() => void preview()}>預覽補登金額</AdminButton>
       <AdminButton variant="ghost" onClick={() => { setBusy(true); Promise.all([financeApi.account(sessionId), financeApi.tipStaff(sessionId)]).then(([value, staff]) => {
-        setAccount(value); setTipStaff(staff); setLines(current => current.map(line => line.distribution?.mode === "equal"
-          ? { ...line, distribution: { mode: "equal", allocations: staff.map(x => ({ staffId: x.staffId, percentage: null })) } } : line)); changed(); })
+        setAccount(value); setTipStaff(staff); changed(); })
         .catch((failure: unknown) => setError(failure instanceof Error ? failure.message : "帳款讀取失敗。" )).finally(() => setBusy(false)); }}>重新讀取帳款與出勤</AdminButton>
     </fieldset>
     {quote && !savedNumber && !uncertain && <div className="adminAssistedQuote"><ul>{quote.charges.map((charge, index) => <li key={index}>

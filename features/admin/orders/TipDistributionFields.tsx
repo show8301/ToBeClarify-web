@@ -10,17 +10,18 @@ export function TipDistributionFields({ value, staff, onChange }: {
   onChange: (value: TipDistributionInput) => void;
 }) {
   const changeMode = (mode: FinanceTipDistributionMode) => onChange({ mode,
-    allocations: mode === "equal" ? staff.map(x => ({ staffId: x.staffId, percentage: null })) : [] });
+    allocations: [] });
   return <fieldset className="adminOrderFinanceTipStaff">
     <legend>小費分配</legend>
     <label>分配方式<select value={value.mode} onChange={e => {
       const mode = e.target.value;
-      if (mode === "equal" || mode === "designated" || mode === "custom") changeMode(mode);
+      if (mode === "public" || mode === "designated" || mode === "custom") changeMode(mode);
     }}>
-      <option value="equal">上班員工均分</option><option value="designated">指定店員</option><option value="custom">自訂比例</option>
+      {value.mode === "equal" && <option value="equal" disabled>舊版人頭均分（請更正）</option>}<option value="public">公共小費（按工時分配）</option><option value="designated">指定店員</option><option value="custom">自訂比例</option>
     </select></label>
-    {staff.length === 0 && <p role="status">此營業日尚無有計薪分鐘的出勤人員，請先核對結算出勤。</p>}
-    {value.mode === "equal" && <p>依本次確認的出勤名單按人均分：{staff.map(x => x.displayName).join("、") || "無"}。分配名單儲存後不隨出勤變動自動改寫。</p>}
+    {value.mode !== "public" && staff.length === 0 && <p role="status">此營業日尚無有計薪分鐘的出勤人員，請先核對結算出勤。</p>}
+    {value.mode === "equal" && <p role="alert">此為舊版按人頭均分，請選擇正確分配方式後填原因更正。</p>}
+    {value.mode === "public" && <p>於結算時依本營業日合資格的主要職位計薪工時分配；此處不指定人員。實收及出勤補正由經理重新結算後反映。</p>}
     {value.mode === "designated" && <label>領取店員<select value={value.allocations[0]?.staffId || ""}
       onChange={e => onChange({ mode: value.mode, allocations: e.target.value ? [{ staffId: e.target.value, percentage: null }] : [] })}>
       <option value="">請選擇</option>{staff.map(x => <option key={x.staffId} value={x.staffId}>{x.displayName}</option>)}

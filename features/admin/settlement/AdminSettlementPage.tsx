@@ -1,5 +1,7 @@
 "use client";
 
+import { validatePublicTipPool } from "./public-tip-contract";
+
 import { AdminRefreshButton } from "@/features/admin/shared/AdminRefreshButton";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -130,13 +132,13 @@ export function AdminSettlementPage() {
       setError(null);
       if (!dayContext || typeof dayContext.flowVersion !== "number") throw new Error("無法確認營業日模式。");
       setFlowVersion(dayContext.flowVersion);
-      setOverview(nextOverview);
+      setOverview(validatePublicTipPool(nextOverview));
       setSelectedRule(null);
       setDayType(nextOverview.run.dayType || "normal");
       setInputs(nextOverview.staffInputs || []);
       setStaff(canManage ? (nextStaff || []) : (user?.staffMemberId ? [{ id: user.staffMemberId, displayName: user.displayName, isActive: true }] : []));
       setRunFields({
-        publicTipAmount: nextOverview.run.publicTipAmount || 0,
+        publicTipAmount: 0, publicTipReconciliationReason: "",
         admissionFeeOverride: nextOverview.run.admissionFeeOverride == null ? "" : String(nextOverview.run.admissionFeeOverride),
         activityExpense: nextOverview.run.activityExpense || 0,
         companyShareHours: nextOverview.run.companyShareHours == null ? "" : String(nextOverview.run.companyShareHours),
@@ -173,8 +175,8 @@ export function AdminSettlementPage() {
       const next: SettlementOverview = await adminApi.getSettlement({ businessDate: date, sessionNo }, controller.signal);
       if (controller.signal.aborted || sequence !== loadSequence.current) return false;
       if (preserveDraftInputs) setInputs(current => mergeRefreshedInputs(current, previous, next.staffInputs || []));
-      else { setInputs(next.staffInputs || []); setSelectedRule(null); setDayType(next.run.dayType); }
-      setOverview(next);
+      else { setInputs(next.staffInputs || []); setSelectedRule(null); setDayType(next.run.dayType); setRunFields(current => ({ ...current, publicTipReconciliationReason: "" })); }
+      setOverview(validatePublicTipPool(next));
       setMessage("結算預覽已依最新出勤更新；尚未保存的輸入需保存後才會計入金額。");
       return true;
     } catch (nextError) {
@@ -222,7 +224,7 @@ export function AdminSettlementPage() {
           attendanceSource: item.attendanceSource || "manual", note: item.note || null,
         })),
       });
-      setOverview(next); setSelectedRule(null); setInputs(next.staffInputs || inputs); setMessage("結算輸入與規則版本已保存。");
+      setOverview(validatePublicTipPool(next)); setSelectedRule(null); setInputs(next.staffInputs || inputs); setRunFields(current => ({ ...current, publicTipReconciliationReason: "" })); setMessage("結算輸入與規則版本已保存。");
     } catch (nextError) { setMessage((nextError as Error).message); }
     finally { setSaving(false); }
   };
@@ -239,7 +241,7 @@ export function AdminSettlementPage() {
         businessDate: date, sessionNo, dayType, staffId: selectedPersonId, role: overview?.payrollAssignments?.find(item => item.staffId === selectedPersonId)?.payrollRole,
         requestedMinutes, reason: backfillForm.reason.trim(),
       });
-      setOverview(next); setInputs(next.staffInputs || inputs);
+      setOverview(validatePublicTipPool(next)); setInputs(next.staffInputs || inputs);
       setBackfillForm((current) => ({ ...current, requestedMinutes: "", reason: "" }));
       setMessage("補打卡申請已送出，待開發人員或店經理核准。");
     } catch (nextError) { setMessage((nextError as Error).message); }
@@ -273,7 +275,7 @@ export function AdminSettlementPage() {
         businessDate: backfillReview.businessDate, sessionNo: backfillReview.sessionNo,
         approved: backfillReview.approved, note: note.trim() || null,
       });
-      setOverview(next);
+      setOverview(validatePublicTipPool(next));
       setInputs(next.staffInputs || inputs);
       setMessage(backfillReview.approved ? "補打卡已核准。" : "補打卡已拒絕。");
       setBackfillReview(null);
@@ -285,7 +287,7 @@ export function AdminSettlementPage() {
 
   const calculate = async () => {
     setSaving(true); setMessage("");
-    try { const next = await adminApi.calculateSettlement({ businessDate: date, sessionNo }); setOverview(next); setInputs(next.staffInputs || inputs); setMessage("已重新計算預覽，正式結算前仍可調整。"); }
+    try { const next = await adminApi.calculateSettlement({ businessDate: date, sessionNo }); setOverview(validatePublicTipPool(next)); setInputs(next.staffInputs || inputs); setMessage("已重新計算預覽，正式結算前仍可調整。"); }
     catch (nextError) { setMessage((nextError as Error).message); }
     finally { setSaving(false); }
   };
@@ -294,7 +296,7 @@ export function AdminSettlementPage() {
     setSaving(true); setMessage("");
     try {
       const next = await adminApi.closeSettlement({ businessDate: date, operationId: crypto.randomUUID(), reason: "結束營業並停止新單" });
-      setOverview(next); setMessage("已停止新單並完成實際關店；未完成服務仍需逐筆協調。 ");
+      setOverview(validatePublicTipPool(next)); setMessage("已停止新單並完成實際關店；未完成服務仍需逐筆協調。 ");
     } catch (nextError) { setMessage((nextError as Error).message); }
     finally { setSaving(false); }
   };
@@ -322,7 +324,7 @@ export function AdminSettlementPage() {
   const finalize = async () => {
     if (!window.confirm("將保存本次結算版本；之後仍可調整計薪輸入，並於最終步驟建立新版。確定完成正式結算嗎？")) return;
     setSaving(true); setMessage("");
-    try { const next = await adminApi.finalizeSettlement({ businessDate: date, sessionNo }); setOverview(next); setMessage("本營業時段已正式結算；原版本已保留，可於同頁調整輸入並建立新版。"); }
+    try { const next = await adminApi.finalizeSettlement({ businessDate: date, sessionNo }); setOverview(validatePublicTipPool(next)); setMessage("本營業時段已正式結算；原版本已保留，可於同頁調整輸入並建立新版。"); }
     catch (nextError) { setMessage((nextError as Error).message); }
     finally { setSaving(false); }
   };
@@ -345,7 +347,7 @@ export function AdminSettlementPage() {
     (selectedRule !== null && selectedRule.id !== overview.rule.id) ||
     dayType !== overview.run.dayType ||
     JSON.stringify(inputs) !== JSON.stringify(overview.staffInputs || []) ||
-    runFields.publicTipAmount !== (overview.run.publicTipAmount || 0) ||
+    Boolean(runFields.publicTipReconciliationReason?.trim()) ||
     runFields.admissionFeeOverride !== (overview.run.admissionFeeOverride == null ? "" : String(overview.run.admissionFeeOverride)) ||
     runFields.activityExpense !== (overview.run.activityExpense || 0) ||
     runFields.companyShareHours !== (overview.run.companyShareHours == null ? "" : String(overview.run.companyShareHours)) ||
@@ -376,14 +378,15 @@ export function AdminSettlementPage() {
     const removedInputs = original.filter(item => !currentByKey.has(`${item.staffId}|${item.role}`))
       .map(item => ({ staffId: item.staffId, role: item.role }));
     const hasRunInputChanges = (selectedRule !== null && selectedRule.id !== overview.rule.id) || dayType !== overview.run.dayType
-      || runFields.publicTipAmount !== (overview.run.publicTipAmount || 0)
+      || Boolean(runFields.publicTipReconciliationReason?.trim())
       || runFields.admissionFeeOverride !== (overview.run.admissionFeeOverride == null ? "" : String(overview.run.admissionFeeOverride))
       || runFields.activityExpense !== (overview.run.activityExpense || 0)
       || runFields.companyShareHours !== (overview.run.companyShareHours == null ? "" : String(overview.run.companyShareHours))
       || runFields.activityHoursConfirmed !== Boolean(overview.run.activityHoursConfirmed);
     if (!hasRunInputChanges && changedInputs.length === 0 && removedInputs.length === 0) return undefined;
     return {
-      ruleVersionId: selectedRule?.id ?? null, dayType, publicTipAmount: runFields.publicTipAmount,
+      ruleVersionId: selectedRule?.id ?? null, dayType, publicTipAmount: 0,
+      publicTipReconciliationReason: runFields.publicTipReconciliationReason,
       admissionFeeOverride: runFields.admissionFeeOverride === "" ? null : Number(runFields.admissionFeeOverride),
       activityExpense: runFields.activityExpense,
       companyShareHours: runFields.companyShareHours === "" ? null : Number(runFields.companyShareHours),

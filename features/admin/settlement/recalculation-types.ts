@@ -18,6 +18,7 @@ export type RecalculationChange = {
 export type RecalculationAdjustments = {
   ruleVersionId?: string | null;
   dayType: string;
+  publicTipReconciliationReason?: string;
   publicTipAmount: number;
   admissionFeeOverride: number | null;
   activityExpense: number;

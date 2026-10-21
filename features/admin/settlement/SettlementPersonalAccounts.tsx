@@ -1,4 +1,5 @@
 import { AdminField, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
+import { AdminDisclosureSummary } from "@/features/admin/shared/AdminDisclosureSummary";
 import type { SettlementResult, SettlementRun, SettlementStaff, SettlementStaffInput, SettlementSummary } from "./types";
 import { settlementExactMoney as exactMoney, settlementMoney as money, settlementRoles } from "./presentation";
 import { SettlementOrderSources as OrderSources } from "./SettlementOrderSources";
@@ -133,7 +134,7 @@ export function SettlementPersonalAccounts({ staff, selectedId, results, inputs,
           <td className="adminSettlementNumber"><strong>{money(item.afterRounding)} G</strong></td>
         </tr>)}</tbody></table></div>
           <div className="adminSettlementSourceList">{personalResults.map((item) => <details className="adminSettlementSourceDisclosure" key={`sources-${item.staffId}-${item.role}`}>
-            <summary>{settlementRoles[item.role] || item.role} · 查看金額來源</summary>
+            <AdminDisclosureSummary>{settlementRoles[item.role] || item.role} · 查看金額來源</AdminDisclosureSummary>
             <SourceDetails item={item} inputs={inputs} run={run} summary={summary} finalized={finalized} />
           </details>)}</div>
         </> : <p className="adminEmptyText">這位人員在本時段尚無薪資結果。</p>}

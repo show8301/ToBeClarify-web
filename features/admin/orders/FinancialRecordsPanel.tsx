@@ -9,7 +9,7 @@ import { AdminButton } from "@/features/admin/shared/AdminShared.jsx";
 import { AdminHelp } from "@/features/admin/shared/AdminHelp";
 
 const kindLabels = { charge_add: "增加應收", charge_reduce: "減少應收", cash_receipt: "實際收款", cash_refund: "實際退款", tip_supplement: "舊版小費分配" };
-const tipDistributionLabels: Record<FinanceTipDistributionMode, string> = { equal: "上班員工均分", designated: "指定店員", custom: "自訂比例" };
+const tipDistributionLabels: Record<FinanceTipDistributionMode, string> = { public: "公共小費（按工時分配）", equal: "舊版人頭均分", designated: "指定店員", custom: "自訂比例" };
 function balanceDelta(kind: string, amount: number): number {
   return kind === "charge_add" || kind === "cash_refund" ? amount : kind === "charge_reduce" || kind === "cash_receipt" ? -amount : 0;
 }

@@ -32,6 +32,7 @@ function SourceDetails({ item, inputs, run, summary, finalized }: {
   const input = inputs.find((candidate) => candidate.staffId === item.staffId && candidate.role === item.role);
   const sources = item.sources || [];
   const revenueSources = sources.filter((source) => source.kind === "designated_revenue");
+  const publicTipSources = sources.filter(source => source.kind === "public_tip");
   const tipSources = sources.filter((source) => source.kind === "designated_tip");
   const supplementalTipSources = tipSources.filter((source) => source.label.startsWith("補登小費"));
   const serviceManagerInputs = inputs.filter((candidate) => candidate.role === "service" || candidate.role === "manager");
@@ -85,7 +86,10 @@ function SourceDetails({ item, inputs, run, summary, finalized }: {
     <section>
       <h4>公共小費來源</h4>
       {item.publicTip > 0
-        ? <p>{publicTipShare} 公共小費池 {exactMoney(run.publicTipAmount)} G × 本人 {exactMoney(item.payableHours)} 小時 ÷ 合計 {exactMoney(publicTipHours)} 小時 = <strong>{exactMoney(item.publicTip)} G</strong></p>
+        ? publicTipSources.length ? <>
+          <p>{publicTipShare} 金額及工時以本版結算快照為準；整數尾差依最大餘數及固定順序分配。來源合計 <strong>{exactMoney(item.publicTip)} G</strong>。</p>
+          <OrderSources sources={publicTipSources} kind="public_tip" />
+        </> : <p>舊版公共小費池 {exactMoney(run.publicTipAmount)} G × 本人 {exactMoney(item.payableHours)} 小時 ÷ 合計 {exactMoney(publicTipHours)} 小時 = <strong>{exactMoney(item.publicTip)} G</strong>。此版本尚無逐單來源快照。</p>
         : <p>本項沒有公共小費。</p>}
     </section>
 

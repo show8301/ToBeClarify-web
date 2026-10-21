@@ -4,7 +4,7 @@ import type { TipDistributionInput } from "./TipDistributionFields";
 
 export interface OrderTip {
   orderId: string; orderNumber: string; itemId: string; amount: number; version: number;
-  distribution: { mode: FinanceTipDistributionMode; allocations: FinanceTipAllocation[] } | null;
+  distribution: { mode: FinanceTipDistributionMode; publicAmount: number; allocations: FinanceTipAllocation[] } | null;
   staffName: string | null; staffAmount: number; storeAmount: number;
 }
 export interface TipCorrection extends TipDistributionInput {
@@ -22,8 +22,8 @@ function parse(value: unknown): OrderTip {
   let distribution: OrderTip["distribution"] = null;
   if (row.distribution !== null) {
     const d = object(row.distribution); const mode = d.mode;
-    if (mode !== "equal" && mode !== "designated" && mode !== "custom") throw new Error("小費分配方式錯誤。");
-    distribution = { mode, allocations: array(d.allocations).map(value => {
+    if (mode !== "public" && mode !== "equal" && mode !== "designated" && mode !== "custom") throw new Error("小費分配方式錯誤。");
+    distribution = { mode, publicAmount: d.publicAmount == null ? 0 : num(d.publicAmount), allocations: array(d.allocations).map(value => {
       const a = object(value);
       return { staffId: str(a.staffId), staffName: str(a.staffName), amount: num(a.amount), percentage: a.percentage === null ? null : num(a.percentage) };
     }) };

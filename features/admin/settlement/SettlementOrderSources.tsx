@@ -33,8 +33,8 @@ export function SettlementOrderSources({ sources, kind }: Props) {
           <div>
             <span className="adminSettlementSourceItemName">{source.itemName || source.label}</span>
             {source.itemName ? <span>{source.label}</span> : null}
-            {source.originalAmount != null ? <span>{kind === "designated_tip" ? "原始員工份額" : "原始品項金額"} {exactMoney(source.originalAmount)} G</span> : null}
-            <span>認列基礎 {exactMoney(source.basisAmount)} G × {exactMoney(source.percentage)}%</span>
+            {source.originalAmount != null ? <span>{kind === "public_tip" ? "原始公共小費" : kind === "designated_tip" ? "原始員工份額" : "原始品項金額"} {exactMoney(source.originalAmount)} G</span> : null}
+            <span>認列基礎 {exactMoney(source.basisAmount)} G × {exactMoney(source.percentage)}%{kind === "public_tip" ? "（含整數尾差分配）" : ""}</span>
           </div>
           <strong>{exactMoney(source.amount)} G</strong>
         </li>)}

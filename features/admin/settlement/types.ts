@@ -112,7 +112,7 @@ export type SettlementResult = {
 };
 
 export type SettlementResultSource = {
-  kind: "designated_revenue" | "designated_tip";
+  kind: "designated_revenue" | "designated_tip" | "public_tip";
   orderId: string;
   orderNumber: string;
   label: string;
@@ -189,7 +189,16 @@ export type SettlementPayrollAssignment = {
   canUseBackstage: boolean; startedAt: string | null;
 };
 
+export type SettlementPublicTipPool = {
+  recognizedAmount: number;
+  distributableAmount: number;
+  sources: { orderId: string; orderNumber: string; originalAmount: number; orderPayableAmount: number;
+    orderCollectedAmount: number; recognizedAmount: number; status: string }[];
+  legacyStoreSources?: SettlementPublicTipPool["sources"] | null;
+};
+
 export type SettlementOverview = {
+  publicTipPool?: SettlementPublicTipPool | null;
   pendingPayrollRoleCorrections?: { staffId: string; displayName: string; beforeRole: string; afterRole: string }[];
   payrollAssignments?: SettlementPayrollAssignment[];
   run: SettlementRun;
@@ -204,6 +213,7 @@ export type SettlementOverview = {
 };
 
 export type SettlementRunFields = {
+  publicTipReconciliationReason?: string;
   publicTipAmount: number;
   admissionFeeOverride: string;
   activityExpense: number;

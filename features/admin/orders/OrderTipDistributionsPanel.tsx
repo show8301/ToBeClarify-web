@@ -12,7 +12,7 @@ import { TipDistributionFields } from "./TipDistributionFields";
 import type { TipDistributionInput } from "./TipDistributionFields";
 
 const money = (n: number) => `${n.toLocaleString("zh-TW")} G`;
-const labels = { equal: "上班員工均分", designated: "指定店員", custom: "自訂比例" };
+const labels = { public: "公共小費（按工時分配）", equal: "舊版人頭均分", designated: "指定店員", custom: "自訂比例" };
 export function OrderTipDistributionsPanel({ sessionId, refreshKey, onSaved }: {
   sessionId: string; refreshKey: string; onSaved: () => Promise<void>;
 }) {
@@ -41,9 +41,10 @@ export function OrderTipDistributionsPanel({ sessionId, refreshKey, onSaved }: {
     {data?.tips.map(tip => <article key={tip.itemId} className="adminOrderBackfillLine">
       <a href={`#admin-order-${encodeURIComponent(tip.orderId)}`}>訂單 {tip.orderNumber}</a>
       <p>小費 {money(tip.amount)} · 分配版本 {tip.version} · {tip.distribution ? labels[tip.distribution.mode] : "原訂單分配"}</p>
-      {tip.distribution ? <ul>{tip.distribution.allocations.map(a => <li key={a.staffId}>
+      {tip.distribution?.mode === "public" ? <p>於結算依合資格計薪工時分配；實收、退款與工時變動須由經理重新結算。</p> : tip.distribution ? <ul>{tip.distribution.allocations.map(a => <li key={a.staffId}>
         {a.staffName}：{money(a.amount)}{a.percentage === null ? "" : `（${a.percentage}%）`}
       </li>)}</ul> : <p>{tip.staffName || "店家"}：員工 {money(tip.staffAmount)}／店家 {money(tip.storeAmount)}</p>}
+      {tip.distribution && tip.distribution.mode !== "public" && tip.distribution.publicAmount > 0 && <p>另有公共小費 {money(tip.distribution.publicAmount)}，於結算按工時分配。</p>}
       {data.account.canWrite && !editing && <AdminButton variant="secondary" onClick={() => setEditing(tip)}>更正此筆分配</AdminButton>}
       {editing?.itemId === tip.itemId && <Correction key={tip.itemId} tip={editing} account={data.account} staff={data.staff}
         onCancel={() => setEditing(null)} onSaved={async () => { await onSaved(); setEditing(null); setRevision(n => n + 1); }} />}
@@ -54,9 +55,9 @@ export function OrderTipDistributionsPanel({ sessionId, refreshKey, onSaved }: {
 function Correction({ tip, account, staff, onCancel, onSaved }: {
   tip: OrderTip; account: FinanceAccount; staff: FinanceTipStaffOption[]; onCancel: () => void; onSaved: () => Promise<void>;
 }) {
-  const [value, setValue] = useState<TipDistributionInput>(() => ({ mode: tip.distribution?.mode ?? "equal",
-    allocations: tip.distribution?.allocations.map(a => ({ staffId: a.staffId, percentage: a.percentage }))
-      ?? staff.map(x => ({ staffId: x.staffId, percentage: null })) }));
+  const [value, setValue] = useState<TipDistributionInput>(() => ({ mode: tip.distribution?.mode === "equal" ? "public" : tip.distribution?.mode ?? "public",
+    allocations: tip.distribution?.mode === "equal" ? [] : tip.distribution?.allocations.map(a => ({ staffId: a.staffId, percentage: a.percentage }))
+      ?? [] }));
   const [reason, setReason] = useState("");
   const [retry, setRetry] = useState<TipCorrection | null>(null);
   const [saved, setSaved] = useState(false);
@@ -86,7 +87,7 @@ function Correction({ tip, account, staff, onCancel, onSaved }: {
       <label>更正原因<input required maxLength={500} value={reason} onChange={e => setReason(e.target.value)} /></label>
     </fieldset>
     <p>原分配將被本次分配取代，保留修改歷程。小費總額 {money(tip.amount)}、應收與實收不變；已正式結算需由經理重新結算。</p>
-    {tip.storeAmount > 0 && <p role="alert">原分配包含店家 {money(tip.storeAmount)}；確認後本筆小費將全額分配給所選員工。</p>}
+    {!tip.distribution && tip.storeAmount > 0 && <p role="alert">原分配包含店家 {money(tip.storeAmount)}；確認後將依所選方式分配：公共小費按結算工時分配，其餘依指定人員／比例。</p>}
     {error && <p role="alert">{saved ? "已儲存分配，請重新讀取，勿再次新增。" : error}</p>}
     <AdminButton type="submit" disabled={busy || (!retry && !saved && !reason.trim())}>{saved ? "重新讀取" : retry ? "查回／重試原更正" : "確認更正分配"}</AdminButton>
     <AdminButton variant="ghost" disabled={busy || !!retry || saved} onClick={onCancel}>取消</AdminButton>

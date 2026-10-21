@@ -85,7 +85,6 @@ export function parseBackfillCatalog(value: unknown): { choices: BackfillChoice[
   for (const room of list(row.rooms)) choices.push({ key: `room:${str(room.id)}`, kind: "room",
     referenceId: str(room.id), label: `包廂｜${str(room.roomName)}`, unitPrice: num(room.segmentPrice) });
   choices.push({ key: "tip:staff", kind: "tip", referenceId: "", label: "小費｜員工分配", unitPrice: 100000 });
-  choices.push({ key: "tip:store", kind: "tip", referenceId: "", label: "小費｜店家", unitPrice: 100000 });
   return { choices, segmentMinutes: num(settings.segmentMinutes) };
 }
 export const backfillApi = {

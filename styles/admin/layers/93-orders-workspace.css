@@ -417,6 +417,99 @@
 .adminOrdersPage .adminOrderFinanceCheckbox input { width: 18px; height: 18px; min-height: 0; flex-shrink: 0; }
 .adminOrdersPage .adminOrderFinanceAdmissionForm > .adminButton { grid-column: 1 / -1; justify-self: start; }
 
+/* Tip distribution is a summary with a full-width correction form, not a backfill product grid. */
+.adminOrdersPage .adminOrderFinanceDisclosureBody {
+  display:grid;
+  gap:10px;
+  padding-top:10px;
+}
+.adminOrdersPage .adminOrderTipDisclosure > .adminOrderTipList {
+  padding-top:12px;
+}
+.adminOrdersPage .adminOrderTipPanel {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  container: order-tip-panel / inline-size;
+}
+.adminOrdersPage .adminOrderTipList { display: grid; gap: 12px; min-width: 0; }
+.adminOrdersPage .adminOrderTipCard {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+}
+.adminOrdersPage .adminOrderTipSummary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  align-items: center;
+  gap: 12px 18px;
+}
+.adminOrdersPage .adminOrderTipIdentity { display: grid; gap: 8px; min-width: 0; }
+.adminOrdersPage .adminOrderTipSummary.hasAction { grid-template-columns: minmax(0, 1fr) max-content max-content; }
+.adminOrdersPage .adminOrderTipIdentity > a { font-size: 14px; font-weight: 700; line-height: 1.5; overflow-wrap: anywhere; }
+.adminOrdersPage .adminOrderTipTags { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; color: var(--color-fg-soft); font-size: 12px; }
+.adminOrdersPage .adminOrderTipAmount { margin: 0; text-align: right; }
+.adminOrdersPage .adminOrderTipAmount dt { color: var(--color-fg-soft); font-size: 13px; line-height: 1.5; }
+.adminOrdersPage .adminOrderTipAmount dd { margin: 4px 0 0; font-size: 20px; font-weight: 750; line-height: 1.4; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.adminOrdersPage .adminOrderTipStatus { margin: 0; color: var(--color-fg-soft); font-size: 14px; line-height: 1.6; }
+.adminOrdersPage .adminOrderTipOriginal,
+.adminOrdersPage .adminOrderTipAllocations {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 8px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.adminOrdersPage .adminOrderTipOriginal > div,
+.adminOrdersPage .adminOrderTipAllocations > li { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; min-width: 0; }
+.adminOrdersPage .adminOrderTipOriginal dt { color: var(--color-fg-soft); overflow-wrap: anywhere; }
+.adminOrdersPage .adminOrderTipOriginal dd { margin: 0; font-weight: 700; }
+.adminOrdersPage .adminOrderTipOriginal dd,
+.adminOrdersPage .adminOrderTipAllocations strong { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.adminOrdersPage .adminOrderTipCorrection {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 8px;
+  background: var(--color-surface-input);
+}
+.adminOrdersPage .adminOrderTipCorrection h4 { margin: 0; font-size: 16px; line-height: 1.5; }
+.adminOrdersPage .adminOrderTipCorrectionFields,
+.adminOrdersPage .adminOrderTipFields { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.adminOrdersPage .adminOrderTipFields { grid-column: 1 / -1; }
+.adminOrdersPage .adminOrderTipFields > legend { padding: 0 0 8px; color: var(--color-fg-soft); font-size: 13px; }
+.adminOrdersPage .adminOrderTipModeField { width: 100%; max-width: 420px; }
+.adminOrdersPage .adminOrderTipModeField > .adminFieldHeading > label { margin: 0; }
+.adminOrdersPage .adminOrderTipCorrection textarea { min-height: 88px; resize: vertical; }
+.adminOrdersPage .adminOrderTipActions { justify-content: flex-end; }
+.adminOrdersPage .adminOrderTipStaffList { display: grid; gap: 8px; }
+.adminOrdersPage .adminOrderTipStaffChoice { display: grid; grid-template-columns: minmax(0, 1fr) 120px; align-items: center; gap: 12px; padding-block: 8px; border-bottom: 1px solid var(--color-border); }
+.adminOrdersPage .adminOrderTipStaffChoice > .adminOrderTipStaffName { display: flex; align-items: center; gap: 8px; margin: 0; min-height: 40px; }
+.adminOrdersPage .adminOrderTipStaffName > input { flex: 0 0 18px; width: 18px; height: 18px; min-height: 0; }
+.adminOrdersPage .adminOrderTipStaffName > span { min-width: 0; overflow-wrap: anywhere; }
+.adminOrdersPage .adminOrderTipPercentage { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; }
+
+@container order-tip-panel (max-width: 560px) {
+  .adminOrdersPage .adminOrderTipSummary,
+  .adminOrdersPage .adminOrderTipSummary.hasAction { grid-template-columns: minmax(0, 1fr) max-content; align-items: start; gap: 12px; }
+  .adminOrdersPage .adminOrderTipSummary > .adminButton { grid-column: 1 / -1; justify-self: end; }
+  .adminOrdersPage .adminOrderTipCard,
+  .adminOrdersPage .adminOrderTipCorrection { padding: 12px; }
+  .adminOrdersPage .adminOrderTipAmount dd { font-size: 18px; }
+}
+@media (any-pointer: coarse) {
+  .adminOrdersPage .adminOrderTipStaffChoice > .adminOrderTipStaffName { min-height: 44px; }
+}
+
 @media (max-width: 1280px) {
   .adminOrdersPage .adminOrderCustomerHeader { grid-template-columns: minmax(0, 1fr); }
   .adminOrdersPage .adminOrderCustomerMetrics > div { min-width: 0; }

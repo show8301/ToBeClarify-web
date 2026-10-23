@@ -22,7 +22,8 @@ async function request(path, { token, ...options } = {}) {
         ...options.headers,
       },
     });
-  } catch {
+  } catch (error) {
+    if (error.name === 'AbortError') throw error;
     throw new OrderingApiError('無法連線至點餐服務，請稍後再試。');
   }
   const payload = await response.json().catch(() => null);
@@ -33,6 +34,7 @@ async function request(path, { token, ...options } = {}) {
 }
 
 export const orderingApi = {
+  nominationAvailability: (token, signal) => request('/nomination-availability', { token, signal }),
   quote: (token, body, signal) => request('/quote', {token,method:'POST',body:JSON.stringify(body),signal}),
   access: (orderToken, signal) => request('/access', { method: 'POST', body: JSON.stringify({ orderToken }), signal }),
   recover: (body, signal) => request('/recover', { method: 'POST', body: JSON.stringify(body), signal }),

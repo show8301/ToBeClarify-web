@@ -16,4 +16,5 @@ export type StaffDutyStatus = {
   currentStatus: "off" | "busy" | "available";
   statusText: string;
   isNominatable: boolean;
+  nominationStatus?: string;
 };

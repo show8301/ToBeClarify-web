@@ -33,7 +33,7 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
     if (match === false) return [];
     const duty = getDutyStatus(person.id);
     if (dutyFilter !== "all" && (!duty.isKnown || duty.isWorkingToday !== (dutyFilter === "yes"))) return [];
-    if (nominationFilter !== "all" && (!duty.isKnown || duty.isNominatable !== (nominationFilter === "yes"))) return [];
+    if (nominationFilter !== "all" && (!duty.isKnown || duty.canReserveNormally !== (nominationFilter === "yes"))) return [];
     return [{ person, match }];
   }), [normalizedQuery, initialStaff, getDutyStatus, dutyFilter, nominationFilter]);
   const clearFilters = () => {
@@ -163,7 +163,7 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
         {filtered.map(({ person, match }, index) => {
             const services = [...(person.commonServices ?? []), ...(person.specialServices ?? [])];
             const duty = getDutyStatus(person.id);
-            const canBeNominated = duty.isNominatable;
+            const nominationText = duty.nominationText;
             const fileNumber = String(index + 1).padStart(2,"0");
             const showTextName = textNameIds.has(person.id);
             return (
@@ -178,7 +178,7 @@ export default function StaffArchive({ initialStaff, embedded=false }:{ initialS
                     <span className={`dreamer-duty${duty.isWorkingToday ? " is-online" : ""}`}>
                       <i aria-hidden="true"/><span><small>{duty.label}</small><b>{duty.statusText}</b></span>
                     </span>
-                    {canBeNominated && <span className="dreamer-nomination" aria-label="此店員可以指名"><i aria-hidden="true">✦</i><b>可以指名</b></span>}
+                    {nominationText && <span className="dreamer-nomination" aria-label={nominationText}><i aria-hidden="true">✦</i><b>{nominationText}</b></span>}
                   </span>
                 </a>
                 <span className="dreamer-card-body">

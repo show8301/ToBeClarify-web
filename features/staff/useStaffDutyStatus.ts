@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { NOMINATION_LABELS, parseStaffDutyStatuses } from "./duty-status";
+import { parseStaffDutyStatuses } from "./duty-status";
 import type { StaffDutyStatus } from "./types";
 
 const REFRESH_INTERVAL = 60_000;
@@ -65,8 +65,6 @@ export function useStaffDutyStatus() {
       isKnown: Boolean(status),
       isWorkingToday: status?.isWorkingToday ?? false,
       isNominatable: status?.isNominatable ?? false,
-      canReserveNormally: Boolean(status?.nominationStatus && ["available", "before_shift", "busy", "partially_reserved"].includes(status.nominationStatus)),
-      nominationText: status?.nominationStatus ? NOMINATION_LABELS[status.nominationStatus] : status?.isNominatable ? "開放指名" : "",
       label: status ? (status.isWorkingToday ? "ON DUTY" : "OFF DUTY") : "STATUS",
       statusText: status?.statusText || (failed || statuses ? "狀態暫無法確認" : "確認執勤狀態中"),
     };

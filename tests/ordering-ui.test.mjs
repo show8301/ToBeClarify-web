@@ -5,12 +5,11 @@ import test from 'node:test';
 test('customer ordering implements meals, staff-first nomination, tips, dependent deletion, recovery, and order history', async () => {
   const source = await readFile(new URL('../features/ordering/components/OrderClient.jsx', import.meta.url), 'utf8');
   const api = await readFile(new URL('../features/ordering/api/client.js', import.meta.url), 'utf8');
-  const nomination = await readFile(new URL('../features/ordering/components/NominationPage.tsx', import.meta.url), 'utf8');
 
   assert.match(source, /一般點餐/);
-  assert.match(nomination, /先選店員，再查看服務與可預約時間/);
-  assert.match(nomination, /Math\.ceil\(service\.durationMinutes \/ settings\.segmentMinutes\)/);
-  assert.match(nomination, /service\.durationMinutes \? 1 : safeSegments/);
+  assert.match(source, /先選店員，再查看該店員提供的服務/);
+  assert.match(source, /Math\.ceil\(service\.durationMinutes \/ settings\.segmentMinutes\)/);
+  assert.match(source, /service\.durationMinutes \? 1 : safeSegments/);
   assert.match(source, /基礎指名費/);
   assert.match(source, /請先刪除服務項目/);
   assert.match(source, /將此分配結果加入本次點餐/);
@@ -41,17 +40,15 @@ test('customer recovery adopts the issued short order URL', async () => {
   assert.match(source, /window\.history\.replaceState\(null, '', `\$\{issuedUrl\.pathname\}\$\{issuedUrl\.search\}`\)/);
 });
 
-test('customer ordering delegates nomination and disables unavailable slots', async () => {
+test('customer ordering hides unavailable staff and keeps the ordering UI concise', async () => {
   const source = await readFile(new URL('../features/ordering/components/OrderClient.jsx', import.meta.url), 'utf8');
-  const nomination = await readFile(new URL('../features/ordering/components/NominationPage.tsx', import.meta.url), 'utf8');
   const styles = await readFile(new URL('../styles/ordering/modern.css', import.meta.url), 'utf8');
 
-  assert.match(source, /<NominationPage token=\{token\}/);
-  assert.match(nomination, /visibleStaff\.map/);
-  assert.match(nomination, /disabled=\{!possible\}/);
-  assert.match(nomination, /可提前預約店員班內的空檔/);
-  assert.match(nomination, /選擇指名方式（二擇一）/);
-  assert.match(nomination, /指名\+加購服務/);
+  assert.match(source, /const visibleStaff = staff\.filter\(\(person\) => person\.isWorkingToday && person\.isNominatable\)/);
+  assert.match(source, /visibleStaff\.map/);
+  assert.match(source, /顯示開放指名人員；目前忙碌仍可選擇班內稍後的空檔/);
+  assert.match(source, /選擇指名方式\(二擇一\)/);
+  assert.match(source, /指名\+加購服務/);
   assert.match(source, /<span>可折抵餘額<\/span>/);
   assert.doesNotMatch(source, /<small>\{item\.kind === 'set' \? 'SET' : 'MENU'\}<\/small>/);
   assert.doesNotMatch(source, /<p>餐點、包廂、指名服務與小費會在送出前集中顯示/);
@@ -76,10 +73,9 @@ test('customer ordering summary uses clear actions and keeps room duration inlin
 
 test('customer ordering keeps service descriptions readable and uses the official empty-state mark', async () => {
   const source = await readFile(new URL('../features/ordering/components/OrderClient.jsx', import.meta.url), 'utf8');
-  const nomination = await readFile(new URL('../features/ordering/components/NominationPage.tsx', import.meta.url), 'utf8');
   const styles = await readFile(new URL('../styles/ordering/modern.css', import.meta.url), 'utf8');
 
-  assert.match(nomination, /<p>\{item\.serviceDescription\}<\/p>/);
+  assert.match(source, /<p>\{item\.serviceDescription\}<\/p>/);
   assert.match(source, /className="orderEmptyLogo"/);
   assert.match(source, /<img src="\/favicon\.ico" alt="清醒夢" \/>/);
   assert.match(styles, /\.nominationServiceGrid\s*\{[\s\S]*grid-template-columns:1fr/);

@@ -130,8 +130,8 @@ export function WorkbenchServiceDialog({ entry, action, orderUnits, onSaved, onB
     {preview && <div className="dwNotice">
       <p>現在開始 {formatClock(preview.effectiveStartsAt)}，服務至 {formatClock(preview.effectiveEndsAt)}。</p>
       <p>保留購買 {preview.purchasedMinutes} 分鐘及休息 {preview.restMinutesReserved} 分鐘。</p>
-      {preview.conflicts.length > 0 && <p>{preview.canStartNow ? "以下尚未成立的衝突請求會轉為待協調：" : "此時段與以下服務重疊，請先重新安排時間："}{preview.conflicts.join("、")}。</p>}
-      {!preview.canStartNow && <p>{preview.startBlockedReason || "目前無法開始此服務，請重新確認班次與既有預約。"}</p>}
+      {preview.conflicts.length > 0 && <p>以下服務會轉為待協調：{preview.conflicts.join("、")}。</p>}
+      {!preview.canStartNow && <p>仍有其他服務進行中，請先完成該服務。</p>}
     </div>}
     <fieldset disabled={busy || retrying}>
       {action === "carry_forward" && <AdminField label="目標營業期"><select value={targetPeriod} onChange={(e) => setTargetPeriod(e.target.value)}><option value="">保留，等待安排</option>{periods.filter((p) => p.id !== unit?.fulfillmentPeriodId).map((p) => <option key={p.id} value={p.id}>{p.date}</option>)}</select></AdminField>}
@@ -141,6 +141,6 @@ export function WorkbenchServiceDialog({ entry, action, orderUnits, onSaved, onB
       {(requiredReason || action === "complete") && <AdminField label="原因" required={requiredReason}><textarea rows={3} maxLength={500} required={requiredReason} value={reason} onChange={(e) => setReason(e.target.value)} /></AdminField>}
     </fieldset>
     {error && <p className="adminFormError" role="alert">{error}</p>}
-    <AdminButton type="submit" busy={busy} disabledReason={lateAcceptanceBlocked ? "預定開始時間已過，請選擇改期或立即開始。" : !prepared ? "正在讀取接待預覽。" : preview?.canStartNow === false ? preview.startBlockedReason || "目前無法開始此服務，請重新確認班次與既有預約。" : !retrying && requiredReason && !reason.trim() ? "請先填寫操作原因。" : undefined} disabled={busy || lateAcceptanceBlocked || !prepared || preview?.canStartNow === false || !retrying && requiredReason && !reason.trim()}>{busy ? "處理中…" : retrying ? "查回／重試同一筆操作" : serviceActionLabel(action, unit?.kind)}</AdminButton>
+    <AdminButton type="submit" busy={busy} disabledReason={lateAcceptanceBlocked ? "預定開始時間已過，請選擇改期或立即開始。" : !prepared ? "正在讀取接待預覽。" : preview?.canStartNow === false ? "仍有其他服務進行中，請先完成該服務。" : !retrying && requiredReason && !reason.trim() ? "請先填寫操作原因。" : undefined} disabled={busy || lateAcceptanceBlocked || !prepared || preview?.canStartNow === false || !retrying && requiredReason && !reason.trim()}>{busy ? "處理中…" : retrying ? "查回／重試同一筆操作" : serviceActionLabel(action, unit?.kind)}</AdminButton>
   </form>;
 }

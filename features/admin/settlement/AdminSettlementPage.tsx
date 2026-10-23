@@ -12,6 +12,7 @@ import { useAdminAuth } from "@/features/admin/auth/AdminAuthContext";
 import { AdminButton, AdminField, AdminPage, AdminPanel, AdminState } from "@/features/admin/shared/AdminShared.jsx";
 import { AttendancePanel } from "./AttendancePanel";
 import { SettlementTabs } from "./SettlementTabs";
+import { SettlementSalaryDispatch } from "./SettlementSalaryDispatch";
 import { SettlementOperations } from "./SettlementOperations";
 import { SettlementPersonalAccounts } from "./SettlementPersonalAccounts";
 import { parseSettlementRule } from "./rule-api";
@@ -24,7 +25,7 @@ import type { RecalculationAdjustments } from "./recalculation-types";
 
 type StaffInput = SettlementStaffInput;
 
-const settlementTabs = new Set<SettlementTab>(["operations", "personal", "settings"]);
+const settlementTabs = new Set<SettlementTab>(["operations", "personal", "dispatch", "settings"]);
 
 function isBusinessDate(value: string | null): value is string {
   if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
@@ -342,7 +343,7 @@ export function AdminSettlementPage() {
 
   const availableStaff = useMemo(() => staff.filter(item => item.isActive !== false && (canManage || item.id === user?.staffMemberId)), [canManage, staff, user?.staffMemberId]);
   const isFinalized = overview?.run.status === "finalized";
-  const tab = !canManage && activeTab === "settings" ? "personal" : activeTab;
+  const tab = !canManage && (activeTab === "settings" || activeTab === "dispatch") ? "personal" : activeTab;
   const dirty = Boolean(overview && (
     (selectedRule !== null && selectedRule.id !== overview.rule.id) ||
     dayType !== overview.run.dayType ||
@@ -425,7 +426,7 @@ export function AdminSettlementPage() {
     actions={<AdminRefreshButton loading={loading} onClick={() => { setLoading(true); void load(); }} disabled={loading || saving} />}
   >
     <div className="adminSettlementWorkspace">
-      <SettlementTabs active={tab} canManage={canManage} onChange={changeTab} />
+      <SettlementTabs active={tab} canManage={canManage} disabled={saving} onChange={changeTab} />
       <div className="adminSettlementContext">
         <AdminField label="營業日期"><input type="date" value={date} disabled={saving} onChange={event => {
           if (!event.target.value || event.target.value === date) return;
@@ -479,6 +480,12 @@ export function AdminSettlementPage() {
             {personalRequests.length ? <div className="adminSettlementRequestList">{personalRequests.map(item => <article key={item.id}><div><strong>{roleLabel[item.role] || item.role} · {item.requestedMinutes} 分鐘</strong><p>{item.reason}</p></div><span className="adminSettlementBadge">{settlementStatuses[item.status] || item.status}</span></article>)}</div> : <p className="adminEmptyText">本時段沒有補打卡申請。</p>}
           </AdminPanel>
         </div>
+        {canManage ? <div id="settlement-panel-dispatch" role="tabpanel" aria-labelledby="settlement-tab-dispatch" hidden={tab !== "dispatch"} className="adminSettlementTabPanel" tabIndex={0}>
+          {tab === "dispatch" ? <SettlementSalaryDispatch
+            key={`${date}-${sessionNo}-${overview.run.inputVersion}-${overview.run.correctionVersion}`}
+            businessDate={date} sessionNo={sessionNo} onBusyChange={setSaving}
+          /> : null}
+        </div> : null}
         {canManage ? <div id="settlement-panel-settings" role="tabpanel" aria-labelledby="settlement-tab-settings" hidden={tab !== "settings"} className="adminSettlementTabPanel" tabIndex={0}>
           <SettlementRuleSettings key={`${date}-${sessionNo}`} rule={overview.rule} form={ruleForm} setForm={setRuleForm} saving={saving} onSave={saveRule}
             selected={selectedRule} businessDate={date} finalized={Boolean(isFinalized)} onCreate={value => setRuleForm(emptyRule(value, value.dayType, date))}

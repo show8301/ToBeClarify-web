@@ -18,7 +18,7 @@
 
 .adminSettlementTabs {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 6px;
   padding: 6px;
   border: 1px solid var(--color-border);
@@ -298,3 +298,40 @@
 .adminSettlementSourceOrders span { color: var(--color-fg-mute); font-size: 11px; }
 .adminSettlementSourceOrders .adminSettlementSourceItemName { color: var(--color-fg); font-size: 12px; font-weight: 650; }
 .adminSettlementSourcePayFormula { padding-top: 9px; border-top: 1px solid var(--color-border); }
+
+.adminSalaryDispatchProgress {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  color: var(--color-fg-soft);
+  font-size: 14px;
+}
+.adminSalaryDispatchProgress strong { color: var(--color-fg); font-variant-numeric: tabular-nums; }
+.adminSalaryDispatchList { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.adminSalaryDispatchRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(120px, auto) auto auto;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+}
+.adminSalaryDispatchPerson, .adminSalaryDispatchAmount { display: grid; gap: 5px; min-width: 0; overflow-wrap: anywhere; }
+.adminSalaryDispatchPerson strong, .adminSalaryDispatchAmount strong { color: var(--color-fg); }
+.adminSalaryDispatchPerson small, .adminSalaryDispatchAmount span { color: var(--color-fg-soft); font-size: 12px; }
+.adminSalaryDispatchAmount strong { font-variant-numeric: tabular-nums; }
+.adminSalaryDispatchStatus[data-paid="true"] {
+  border-color: var(--color-accent);
+  background: rgba(var(--color-accent-rgb), .15);
+  color: var(--color-fg);
+}
+@media (max-width: 640px) {
+  .adminSalaryDispatchRow { grid-template-columns: minmax(0, 1fr) auto; gap: 12px; padding: 14px; }
+  .adminSalaryDispatchPerson { grid-column: 1; grid-row: 1; }
+  .adminSalaryDispatchStatus { grid-column: 2; grid-row: 1; justify-self: end; }
+  .adminSalaryDispatchAmount { grid-column: 1; grid-row: 2; }
+  .adminSalaryDispatchRow > .adminButton { grid-column: 2; grid-row: 2; }
+}

@@ -62,7 +62,6 @@ export function parseUnits(value: unknown): WorkbenchUnit[] {
 export type StartPreview = {
   canStartNow: boolean; effectiveStartsAt: string; effectiveEndsAt: string;
   purchasedMinutes: number; restMinutesReserved: number; conflicts: string[];
-  startBlockedReason?: string;
 };
 
 export function parseStartPreview(value: unknown): StartPreview {
@@ -70,7 +69,6 @@ export function parseStartPreview(value: unknown): StartPreview {
   if (typeof p.canStartNow !== "boolean") throw new Error("接待預覽格式異常。");
   return {
     canStartNow: p.canStartNow, effectiveStartsAt: dateValue(p.effectiveStartsAt),
-    startBlockedReason: p.startBlockedReason == null ? undefined : textValue(p.startBlockedReason),
     effectiveEndsAt: dateValue(p.effectiveEndsAt), purchasedMinutes: integer(p.purchasedMinutes),
     restMinutesReserved: integer(p.restMinutesReserved),
     conflicts: list(p.conflicts, (entry) => {

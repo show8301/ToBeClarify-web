@@ -458,9 +458,9 @@
 .dreamer-photo-statuses .dreamer-duty small{color:rgba(49,51,74,.58);opacity:1}
 .dreamer-photo-statuses .dreamer-duty b{color:#31334a;text-shadow:none}
 .dreamer-nomination{
-  justify-self:end;min-width:0;max-width:100%;min-height:0;padding:0;display:inline-flex;align-items:center;gap:5px;
+  justify-self:end;min-height:0;padding:0;display:inline-flex;align-items:center;gap:5px;
   border:0;border-radius:0;background:transparent;box-shadow:none;
-  color:#31334a;white-space:normal;overflow-wrap:anywhere;font-size:9px;font-weight:760;line-height:1.4
+  color:#31334a;white-space:nowrap;font-size:9px;font-weight:760;line-height:1
 }
 .dreamer-nomination>i{color:#fff;font-size:8px;font-style:normal;text-shadow:0 1px 4px rgba(88,91,136,.32)}
 .dreamer-photo-statuses .dreamer-file-number{

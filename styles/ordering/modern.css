@@ -81,7 +81,7 @@
 .orderPrimaryAction { min-height:52px; padding:12px 18px; border-color:rgba(255,255,255,.82); border-radius:11px; background:linear-gradient(115deg,#c1b9df,#a9c7ea 52%,#e8c7da); box-shadow:0 10px 24px rgba(118,121,161,.15); font-size:15px; font-weight:780; }
 .nominationSection h2,.tipComposer h2,.helpCard h2{font-family:var(--o-display);font-weight:780;letter-spacing:-.025em}
 .nominationSection header p,.nominationServiceGrid p{font-size:13px;line-height:1.65}
-.nominationStaffGrid button{min-height:116px;padding:11px 8px}.nominationStaffGrid strong{font-size:13px}.nominationStaffGrid small{font-size:10px;white-space:normal;line-height:1.5;overflow-wrap:anywhere}
+.nominationStaffGrid button{min-height:116px;padding:11px 8px}.nominationStaffGrid strong{font-size:13px}.nominationStaffGrid small{font-size:10px}
 .nominationServiceGrid>button,.nominationModeCard{min-height:132px;padding:16px}.nominationServiceGrid>button>strong,.nominationModeSelect>strong{font:750 16px/1.35 var(--o-display)}
 .stepper button{min-width:44px;min-height:44px;font-size:18px}.stepper strong{font-size:15px}
 .stepper { overflow:hidden; border-radius:11px; }
@@ -93,9 +93,7 @@
 .orderGateCard { border-color:rgba(255,255,255,.84); border-radius:22px; background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(245,240,248,.9)); box-shadow:0 30px 80px rgba(118,121,161,.16),inset 0 1px rgba(255,255,255,.94); }
 .orderGateCard h1{font-family:var(--o-display);font-weight:850;letter-spacing:-.055em}
 .orderGateCard label,.helpCard label,.tipComposer label,.nominationControls label{font-size:13px;font-weight:650}
-.orderGateCard form input,.orderGateCard form select,.helpCard form input,.helpCard form select,.tipComposer input,.tipComposer select,.nominationControls input,.nominationControls select { min-height:48px; padding:11px 13px; border-radius:11px; background-color:rgba(255,255,255,.8); font-size:15px; }
-.nominationControls label { min-width:0; }
-.nominationControls select { box-sizing:border-box; width:100%; min-width:0; max-width:100%; border:1px solid var(--o-line); color:var(--o-ink); }
+.orderGateCard form input,.orderGateCard form select,.helpCard form input,.helpCard form select,.tipComposer input,.tipComposer select,.nominationControls input { min-height:48px; padding:11px 13px; border-radius:11px; background-color:rgba(255,255,255,.8); font-size:15px; }
 .orderRecoveryForm .characterIdentityFields { display:grid; gap:13px; min-width:0; }
 .orderRecoveryForm .characterIdentityFields label { display:grid; gap:6px; min-width:0; }
 .orderRecoveryForm .characterIdentityFields input,

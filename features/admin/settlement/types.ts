@@ -160,7 +160,7 @@ export type SettlementStaffInput = {
   note?: string | null;
 };
 
-export type SettlementTab = "operations" | "personal" | "settings";
+export type SettlementTab = "operations" | "personal" | "dispatch" | "settings";
 
 export type SettlementAnomaly = {
   code: string;

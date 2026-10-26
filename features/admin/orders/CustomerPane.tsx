@@ -101,7 +101,7 @@ export function CustomerPane({ sessions, selectedId, businessDate, loading, onSe
   const progressFor = (item: CustomerListItem): CustomerProgress => current?.progress[item.session.id]
     || { group: "unknown", label: "正在讀取訂單狀態…" };
 
-  return <aside className="adminCustomerPane" ref={paneRef} aria-label="顧客與訂單進度">
+  return <aside id="admin-order-customers" className="adminCustomerPane" ref={paneRef} aria-label="顧客與訂單進度">
     {children}
     <div className="adminCustomerProgressNote">
       <span>{!current ? "正在核對訂單進度…" : "依訂單履約分類；帳款另行核對"}</span>
@@ -133,6 +133,7 @@ export function CustomerPane({ sessions, selectedId, businessDate, loading, onSe
     <div className="adminCustomerListPosition">
       <span>{position.first ? `顯示第 ${position.first}–${position.last} 位／展開 ${position.total} 位` : `展開 ${position.total} 位／共 ${sessions.length} 位`}</span>
       <strong>{position.more ? "↓ 下方還有顧客分類或名單" : "已到清單底部"}</strong>
+      {selectedId && <a className="adminButton adminButton-secondary adminOrderMobileJump" href="#admin-order-customer">前往目前顧客明細</a>}
     </div>
   </aside>;
 }

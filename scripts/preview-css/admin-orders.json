@@ -182,7 +182,7 @@
   {
     "selector": ".adminOrdersPage .adminCustomerPane",
     "context": ["@media (max-width: 760px)"],
-    "declarations": { "position": "static", "height": "min(65dvh, 520px)", "min-height": "360px" }
+    "declarations": { "position": "static", "height": "auto", "min-height": "0" }
   },
   {
     "selector": ":root[data-admin-theme=\"dark\"] .adminButton-secondary",

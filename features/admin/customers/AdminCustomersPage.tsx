@@ -44,13 +44,13 @@ export function AdminCustomersPage() {
         <div className="adminCustomerTableWrap"><table className="adminCustomerTable">
           <thead><tr><th>營業日／入場</th><th>顧客／UID</th><th>當日訂單</th><th>找回碼狀態</th><th>實收淨額</th><th>填寫 ID 參考</th><th>操作</th></tr></thead>
           <tbody>{data.items.map((visit) => <tr key={visit.sessionId}>
-            <td><strong>{visit.businessDate.slice(0, 10)}</strong><small>{formatCustomerTime(visit.createdAt)}</small><small>{entryLabel(visit.entryStatus)}</small></td>
-            <td><strong>{visit.customerName}</strong><small>填寫 ID：{visit.gameId || "未填寫"}</small>{!readCharacterIdentity(visit.gameId) ? <small>伺服器未確認（舊紀錄）</small> : null}{visit.customerUid ? <button className="adminCustomerUid" type="button" onClick={() => setSelectedUid(visit.customerUid)}>{visit.customerUid}</button> : <small>尚未綁定長期 UID</small>}</td>
-            <td><strong>{visit.orderCount} 單 · {formatMoney(visit.orderAmount)}</strong><small>入場應付 {formatMoney(visit.admissionReceivable)} · 實收 {formatMoney(visit.admissionReceived)} · 實退 {formatMoney(visit.admissionRefunded)}</small><small>{visit.admissionStatus === "unrecorded" ? "入場帳尚未登錄" : `本次消費應付 ${formatMoney(visit.consumptionAmount)}`}</small><small>未完成作品 {visit.pendingDeliveryCount} 件</small></td>
-            <td><strong>{visit.hasRecoveryCode ? "已建立" : "未建立"}</strong><small>第 {visit.recoveryCodeVersion || 1} 版</small>{visit.recoveryCodeIssuedAt ? <small>發行 {formatCustomerTime(visit.recoveryCodeIssuedAt)}</small> : null}</td>
-            <td><strong>{visit.hasCashRecords ? formatMoney(visit.netReceived) : "尚無收退款紀錄"}</strong><small>依帳款紀錄扣除退款</small></td>
-            <td><strong>{visit.gameIdVisitCount} 次入場</strong><small>{formatMoney(visit.gameIdOrderAmount)} 訂單金額</small><small>自填 ID 群組，未驗證身分</small></td>
-            <td><div className="adminCustomerRowActions">
+            <td data-label="營業日／入場"><strong>{visit.businessDate.slice(0, 10)}</strong><small>{formatCustomerTime(visit.createdAt)}</small><small>{entryLabel(visit.entryStatus)}</small></td>
+            <td data-label="顧客／UID"><strong>{visit.customerName}</strong><small>填寫 ID：{visit.gameId || "未填寫"}</small>{!readCharacterIdentity(visit.gameId) ? <small>伺服器未確認（舊紀錄）</small> : null}{visit.customerUid ? <button className="adminCustomerUid" type="button" onClick={() => setSelectedUid(visit.customerUid)}>{visit.customerUid}</button> : <small>尚未綁定長期 UID</small>}</td>
+            <td data-label="當日訂單"><strong>{visit.orderCount} 單 · {formatMoney(visit.orderAmount)}</strong><small>入場應付 {formatMoney(visit.admissionReceivable)} · 實收 {formatMoney(visit.admissionReceived)} · 實退 {formatMoney(visit.admissionRefunded)}</small><small>{visit.admissionStatus === "unrecorded" ? "入場帳尚未登錄" : `本次消費應付 ${formatMoney(visit.consumptionAmount)}`}</small><small>未完成作品 {visit.pendingDeliveryCount} 件</small></td>
+            <td data-label="找回碼狀態"><strong>{visit.hasRecoveryCode ? "已建立" : "未建立"}</strong><small>第 {visit.recoveryCodeVersion || 1} 版</small>{visit.recoveryCodeIssuedAt ? <small>發行 {formatCustomerTime(visit.recoveryCodeIssuedAt)}</small> : null}</td>
+            <td data-label="實收淨額"><strong>{visit.hasCashRecords ? formatMoney(visit.netReceived) : "尚無收退款紀錄"}</strong><small>依帳款紀錄扣除退款</small></td>
+            <td data-label="填寫 ID 參考"><strong>{visit.gameIdVisitCount} 次入場</strong><small>{formatMoney(visit.gameIdOrderAmount)} 訂單金額</small><small>自填 ID 群組，未驗證身分</small></td>
+            <td data-label="操作"><div className="adminCustomerRowActions">
               <a className="adminButton adminButton-secondary" href={queryPath("/admin/order-list", { date: visit.businessDate.slice(0, 10), session: visit.sessionId })}>歷史訂單</a>
               <a className="adminButton adminButton-secondary" href={queryPath("/admin/deliveries", { session: visit.sessionId, date: visit.businessDate.slice(0, 10), create: "1" })}>建立作品交付</a>
               {!visit.customerUid ? <button className="adminButton adminButton-ghost" type="button" onClick={() => setSelectedVisit(visit)}>建立／綁定 UID</button> : null}

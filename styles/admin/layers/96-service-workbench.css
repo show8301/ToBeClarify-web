@@ -156,6 +156,13 @@
 .adminTheme .adminAdmissionSummary dl > div { display: grid; grid-template-columns: minmax(0, 1fr) max-content; align-items: baseline; gap: 12px; min-width: max-content; padding: 10px 12px; }
 .adminTheme .adminAdmissionSummary :is(dt, dd) { margin: 0; font-size: 18px; font-weight: 700; line-height: 1.5; white-space: nowrap; }
 .adminTheme .adminAdmissionSummary dd { text-align: right; font-variant-numeric: tabular-nums; }
+@media (max-width: 760px) {
+  .adminTheme .adminAdmissionSummary dl { overflow: visible; }
+  .adminTheme .adminAdmissionSummary dl > div { grid-template-columns: minmax(0, 1fr); min-width: 0; gap: 4px; }
+  .adminTheme .adminAdmissionSummary :is(dt, dd) { white-space: normal; overflow-wrap: anywhere; }
+  .adminTheme .adminAdmissionSummary dd { text-align: left; }
+  .adminTheme .adminAdmissionSummary > small { overflow-wrap: anywhere; }
+}
 .adminCreateSessionPanel .adminAdmissionPayment { display: grid; grid-template-columns: minmax(0, 1fr) max-content; align-items: end; gap: 8px 12px; }
 .adminAdmissionOverview { display: grid; grid-column: 1 / -1; min-width: 0; gap: 3px; }
 .adminAdmissionOverviewPrimary { display: flex; flex-wrap: wrap; min-width: 0; align-items: baseline; gap: 4px 16px; }

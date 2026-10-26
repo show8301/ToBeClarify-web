@@ -38,7 +38,8 @@ export function SessionHeader({ item, onUpdate, onReissue, onAssisted, onBackfil
   const createQuery = new URLSearchParams({ session: item.session.id, date: item.session.businessDate, create: "1" });
 
   return (
-    <header className="adminSelectedCustomer adminOrderCustomerHeader">
+    <header id="admin-order-customer" className="adminSelectedCustomer adminOrderCustomerHeader">
+      <a className="adminButton adminButton-ghost adminOrderMobileJump" href="#admin-order-customers">返回顧客清單</a>
       <div className="adminOrderCustomerIdentity">
         <div className="adminOrderCustomerProfile">
           <div className="adminOrderCustomerName">

@@ -58,6 +58,7 @@
   .adminCreateSessionPanel > form { --order-pass-label-height: 44px; }
 }
 .adminOrdersPage > .adminPageHeading { padding-right: 90px; }
+.adminOrdersPage .adminOrderMobileJump { display: none; }
 /* clip preserves page scrolling so the customer pane can stick to the viewport. */
 .adminShell:has(.adminOrdersPage) { overflow-x: clip; }
 .adminOrdersPage .adminOrderWorkspace {
@@ -520,15 +521,40 @@
   .adminOrdersPage .adminOrderFinanceAdmissionForm { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 760px) {
+  .adminOrdersPage > .adminPageHeading { padding-right: 0; }
+  .adminOrdersPage .adminOrderMobileJump { display: inline-flex; grid-column: 1 / -1; }
+  .adminOrdersPage :is(#admin-order-customers, #admin-order-customer) { scroll-margin-top: 16px; }
   .adminOrdersPage .adminOrderWorkspace { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--admin-space-block); overflow: visible; }
   .adminOrdersPage .adminCustomerPane { position: static; height: min(65dvh, 520px); min-height: 360px; max-height: none; border-radius: 16px; }
   .adminOrdersPage .adminOrderDetailPane { margin: 0; padding: 0; }
   .adminOrdersPage .adminOrderFinanceOverview { grid-template-columns: minmax(0, 1fr); }
-  .adminOrdersPage .adminOrderFinanceRecord { grid-template-columns: minmax(0, 1fr) auto; }
+  .adminOrdersPage .adminOrderFinanceRecord { grid-template-columns: minmax(0, 1fr); }
+  .adminOrdersPage .adminOrderFinanceRecords .adminOrderCashRecord { grid-template-columns: minmax(0, 1fr); }
+  .adminOrdersPage .adminOrderCashRecordContent { flex-wrap: wrap; overflow: visible; white-space: normal; gap: 6px 10px; }
+  .adminOrdersPage .adminOrderCashRecordContent > * { flex-shrink: 1; min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+  .adminOrdersPage .adminOrderCashRecordContent > :is(a, time) { flex-basis: 100%; }
+  .adminOrdersPage .adminOrderCashRecord > b { white-space: normal; overflow-wrap: anywhere; }
   .adminOrdersPage .adminOrderFinanceRecord > .adminButton,
   .adminOrdersPage .adminOrderFinanceRecord > .adminOrderFinanceRecordActions { grid-column: 1 / -1; justify-self: start; justify-content: flex-start; }
   .adminOrdersPage .adminOrderFinanceHeading > .adminButton { width: 100%; }
   .adminOrdersPage .adminOrderCardHead { flex-wrap: wrap; }
+  .adminOrdersPage .adminOrderSummary > .adminDisclosureLabel { overflow: visible; }
+  .adminOrdersPage .adminOrderSummaryLine { display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; gap: 8px; white-space: normal; }
+  .adminOrdersPage .adminOrderSummaryStatus { justify-self: start; font-size: 18px; }
+  .adminOrdersPage .adminOrderSummaryNumber,
+  .adminOrdersPage .adminOrderSummaryAmount { display: flex; flex-wrap: wrap; min-width: 0; gap: 4px 8px; }
+  .adminOrdersPage .adminOrderSummaryNumber > strong { min-width: 0; font-size: 16px; overflow-wrap: anywhere; }
+  .adminOrdersPage .adminOrderSummaryAmount > strong { font-size: 20px; overflow-wrap: anywhere; }
+  .adminOrdersPage .adminOrderSummaryLine > time { font-size: 14px; }
+  .adminOrdersPage .adminOrderCustomerIdentity { overflow: visible; }
+  .adminOrdersPage .adminOrderCustomerProfile { flex-wrap: wrap; min-width: 0; white-space: normal; gap: 6px 10px; }
+  .adminOrdersPage .adminOrderCustomerName { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; width: 100%; min-width: 0; }
+  .adminOrdersPage .adminOrderCustomerName h2,
+  .adminOrdersPage .adminOrderCustomerGameId { font-size: 20px; overflow-wrap: anywhere; }
+  .adminOrdersPage .adminOrderCustomerGameId { min-width: 0; }
+  .adminOrdersPage .adminOrderCustomerMetrics { grid-template-columns: minmax(0, 1fr); }
+  .adminOrdersPage .adminOrderCustomerMetrics > div { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 12px; }
+  .adminOrdersPage .adminOrderCustomerMetrics dd { margin: 0; }
   .adminOrdersPage .adminOrderCustomerIdentity p { flex-basis: 100%; }
   .adminOrdersPage .adminOrderItemList > .adminOrderItemRow { grid-template-columns: minmax(0, 1fr) auto auto; }
   .adminOrdersPage .adminOrderItemActions { justify-self: end; }

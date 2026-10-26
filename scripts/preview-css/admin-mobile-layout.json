@@ -1,0 +1,55 @@
+[
+  {
+    "selector": ".adminCustomers",
+    "declarations": { "grid-template-columns": "minmax(0, 1fr)", "min-width": "0" }
+  },
+  {
+    "selector": ".adminCustomers .adminCustomerTable td",
+    "context": ["@media (max-width: 680px)"],
+    "declarations": { "display": "block", "min-width": "0", "overflow-wrap": "anywhere" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderSummaryLine",
+    "context": ["@media (max-width: 760px)"],
+    "declarations": { "display": "grid", "min-width": "0", "white-space": "normal" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderFinanceRecords .adminOrderCashRecord",
+    "context": ["@media (max-width: 760px)"],
+    "declarations": { "grid-template-columns": "minmax(0, 1fr)" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminOrderCashRecordContent",
+    "context": ["@media (max-width: 760px)"],
+    "declarations": { "flex-wrap": "wrap", "overflow": "visible", "white-space": "normal" }
+  },
+  {
+    "selector": ".adminTheme .adminAdmissionSummary dl > div",
+    "context": ["@media (max-width: 760px)"],
+    "declarations": { "grid-template-columns": "minmax(0, 1fr)", "min-width": "0" }
+  },
+  {
+    "selector": ".adminDragCardContent",
+    "context": ["@media (max-width: 720px)"],
+    "declarations": { "width": "auto", "flex": "1 1 0" }
+  },
+  {
+    "selector": ".adminStaffListControls",
+    "context": ["@media (max-width: 720px)"],
+    "declarations": { "grid-template-columns": "minmax(0, 1fr) auto" }
+  },
+  {
+    "selector": ".adminDutyPlanningMetrics article:first-child strong",
+    "declarations": { "white-space": "normal", "overflow-wrap": "anywhere" }
+  },
+  {
+    "selector": ".adminTopbar",
+    "context": ["@media (max-width: 760px)"],
+    "declarations": { "position": "relative", "top": "auto" }
+  },
+  {
+    "selector": ".adminTheme .adminFloatingTop",
+    "context": ["@media (max-width: 760px)"],
+    "declarations": { "position": "static", "height": "44px" }
+  }
+]

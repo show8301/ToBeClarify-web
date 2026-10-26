@@ -1,4 +1,5 @@
-.adminCustomers { display: grid; gap: 22px; min-width: 0; }
+.adminCustomers { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; min-width: 0; }
+.adminCustomers > .adminPanel { min-width: 0; }
 .adminCustomerFilters { display: flex; align-items: end; flex-wrap: wrap; gap: 14px; }
 .adminCustomerFilters .adminField { flex: 1 1 200px; min-width: 0; max-width: 100%; }
 .adminCustomerActions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-block: 16px; }
@@ -33,7 +34,7 @@
 .adminIdentityCandidates > label { display: flex; align-items: flex-start; gap: 10px; padding: 10px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); cursor: pointer; }
 .adminIdentityCandidates > label span { display: grid; gap: 4px; min-width: 0; }
 .adminIdentityCandidates > label small { color: var(--color-fg-soft); line-height: 1.5; }
-.adminCustomerTableWrap { overflow-x: auto; }
+.adminCustomerTableWrap { width: 100%; min-width: 0; max-width: 100%; overflow-x: auto; }
 .adminCustomerTable { width: 100%; border-collapse: collapse; font-size: 13px; }
 .adminCustomerTable th { text-align: left; color: var(--color-fg-soft); font-size: 12px; white-space: nowrap; }
 .adminCustomerTable th, .adminCustomerTable td { padding: 14px 12px; border-bottom: 1px solid var(--color-border); vertical-align: top; }
@@ -76,4 +77,14 @@
   .adminCustomerActions .adminButton { flex: 1 1 auto; }
   .adminDeliveryUpload { grid-template-columns: 1fr; padding: 14px; }
   .adminDeliveryList > article { padding: 14px; }
+  /* Keep each visit and its actions together instead of hiding columns off screen. */
+  .adminCustomers .adminCustomerTable { display: block; }
+  .adminCustomers .adminCustomerTable thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .adminCustomers .adminCustomerTable tbody { display: grid; gap: 14px; }
+  .adminCustomers .adminCustomerTable tr { display: grid; grid-template-columns: minmax(0, 1fr); padding: 12px; border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+  .adminCustomers .adminCustomerTable td { display: block; min-width: 0; padding: 10px 0; overflow-wrap: anywhere; }
+  .adminCustomers .adminCustomerTable td::before { display: block; margin-bottom: 6px; color: var(--color-fg-soft); font-size: 12px; content: attr(data-label); }
+  .adminCustomers .adminCustomerTable td:last-child { border-bottom: 0; }
+  .adminCustomerRowActions { min-width: 0; justify-items: stretch; }
+  .adminCustomerFilters input { box-sizing: border-box; min-width: 0; max-width: 100%; }
 }

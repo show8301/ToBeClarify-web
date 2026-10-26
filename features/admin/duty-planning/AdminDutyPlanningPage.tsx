@@ -128,6 +128,14 @@ export function AdminDutyPlanningPage({ navigate }: { navigate: Navigate }) {
   const [plans, setPlans] = useState<DutyPlan[]>([]);
   const [staff, setStaff] = useState<StaffOption[]>([]);
   const [draft, setDraft] = useState<DutyPlanDraft | null>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
+  const editorKey = draft ? draft.id || "new" : null;
+  useEffect(() => {
+    if (editorKey && window.matchMedia("(max-width: 760px)").matches) {
+      editorRef.current?.scrollIntoView({ block: "start", behavior: "instant" });
+      editorRef.current?.focus({ preventScroll: true });
+    }
+  }, [editorKey]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [reviewingId, setReviewingId] = useState("");
@@ -304,7 +312,7 @@ export function AdminDutyPlanningPage({ navigate }: { navigate: Navigate }) {
       </div>
 
       <AdminPanel className="adminDutyPlanEditor" title={draft ? (draft.id ? "編輯值班規劃" : "新增值班規劃") : "先選擇一筆規劃"} description={draft ? (canManageAll ? "經理／開發者儲存後會直接視為已核准。" : "送出後等待經理核准；切換工作台不會改變計薪職位。") : "從左側編輯既有規劃，或新增一筆日期與時段。"}>
-        {draft ? <div className="adminDutyPlanForm">
+        {draft ? <div className="adminDutyPlanForm" ref={editorRef} tabIndex={-1} aria-label="值班規劃編輯表單">
           {canManageAll ? <AdminField label="店員"><select disabled={Boolean(draft.id) || saving} value={draft.staffId} onChange={(event) => {
             const staffId = event.target.value;
             setDraft((current) => current ? { ...current, staffId,

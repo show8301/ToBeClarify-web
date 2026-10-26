@@ -525,7 +525,9 @@
   .adminOrdersPage .adminOrderMobileJump { display: inline-flex; grid-column: 1 / -1; }
   .adminOrdersPage :is(#admin-order-customers, #admin-order-customer) { scroll-margin-top: 16px; }
   .adminOrdersPage .adminOrderWorkspace { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--admin-space-block); overflow: visible; }
-  .adminOrdersPage .adminCustomerPane { position: static; height: min(65dvh, 520px); min-height: 360px; max-height: none; border-radius: 16px; }
+  /* Size the list itself: toolbar/footer growth must not consume its viewport. */
+  .adminOrdersPage .adminCustomerPane { position: static; height: auto; min-height: 0; max-height: none; border-radius: 16px; }
+  .adminOrdersPage .adminCustomerListScroll { flex: none; height: clamp(320px, 50dvh, 520px); min-height: 320px; }
   .adminOrdersPage .adminOrderDetailPane { margin: 0; padding: 0; }
   .adminOrdersPage .adminOrderFinanceOverview { grid-template-columns: minmax(0, 1fr); }
   .adminOrdersPage .adminOrderFinanceRecord { grid-template-columns: minmax(0, 1fr); }

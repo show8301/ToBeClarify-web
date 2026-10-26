@@ -1,5 +1,15 @@
 [
   {
+    "selector": ".adminOrdersPage .adminCustomerPane",
+    "context": ["@media (max-width: 760px)"],
+    "declarations": { "height": "auto", "min-height": "0" }
+  },
+  {
+    "selector": ".adminOrdersPage .adminCustomerListScroll",
+    "context": ["@media (max-width: 760px)"],
+    "declarations": { "flex": "none", "height": "clamp(320px, 50dvh, 520px)", "min-height": "320px" }
+  },
+  {
     "selector": ".adminCustomers",
     "declarations": { "grid-template-columns": "minmax(0, 1fr)", "min-width": "0" }
   },

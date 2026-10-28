@@ -1,4 +1,5 @@
 "use client";
+import { ADMIN_NOTIFICATION_CHANGED } from "@/features/admin/shared/admin-events";
 import type {NotificationCenterValue,NotificationRule,NotificationSettings,NotificationInbox,NotificationDelivery,NotificationCapabilities,NotificationSound,NotificationChange,BroadcastSendRequest,BroadcastSendResult,BroadcastReceiptSummary} from '@/features/admin/notifications/types';
 import {NotificationApiError} from '@/features/admin/notifications/api';
 import {createContext,useContext,useEffect,useRef,useState} from 'react';
@@ -134,7 +135,7 @@ export function AdminNotificationProvider({children}:{children:React.ReactNode})
       const query=cursor.current?`?cursor=${encodeURIComponent(cursor.current)}`:'';
       stream?.close();stream=new EventSource(`/api/admin/notifications/stream${query}`);
       stream.addEventListener('inbox',event=>{try{receive(JSON.parse((event as MessageEvent<string>).data) as NotificationInbox);}catch{setState('通知資料異常');}});
-      stream.addEventListener('change',event=>{try{const change=JSON.parse((event as MessageEvent<string>).data) as NotificationChange;if(change.changeType)setState('已連線');}catch{setState('通知資料異常');}});
+      stream.addEventListener('change',event=>{try{const change=JSON.parse((event as MessageEvent<string>).data) as NotificationChange;if(change.changeType){setState('已連線');window.dispatchEvent(new Event(ADMIN_NOTIFICATION_CHANGED));}}catch{setState('通知資料異常');}});
       stream.addEventListener('resync',()=>{void pollOnce();});
       stream.onerror=()=>{stream?.close();stream=undefined;if(!stopped){setState('串流重連中');void pollOnce();clearTimeout(timer);timer=setTimeout(connectStream,15000);}};
     };

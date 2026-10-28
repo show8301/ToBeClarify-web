@@ -59,25 +59,6 @@ export function parseUnits(value: unknown): WorkbenchUnit[] {
   });
 }
 
-export type StartPreview = {
-  canStartNow: boolean; effectiveStartsAt: string; effectiveEndsAt: string;
-  purchasedMinutes: number; restMinutesReserved: number; conflicts: string[];
-};
-
-export function parseStartPreview(value: unknown): StartPreview {
-  const p = record(value);
-  if (typeof p.canStartNow !== "boolean") throw new Error("接待預覽格式異常。");
-  return {
-    canStartNow: p.canStartNow, effectiveStartsAt: dateValue(p.effectiveStartsAt),
-    effectiveEndsAt: dateValue(p.effectiveEndsAt), purchasedMinutes: integer(p.purchasedMinutes),
-    restMinutesReserved: integer(p.restMinutesReserved),
-    conflicts: list(p.conflicts, (entry) => {
-      const c = record(entry);
-      return `${textValue(c.name)}（重疊 ${integer(c.overlapMinutes)} 分鐘）`;
-    }),
-  };
-}
-
 export const fulfillmentPath = (orderId: string, unitId?: string) =>
   `/orders/${encodeURIComponent(orderId)}/fulfillment${unitId ? `/${encodeURIComponent(unitId)}` : ""}`;
 
@@ -95,8 +76,7 @@ export const workbenchApi = {
   units: async (id: string, signal?: AbortSignal) => parseUnits(await adminRequest(fulfillmentPath(id), { signal })),
   respond: (orderId: string, nomineeId: string, body: { operationId: string; expectedVersion: number; decision: "accept" | "decline"; reason: string | null }) =>
     adminRequest(`/orders/${encodeURIComponent(orderId)}/nominees/${encodeURIComponent(nomineeId)}/response`, { method: "POST", body: JSON.stringify(body) }),
-  preview: async (orderId: string, unitId: string, signal?: AbortSignal) =>
-    parseStartPreview(await adminRequest(`${fulfillmentPath(orderId, unitId)}/start-preview`, { signal })),
+
 };
 
 export function errorText(error: unknown): string {
@@ -104,7 +84,7 @@ export function errorText(error: unknown): string {
 }
 
 export const serviceStatusLabels: Record<string, string> = {
-  waiting: "待我確認", confirmed: "已承接", accepted: "已承接", in_service: "服務中",
+  waiting: "待承接", confirmed: "已承接", accepted: "已承接", in_service: "服務中",
   completed: "已完成", cancelled: "已取消", needs_coordination: "經理協調中",
   carried_forward: "保留待安排", needs_reschedule: "待協調時間",
 };

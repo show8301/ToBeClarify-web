@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { adminRequest } from "@/features/admin/api/client.js";
+import { OrderServiceActions } from "@/features/admin/shared/OrderServiceActions";
 import { AdminButton } from "@/features/admin/shared/AdminButton";
 import { AdminHelp } from "@/features/admin/shared/AdminHelp";
 import { AdminDisclosureSummary } from "@/features/admin/shared/AdminDisclosureSummary";
@@ -32,16 +33,6 @@ interface Unit {
   allowedActions: string[];
 }
 
-interface Preview {
-  originalStartsAt: string;
-  effectiveStartsAt: string;
-  effectiveEndsAt: string;
-  purchasedMinutes: number;
-  originalRestMinutes: number;
-  restMinutesReserved: number;
-  conflicts: Array<{ unitId: string; name: string; overlapMinutes: number; startsAt?: string | null; endsAt?: string | null; status: string }>;
-  canStartNow: boolean;
-}
 interface PeriodOption { id: string; businessDate: string; status: string; }
 
 function parseUnits(value: unknown): Unit[] {
@@ -59,7 +50,7 @@ function parseUnits(value: unknown): Unit[] {
 }
 
 const labels: Record<string, string> = {
-  accept: "接單", decline: "無法承接／交回經理", needs_coordination: "等待經理協調", start: "開始", start_now: "預覽現在接待", backfill: "補登已服務", complete: "完成",
+  accept: "接單", decline: "無法承接／交回經理", needs_coordination: "等待經理協調", start: "開始", start_now: "進階現在開始（休息／折讓）", backfill: "補登已服務", complete: "完成",
   cancel: "取消未服務項目", reschedule: "改期", carry_forward: "轉入新營業期／保留", waiting: "待接單", accepted: "已接單", in_service: "處理中",
   completed: "已完成", cancelled: "已取消",
   carried_forward: "待跨期",
@@ -119,11 +110,12 @@ export function OrderFulfillmentPanel({ orderId, onChanged, disabled = false, st
     <header className="adminOrderFulfillmentHeading">
       <div className="adminOrderHeadingWithHelp">
         <h3>餐點與指名分開處理</h3>
-        <AdminHelp title="分項接待說明">原預約時間會保留；晚開始可在這裡保留完整購買分鐘並調整休息，折讓會同次寫入帳務。</AdminHelp>
+        <AdminHelp title="分項接待說明">指名使用整單快捷操作；餐點及包廂仍依各自進度處理。進階折讓須另填原因。</AdminHelp>
       </div>
       <AdminButton variant="ghost" className="iconActionButton" aria-label="重讀履約進度" title="重讀履約進度"
         disabled={disabled || batchBusy || !ready} onClick={() => setRevision(n => n + 1)}><RefreshCw aria-hidden="true" /></AdminButton>
     </header>
+    {units.some(unit => unit.kind === "nominee") && <OrderServiceActions orderId={orderId} refreshKey={loadKey} disabled={disabled || batchBusy} onBusy={onBusy} onChanged={async () => { setRevision(n => n + 1); await onChanged(); }} />}
     {!ready && <p role="status">讀取分項履約中…</p>}
     {ready && error && <p role="alert">{error}</p>}
     {actionableUnits.some(unit => unit.kind === "meal" && unit.allowedActions.includes("accept")) || actionableUnits.some(unit => unit.kind === "meal" && unit.allowedActions.includes("complete")) ? <div className="adminPageActions adminOrderFulfillmentActions">
@@ -147,7 +139,6 @@ function UnitControls({ orderId, unit, onChanged, disabled, onBusy }: { orderId:
   const [periods, setPeriods] = useState<PeriodOption[]>([]);
   const [periodsReady, setPeriodsReady] = useState(false);
   const [periodsError, setPeriodsError] = useState("");
-  const [preview, setPreview] = useState<Preview | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
   const [activeAction, setActiveAction] = useState<string | null>(null);
   const [completionTime, setCompletionTime] = useState(() => Date.now());
@@ -188,17 +179,8 @@ function UnitControls({ orderId, unit, onChanged, disabled, onBusy }: { orderId:
   }, [orderId, unit.allowedActions, unit.id]);
   const [retry, setRetry] = useState<FulfillmentTransitionRequest | null>(null);
 
-  const loadPreview = async () => {
-    onBusy?.(true); setBusy(true); setPendingAction("start-preview"); setError(""); setPreview(null);
-    try {
-      const value = await adminRequest(`/orders/${encodeURIComponent(orderId)}/fulfillment/${encodeURIComponent(unit.id)}/start-preview`) as Preview;
-      setPreview(value);
-    } catch (e) { setError(e instanceof Error ? e.message : "無法預覽現在接待"); }
-    finally { setBusy(false); onBusy?.(false); setPendingAction(null); }
-  };
   const run = async (action: string) => {
     if (disabled || busy) return;
-    if (action === "start_now" && !preview) { await loadPreview(); return; }
     if (!retry) {
       const validation = disabledReason(action);
       if (validation) { setError(validation); return; }
@@ -207,7 +189,7 @@ function UnitControls({ orderId, unit, onChanged, disabled, onBusy }: { orderId:
     onBusy?.(true); setBusy(true); setPendingAction(retry ? `retry:${action}` : action); setRetry(body);
     try {
       await adminRequest(`/orders/${encodeURIComponent(orderId)}/fulfillment/${encodeURIComponent(unit.id)}/transition`, { method: "POST", body: JSON.stringify(body) });
-      setRetry(null); setPreview(null); setError(""); await onChanged();
+      setRetry(null); setError(""); await onChanged();
     } catch (e) {
       setError(e instanceof Error ? e.message : "操作失敗");
       if (e && typeof e === "object" && "status" in e && typeof e.status === "number" && e.status >= 400 && e.status < 500) setRetry(null);
@@ -236,10 +218,10 @@ function UnitControls({ orderId, unit, onChanged, disabled, onBusy }: { orderId:
     setCompletionTime(selectedAt);
     setMoreOpen(true);
     setError("");
-    if (action === "start_now") void loadPreview();
   };
-  const dailyActions = unit.allowedActions.filter(action => ["accept", "start", "complete", "start_now"].includes(action));
-  const advancedActions = unit.allowedActions.filter(action => !dailyActions.includes(action));
+  const availableActions = unit.allowedActions.filter(action => unit.kind !== "nominee" || !["accept", "start", "backfill"].includes(action));
+  const dailyActions = availableActions.filter(action => ["accept", "start", "complete"].includes(action));
+  const advancedActions = availableActions.filter(action => !dailyActions.includes(action));
   const unfinished = !isFulfillmentUnitFinished(unit);
   const metrics = [
     { label: "共", value: unit.quantity, total: true },
@@ -273,8 +255,8 @@ function UnitControls({ orderId, unit, onChanged, disabled, onBusy }: { orderId:
         <div className="adminFulfillmentDailyActions">
           {dailyActions.map((action, index) => <AdminButton key={action}
             variant={index === 0 ? "primary" : "secondary"}
-            busy={pendingAction === action || (action === "start_now" && pendingAction === "start-preview")}
-            busyLabel={action === "start_now" ? "讀取接待預覽…" : "處理中…"}
+            busy={pendingAction === action}
+            busyLabel="處理中…"
             disabledReason={disabledReason(action, true)}
             disabled={Boolean(disabledReason(action, true))}
             onClick={() => {
@@ -301,21 +283,13 @@ function UnitControls({ orderId, unit, onChanged, disabled, onBusy }: { orderId:
               periodsLoading={!periodsReady} periodsError={periodsError}
               completionReasonRequired={activeAction === "complete" && earlyCompletion}
               disabled={disabled || busy || Boolean(retry)} onChange={updateDraft} />
-            {activeAction === "start_now" && <div className="adminFulfillmentPreview">
-              {preview && <div role="status">
-                <p>現在接待：{showTime(preview.effectiveStartsAt)} 開始，服務至 {showTime(preview.effectiveEndsAt)}，購買 {preview.purchasedMinutes} 分鐘。</p>
-                {preview.conflicts.length > 0 && <p>會影響：{preview.conflicts.map(conflict => conflict.name + "（重疊 " + conflict.overlapMinutes + " 分鐘）").join("、")}；開始後這些單會轉待協調。</p>}
-                {!preview.canStartNow && <p>此店員仍有進行中的服務，請先完成該服務。</p>}
-              </div>}
-              <AdminButton variant="ghost" disabled={busy || Boolean(retry)} onClick={() => void loadPreview()}>重新讀取接待預覽</AdminButton>
-            </div>}
             <div className="adminFulfillmentEditorActions">
               <AdminButton variant={activeAction === "cancel" ? "danger" : "primary"}
                 busy={pendingAction === activeAction} busyLabel="處理中…"
-                disabledReason={activeAction === "start_now" && !preview?.canStartNow ? "請先取得可開始的接待預覽。" : disabledReason(activeAction)}
-                disabled={Boolean(disabledReason(activeAction)) || (activeAction === "start_now" && !preview?.canStartNow)}
+                disabledReason={disabledReason(activeAction)}
+                disabled={Boolean(disabledReason(activeAction))}
                 onClick={() => void run(activeAction)}>
-                {activeAction === "start_now" ? "確認現在接待" : "確認" + (labels[activeAction] || activeAction)}
+                {activeAction === "start_now" ? "確認進階現在開始" : "確認" + (labels[activeAction] || activeAction)}
               </AdminButton>
             </div>
           </div>}

@@ -7,6 +7,12 @@
 - The API project has no separate test environment. When a combined request says to deploy to the test environment, deploy Web to `dev` and deploy the API through its normal production flow to `main`.
 - API `dev` is build-only and is not an API test host.
 
+## Database migrations for combined releases
+
+- Until the user changes the connection method, use the API project's [local DBA migration procedure](../ToBeClarify-api/docs/DATABASE-MIGRATION-RUNBOOK.md) for required migrations before publishing dependent API changes.
+- Use the user-authorized DBA account from the existing ignored local configuration; keep credentials out of source, documentation, logs, and Git.
+- This does not change Web dev-to-main confirmation requirements or authorize unrelated/destructive database operations.
+
 ## Coding standards
 
 - Read and follow [`docs/coding-standards.md`](docs/coding-standards.md) before making Web code changes.

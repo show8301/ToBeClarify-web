@@ -1,0 +1,65 @@
+.adminTheme .orderServiceActions {
+  display: grid;
+  gap: 0.75rem;
+  width: 100%;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  background: var(--color-surface);
+}
+.orderServiceHeading, .orderServiceButtons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.orderServiceActions p, .orderServiceTimes {
+  margin: 0;
+}
+.orderServiceTimes {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+.orderServiceTimes li, .orderServiceActual, .orderServiceEditor form,
+.orderServiceEditor fieldset, .orderServiceEditor label {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+}
+.orderServiceHint, .orderServiceTimes small {
+  font-size: 0.85em;
+  opacity: 0.8;
+}
+.orderServiceUnavailable {
+  opacity: 0.7;
+  cursor: help;
+}
+.orderServiceReason p {
+  white-space: pre-line;
+}
+.adminTheme.orderServiceEditor {
+  width: min(34rem, calc(100vw - 2rem));
+  max-width: min(34rem, calc(100vw - 2rem));
+  max-height: min(44rem, 80dvh, var(--available-height, 80dvh));
+  overflow-y: auto;
+}
+.orderServiceEditor fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  gap: 1rem;
+}
+.orderServiceEditor input, .orderServiceEditor select, .orderServiceEditor textarea {
+  box-sizing: border-box;
+  width: 100%;
+  font: inherit;
+}
+@media (max-width: 640px) {
+  .orderServiceButtons > button {
+    width: 100%;
+    white-space: normal;
+  }
+}

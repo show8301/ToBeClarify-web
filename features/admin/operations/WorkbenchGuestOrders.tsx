@@ -2,8 +2,9 @@
 
 import { OrderServiceActions } from "@/features/admin/shared/OrderServiceActions";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { AdminButton } from "@/features/admin/shared/AdminShared.jsx";
+import { AdminDisclosureSummary } from "@/features/admin/shared/AdminDisclosureSummary";
 import { financeApi } from "../orders/finance-api";
 import { DeliveryItems } from "@/features/admin/shared/DeliveryItems";
 import type { FinanceAccount } from "../orders/finance-types";
@@ -27,6 +28,28 @@ type Dialog = { kind: "complete"; order: OperationsOrder; unit: WorkbenchUnit }
   | { kind: "receipt"; order: OperationsOrder; account: FinanceAccount };
 
 const kindLabels: Record<string, string> = { meal: "餐點", room: "包廂", nominee: "指名", addon: "加購", tip: "小費", other: "費用" };
+
+function GuestOrderDisclosure({ orderNumber, progressLabel, financeLabel, finished, children }: {
+  orderNumber: string; progressLabel: string; financeLabel: string; finished: boolean; children: ReactNode;
+}) {
+  const [manualOpen, setManualOpen] = useState<boolean | null>(null);
+  const detailsRef = useRef<HTMLDetailsElement>(null);
+  const open = manualOpen ?? !finished;
+  useEffect(() => {
+    const details = detailsRef.current;
+    if (!open && details?.querySelector(".dwGuestOrderBody")?.contains(document.activeElement)) {
+      details.querySelector("summary")?.focus();
+    }
+  }, [open]);
+  return <details ref={detailsRef} className="dwGuestOrder" aria-label={`訂單 ${orderNumber}`} open={open}
+    onToggle={(event) => { if (event.currentTarget.open !== open) setManualOpen(event.currentTarget.open); }}>
+    <AdminDisclosureSummary className="dwGuestOrderSummary">
+      <strong>{orderNumber}</strong>
+      <span className="dwOrderStatuses"><span>處理進度：<strong>{progressLabel}</strong></span><span>收款狀態：<strong>{financeLabel}</strong></span></span>
+    </AdminDisclosureSummary>
+    <div className="dwGuestOrderBody">{children}</div>
+  </details>;
+}
 
 export function WorkbenchGuestOrders({ orders, units, unavailable, disabled, cashPeriodId, businessDate, staffId, entries, canAct, onServiceAction, onChanged, onBusy }: Props) {
   const sessionId = orders[0]?.sessionId || "";
@@ -64,12 +87,10 @@ export function WorkbenchGuestOrders({ orders, units, unavailable, disabled, cas
       const summary = account ? orderFinance(order, account) : null;
       const terminal = ["cancelled", "expired", "rejected"].includes(order.status);
       const completionBlocked = blocked || terminal || order.storeConfirmationStatus === "pending";
-      return <article className="dwGuestOrder" key={order.id} aria-label={`訂單 ${order.orderNumber}`}>
-        <h4>{order.orderNumber}</h4>
-        <div className="dwOrderStatuses">
-          <span>處理進度：<strong>{unavailable ? "讀取中／待確認" : (order.flowVersion || 1) < 2 ? orderStatusLabel(order.status) : progress.label}</strong></span>
-          <span>收款狀態：<strong>{summary?.label || (financeReady ? "帳款未確認" : "讀取中…")}</strong></span>
-        </div>
+      const progressLabel = unavailable ? "讀取中／待確認" : (order.flowVersion || 1) < 2 ? orderStatusLabel(order.status) : progress.label;
+      const financeLabel = summary?.label || (financeReady ? "帳款未確認" : "讀取中…");
+      const finished = !unavailable && financeReady && order.storeConfirmationStatus !== "pending" && progressLabel === "全部完成" && financeLabel === "已收清";
+      return <GuestOrderDisclosure key={order.id} orderNumber={order.orderNumber} progressLabel={progressLabel} financeLabel={financeLabel} finished={finished}>
         {!unavailable && order.status === "completed" && progress.total > progress.completed && <p className="adminFormError">整單狀態與分項進度不一致，請至完整點單管理核對。</p>}
         {order.nominees.length > 0 && <OrderServiceActions orderId={order.id} refreshKey={orderUnits.map(u => `${u.id}:${u.version}`).join(",")} disabled={blocked} onChanged={onChanged} onBusy={onBusy} />}
         {(order.flowVersion || 1) >= 2 ? <div className="dwOrderUnits">
@@ -101,7 +122,7 @@ export function WorkbenchGuestOrders({ orders, units, unavailable, disabled, cas
           <div className="dwActions"><AdminButton disabled={blocked || !summary || Boolean(summary.blockedReason) || summary.balance <= 0 || !cashPeriodId} onClick={() => { if (account) setDialog({ kind: "receipt", order, account }); }}>同單收款</AdminButton><Link href={`/admin/orders?${new URLSearchParams({ date: order.sessionBusinessDate || businessDate, session: order.sessionId, order: order.id })}`}>完整點單管理</Link></div>
           {!cashPeriodId && <p>尚未確認收款營業日，請重新整理。</p>}
         </div>
-      </article>;
+      </GuestOrderDisclosure>;
     })}
     {dialog?.kind === "complete" && <WorkbenchItemCompletionDialog order={dialog.order} unit={dialog.unit} onClose={close} onCommitted={committed} onBusy={onBusy} />}
     {dialog?.kind === "receipt" && <WorkbenchOrderReceiptDialog order={dialog.order} account={dialog.account} cashPeriodId={cashPeriodId} businessDate={businessDate} onClose={close} onCommitted={committed} onBusy={onBusy} />}

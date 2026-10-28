@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { adminRequest, ApiError } from "@/features/admin/api/client.js";
 import { AdminButton, AdminDialog, AdminField } from "@/features/admin/shared/AdminShared.jsx";
+import { DeliveryItems } from "@/features/admin/shared/DeliveryItems";
 import { completionOption } from "./workbenchOrderProgress";
 import { errorText, fulfillmentPath } from "./workbenchApi";
 import { formatClock } from "./operationsFormat";
@@ -57,6 +58,7 @@ export function WorkbenchItemCompletionDialog({ order, unit, onClose, onCommitte
   return <AdminDialog open title={label} description={`${order.orderNumber} · ${unit.name}`} className="adminDesignatedWorkbenchDialog" onClose={() => { if (!busy && !retry) onClose(); }} actions={null}>
     <form className="dwOrderActionForm" onSubmit={(event) => { event.preventDefault(); void save(); }}>
       <p>{unit.kind === "meal" ? "確認本次已實際送達的數量。" : "確認顧客已結束這段包廂使用。"}</p>
+      {unit.kind === "meal" && <DeliveryItems items={unit.deliveryItems} />}
       {unit.kind === "room" && <p>預約時段：{formatClock(unit.scheduledStartsAt)}–{formatClock(unit.scheduledEndsAt)}</p>}
       <fieldset disabled={busy || Boolean(retry) || mustReload}>
         <AdminField label="本次完成數量" required><input type="number" min={1} max={option?.quantity ?? 1} step={1} required value={quantity} onChange={(event) => setQuantity(Number(event.target.value))} /></AdminField>

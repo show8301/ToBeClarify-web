@@ -5,6 +5,7 @@ import { adminRequest } from "@/features/admin/api/client.js";
 import { OrderServiceActions } from "@/features/admin/shared/OrderServiceActions";
 import { AdminButton } from "@/features/admin/shared/AdminButton";
 import { AdminHelp } from "@/features/admin/shared/AdminHelp";
+import { DeliveryItems, parseDeliveryItems, type DeliveryItem } from "@/features/admin/shared/DeliveryItems";
 import { AdminDisclosureSummary } from "@/features/admin/shared/AdminDisclosureSummary";
 import { RefreshCw } from "lucide-react";
 import { isFulfillmentUnitFinished } from "./fulfillment-progress";
@@ -14,6 +15,7 @@ import { createFulfillmentTransition, fulfillmentActionNeedsReason, getFulfillme
 import type { FulfillmentDraft, FulfillmentTransitionRequest } from "./fulfillment-operation";
 
 interface Unit {
+  deliveryItems: DeliveryItem[];
   id: string;
   name: string;
   kind: string;
@@ -45,7 +47,7 @@ function parseUnits(value: unknown): Unit[] {
       if (typeof u[key] !== "number" || !Number.isSafeInteger(u[key])) throw new Error("接待數量有誤。");
     }
     if (!Array.isArray(u.allowedActions) || !u.allowedActions.every(a => typeof a === "string")) throw new Error("接待操作格式有誤。");
-    return u as unknown as Unit;
+    return { ...u, deliveryItems: parseDeliveryItems(u.deliveryItems) } as unknown as Unit;
   });
 }
 
@@ -236,6 +238,7 @@ function UnitControls({ orderId, unit, onChanged, disabled, onBusy }: { orderId:
     aria-label={unit.name + "履約操作"} disabled={disabled || busy}>
     <header className="adminOrderUnitHeading">
       <strong>{unit.name}</strong>
+      {unit.kind === "meal" && <DeliveryItems items={unit.deliveryItems} />}
       <span className={"adminOrderUnitStatus" + (unit.status === "completed" ? " isComplete" : "")}>
         {labels[unit.status] || unit.status}
       </span>

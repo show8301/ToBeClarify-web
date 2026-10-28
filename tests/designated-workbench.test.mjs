@@ -14,8 +14,8 @@ test("a meal being served does not turn a waiting nomination into an active serv
   assert.equal(canAct(entry, "accept", now), true);
 });
 
-test("a waiting request cannot bypass the staff confirmation by starting now", () => {
-  assert.equal(canAct(entry, "start_now", now), false);
+test("a waiting request can accept and start through the server-authorized quick command", () => {
+  assert.equal(canAct(entry, "start_now", now), true);
   assert.equal(canAct({ ...entry, unit: { ...unit, acceptedQuantity: 1 } }, "start_now", now), true);
 });
 
@@ -31,12 +31,12 @@ test("a declined request stays with the manager until the server grants another 
   assert.equal(resolveServiceStatus(order, nominee, declined.unit), "needs_coordination");
 });
 
-test("unloaded v2 progress grants no actions and legacy mixed orders cannot mutate the whole order", () => {
+test("unloaded v2 progress grants no actions and legacy mixed orders retain separate cancellation safeguards", () => {
   assert.equal(canAct({ ...entry, unit: null }, "accept", now), false);
   const mixed = { ...entry, unit: null, status: "confirmed", order: { ...order, flowVersion: 1, status: "confirmed", items: [{ kind: "nomination_base" }, { kind: "meal" }] } };
-  assert.equal(canAct(mixed, "start_now", now), false);
+  assert.equal(canAct(mixed, "start_now", now), true);
   assert.equal(canAct(mixed, "cancel", now), false);
-  assert.equal(resolveServiceStatus({ ...mixed.order, status: "in_service" }, nominee, null), "waiting");
+  assert.equal(resolveServiceStatus({ ...mixed.order, status: "in_service" }, nominee, null), "in_service");
 });
 
 test("shortening respects the minimum purchased segments and the service start time", () => {

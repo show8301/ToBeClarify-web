@@ -1,5 +1,6 @@
 "use client";
 
+import { OrderServiceActions } from "@/features/admin/shared/OrderServiceActions";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AdminButton } from "@/features/admin/shared/AdminShared.jsx";
@@ -69,22 +70,23 @@ export function WorkbenchGuestOrders({ orders, units, unavailable, disabled, cas
           <span>收款狀態：<strong>{summary?.label || (financeReady ? "帳款未確認" : "讀取中…")}</strong></span>
         </div>
         {!unavailable && order.status === "completed" && progress.total > progress.completed && <p className="adminFormError">整單狀態與分項進度不一致，請至完整點單管理核對。</p>}
+        {order.nominees.length > 0 && <OrderServiceActions orderId={order.id} refreshKey={orderUnits.map(u => `${u.id}:${u.version}`).join(",")} disabled={blocked} onChanged={onChanged} onBusy={onBusy} />}
         {(order.flowVersion || 1) >= 2 ? <div className="dwOrderUnits">
           {orderUnits.map((unit) => {
             const entry = entries.find((value) => value.unit?.id === unit.id);
-            const own = unit.staffId === staffId && ["nominee", "addon"].includes(unit.kind);
+            const canRepresent = ["nominee", "addon"].includes(unit.kind) && (unit.staffId === staffId || order.nominees.some(n => n.staffId === staffId));
             const action = completionOption(unit);
             const remaining = unit.quantity - unit.cancelledQuantity;
             return <div className="dwOrderUnit" key={unit.id}>
               <div className="dwOrderUnitCopy">
-                <span className="dwOrderKind">{own ? `我的${kindLabels[unit.kind]}` : kindLabels[unit.kind] || unit.kind}</span>
+                <span className="dwOrderKind">{unit.staffId === staffId ? `我的${kindLabels[unit.kind]}` : kindLabels[unit.kind] || unit.kind}</span>
                 <strong>{unit.name}</strong>
-                <span>{own && entry ? serviceStatusLabels[entry.status] || entry.status : unitProgressLabel(unit)} · 已完成 {unit.completedQuantity}／{remaining}</span>
+                <span>{canRepresent && entry ? serviceStatusLabels[entry.status] || entry.status : unitProgressLabel(unit)} · 已完成 {unit.completedQuantity}／{remaining}</span>
                 {unit.scheduledStartsAt && <span>{formatClock(unit.scheduledStartsAt)}–{formatClock(unit.scheduledEndsAt)}</span>}
               </div>
               <div className="dwOrderUnitActions">
                 {action && <AdminButton variant="secondary" disabled={completionBlocked} onClick={() => setDialog({ kind: "complete", order, unit })}>{unit.kind === "meal" ? "確認已送達" : "確認使用完成"}</AdminButton>}
-                {own && entry && (unit.kind === "nominee" ? ["accept", "start_now", "complete"] as const : ["start", "complete"] as const).filter((value) => canAct(entry, value)).map((value) => <AdminButton key={value} variant="secondary" disabled={completionBlocked} onClick={() => onServiceAction(entry, value)}>{value === "accept" ? "承接此指名" : value === "complete" ? unit.kind === "addon" ? "完成此加購" : "完成此指名" : unit.kind === "addon" ? "開始此加購" : "開始此指名"}</AdminButton>)}
+                {canRepresent && entry && (unit.kind === "nominee" ? ["complete"] as const : ["start", "complete"] as const).filter((value) => canAct(entry, value)).map((value) => <AdminButton key={value} variant="secondary" disabled={completionBlocked} onClick={() => onServiceAction(entry, value)}>{value === "complete" ? unit.kind === "addon" ? "完成此加購" : "完成此指名" : unit.kind === "addon" ? "開始此加購" : "開始此指名"}</AdminButton>)}
               </div>
             </div>;
           })}

@@ -1,5 +1,6 @@
 "use client";
 
+import { OrderServiceActions } from "@/features/admin/shared/OrderServiceActions";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { adminApi, adminRequest } from "@/features/admin/api/client.js";
 import { AdminButton, AdminDialog, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
@@ -64,18 +65,19 @@ export function AdminDesignatedWorkbench({ data, user, onChanged, loading, loadE
     const timer = window.setInterval(() => setNow(Date.now()), 10_000);
     return () => window.clearInterval(timer);
   }, []);
-  const entries: ServiceEntry[] = mine.flatMap((order) => order.nominees.filter((n) => n.staffId === user.staffMemberId).map((nominee) => {
-    const unit = units[order.id]?.find((u) => u.kind === "nominee" && u.nomineeId === nominee.id && u.staffId === user.staffMemberId) || null;
+  const entries: ServiceEntry[] = mine.flatMap((order) => order.nominees.map((nominee) => {
+    const unit = units[order.id]?.find((u) => u.kind === "nominee" && u.nomineeId === nominee.id) || null;
     const status = resolveServiceStatus(order, nominee, unit);
     return { order, nominee, unit, status };
   })).filter((entry) => !entry.unit || !data.context?.businessPeriodId ||
     (entry.unit.fulfillmentPeriodId || entry.order.businessPeriodId) === data.context.businessPeriodId)
     .sort((a, b) => Date.parse(startTime(a)) - Date.parse(startTime(b)));
-  const requests = entries.filter((entry) => entry.status === "waiting" && entry.order.storeConfirmationStatus !== "pending");
+  const ownEntries = entries.filter(entry => entry.nominee.staffId === user.staffMemberId);
+  const requests = entries.filter((entry, index, all) => entry.status === "waiting" && entry.order.storeConfirmationStatus !== "pending" && all.findIndex(e => e.order.id === entry.order.id && e.status === "waiting") === index);
   const waitingStore = entries.filter((entry) => entry.order.storeConfirmationStatus === "pending");
-  const active = entries.filter((entry) => entry.status === "in_service");
+  const active = ownEntries.filter((entry) => entry.status === "in_service");
   const current = active[0];
-  const next = entries.find((entry) => ["accepted", "confirmed"].includes(entry.status));
+  const next = ownEntries.find((entry) => ["accepted", "confirmed"].includes(entry.status));
   const sessionIds = new Set(mine.map((o) => o.sessionId));
   const guests = data.sessions.filter((s) => sessionIds.has(s.id));
   const selected = guests.find((s) => s.id === selectedSessionId) || guests.find((s) => s.id === current?.order.sessionId) || guests[0];
@@ -150,14 +152,14 @@ export function AdminDesignatedWorkbench({ data, user, onChanged, loading, loadE
     {unitsError && <p className="adminFormError" role="alert">服務進度尚未更新：{unitsError} 請重新整理後再操作。</p>}
     {feedback && <p className="dwNotice" role="status">{feedback}</p>}
     <div className="dwTaskGrid">
-      <AdminPanel title="等待我確認" description="直接指名與經理承接請求，在這裡回覆。" actions={<span className="dwCount">{unavailable ? "—" : requests.length + pendingAddons.length}</span>}>
+      <AdminPanel title="待處理指名訂單" description="本單任一名指名人員可依現場協調代辦整單。" actions={<span className="dwCount">{unavailable ? "—" : requests.length + pendingAddons.length}</span>}>
         <div className="dwList">
           {requests.map((entry) => <article className="dwRequest" key={entry.nominee.id}>
             <div className="dwRow"><button className="dwName" type="button" onClick={() => selectGuest(entry.order.sessionId)}>{entry.order.customerName}</button><span className={`dwBadge${entry.order.requestSource === "manager_transfer" ? " is-manager" : ""}`}>{entry.order.requestSource === "manager_transfer" ? "經理承接請求" : "直接指名"}</span></div>
             <p className="dwRequestTime">{formatClock(startTime(entry))}–{formatClock(endTime(entry))}<span>{entry.nominee.serviceName}</span></p>
             <p className="dwHint">{entry.order.gameId} · {entry.order.customerLocation || "未註記位置"}{entry.order.customerNote ? ` · ${entry.order.customerNote}` : ""}</p>
             <p className="dwHint">同單內容：{entry.order.items?.filter((item) => ["menu_item", "menu_set", "room_service"].includes(item.kind)).map((item) => `${item.name} × ${item.quantity}`).join("、") || "無其他餐點或包廂"}</p>
-            <div className="dwActions"><AdminButton disabled={disabled || !canAct(entry, "accept")} onClick={() => openService(entry, "accept")}>承接此指名</AdminButton><AdminButton variant="ghost" disabled={disabled || !canAct(entry, "decline")} onClick={() => openService(entry, "decline")}>無法承接</AdminButton><AdminButton variant="ghost" onClick={() => selectGuest(entry.order.sessionId)}>查看同單進度</AdminButton></div>
+            <div className="dwActions"><OrderServiceActions orderId={entry.order.id} refreshKey={String(entry.unit?.version || 0)} disabled={disabled} onChanged={refresh} onBusy={onBusy} /><AdminButton variant="ghost" disabled={disabled || !canAct(entry, "decline")} onClick={() => openService(entry, "decline")}>無法承接</AdminButton><AdminButton variant="ghost" onClick={() => selectGuest(entry.order.sessionId)}>查看同單進度</AdminButton></div>
           </article>)}
           {pendingAddons.map(({ order, addon, unit }) => <article className="dwRequest" key={addon.id}><div className="dwRow"><strong>{order.customerName}</strong><span className="dwBadge">加購確認</span></div><p>{addon.serviceName}</p><AdminButton disabled={disabled || Boolean(unit && !unit.allowedActions.includes("accept"))} onClick={() => void confirmAddon(order, unit)}>確認加購</AdminButton></article>)}
           {activeAddons.map((entry) => <article className="dwRequest" key={entry.unit?.id}><div className="dwRow"><strong>{entry.order.customerName} · 加購服務</strong>{badge(entry.status)}</div><p>{entry.nominee.serviceName}</p><div className="dwActions">{canAct(entry, "start") && <AdminButton variant="secondary" disabled={disabled} onClick={() => openService(entry, "start")}>開始加購</AdminButton>}{canAct(entry, "complete") && <AdminButton variant="secondary" disabled={disabled} onClick={() => openService(entry, "complete")}>完成加購</AdminButton>}{canAct(entry, "cancel") && <AdminButton variant="ghost" disabled={disabled} onClick={() => openService(entry, "cancel")}>取消未服務加購</AdminButton>}</div></article>)}
@@ -172,9 +174,9 @@ export function AdminDesignatedWorkbench({ data, user, onChanged, loading, loadE
             <p>{current.nominee.serviceName} · {formatClock(startTime(current))}–{formatClock(endTime(current))}</p>
             <div className="dwRemaining"><strong>{Math.max(0, Math.ceil((Date.parse(endTime(current)) - now) / 60_000))}</strong><span>分鐘剩餘<small>休息 {current.unit?.restMinutesReserved ?? current.nominee.bufferMinutes ?? 0} 分鐘</small></span></div>
             {current.unit?.originalScheduledStartsAt && <p className="dwHint">原預約 {formatClock(current.unit.originalScheduledStartsAt)}–{formatClock(current.unit.originalScheduledEndsAt)}</p>}
-            <div className="dwActions"><AdminButton disabled={disabled || !canAct(current, "complete")} onClick={() => openService(current, "complete")}>完成此指名</AdminButton><AdminButton variant="secondary" disabled={disabled || !["open", undefined].includes(data.sessions.find((s) => s.id === current.order.sessionId)?.entryStatus)} onClick={() => { setDirty(false); setDialog({ kind: "addon", entry: current }); }}>加購服務</AdminButton></div>
+            <div className="dwActions"><OrderServiceActions orderId={current.order.id} refreshKey={String(current.unit?.version || 0)} disabled={disabled} onChanged={refresh} onBusy={onBusy} /><AdminButton variant="secondary" disabled={disabled || !["open", undefined].includes(data.sessions.find((s) => s.id === current.order.sessionId)?.entryStatus)} onClick={() => { setDirty(false); setDialog({ kind: "addon", entry: current }); }}>加購服務</AdminButton></div>
             {active.length > 1 && <p className="adminFormError" role="alert">另有 {active.length - 1} 筆服務進行中，請在今日排程核對進度。</p>}
-          </div> : next ? <div className="dwCurrent"><div className="dwRow"><strong>{next.order.customerName}</strong>{badge(next.status)}</div><p>{formatClock(startTime(next))}–{formatClock(endTime(next))} · {next.nominee.serviceName}</p><AdminButton disabled={disabled || !canAct(next, "start_now")} onClick={() => openService(next, "start_now")}>開始此指名</AdminButton></div> : <p className="dwEmpty">{emptyMessage("讀取服務進度中…", "目前沒有進行中或已承接的服務。")}</p>}
+          </div> : next ? <div className="dwCurrent"><div className="dwRow"><strong>{next.order.customerName}</strong>{badge(next.status)}</div><p>{formatClock(startTime(next))}–{formatClock(endTime(next))} · {next.nominee.serviceName}</p><OrderServiceActions orderId={next.order.id} refreshKey={String(next.unit?.version || 0)} disabled={disabled} onChanged={refresh} onBusy={onBusy} /></div> : <p className="dwEmpty">{emptyMessage("讀取服務進度中…", "目前沒有進行中或已承接的服務。")}</p>}
         </AdminPanel>
         <section className="dwNext"><span>下一位</span>{next ? <><strong>{next.order.customerName}</strong><small>{formatClock(startTime(next))} · {next.nominee.serviceName}</small><AdminButton variant="ghost" onClick={() => selectGuest(next.order.sessionId)}>查看顧客</AdminButton></> : <p>{emptyMessage("讀取下一位顧客中…", "目前沒有已承接的下一位顧客。")}</p>}</section>
       </div>
@@ -196,7 +198,7 @@ export function AdminDesignatedWorkbench({ data, user, onChanged, loading, loadE
         </> : <p className="dwEmpty">{emptyMessage("讀取今日顧客中…", "尚無與我有關的營業中顧客。")}</p>}
       </AdminPanel>
       <AdminPanel title="我的今日排程" description="依服務開始時間排序；點選顧客可在左側處理。">
-        <div className="dwSchedule">{entries.map((entry) => <article className={`dwScheduleItem${entry.status === "in_service" ? " isCurrent" : ""}`} key={entry.nominee.id}>
+        <div className="dwSchedule">{ownEntries.map((entry) => <article className={`dwScheduleItem${entry.status === "in_service" ? " isCurrent" : ""}`} key={entry.nominee.id}>
           <div className="dwScheduleTime"><strong>{formatClock(startTime(entry))}</strong><small>{formatClock(endTime(entry))}</small></div>
           <div className="dwScheduleCopy"><div className="dwRow"><button type="button" className="dwName" onClick={() => selectGuest(entry.order.sessionId)}>{entry.order.customerName}</button>{badge(entry.status)}</div><p>{entry.nominee.serviceName}{entry.unit?.purchasedMinutes ? ` · ${entry.unit.purchasedMinutes} 分鐘` : ""}</p>
             <div className="dwActions">{canAct(entry, "start_now") && <AdminButton variant="secondary" disabled={disabled} onClick={() => openService(entry, "start_now")}>開始此指名</AdminButton>}{canAct(entry, "complete") && <AdminButton variant="secondary" disabled={disabled} onClick={() => openService(entry, "complete")}>完成此指名</AdminButton>}</div>
@@ -208,10 +210,7 @@ export function AdminDesignatedWorkbench({ data, user, onChanged, loading, loadE
       </AdminPanel>
     </div>
     <AdminDialog open={Boolean(dialog)} title={dialogTitle} description="完成操作後留在指名人員工作台。" className="adminDesignatedWorkbenchDialog" onClose={closeDialog} actions={null}>
-      {dialog?.kind === "service" && <WorkbenchServiceDialog key={dialog.action} entry={dialog.entry} action={dialog.action} orderUnits={units[dialog.entry.order.id]} recoveryActions={(["reschedule", "start_now"] as const).filter((action) => canAct(dialog.entry, action))} onChooseRecoveryAction={(action) => {
-        if (dialogBusyRef.current || !canAct(dialog.entry, action)) return;
-        setDirty(false); setDialog({ kind: "service", entry: dialog.entry, action });
-      }} onSaved={() => saved(`${dialog.entry.nominee.serviceName}：${dialog.action === "accept" ? "已承接" : dialog.action === "complete" ? "此服務已完成" : "服務操作已記錄"}。`)} onBusy={onBusy} />}
+      {dialog?.kind === "service" && <WorkbenchServiceDialog key={dialog.action} entry={dialog.entry} action={dialog.action} orderUnits={units[dialog.entry.order.id]} onSaved={() => saved(`${dialog.entry.nominee.serviceName}：${dialog.action === "accept" ? "已承接" : dialog.action === "complete" ? "此服務已完成" : "服務操作已記錄"}。`)} onBusy={onBusy} />}
       {dialog?.kind === "addon" && <WorkbenchAddonForm entry={dialog.entry} onSaved={saved} onBusy={onBusy} />}
       {dialog?.kind === "composer" && <WorkbenchOrderComposer sessionId={dialog.session.id} businessDate={businessDate} mode={dialog.mode} staffId={user.staffMemberId} onSaved={saved} onBusy={onBusy} />}
       {dialog?.kind === "delivery" && <WorkbenchDeliveryAction session={dialog.session} orderId={dialog.orderId} businessDate={businessDate} user={user} onBusy={onBusy} onDirty={onDirty} />}

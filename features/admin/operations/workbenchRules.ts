@@ -10,16 +10,18 @@ export function legacyStandalone(order: OperationsOrder): boolean {
 export function resolveServiceStatus(order: OperationsOrder, nominee: OperationsNominee, unit: WorkbenchUnit | null): string {
   if (unit) return unit.status;
   if (["completed", "cancelled"].includes(order.status)) return order.status;
-  if (order.status === "in_service" && legacyStandalone(order)) return "in_service";
+  if (order.status === "in_service" && order.nominees.length > 0) return "in_service";
   return nominee.confirmationStatus;
 }
 
 export function canAct(entry: ServiceEntry, action: ServiceAction, now: number): boolean {
   if (entry.order.storeConfirmationStatus === "pending") return false;
-  if (entry.unit) return entry.unit.allowedActions.includes(action) && (action !== "start_now" || entry.unit.acceptedQuantity > 0);
+  if (entry.unit) return entry.unit.allowedActions.includes(action);
   if ((entry.order.flowVersion || 1) >= 2) return false;
   if (action === "accept" || action === "decline") return entry.nominee.confirmationStatus === "waiting" && ["submitted", "partially_confirmed"].includes(entry.order.status);
   if (action === "shorten") return entry.nominee.segmentCount > (entry.nominee.minimumSegments || 1) && Date.parse(entry.nominee.requestedStartsAt) > now && ["waiting", "confirmed"].includes(entry.status);
+  if (action === "start_now") return ["submitted", "partially_confirmed", "confirmed"].includes(entry.order.status);
+  if (action === "complete") return entry.order.status === "in_service";
   if (!legacyStandalone(entry.order)) return false;
-  return action === "start_now" ? entry.order.status === "confirmed" : action === "complete" ? entry.order.status === "in_service" : action === "cancel" && ["submitted", "partially_confirmed", "confirmed"].includes(entry.order.status);
+  return action === "cancel" && ["submitted", "partially_confirmed", "confirmed"].includes(entry.order.status);
 }

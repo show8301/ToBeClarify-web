@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AdminButton } from "@/features/admin/shared/AdminShared.jsx";
 import { financeApi } from "../orders/finance-api";
+import { DeliveryItems } from "@/features/admin/shared/DeliveryItems";
 import type { FinanceAccount } from "../orders/finance-types";
 import { WorkbenchItemCompletionDialog } from "./WorkbenchItemCompletionDialog";
 import { WorkbenchOrderReceiptDialog } from "./WorkbenchOrderReceiptDialog";
@@ -81,6 +82,7 @@ export function WorkbenchGuestOrders({ orders, units, unavailable, disabled, cas
               <div className="dwOrderUnitCopy">
                 <span className="dwOrderKind">{unit.staffId === staffId ? `我的${kindLabels[unit.kind]}` : kindLabels[unit.kind] || unit.kind}</span>
                 <strong>{unit.name}</strong>
+                {unit.kind === "meal" && <DeliveryItems items={unit.deliveryItems} />}
                 <span>{canRepresent && entry ? serviceStatusLabels[entry.status] || entry.status : unitProgressLabel(unit)} · 已完成 {unit.completedQuantity}／{remaining}</span>
                 {unit.scheduledStartsAt && <span>{formatClock(unit.scheduledStartsAt)}–{formatClock(unit.scheduledEndsAt)}</span>}
               </div>

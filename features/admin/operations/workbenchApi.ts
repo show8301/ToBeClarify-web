@@ -1,4 +1,5 @@
 import { adminRequest } from "@/features/admin/api/client.js";
+import { parseDeliveryItems, type DeliveryItem } from "@/features/admin/shared/DeliveryItems";
 
 export function record(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("營業資料格式異常，請重新整理。");
@@ -28,6 +29,7 @@ function dateValue(value: unknown): string {
 }
 
 export type WorkbenchUnit = {
+  deliveryItems: DeliveryItem[];
   id: string; nomineeId: string; staffId: string; kind: string; name: string;
   status: string; version: number; quantity: number; acceptedQuantity: number;
   startedQuantity: number; completedQuantity: number; cancelledQuantity: number;
@@ -45,7 +47,7 @@ export function parseUnits(value: unknown): WorkbenchUnit[] {
     return {
       id: textValue(u.id), nomineeId: u.nomineeId == null ? "" : textValue(u.nomineeId),
       staffId: u.staffId == null ? "" : textValue(u.staffId), kind: textValue(u.kind),
-      name: textValue(u.name), status: textValue(u.status), version,
+      name: textValue(u.name), deliveryItems: parseDeliveryItems(u.deliveryItems), status: textValue(u.status), version,
       quantity: integer(u.quantity), acceptedQuantity: integer(u.acceptedQuantity),
       startedQuantity: integer(u.startedQuantity), completedQuantity: integer(u.completedQuantity),
       cancelledQuantity: integer(u.cancelledQuantity), purchasedMinutes: integer(u.purchasedMinutes),

@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, type MouseEvent } from "react";
 import type { HomeData, PricingRule } from "@/features/site/types";
 
 type HomeLandingProps = { home:HomeData; pricingRules?:PricingRule[] };
+type BusinessStatus = "open" | "closed" | "unknown";
 
 function legacyPricingRules(home:HomeData):PricingRule[]{
   return home.shopInfo.pricing.map((item,index)=>({
@@ -35,6 +36,7 @@ export default function HomeLanding({home,pricingRules:initialPricingRules=[]}:H
   const [slide,setSlide]=useState(0);
   const [slides,setSlides]=useState(home.slides);
   const [shopInfo,setShopInfo]=useState(home.shopInfo);
+  const [businessStatus,setBusinessStatus]=useState<BusinessStatus>("unknown");
   const [livePageVisibility,setLivePageVisibility]=useState(home.pageVisibility);
   const [pricingRules,setPricingRules]=useState<PricingRule[]>(normalizePricingRules(initialPricingRules.length?initialPricingRules:legacyPricingRules(home)));
   const [pricingFresh,setPricingFresh]=useState(false);
@@ -68,6 +70,36 @@ export default function HomeLanding({home,pricingRules:initialPricingRules=[]}:H
     Promise.all([homeRequest,menuRequest]).catch(()=>{});
     return()=>controller.abort();
   },[home.pageVisibility]);
+
+  useEffect(()=>{
+    let active=true;
+    let controller:AbortController|undefined;
+    let expiry:number|undefined;
+    async function refresh(){
+      controller?.abort();
+      controller=new AbortController();
+      try{
+        const response=await fetch("/api/public/home",{cache:"no-store",headers:{Accept:"application/json"},signal:controller.signal});
+        if(!response.ok)throw new Error("Status unavailable");
+        const payload:unknown=await response.json();
+        if(!active)return;
+        const data=typeof payload==="object"&&payload!==null&&"success" in payload&&payload.success===true&&"data" in payload?payload.data:null;
+        const status=typeof data==="object"&&data!==null&&"businessStatus" in data?data.businessStatus:null;
+        const state=typeof status==="object"&&status!==null&&"state" in status?status.state:null;
+        if(state!=="open"&&state!=="closed")throw new Error("Invalid status");
+        setBusinessStatus(state);
+        window.clearTimeout(expiry);
+        expiry=window.setTimeout(()=>setBusinessStatus("unknown"),120_000);
+      }catch(error){
+        if(active&&!(error instanceof Error&&error.name==="AbortError"))setBusinessStatus("unknown");
+      }
+    }
+    void refresh();
+    const interval=window.setInterval(()=>void refresh(),60_000);
+    const onVisibility=()=>{if(document.visibilityState==="visible")void refresh();};
+    document.addEventListener("visibilitychange",onVisibility);
+    return()=>{active=false;controller?.abort();window.clearInterval(interval);window.clearTimeout(expiry);document.removeEventListener("visibilitychange",onVisibility);};
+  },[]);
 
   useEffect(()=>{
     if(reduceMotion||images.length<2)return;
@@ -112,7 +144,7 @@ export default function HomeLanding({home,pricingRules:initialPricingRules=[]}:H
         <h1><i>LUCID</i><br/>DREAM</h1>
         <div className="home-hero-description"><p>{shopInfo.subtitle}</p></div>
         <div className="home-hero-actions">
-          <div className="home-business-status"><b><i aria-hidden="true"/><span><small>LIVE STATUS</small>{shopInfo.businessStatus}</span></b><span>{shopInfo.openHours}</span></div>
+          <div className={`home-business-status is-${businessStatus}`}><b role="status"><i aria-hidden="true"/><span><small>LIVE STATUS</small>{businessStatus==="open"?"營業中":businessStatus==="closed"?"店休中":"狀態更新中"}</span></b><span>{shopInfo.openHours}</span></div>
           {livePageVisibility.staff&&<a href="/staff"><span>MEET THE DREAMERS</span><i aria-hidden="true">↗</i></a>}
         </div>
       </motion.div>

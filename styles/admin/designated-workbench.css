@@ -288,6 +288,9 @@
   display: grid;
   gap: 10px;
 }
+.adminDesignatedWorkbench .orderServiceActions + .dwOrderUnits {
+  margin-top: 12px;
+}
 
 .adminDesignatedWorkbench .dwOrderUnit {
   display: flex;

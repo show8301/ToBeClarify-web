@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { adminApi, adminRequest, ApiError } from "@/features/admin/api/client.js";
+import { clearPendingServiceCommands } from "@/features/admin/shared/order-service-pending";
 import { parseAdminIdentity } from "./identity";
 import type { AdminAuthState, AdminAuthValue, AdminIdentity, WorkbenchRole } from "./types";
 
@@ -27,6 +28,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const applyIdentity = useCallback((identity: AdminIdentity | null) => {
+    if (!identity) clearPendingServiceCommands();
     if (account.current?.id !== identity?.id || account.current?.role !== identity?.role) invalidateSession();
     account.current = identity;
     setState({ loading: false, user: identity, error: null });

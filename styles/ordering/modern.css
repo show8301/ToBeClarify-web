@@ -280,13 +280,13 @@
 .orderCategoryRail button {
   min-height:38px;
   padding:7px 14px;
-  border-color:#dce1e9;
-  background:#f8f9fb;
+  border-color:#aab9d0;
+  background:#fff;
   font-size:12px;
 }
 .orderCategoryRail button.isActive {
-  border-color:#9fb1cf;
-  background:#dfe8f4;
+  border-color:#617ba7;
+  background:#c8d8ed;
   box-shadow:none;
 }
 .orderProductGrid { gap:14px; }
@@ -1157,7 +1157,7 @@
 .roomBookingCopy em {
   display:-webkit-box;
   -webkit-box-orient:vertical;
-  -webkit-line-clamp:2;
+  -webkit-line-clamp:3;
   overflow:hidden;
   white-space:normal;
 }
@@ -1384,3 +1384,16 @@
     font-size:13px;
   }
 }
+
+/* Align the visible track ends with the range thumb at 0% and 100%. */
+.tipComposer .tipRange input {
+  appearance:none;
+  min-height:44px;
+  padding:0;
+  margin:0;
+  border:0;
+  border-radius:0;
+  background:linear-gradient(to right, #d5d5d5 var(--tip-position), var(--o-coral) var(--tip-position)) center / calc(100% - 16px) 4px no-repeat;
+}
+.tipRange input::-webkit-slider-thumb { appearance:none; width:16px; height:16px; border-radius:50%; background:#617ba7; }
+.tipRange input::-moz-range-thumb { width:16px; height:16px; border:0; border-radius:50%; background:#617ba7; }

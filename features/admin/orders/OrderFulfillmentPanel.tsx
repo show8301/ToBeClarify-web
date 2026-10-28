@@ -86,7 +86,7 @@ export function OrderFulfillmentPanel({ orderId, onChanged, disabled = false, st
       .catch((e: Error) => { if (!controller.signal.aborted) { setError(e.message); setLoadedFor(loadKey); onProgressChange?.({ kind: "error" }); } });
     return () => controller.abort();
   }, [orderId, revision, loadKey, onProgressChange]);
-  const batchMeals = async (action: "accept" | "complete") => {
+  const batchMeals = async (action: "accept" | "start" | "complete") => {
     if (disabled || storeConfirmationPending || batchBusy || !ready || error) return;
     const candidates = units.filter(unit => unit.kind === "meal" && unit.allowedActions.includes(action));
     if (candidates.length === 0) return;
@@ -95,6 +95,7 @@ export function OrderFulfillmentPanel({ orderId, onChanged, disabled = false, st
       for (const unit of candidates) {
         const quantity = action === "accept"
           ? unit.quantity - unit.cancelledQuantity - unit.acceptedQuantity
+          : action === "start" ? unit.acceptedQuantity - unit.startedQuantity
           : unit.startedQuantity - unit.completedQuantity;
         if (quantity < 1) continue;
         await adminRequest(`/orders/${encodeURIComponent(orderId)}/fulfillment/${encodeURIComponent(unit.id)}/transition`, {
@@ -118,9 +119,10 @@ export function OrderFulfillmentPanel({ orderId, onChanged, disabled = false, st
     {units.some(unit => unit.kind === "nominee") && <OrderServiceActions orderId={orderId} refreshKey={loadKey} disabled={disabled || batchBusy} onBusy={onBusy} onChanged={async () => { setRevision(n => n + 1); await onChanged(); }} />}
     {!ready && <p role="status">讀取分項履約中…</p>}
     {ready && error && <p role="alert">{error}</p>}
-    {actionableUnits.some(unit => unit.kind === "meal" && unit.allowedActions.includes("accept")) || actionableUnits.some(unit => unit.kind === "meal" && unit.allowedActions.includes("complete")) ? <div className="adminPageActions adminOrderFulfillmentActions">
-      <AdminButton disabled={disabled || batchBusy || !ready || Boolean(error)} onClick={() => void batchMeals("accept")}>批次接單餐點</AdminButton>
-      <AdminButton variant="secondary" disabled={disabled || batchBusy || !ready || Boolean(error)} onClick={() => void batchMeals("complete")}>批次送達已處理餐點</AdminButton>
+    {actionableUnits.some(unit => unit.kind === "meal" && ["accept", "start", "complete"].some(action => unit.allowedActions.includes(action))) ? <div className="adminPageActions adminOrderFulfillmentActions">
+      {actionableUnits.some(unit => unit.kind === "meal" && unit.allowedActions.includes("accept")) && <AdminButton disabled={disabled || batchBusy || !ready || Boolean(error)} onClick={() => void batchMeals("accept")}>批次接單餐點</AdminButton>}
+      {actionableUnits.some(unit => unit.kind === "meal" && unit.allowedActions.includes("start")) && <AdminButton disabled={disabled || batchBusy || !ready || Boolean(error)} onClick={() => void batchMeals("start")}>批次開始已接餐點</AdminButton>}
+      {actionableUnits.some(unit => unit.kind === "meal" && unit.allowedActions.includes("complete")) && <AdminButton variant="secondary" disabled={disabled || batchBusy || !ready || Boolean(error)} onClick={() => void batchMeals("complete")}>批次送達已處理餐點</AdminButton>}
     </div> : null}
     {actionableUnits.map(unit => <UnitControls key={`${unit.id}-${unit.version}-${storeConfirmationPending}`} orderId={orderId} unit={unit} disabled={disabled || batchBusy || !ready || Boolean(error)} onBusy={onBusy} onChanged={async () => {
       setRevision(n => n + 1);

@@ -48,7 +48,6 @@ export function AdmissionPaymentFields({
                     const value = event.target.value;
                     if (value === "received" || value === "unpaid" || value === "waived") {
                       payment.setMode(value);
-                      payment.setConfirmed(false);
                     }
                   }}
                 >
@@ -69,7 +68,6 @@ export function AdmissionPaymentFields({
                     disabled={payment.locked}
                     onChange={(event) => {
                       payment.setDiscount(Number(event.target.value));
-                      payment.setConfirmed(false);
                     }}
                   />
                 </label>
@@ -89,18 +87,6 @@ export function AdmissionPaymentFields({
             </div>
           )}
           <div className="adminAdmissionPaymentActions">
-            {payment.mode === "received" && (
-              <label className="adminAdmissionConfirm">
-                <input
-                  type="checkbox"
-                  required
-                  checked={payment.confirmed}
-                  disabled={payment.locked}
-                  onChange={(event) => payment.setConfirmed(event.target.checked)}
-                />
-                已確認收到上述入場費
-              </label>
-            )}
             <AdminButton
               variant="ghost"
               disabled={payment.locked}

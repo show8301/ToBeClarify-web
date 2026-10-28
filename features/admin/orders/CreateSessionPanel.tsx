@@ -98,7 +98,7 @@ export function CreateSessionPanel({ canManage, admissionPolicyRevision = 0, onC
         <input id={uidInputId} value={form.customerUid} maxLength={40} disabled={loading} autoComplete="off" onChange={(event) => setForm({ ...form, customerUid: event.target.value.trim().toUpperCase() })} />
       </div> : null}
       <AdmissionPaymentFields payment={payment} canManage={canManage} />
-      <AdminButton type="submit" disabled={payment.busy || Boolean(payment.result) || !identityKey || candidateLoading || Boolean(candidateError) || !payment.pending && (!payment.preview?.confirmedCreationAvailable || payment.mode === "received" && !payment.confirmed)}>{payment.busy ? "開立中…" : payment.pending ? "查回／重試同一筆開碼" : payment.mode === "received" ? "確認收款並開立點餐碼" : "確認例外並開立點餐碼"}</AdminButton>
+      <AdminButton type="submit" disabled={payment.busy || Boolean(payment.result) || !identityKey || candidateLoading || Boolean(candidateError) || !payment.pending && !payment.preview?.confirmedCreationAvailable}>{payment.busy ? "開立中…" : payment.pending ? "查回／重試同一筆開碼" : payment.mode === "received" ? "確認收款並開立點餐碼" : "確認例外並開立點餐碼"}</AdminButton>
       <div className="adminSessionIdentityFeedback" aria-live="polite">
         {identityError ? <p className="adminFormError">{identityError}</p> : null}
         {identityKey ? <p className="adminSessionQualifiedId">顧客 ID：<strong>{identityKey}</strong></p> : null}

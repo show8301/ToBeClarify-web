@@ -13,7 +13,6 @@ export function useAdmissionCreation(onIssued: (issued: IssuedAdmissionSession) 
   const [mode, setMode] = useState<AdmissionCreationMode>("received");
   const [discount, setDiscount] = useState(0);
   const [reason, setReason] = useState("");
-  const [confirmed, setConfirmed] = useState(false);
   const lock = useRef(false);
   const previewRequest = useRef<AbortController | null>(null);
   const mounted = useRef(true);
@@ -23,7 +22,7 @@ export function useAdmissionCreation(onIssued: (issued: IssuedAdmissionSession) 
     const controller = new AbortController();
     previewRequest.current = controller;
     const requestSignal = signal ? AbortSignal.any([signal, controller.signal]) : controller.signal;
-    setPreview(null); setConfirmed(false); setError("");
+    setPreview(null); setError("");
     try { const value = await admissionCreationApi.preview(requestSignal); if (!requestSignal.aborted) setPreview(value); }
     catch (e) { if (!requestSignal.aborted) setError(e instanceof Error ? e.message : "無法讀取入場費。"); }
   }, []);
@@ -38,12 +37,12 @@ export function useAdmissionCreation(onIssued: (issued: IssuedAdmissionSession) 
   }, [locked]);
   const received = mode === "received" ? Math.max(0, (preview?.admissionAmount ?? 0) - discount) : 0;
   const submit = async (identity: Omit<CreateAdmissionSessionRequest, "admission" | "operationId">) => {
-    if (lock.current || result || !pending && (!preview?.confirmedCreationAvailable || mode === "received" && !confirmed)) return;
+    if (lock.current || result || !pending && !preview?.confirmedCreationAvailable) return;
     lock.current = true; setBusy(true); setError("");
     const request = pending ?? { ...identity, operationId: crypto.randomUUID(), admission: {
       businessPeriodId: preview!.businessPeriodId, pricingRevision: preview!.pricingRevision, expiresAt: preview!.expiresAt,
       mode, discountAmount: mode === "waived" ? preview!.admissionAmount : discount,
-      paymentConfirmed: mode === "received" && confirmed, confirmedReceivedAmount: received, reason: reason.trim() || undefined,
+      paymentConfirmed: mode === "received", confirmedReceivedAmount: received, reason: reason.trim() || undefined,
     } };
     setPending(request);
     try {
@@ -54,7 +53,7 @@ export function useAdmissionCreation(onIssued: (issued: IssuedAdmissionSession) 
     } catch (e) {
       setError(e instanceof Error ? e.message : "開碼結果尚未確認。");
       if (e instanceof ApiError && e.status >= 400 && e.status < 500 && ![408, 429].includes(e.status)) {
-        setPending(null); setConfirmed(false);
+        setPending(null);
       }
     } finally { lock.current = false; setBusy(false); }
   };
@@ -73,5 +72,5 @@ export function useAdmissionCreation(onIssued: (issued: IssuedAdmissionSession) 
     finally { lock.current = false; setBusy(false); }
   };
   return { preview, error, busy, pending, result, locked, mode, setMode, discount, setDiscount, reason, setReason,
-    confirmed, setConfirmed, received, load, submit, lookup, reissue };
+    received, load, submit, lookup, reissue };
 }

@@ -242,7 +242,7 @@
 .adminOrdersPage .adminOrderCustomerDetails { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; align-items: start; gap: 12px; }
 .adminOrdersPage .adminOrderCustomerDetails label { grid-template-rows: 24px auto; align-content: start; gap: 6px; min-width: 0; font-size: 13px; }
 .adminOrdersPage .adminOrderCustomerDetails label > span { display: flex; align-items: center; }
-.adminOrdersPage .adminOrderCustomerDetails :is(input, textarea) { box-sizing: border-box; min-width: 0; min-height: 40px; font-size: 14px; }
+.adminOrdersPage .adminOrderCustomerDetails :is(input, textarea) { box-sizing: border-box; min-width: 0; min-height: 40px; color: var(--color-fg); background: var(--color-surface-input); font-size: 14px; }
 .adminOrdersPage .adminOrderCustomerDetails > .iconActionButton { margin-top: 30px; }
 .adminTheme .adminOrderFulfillment { display: grid; gap: 12px; padding: 16px; }
 .adminTheme .adminOrderFulfillmentHeading { display: flex; align-items: start; justify-content: space-between; gap: 12px; }

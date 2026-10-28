@@ -622,3 +622,52 @@
   border-radius: 12px;
   min-width: 0;
 }
+.adminOrdersPage .adminAssistedOrderGrid > div {
+  min-width: 0;
+  container-type: inline-size;
+  background: var(--color-surface-strong);
+}
+.adminOrdersPage .adminAssistedOrderPanel :is(input, select, textarea) {
+  box-sizing: border-box;
+  min-height: 40px;
+  color: var(--color-fg);
+  background-color: var(--color-surface-input);
+}
+.adminOrdersPage .adminAssistedOrderPanel .adminAssistedFields {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: end;
+}
+.adminOrdersPage .adminAssistedOrderPanel .adminAssistedMealFields { grid-template-columns: minmax(0, 1fr) 72px 64px; }
+.adminOrdersPage .adminAssistedNominationFields > input[type="datetime-local"],
+.adminOrdersPage .adminAssistedRoomFields > input[type="datetime-local"] { min-width: 0; grid-column: 1 / -1; }
+.adminOrdersPage .adminAssistedNominationFields > select,
+.adminOrdersPage .adminAssistedRoomFields > select,
+.adminOrdersPage .adminAssistedTipFields > select { grid-column: 1 / -1; }
+.adminOrdersPage .adminAssistedNominationFields > span { display: flex; gap: 8px; }
+.adminOrdersPage .adminAssistedNominationFields > span label { display: grid; gap: 4px; min-width: 0; flex: 1; }
+.adminOrdersPage .adminAssistedFields .adminAssistedAdd {
+  box-sizing: border-box;
+  width: 64px;
+  min-height: 40px;
+  justify-self: start;
+  color: #18201d;
+}
+.adminOrdersPage .adminAssistedOrderPanel header .adminFieldHeading { margin-top: 6px; }
+.adminOrdersPage .adminAssistedOrderPanel header .adminFieldHeading h2 { margin: 0; }
+.adminOrdersPage .adminAssistedOrderPanel .adminHelpTrigger {
+  border: 0;
+  color: var(--color-fg-soft);
+  background: transparent;
+  box-shadow: none;
+}
+.adminOrdersPage .adminAssistedOrderPanel .adminAssistedClose {
+  color: var(--color-fg);
+  background: var(--color-surface-input);
+}
+@container (max-width: 380px) {
+  .adminOrdersPage .adminAssistedOrderPanel .adminAssistedFields { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 760px) {
+  .adminOrdersPage .adminAssistedOrderGrid,
+  .adminOrdersPage .adminAssistedNotes { grid-template-columns: minmax(0, 1fr); }
+}

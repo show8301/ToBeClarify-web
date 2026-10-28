@@ -422,6 +422,7 @@
   box-shadow:0 9px 24px rgba(101,120,159,.14)
 }
 .home-business-status>b>i{flex:0 0 11px;width:11px;height:11px;border-radius:50%;background:#35bf87;box-shadow:0 0 0 4px rgba(53,191,135,.14)}
+.home-business-status.is-closed>b>i,.home-business-status.is-unknown>b>i{background:#84909a;box-shadow:0 0 0 4px rgba(132,144,154,.14)}
 .home-business-status>b>span{display:grid;gap:4px;font-size:18px;line-height:1.2}
 .home-business-status>b small{font:700 8px/1.2 var(--font-geist-mono),monospace;letter-spacing:.13em;opacity:.65}
 .home-business-status>span{min-width:0;font-size:13px!important;line-height:1.6;overflow-wrap:anywhere}

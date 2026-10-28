@@ -188,7 +188,6 @@ export function AdminHomeSettingsPage() {
             <AdminField label="店名"><input value={site.name} onChange={(event) => updateSite('name', event.target.value)} /></AdminField>
             <AdminField label="英文／簡稱"><input value={site.shortName} onChange={(event) => updateSite('shortName', event.target.value)} /></AdminField>
             <AdminField label="副標題" className="span-2"><input value={site.subtitle} onChange={(event) => updateSite('subtitle', event.target.value)} /></AdminField>
-            <AdminField label="營業狀態"><input value={site.businessStatus} onChange={(event) => updateSite('businessStatus', event.target.value)} /></AdminField>
             <AdminField label="營業時間"><input value={site.openHours} onChange={(event) => updateSite('openHours', event.target.value)} /></AdminField>
             <AdminField label="Server"><input value={site.server} onChange={(event) => updateSite('server', event.target.value)} /></AdminField>
             <AdminField label="地址"><input value={site.address} onChange={(event) => updateSite('address', event.target.value)} /></AdminField>

@@ -98,15 +98,21 @@ export function AdmissionPaymentFields({
         </>
       ) : (
         <>
-          <h3>入場收款</h3>
-          <p>尚未取得有效收費預覽，請確認營業日已開啟；入場費請至「營運參數」設定。</p>
-          <AdminButton
-            variant="ghost"
-            disabled={payment.locked}
-            onClick={() => void payment.load()}
-          >
-            重新讀取收費
-          </AdminButton>
+          <div className="adminAdmissionOverview">
+            <div className="adminAdmissionOverviewPrimary">
+              <h3>入場收款</h3>
+            </div>
+            <p>尚未取得有效收費預覽，請確認營業日已開啟；入場費請至「營運參數」設定。</p>
+          </div>
+          <div className="adminAdmissionPaymentActions">
+            <AdminButton
+              variant="ghost"
+              disabled={payment.locked}
+              onClick={() => void payment.load()}
+            >
+              重新讀取收費
+            </AdminButton>
+          </div>
         </>
       )}
       {payment.error && (

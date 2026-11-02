@@ -10,13 +10,14 @@ type Attendance = { hasPlan: boolean; hasOpenShift: boolean; stopped: boolean; s
 type Props = {
   businessDate: string; staffId: string; name: string; periodStatus: string;
   disabled: boolean; onChanged: () => Promise<void>;
+  compact?: boolean;
 };
 
 export function WorkbenchShiftBar(props: Props) {
   return <ShiftBar key={`${props.businessDate}:${props.staffId}`} {...props} />;
 }
 
-function ShiftBar({ businessDate, staffId, name, periodStatus, disabled, onChanged }: Props) {
+function ShiftBar({ businessDate, staffId, name, periodStatus, disabled, onChanged, compact = false }: Props) {
   const [summaryState, setSummary] = useState<(Attendance & { key: string }) | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -68,8 +69,8 @@ function ShiftBar({ businessDate, staffId, name, periodStatus, disabled, onChang
       if (!controller.signal.aborted) { setBusy(false); setRevision((r) => r + 1); }
     }
   };
-  return <section className="dwShiftBar" aria-label="我的營業狀態">
-    <div className="dwShiftIdentity"><span className={`dwDot${summary?.hasOpenShift ? " isActive" : ""}`} /><div><strong>{name} <small>{periodStatusLabel(periodStatus)}</small></strong><p>{!staffId ? "帳號尚未綁定店員" : summary ? !summary.hasPlan ? "今日尚無核准班次，可查看工作台" : summary.hasOpenShift ? `上班中 · ${formatClock(summary.startsAt)} 打卡` : "尚未上班打卡" : error || "讀取今日出勤…"}</p></div></div>
+  return <section className={`dwShiftBar${compact ? " serviceShiftBar" : ""}`} aria-label="我的營業狀態">
+    <div className="dwShiftIdentity"><span className={`dwDot${summary?.hasOpenShift ? " isActive" : ""}`} /><div>{!compact && <strong>{name} <small>{periodStatusLabel(periodStatus)}</small></strong>}<p>{compact && `${periodStatus ? periodStatusLabel(periodStatus) : "營業狀態待確認"} · `}{!staffId ? "帳號尚未綁定店員" : summary ? !summary.hasPlan ? "今日尚無核准班次，可查看工作台" : summary.hasOpenShift ? `上班中 · ${formatClock(summary.startsAt)} 打卡` : "尚未上班打卡" : error || "讀取今日出勤…"}</p></div></div>
     <AdminButton variant="secondary" busy={busy} busyLabel="處理中…" disabled={disabled || !summary?.hasPlan || Boolean(summary.hasOpenShift && summary.activeCount)} disabledReason={summary && !summary.hasPlan ? "請先完成班次規劃並由經理核准。" : undefined} onClick={() => void apply(summary?.hasOpenShift ? "clock_out" : "clock_in")}>{summary?.hasOpenShift ? "下班打卡" : "上班打卡"}</AdminButton>
     {actionError && <p className="adminFormError" role="alert">{actionError}</p>}
   </section>;

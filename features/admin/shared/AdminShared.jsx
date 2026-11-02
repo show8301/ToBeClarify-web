@@ -9,14 +9,14 @@ import { AdminButton } from './AdminButton';
 export function AdminPage({ eyebrow, title, description, actions, children }) {
   return (
     <section className="adminPage">
-      <div className="adminPageHeading">
+      {(eyebrow || title || description || actions) ? <div className="adminPageHeading">
         <div>
           <p className="eyebrow">{eyebrow}</p>
           <h1>{title}</h1>
           {description ? <p>{description}</p> : null}
         </div>
         {actions ? <div className="adminPageActions">{actions}</div> : null}
-      </div>
+      </div> : null}
       {children}
     </section>
   );

@@ -4,9 +4,10 @@
   { "selector": ".orderCustomerNav button.isActive", "declarations": { "font-weight": "800" } },
   { "selector": ".orderMenuDrawer", "declarations": { "position": "fixed", "overflow": "auto" } },
   { "selector": ".orderCustomerShell .orderWorkspace", "context": ["@media(max-width:1479px)"], "declarations": { "grid-template-columns": "minmax(0,1fr)" } },
-  { "selector": ".orderCustomerShell .orderAside>button", "context": ["@media(max-width:1479px)"], "declarations": { "width": "auto", "min-width": "88px", "white-space": "normal" } },
+  { "selector": ".orderCustomerShell .orderAside>button", "context": ["@media(max-width:1479px)"], "declarations": { "width": "100%", "min-width": "88px", "white-space": "normal" } },
+  { "selector": ".orderCustomerShell .orderTopbar", "declarations": { "z-index": "40", "background": "#f9fafc" } },
   { "selector": ".orderNavigationDesktop", "context": ["@media(max-width:1100px)"], "declarations": { "display": "none" } },
   { "selector": ".orderNavigationMobile", "context": ["@media(max-width:1100px)"], "declarations": { "display": "flex", "flex-wrap": "wrap" } },
   { "selector": ".orderCustomerShell .nominationModeGrid", "context": ["@media(max-width:1100px)"], "declarations": { "grid-template-columns": "minmax(0,1fr)" } },
-  { "selector": ".nominationModeCard>.nominationModeCopy", "declarations": { "font-size": "14px", "letter-spacing": "normal" } }
+  { "selector": ".nominationModeCard>.nominationModeCopy", "declarations": { "font-size": "14px", "font-weight": "400", "letter-spacing": "normal" } }
 ]

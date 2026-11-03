@@ -329,11 +329,12 @@ function NominationPage({ session, settings, businessContext, staff, cart, setCa
       <div className="nominationStaffGrid">{visibleStaff.map((person) => { const label = person.currentStatus === 'busy' ? '目前忙碌，可選未來空檔' : person.isWorkingToday ? '可指名' : '班內可預約'; return <button type="button" key={person.id} aria-pressed={staffId === person.id} className={staffId === person.id ? 'isActive' : ''} onClick={() => selectStaff(person.id)}><span>{person.avatarUrl ? <img src={person.avatarUrl} alt="" /> : person.displayName.slice(0, 1)}</span><strong>{person.displayName}</strong><small>{label}</small></button>; })}</div>
       {!visibleStaff.length ? <p>目前沒有開放指名的店員，請洽店員協助。</p> : null}
     </section>
-    {selectedStaff ? <section className="nominationSection"><header><span>02</span><div><h2 id="nomination-method-title">這次要如何預約？</h2><p id="nomination-method-hint">請點選一種方式；兩種方式都由你選擇店員。</p></div></header>
+    {selectedStaff ? <section className="nominationSection"><header><span>02</span><div><h2 id="nomination-method-title">這次要如何預約？</h2><p id="nomination-method-hint">為這位店員選一種預約方式。</p></div></header>
       <fieldset className="nominationModeGrid" aria-labelledby="nomination-method-title" aria-describedby="nomination-method-hint">
-        <NominationModeCard value="companionship" title="先預約店員，稍後再選服務" description="先安排指名時段，現在只計基礎指名費。" price={`基礎指名費 ${money(settings.baseNominationFee)}／節`} detail="服務成立後，可在原時段內追加服務，不重複收取該時段的基礎指名費。" selected={mode === 'companionship'} onSelect={() => selectMode('companionship')} />
-        <NominationModeCard value="service" title="預約店員，現在選購服務" description="現在選擇這位店員提供的服務，再安排時間。" price="基礎指名費＋所選服務費；下一步分別列出。" detail="下一步：選擇下方一項服務。改選稍後選服務會清除加購商品，並重設為 1 節。" selected={mode === 'service'} onSelect={() => selectMode('service')} />
+        <NominationModeCard value="companionship" title="先約時段" description="先排時間，服務稍後加購。" price={`基礎指名費 ${money(settings.baseNominationFee)}／節`} selected={mode === 'companionship'} onSelect={() => selectMode('companionship')} />
+        <NominationModeCard value="service" title="選服務再預約" description="先選一項服務，再安排時間。" price="基礎指名費＋所選服務費" selected={mode === 'service'} onSelect={() => selectMode('service')} />
       </fieldset>
+      <details className="nominationMethodHelp"><summary>費用與追加服務說明</summary><p>兩種方式皆收基礎指名費，加購服務另計；費用會在排程區分別列出。預約成立後，可在原時段內追加服務，不重複收取該時段的基礎指名費。</p></details>
       <p className="nominationNextStep" role="status">{nextStep}</p>
       {mode === 'service' ? <div className="nominationServiceGrid">{services.map((item) => <button type="button" key={item.id} aria-pressed={serviceId === item.id} className={serviceId === item.id ? 'isActive' : ''} onClick={() => { setServiceId(item.id); setSegments(item.durationMinutes ? Math.ceil(item.durationMinutes / settings.segmentMinutes) : 1); }}><span>{item.serviceType === 'special' ? 'SPECIAL' : 'SERVICE'}</span><strong>{item.serviceName}</strong><p>{item.serviceDescription}</p><footer><b>{money(item.price)}</b><small>{item.durationMinutes ? `${item.durationMinutes} 分鐘／單次` : '每節計費'}</small></footer></button>)}</div> : null}
     </section> : null}

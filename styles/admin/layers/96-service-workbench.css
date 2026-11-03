@@ -97,7 +97,30 @@
 .serviceTaskHead small, .adminAdmissionDaily small, .adminAdmissionSummary > small { display: block; margin-top: 6px; color: var(--color-fg-mute); }
 .serviceTaskHead strong, .serviceTaskHead small { overflow-wrap: anywhere; }
 .serviceTaskDetail { display: grid; gap: 14px; margin-top: var(--admin-space-block, 18px); }
-.serviceCurrentOrder { scroll-margin-top: var(--admin-space-block, 18px); }
+.adminDialog.serviceOrderDialog {
+  width: min(1120px, 100%);
+  max-height: 90dvh;
+}
+:root .adminDialog.serviceOrderDialog { background: var(--color-bg-0); }
+.serviceOrderDialog .adminDialogHeader { align-items: flex-start; }
+.serviceOrderDialog .adminDialogHeader > div { min-width: 0; }
+.serviceOrderDialog .adminDialogTitle { font-size: 22px; overflow-wrap: anywhere; }
+.serviceOrderDialog .adminDialogDescription { overflow-wrap: anywhere; }
+.serviceOrderDialog .adminDialogBody { min-height: 0; overscroll-behavior: contain; }
+.serviceOrderDialog .serviceTaskDetail { margin-top: 0; }
+.serviceOrderDiscard { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.serviceOrderDiscard p { flex-basis: 100%; margin: 0; }
+@media (max-width: 760px) {
+  .adminDialogPopup:has(.serviceOrderDialog) { width: 100dvw; padding: 0; }
+  .adminDialog.serviceOrderDialog { width: 100%; height: 100dvh; max-height: 100dvh; border-radius: 0; }
+  .serviceOrderDialog .adminDialogHeader { padding-top: calc(14px + env(safe-area-inset-top)); }
+  .serviceOrderDialog .adminDialogTitle { font-size: 18px; }
+  .serviceOrderDialog .adminDialogBody { padding-bottom: calc(14px + env(safe-area-inset-bottom)); }
+  .serviceOrderDialog .serviceOrderColumns { grid-template-columns: minmax(0, 1fr); }
+  .serviceOrderDialog .adminOrderUnitHeading { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+  .serviceOrderDialog .adminOrderUnitHeading > div { grid-row: 2; grid-column: 1 / -1; }
+  .serviceOrderDialog .adminOrderUnitStatus { grid-row: 1; grid-column: 2; }
+}
 .serviceOrderColumns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--admin-space-inline, 18px); align-items: start; }
 .serviceOrderService, .serviceOrderReceipt {
   display: grid;

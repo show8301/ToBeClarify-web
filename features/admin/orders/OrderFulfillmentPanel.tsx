@@ -59,9 +59,10 @@ const labels: Record<string, string> = {
 };
 const showTime = (value?: string | null) => value ? new Date(value).toLocaleString("zh-TW", { hour12: false, timeZone: "Asia/Taipei" }) : "—";
 
-export function OrderFulfillmentPanel({ orderId, onChanged, disabled = false, storeConfirmationPending = false, onBusy, onProgressChange, refreshKey = "" }: {
+export function OrderFulfillmentPanel({ orderId, onChanged, disabled = false, storeConfirmationPending = false, onBusy, onProgressChange, refreshKey = "", defaultQuantityToMax = false }: {
   orderId: string; onChanged: () => Promise<void> | void; disabled?: boolean; onBusy?: (busy: boolean) => void;
   storeConfirmationPending?: boolean; onProgressChange?: (progress: FulfillmentReadState) => void; refreshKey?: string;
+  defaultQuantityToMax?: boolean;
 }) {
   const [units, setUnits] = useState<Unit[]>([]);
   const [error, setError] = useState("");
@@ -126,16 +127,18 @@ export function OrderFulfillmentPanel({ orderId, onChanged, disabled = false, st
       {actionableUnits.some(unit => unit.kind === "meal" && unit.allowedActions.includes("start")) && <AdminButton disabled={disabled || batchBusy || !ready || Boolean(error)} onClick={() => void batchMeals("start")}>批次開始已接餐點</AdminButton>}
       {actionableUnits.some(unit => unit.kind === "meal" && unit.allowedActions.includes("complete")) && <AdminButton variant="secondary" disabled={disabled || batchBusy || !ready || Boolean(error)} onClick={() => void batchMeals("complete")}>批次送達已處理餐點</AdminButton>}
     </div> : null}
-    {actionableUnits.map(unit => <UnitControls key={`${unit.id}-${unit.version}-${storeConfirmationPending}`} orderId={orderId} unit={unit} disabled={disabled || batchBusy || !ready || Boolean(error)} onBusy={onBusy} onChanged={async () => {
+    {actionableUnits.map(unit => <UnitControls key={`${unit.id}-${unit.version}-${storeConfirmationPending}`} orderId={orderId} unit={unit} defaultQuantityToMax={defaultQuantityToMax} disabled={disabled || batchBusy || !ready || Boolean(error)} onBusy={onBusy} onChanged={async () => {
       setRevision(n => n + 1);
       await onChanged();
     }} />)}
   </section>;
 }
 
-function UnitControls({ orderId, unit, onChanged, disabled, onBusy }: { orderId: string; unit: Unit; onChanged: () => Promise<void>; disabled: boolean; onBusy?: (busy: boolean) => void }) {
+function UnitControls({ orderId, unit, onChanged, disabled, onBusy, defaultQuantityToMax }: { orderId: string; unit: Unit; onChanged: () => Promise<void>; disabled: boolean; onBusy?: (busy: boolean) => void; defaultQuantityToMax: boolean }) {
+  const defaultAction = unit.allowedActions.find(action => ["accept", "start", "complete"].includes(action)) || unit.allowedActions[0] || "";
+  const dailyLimit = getFulfillmentQuantityLimit(unit, defaultAction);
   const [draft, setDraft] = useState<FulfillmentDraft>({
-    quantity: 1, reason: "", startsAt: "", targetBusinessPeriodId: "",
+    quantity: defaultQuantityToMax ? Math.max(1, dailyLimit) : 1, reason: "", startsAt: "", targetBusinessPeriodId: "",
     actualStartsAt: "", actualEndsAt: "", restMinutes: unit.restMinutesReserved || 0,
     compensationAmount: 0, compensationReason: "",
   });
@@ -218,6 +221,7 @@ function UnitControls({ orderId, unit, onChanged, disabled, onBusy }: { orderId:
   };
   const openEditor = (action: string, selectedAt: number) => {
     if (disabled || busy || retry) return;
+    if (defaultQuantityToMax) updateDraft({ quantity: Math.max(1, getFulfillmentQuantityLimit(unit, action)) });
     setActiveAction(action);
     setCompletionTime(selectedAt);
     setMoreOpen(true);
@@ -255,7 +259,7 @@ function UnitControls({ orderId, unit, onChanged, disabled, onBusy }: { orderId:
     </p>}
     {unit.allowedActions.length > 0 && <div className="adminFulfillmentDailyBar">
       {dailyActions.length > 0 && <>
-        <FulfillmentQuantityField value={draft.quantity} max={unit.quantity} fixed={unit.quantity === 1}
+        <FulfillmentQuantityField value={draft.quantity} max={defaultQuantityToMax ? dailyLimit : unit.quantity} fixed={unit.quantity === 1}
           disabled={disabled || busy || Boolean(retry)} onChange={quantity => updateDraft({ quantity })} />
         <div className="adminFulfillmentDailyActions">
           {dailyActions.map((action, index) => <AdminButton key={action}

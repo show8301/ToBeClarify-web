@@ -20,10 +20,11 @@ export function WorkbenchOrderReceiptDialog({ order, account, cashPeriodId, busi
   </AdminDialog>;
 }
 
-export function WorkbenchOrderReceiptForm({ order, account, cashPeriodId, businessDate, onClose, onCommitted, onBusy, disabled = false, onReload, onPendingChange, showOrderBreakdown = true }: {
+export function WorkbenchOrderReceiptForm({ order, account, cashPeriodId, businessDate, onClose, onCommitted, onBusy, disabled = false, onReload, onPendingChange, onDirtyChange, showOrderBreakdown = true }: {
   order: OperationsOrder; account: FinanceAccount; cashPeriodId: string; businessDate: string;
   onClose?: () => void; onCommitted: (message: string) => void; onBusy: (busy: boolean) => void;
   disabled?: boolean; onReload?: () => Promise<void>; onPendingChange?: (pending: boolean) => void; showOrderBreakdown?: boolean;
+  onDirtyChange?: (dirty: boolean) => void;
 }) {
   const summary = orderFinance(order, account);
   const [amountInput, setAmountInput] = useState<string | null>(null);
@@ -34,6 +35,8 @@ export function WorkbenchOrderReceiptForm({ order, account, cashPeriodId, busine
   const [retry, setRetry] = useState<FinanceSaveRequest | null>(null);
   const [mustReload, setMustReload] = useState(false);
   const lock = useRef(false);
+  const dirty = amountInput !== null || note !== "";
+  useEffect(() => { onDirtyChange?.(dirty); }, [dirty, onDirtyChange]);
   useEffect(() => {
     onPendingChange?.(busy || Boolean(retry));
     return () => onPendingChange?.(false);

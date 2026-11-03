@@ -22,7 +22,6 @@ export function BusinessDayPlanPanel({ businessDate, onOpened, compact = false, 
   const [plan, setPlan] = useState<Plan | null>(null);
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
-  const [flow2, setFlow2] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [retry, setRetry] = useState<{ action: "save" | "open"; path: string; body: object } | null>(null);
@@ -39,7 +38,7 @@ export function BusinessDayPlanPanel({ businessDate, onOpened, compact = false, 
     const request = retry ?? {
       action, path: action === "save" ? `/business-day-plans/${date}` : "/business-period/open",
       body: action === "save" ? { startsAt: `${startsAt}:00+08:00`, endsAt: `${endsAt}:00+08:00`, expectedVersion: plan.version, operationId: crypto.randomUUID() }
-        : { businessDate: date, projectedCloseAt: endsAt, flowVersion: flow2 ? 2 : 1, operationId: crypto.randomUUID(), reason: "現場手動開店" },
+        : { businessDate: date, projectedCloseAt: endsAt, flowVersion: 2, operationId: crypto.randomUUID(), reason: "現場手動開店" },
     };
     setRetry(request); setBusy(true); setMessage("");
     onBusyChange?.(true);
@@ -67,8 +66,7 @@ export function BusinessDayPlanPanel({ businessDate, onOpened, compact = false, 
       <div className="adminBusinessPlanActions">
         {plan && !plan.isOpened && <>
           <button className="adminButton adminButton-secondary adminBusinessPlanSave" type="button" disabled={!startsAt || !endsAt} onClick={() => void run("save")}>儲存計畫</button>
-          <label className="adminBusinessPlanOption"><input type="checkbox" checked={flow2} onChange={e => setFlow2(e.target.checked)} /><span>本營業日使用分項接待及現場帳款</span></label>
-          {flow2 && <p className="adminBusinessPlanHint">分項接待與現場帳款可用；關店後由結算工作臺入口核對實收、保留分潤並完成正式結算。</p>}
+          <p className="adminBusinessPlanHint">開店一律使用分項接待及現場帳款；關店後請至結算工作臺核對實收並完成正式結算。</p>
           <button className="adminButton adminButton-primary adminBusinessPlanOpen" type="button" disabled={!plan.isSaved || startsAt !== inputTime(plan.startsAt) || endsAt !== inputTime(plan.endsAt)} onClick={() => void run("open")}>現在開店</button>
         </>}
       </div>

@@ -5,12 +5,15 @@ import { AdmissionSummary } from "@/features/admin/orders/AdmissionSummary";
 import { WorkbenchOrderComposer } from "./WorkbenchOrderComposer";
 import { WorkbenchDepartureAction, WorkbenchPassAction } from "./WorkbenchGuestActions";
 import { ServiceGuestPicker } from "./ServiceGuestPicker";
+import type { ServiceGuestScope } from "./ServiceGuestPicker";
 import type { CurrentAdminUser, OperationsData, OperationsOrder } from "./operationsTypes";
 
-export function ServiceGuestPanel({ data, user, selectedId, onSelect, disabled, onBusy, onChanged, onOpenOrder }: {
+export function ServiceGuestPanel({ data, user, selectedId, onSelect, disabled, onBusy, onChanged, onOpenOrder, loading = false, loadError = "", onRetry, scope, onScopeChange }: {
   data: OperationsData; user?: CurrentAdminUser; selectedId: string;
   onSelect: (id: string) => void; disabled: boolean; onBusy: (busy: boolean) => void; onChanged: () => Promise<void>;
   onOpenOrder: (order: OperationsOrder) => void;
+  loading?: boolean; loadError?: string; onRetry?: () => Promise<void>;
+  scope: ServiceGuestScope; onScopeChange: (scope: ServiceGuestScope) => void;
 }) {
   const [dialog, setDialog] = useState<"meals" | "rooms" | "pass" | "departure" | null>(null);
   const selected = data.sessions.find((s) => s.id === selectedId);
@@ -20,9 +23,11 @@ export function ServiceGuestPanel({ data, user, selectedId, onSelect, disabled, 
   const canOrder = currentEntry && selected?.status === "active" && selected.entryStatus === "open";
   const saved = async () => { setDialog(null); await onChanged(); };
   return <AdminPanel className="serviceGuestPanel" title={<span className="adminFieldHeading">顧客現場處理<AdminHelp title="顧客現場處理說明">搜尋本期入場與跨期履約顧客，處理代點、點餐碼、離店與同單收款。在場不代表本期可點餐，服務完成與帳款結清分開追蹤。</AdminHelp></span>}>
-    <ServiceGuestPicker sessions={data.sessions} periodId={periodId} selectedId={selectedId} onSelect={onSelect} disabled={disabled || Boolean(dialog)} />
-    {selected ? <div key={selected.id}>
+    {loading ? <p role="status">正在讀取顧客…</p> : loadError ? <div role="alert"><p>{loadError}</p><AdminButton variant="secondary" onClick={() => void onRetry?.()}>重新讀取顧客</AdminButton></div> : null}
+    <ServiceGuestPicker sessions={data.sessions} periodId={periodId} selectedId={selectedId} onSelect={onSelect} disabled={disabled || Boolean(dialog)} unavailable={loading || Boolean(loadError)} scope={scope} onScopeChange={onScopeChange} />
+    {selected ? <div className="serviceGuestDetails" key={selected.id}>
       <h3>{selected.customerName} · {selected.gameId}</h3>
+      <p className="serviceGuestState">{currentEntry ? "本期入場" : "跨期履約"} · {canOrder ? "可點餐" : "唯讀／不可點餐"} · 帳款請依入場與收款資訊確認</p>
       {!currentEntry && <p>此為跨期履約顧客；原入場紀錄不提供本期代點、重發碼或重開點餐。</p>}
       <AdmissionSummary sessionId={selected.id} refreshKey={data.refreshedAt} />
       <div className="adminPageActions"><AdminButton disabled={disabled || !canOrder} onClick={() => setDialog("meals")}>代客點餐</AdminButton><AdminButton variant="secondary" disabled={disabled || !canOrder} onClick={() => setDialog("rooms")}>代訂包廂</AdminButton><AdminButton variant="secondary" disabled={disabled || !currentEntry} onClick={() => setDialog("pass")}>重發點餐碼</AdminButton><AdminButton variant="ghost" disabled={disabled || !currentEntry} onClick={() => setDialog("departure")}>{selected.status === "active" ? "顧客離店" : "重開點餐"}</AdminButton></div>

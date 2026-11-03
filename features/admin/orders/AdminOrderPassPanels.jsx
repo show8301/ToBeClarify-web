@@ -11,17 +11,21 @@ export function IssuedPanel({ issued, onClose }) {
     } catch { setCopied(''); }
   };
   const orderUrl = publicOrderUrl(issued.orderUrl);
-  const compactUrl = compactOrderUrl(orderUrl);
   return <div className="adminIssuedPanel">
     <header>
       <div><span>ORDER PASS READY</span><h2>{issued.session.customerName} 的今日點餐資料</h2></div>
       <button type="button" aria-label="關閉點餐資料" onClick={onClose}>×</button>
     </header>
-    {issued.admission ? <p role="status">入場實收 {Number(issued.admission.receivedAmount).toLocaleString('zh-TW')} G · {new Date(issued.admission.recordedAt).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' })} · 經手帳號 {issued.admission.recordedBy}</p> : null}
+    {issued.admission ? <dl className="adminIssuedReceipt" aria-label="入場收款紀錄">
+      <div><dt>入場實收</dt><dd><strong>{Number(issued.admission.receivedAmount).toLocaleString('zh-TW')} G</strong></dd></div>
+      <div><dt>登記時間</dt><dd>{new Date(issued.admission.recordedAt).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' })}</dd></div>
+      <div><dt>經手帳號</dt><dd>{issued.admission.recordedBy}</dd></div>
+    </dl> : null}
     <div className="adminIssuedFields">
-      <div className="adminIssuedField adminIssuedUrlField"><div className="adminIssuedFieldLabel"><strong>點餐網址</strong><small>複製可直接分享給顧客</small></div><code title={orderUrl}>{compactUrl}</code><button className="adminCopyIconButton" type="button" aria-label="複製點餐網址" title="複製點餐網址" onClick={() => copy(orderUrl, 'url')}><CopyIcon />{copied === 'url' ? <span className="adminCopyStatus">已複製</span> : null}</button></div>
-      <div className="adminIssuedField adminRecoveryField"><div className="adminIssuedFieldLabel"><strong>六位數協助碼</strong><small>顧客遺失網址時提供</small></div><code>{issued.recoveryCode}</code><button className="adminCopyIconButton" type="button" aria-label="複製協助碼" title="複製協助碼" onClick={() => copy(issued.recoveryCode, 'recovery')}><CopyIcon />{copied === 'recovery' ? <span className="adminCopyStatus">已複製</span> : null}</button></div>
+      <div className="adminIssuedField adminIssuedUrlField"><div className="adminIssuedFieldLabel"><strong>點餐網址</strong><small>複製可直接分享給顧客</small></div><code dir="ltr">{orderUrl}</code><button className="adminCopyIconButton" type="button" aria-label="複製點餐網址" title="複製點餐網址" onClick={() => copy(orderUrl, 'url')}><CopyIcon /></button></div>
+      <div className="adminIssuedField adminRecoveryField"><div className="adminIssuedFieldLabel"><strong>六位數協助碼</strong><small>顧客遺失網址時提供</small></div><code dir="ltr">{issued.recoveryCode}</code><button className="adminCopyIconButton" type="button" aria-label="複製協助碼" title="複製協助碼" onClick={() => copy(issued.recoveryCode, 'recovery')}><CopyIcon /></button></div>
     </div>
+    <p className="adminIssuedCopyFeedback" role="status">{copied === 'url' ? '點餐網址已複製' : copied === 'recovery' ? '協助碼已複製' : ''}</p>
     <p>重新補發會使舊網址失效；協助碼只在顧客遺失點餐碼時由店員提供。</p>
   </div>;
 }
@@ -33,15 +37,6 @@ function publicOrderUrl(value) {
     url.protocol = window.location.protocol;
     url.host = window.location.host;
     return url.toString();
-  } catch { return value; }
-}
-
-function compactOrderUrl(value) {
-  try {
-    const url = new URL(value);
-    const code = url.searchParams.get('code');
-    if (!code) return value;
-    return `${url.host}${url.pathname}?code=${code.length > 10 ? `${code.slice(0, 10)}…` : code}`;
   } catch { return value; }
 }
 

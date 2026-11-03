@@ -1,12 +1,16 @@
+.adminRoleDashboard-service .serviceMetrics {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
 .serviceMetrics > button {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(2ch, max-content);
-  grid-template-areas: "topic quantity" "detail detail";
+  grid-template-areas: "topic quantity";
   align-content: center;
   gap: 8px 12px;
   min-width: 0;
-  min-height: 112px;
-  padding: 14px 16px;
+  min-height: 64px;
+  padding: 10px 12px;
   border: 1px solid var(--admin-border, rgba(127, 149, 162, .3));
   border-radius: 14px;
   background: var(--admin-panel-bg, rgba(127, 149, 162, .08));
@@ -15,12 +19,59 @@
   font: inherit;
   cursor: pointer;
 }
-.adminRoleDashboard-service .serviceMetrics > button > span { grid-area: topic; }
-.adminRoleDashboard-service .serviceMetrics > button > strong { grid-area: quantity; place-self: start end; }
-.serviceMetrics > button > small { color: var(--color-fg-mute); }
-.adminRoleDashboard-service .serviceMetrics > button:first-child span { font-size: 26px; }
-.adminRoleDashboard-service .serviceMetrics > button:first-child strong { font-size: 22px; color: var(--color-accent-2); }
+.adminRoleDashboard-service .serviceMetrics > button > span { grid-area: topic; font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; }
+.adminRoleDashboard-service .serviceMetrics > button > strong { grid-area: quantity; place-self: center end; font-size: 22px; line-height: 1.3; }
+.serviceMetrics > button[aria-pressed="true"] { border-color: var(--color-accent); background-color: rgba(var(--color-accent-rgb), .12); box-shadow: inset 0 -3px var(--color-accent); }
 .serviceMetrics > button:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+.serviceMetricHelp { display: flex; justify-content: flex-end; margin-top: -14px; }
+.servicePrimaryActions { display: flex; flex-wrap: wrap; gap: 10px; }
+.adminRoleDashboard-service > .serviceWorkbenchHeading { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 18px; padding-bottom: 12px; margin: 0; }
+.serviceWorkbenchHeading > .serviceShiftBar { grid-column: 1; grid-row: 2; }
+.serviceWorkbenchHeading > .servicePrimaryActions { grid-column: 2; grid-row: 1 / 3; align-self: start; }
+.servicePrimaryActions .adminButton { min-height: 44px; white-space: normal; overflow-wrap: anywhere; }
+.adminRoleDashboard-service .dwShiftBar.serviceShiftBar { padding: 0; border: 0; background: transparent; box-shadow: none; min-width: 0; gap: 12px; }
+.adminRoleDashboard-service .serviceShiftBar .dwShiftIdentity { min-width: 0; }
+.adminRoleDashboard-service .serviceShiftBar .dwShiftIdentity p { margin: 0; font-size: 13px; overflow-wrap: anywhere; }
+.adminRoleDashboard-service .serviceShiftBar > .adminButton { min-height: 44px; margin-left: auto; }
+.serviceWorkspace { display: grid; grid-template-columns: minmax(0, 1.85fr) minmax(330px, 1fr); align-items: start; gap: var(--admin-space-inline); }
+.serviceWorkspacePane { min-width: 0; scroll-margin-top: 18px; }
+.serviceWorkspacePane > .adminPanel { margin: 0; }
+.serviceWorkspaceTabs { display: none; }
+.serviceConditionSummary { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-bottom: 10px; font-size: 13px; color: var(--color-fg-mute); overflow-wrap: anywhere; }
+.serviceGuestSearchArea { display: grid; gap: 10px; min-width: 0; }
+.serviceGuestFilterDisclosure > summary { min-height: 44px; }
+.serviceGuestFilterDisclosure .serviceGuestFilters { padding-top: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.serviceGuestDetails { min-width: 0; overflow-wrap: anywhere; }
+.serviceGuestDetails > h3 { margin: 18px 0 8px; }
+.serviceGuestDetails .adminAdmissionSummary dl { overflow: visible; }
+.serviceGuestDetails .adminAdmissionSummary dl > div { min-width: 0; grid-template-columns: minmax(0, 1fr); gap: 4px; }
+.serviceGuestDetails .adminAdmissionSummary :is(dt, dd) { white-space: normal; overflow-wrap: anywhere; text-align: left; }
+.serviceGuestState { font-size: 13px; color: var(--color-fg-soft); }
+.serviceQuickLinks { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-top: 10px; border-top: 1px solid var(--color-border); }
+.serviceQuickLinks .adminButton, .serviceConditionSummary .adminButton { min-height: 44px; white-space: normal; }
+.serviceEmptyState p { margin: 12px 0; }
+.serviceStandaloneRooms { display: grid; min-width: 0; gap: 8px; margin-top: 14px; }
+.serviceStandaloneRooms > h3 { margin: 0; font-size: 16px; }
+.serviceStandaloneRooms > p { margin: 0; font-size: 13px; }
+@media (max-width: 1200px) {
+  .serviceWorkspace { grid-template-columns: minmax(0, 1fr); }
+  .serviceWorkspaceTabs { display: flex; gap: 8px; border-bottom: 1px solid var(--color-border); }
+  .serviceWorkspaceTabs > button { flex: 1; min-height: 44px; padding: 10px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); color: var(--color-fg); background: var(--color-surface); font: inherit; cursor: pointer; }
+  .serviceWorkspaceTabs > button[aria-selected="true"] { font-weight: 700; border-color: var(--color-accent); background: rgba(var(--color-accent-rgb), .12); box-shadow: inset 0 -3px var(--color-accent); }
+  .serviceWorkspaceTabs > button:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+  .serviceWorkspace[data-workspace="tasks"] > .serviceGuestsPane,
+  .serviceWorkspace[data-workspace="guests"] > .serviceTasksPane { display: none; }
+}
+@media (max-width: 760px) {
+  .adminRoleDashboard-service .serviceMetrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .adminRoleDashboard-service > .serviceWorkbenchHeading { grid-template-columns: minmax(0, 1fr); }
+  .serviceWorkbenchHeading > .servicePrimaryActions { grid-column: 1; grid-row: 3; }
+  .servicePrimaryActions { width: 100%; }
+  .servicePrimaryActions > .adminButton { flex: 1 1 120px; }
+  .adminRoleDashboard-service .serviceShiftBar .dwShiftIdentity { flex: 1 1 180px; }
+  .serviceTaskFilters .adminButton { flex: 1 1 auto; padding: 8px 10px; white-space: normal; }
+  .serviceGuestFilterDisclosure .serviceGuestFilters { grid-template-columns: minmax(0, 1fr); }
+}
 .serviceTaskFilters, .serviceTaskActions, .serviceTaskPagination {
   display: flex;
   flex-wrap: wrap;
@@ -165,6 +216,7 @@
 }
 .adminCreateSessionPanel .adminAdmissionPayment { display: grid; grid-template-columns: minmax(0, 1fr) max-content; align-items: end; gap: 8px 12px; }
 .adminAdmissionOverview { display: grid; grid-column: 1 / -1; min-width: 0; gap: 3px; }
+.adminAdmissionOverview > p { margin: 0; line-height: 1.6; overflow-wrap: anywhere; }
 .adminAdmissionOverviewPrimary { display: flex; flex-wrap: wrap; min-width: 0; align-items: baseline; gap: 4px 16px; }
 .adminAdmissionOverviewPrimary h3 { margin: 0; color: var(--color-fg); font-size: 16px; line-height: 1.4; }
 .adminAdmissionOverviewPrimary p { display: flex; align-items: baseline; gap: 5px; margin: 0; color: var(--color-fg-soft); font-size: 14px; line-height: 1.4; white-space: nowrap; }
@@ -181,6 +233,12 @@
 .adminAdmissionPaymentActions { display: flex; grid-column: 2; flex-wrap: wrap; align-items: center; align-self: end; justify-content: flex-end; gap: 8px; }
 .adminAdmissionPayment > :is(h3, p), .adminAdmissionPayment [role="status"] > p { margin: 0; }
 .adminAdmissionPayment [role="status"] { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.adminAdmissionPayment > :is(.adminFormError, [role="status"]) { grid-column: 1 / -1; min-width: 0; overflow-wrap: anywhere; }
+/* The drawer stays narrow even when the surrounding desktop viewport is wide. */
+.adminOrderPassDrawerPanel .adminAdmissionPayment { grid-template-columns: minmax(0, 1fr); align-items: start; }
+.adminOrderPassDrawerPanel .adminAdmissionPaymentActions { grid-column: 1; justify-content: flex-start; }
+.adminOrderPassDrawerPanel .adminAdmissionPayment .adminButton,
+.adminOrderPassDrawerPanel .adminCreateSessionPanel > form > .adminButton { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
 .adminAdmissionConfirm { display: flex; align-items: center; gap: 8px; }
 .adminAdmissionConfirm input { width: auto; }
 .adminCreateSessionPanel > form > .adminAdmissionPayment { flex: 1 0 100%; box-sizing: border-box; }

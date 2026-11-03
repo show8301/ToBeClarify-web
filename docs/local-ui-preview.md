@@ -54,7 +54,7 @@
 
 後台入口包含 `95-scrollbars.css`，統一整頁、側欄、抽屜與內部清單的捲軸明暗配色。根層規則以 `:root:has(.adminTheme)` 限定後台範圍，預覽時確認離開後台後公開頁面不受影響；桌面側欄的品牌區與帳號工具列固定，中間 `.adminNav` 獨立捲動，捲軸不得碰到外層圓角邊框。窄螢幕側欄仍使用展開式導覽選單。設計基準見[後台 UI 設計規範](admin-ui-design-guidelines.md)。
 
-服務員工作台新增 `96-service-workbench.css`，在捲軸層之後、既有指名工作台樣式之前載入。確認待辦篩選／展開、顧客區、開碼收款區及 760px 單欄規則；靜態產物檢查可用 [service-workbench.json](../scripts/preview-css/service-workbench.json)。此檢查不代表交易、computed styles 或 rendered fonts 已驗證。
+服務員工作台 `96-service-workbench.css` 在捲軸層之後、既有指名工作台樣式之前載入。確認精簡頁首、64px 統計入口、1200px 以下頁籤與760px 以下2×2統計、顧客篩選收合，以及保留開碼抽屜單欄收款修正；靜態產物檢查可用 [service-workbench.json](../scripts/preview-css/service-workbench.json)。頁籤只隱藏既有元件，不卸載搜尋與草稿；寬版訂單處理保持全寬。此檢查不代表交易、computed styles 或 rendered fonts 已驗證。
 
 交付工作台樣式 `92-delivery-workspace.css` 置於 `91-customers-and-delivery.css` 與 `95-scrollbars.css` 之間；預覽時確認 `.adminDeliveryColumns`、範圍切換、詳情頁籤與共用展開箭頭均包含在後台 bundle。
 
@@ -63,6 +63,8 @@
 顧客分類依既有逐客訂單查詢核對（同時最多 4 筆，更新或離頁會取消過期讀取），依優先順序分為待確認／需協調、待履約／服務中、狀態待確認、訂單已完成、僅取消／失效及尚未下單。未知狀態、數量不一致或讀取失敗不得歸入完成。訂單完成只代表履約，不代表帳款已結清。新邏輯與清單抽至 TypeScript 的 `CustomerPane.tsx`、`customerProgress.ts`；既有 `AdminOrdersPage.jsx` 本次只替換組合入口，保留 JSX，避免連帶改寫既有大型交易表單，後續實質修改那些表單時再遷移。
 
 開立點餐碼採依內容寬度換行的表單，人物 ID 欄供 6 字、顯示名稱供 12 字，指名人數為 0–9；既有 UID 與產生按鈕接續排列。欄位標籤列高度一致，標籤及圖示置中、控制項對齊；伺服器文字以對稱內距置中並保留共用箭頭。一般填寫與舊 UID 說明使用下述標準行內說明；載入／錯誤／完整顧客 ID 與歸戶結果仍直接顯示。
+
+開碼成功的 `IssuedPanel` 使用單欄上下排列的網址／六位數協助碼資訊卡，標籤獨立一列、值與複製按鈕並排。網址允許完整換行，協助碼不得省略；複製按鈕與關閉按鈕至少 44px。收款金額、登記時間與經手帳號使用分列描述清單，長帳號可換行；無入場紀錄的補發結果不顯示空收款區。複製回饋放獨立的 status 列，避免遮住資料。樣式集中於 `40-dark-and-operational.css`，沿用明暗配色及既有抽屜，不調整開碼、收款或焦點規則。本次僅局部調整既有 JSX 結果面板的呈現，保留檔名與引用，未擴大遷移交易頁。可用 [issued-order-pass.json](../scripts/preview-css/issued-order-pass.json) 檢查產物宣告，實際視覺與複製操作仍須人工確認。
 
 經理工作台樣式 `94-manager-workbench.css` 在完整點單管理之後、捲軸樣式之前載入。確認 `.managerColumns`、`.managerTask`、`.managerChecklist`、明暗主題與手機斷點規則均包含在 bundle；現場待辦與帳款清單各自捲動，收班步驟與營運摘要依自然高度呈現。
 

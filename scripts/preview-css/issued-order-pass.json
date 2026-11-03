@@ -1,0 +1,10 @@
+[
+  { "selector": ".adminIssuedPanel > .adminIssuedFields", "declarations": { "grid-template-columns": "minmax(0, 1fr)", "gap": "12px" } },
+  { "selector": ".adminIssuedField", "declarations": { "grid-template-columns": "minmax(0, 1fr) auto", "padding": "16px" } },
+  { "selector": ".adminIssuedFieldLabel", "declarations": { "grid-column": "1 / -1" } },
+  { "selector": ".adminIssuedField code", "declarations": { "white-space": "normal", "overflow-wrap": "anywhere", "text-overflow": "clip" } },
+  { "selector": ".adminRecoveryField code", "declarations": { "white-space": "nowrap", "text-align": "left" } },
+  { "selector": ".adminIssuedReceipt dd", "declarations": { "overflow-wrap": "anywhere" } },
+  { "selector": ".adminIssuedField .adminCopyIconButton", "declarations": { "--icon-action-size": "44px" } },
+  { "selector": ".adminIssuedPanel > header > button", "declarations": { "width": "44px", "height": "44px" } }
+]

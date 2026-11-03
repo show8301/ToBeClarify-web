@@ -3,7 +3,8 @@
 import { useId, useMemo, useState } from "react";
 import { Combobox } from "@base-ui/react/combobox";
 import { ChevronDown, X } from "lucide-react";
-import { AdminField } from "@/features/admin/shared/AdminShared.jsx";
+import { AdminButton, AdminField } from "@/features/admin/shared/AdminShared.jsx";
+import { AdminDisclosureSummary } from "@/features/admin/shared/AdminDisclosureSummary";
 import type { OperationsSession } from "./operationsTypes";
 
 type Props = {
@@ -12,9 +13,13 @@ type Props = {
   selectedId: string;
   disabled: boolean;
   onSelect: (id: string) => void;
+  unavailable?: boolean;
+  scope: ServiceGuestScope;
+  onScopeChange: (scope: ServiceGuestScope) => void;
 };
 type EntryScope = "all" | "open" | "departed" | "unknown";
 type PeriodScope = "all" | "current" | "carry";
+export type ServiceGuestScope = { entryScope: EntryScope; periodScope: PeriodScope };
 type GuestOption = { id: string; label: string; entry: Exclude<EntryScope, "all">; period: Exclude<PeriodScope, "all"> | "unknown" };
 
 function entryState(session: OperationsSession): GuestOption["entry"] {
@@ -25,11 +30,11 @@ function entryState(session: OperationsSession): GuestOption["entry"] {
 
 const entryLabels = { open: "在場", departed: "已離店／唯讀", unknown: "入場狀態待確認" };
 
-export function ServiceGuestPicker({ sessions, periodId, selectedId, disabled, onSelect }: Props) {
+export function ServiceGuestPicker({ sessions, periodId, selectedId, disabled, onSelect, unavailable = false, scope, onScopeChange }: Props) {
   const pickerId = useId();
   const countId = useId();
-  const [entryScope, setEntryScope] = useState<EntryScope>("all");
-  const [periodScope, setPeriodScope] = useState<PeriodScope>("all");
+  const { entryScope, periodScope } = scope;
+  const [query, setQuery] = useState("");
   const options = useMemo<GuestOption[]>(() => sessions.map((session) => {
     const entry = entryState(session);
     const period = !periodId || !session.businessPeriodId ? "unknown" : session.businessPeriodId === periodId ? "current" : "carry";
@@ -41,13 +46,15 @@ export function ServiceGuestPicker({ sessions, periodId, selectedId, disabled, o
   const selectedOutsideScope = selected && !candidates.some((item) => item.id === selected.id);
 
   return <>
-    <div className="serviceGuestFilters">
+    <div className="serviceGuestSearchArea">
       <div className="serviceGuestPickerField">
         <label htmlFor={pickerId}>顧客搜尋</label>
         <Combobox.Root<GuestOption>
           items={candidates}
           value={selected}
           disabled={disabled}
+          inputValue={query}
+          onInputValueChange={setQuery}
           autoHighlight
           itemToStringLabel={(item) => item.label}
           itemToStringValue={(item) => item.id}
@@ -70,15 +77,18 @@ export function ServiceGuestPicker({ sessions, periodId, selectedId, disabled, o
           </Combobox.Portal>
         </Combobox.Root>
       </div>
+      <div className="serviceConditionSummary"><span>{entryScope === "all" ? "全部入場狀態" : entryLabels[entryScope]} · {periodScope === "all" ? "含跨期履約" : periodScope === "current" ? "本期入場" : "跨期履約顧客"}</span>{(entryScope !== "all" || periodScope !== "all" || query) && <AdminButton variant="ghost" disabled={disabled} onClick={() => { onScopeChange({ entryScope: "all", periodScope: "all" }); setQuery(""); }}>清除條件</AdminButton>}</div>
+      <details className="serviceGuestFilterDisclosure"><AdminDisclosureSummary>篩選</AdminDisclosureSummary><div className="serviceGuestFilters">
       <AdminField label="入場狀態"><select disabled={disabled} value={entryScope} onChange={(event) => {
         const value = event.target.value;
-        if (value === "all" || value === "open" || value === "departed" || value === "unknown") setEntryScope(value);
+        if (value === "all" || value === "open" || value === "departed" || value === "unknown") onScopeChange({ ...scope, entryScope: value });
       }}><option value="all">全部</option><option value="open">在場</option><option value="departed">已離店／唯讀</option><option value="unknown">狀態待確認</option></select></AdminField>
       <AdminField label="營業期範圍"><select disabled={disabled} value={periodScope} onChange={(event) => {
         const value = event.target.value;
-        if (value === "all" || value === "current" || value === "carry") setPeriodScope(value);
+        if (value === "all" || value === "current" || value === "carry") onScopeChange({ ...scope, periodScope: value });
       }}><option value="all">全部（含跨期履約）</option><option value="current">本期入場</option><option value="carry">跨期履約顧客</option></select></AdminField>
+      </div></details>
     </div>
-    <p id={countId} className="serviceGuestCount" role="status">篩選範圍共 {candidates.length} 位顧客{selectedOutsideScope ? "；目前選取的顧客不在此範圍，明細仍保留。" : "。"}</p>
+    <p id={countId} className="serviceGuestCount" role="status">{unavailable ? "顧客筆數尚未確認。" : `篩選範圍共 ${candidates.length} 位顧客${selectedOutsideScope ? "；目前選取的顧客不在此範圍，明細仍保留。" : "。"}`}</p>
   </>;
 }

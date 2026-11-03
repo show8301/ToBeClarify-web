@@ -1,25 +1,28 @@
 "use client";
 
-import { InlineHelp } from "@/components/InlineHelp";
+import { useId } from "react";
 
 type Props = {
-  kicker: string;
+  value: string;
   title: string;
   description: string;
+  price: string;
+  detail: string;
   selected: boolean;
   onSelect: () => void;
 };
 
-export function NominationModeCard({ kicker, title, description, selected, onSelect }: Props) {
+export function NominationModeCard({ value, title, description, price, detail, selected, onSelect }: Props) {
+  const id = useId();
   return (
-    <div className={`nominationModeCard ${selected ? "isActive" : ""}`}>
-      <span>{kicker}</span>
-      <div className="nominationModeTitle">
-        <button type="button" className="nominationModeSelect" aria-pressed={selected} onClick={onSelect}>
-          <strong>{title}</strong>
-        </button>
-        <InlineHelp title={`${title}說明`}>{description}</InlineHelp>
-      </div>
-    </div>
+    <label htmlFor={id} aria-label={title} className={`nominationModeCard ${selected ? "isActive" : ""}`}>
+      <input id={id} type="radio" name="nomination-mode" value={value} checked={selected} onChange={onSelect} />
+      <span className="nominationModeCopy">
+        <span className="nominationModeHeading"><strong>{title}</strong>{selected ? <span>已選擇</span> : null}</span>
+        <span>{description}</span>
+        <b>{price}</b>
+        <small>{detail}</small>
+      </span>
+    </label>
   );
 }

@@ -1321,42 +1321,61 @@
   letter-spacing:-.04em;
 }
 
-/* Keep the card selection target and supplemental help as separate controls. */
+/* Native radios make the whole label selectable without nested controls. */
+.nominationModeGrid {
+  min-width:0;
+  padding:0;
+  border:0;
+}
 .nominationModeCard {
   position:relative;
+  display:flex;
+  align-items:flex-start;
   min-width:0;
   min-height:0;
   height:auto;
   padding:14px 16px 15px;
-  gap:8px;
+  gap:12px;
   align-content:start;
+  cursor:pointer;
+  color:var(--o-ink);
 }
-.nominationModeSelect>strong {
-  font-size:22px;
-  line-height:1.35;
-}
-.nominationModeTitle { display:flex; align-items:center; gap:6px; }
-.nominationModeSelect {
-  position:static;
+.nominationModeCard input[type="radio"] {
+  appearance:auto;
+  flex:0 0 22px;
+  width:22px;
+  height:22px;
+  min-height:22px;
+  margin:3px 0 0;
   padding:0;
-  border:0;
-  color:inherit;
-  background:transparent;
-  font:inherit;
-  text-align:left;
+  accent-color:#526b95;
 }
-.nominationModeSelect::after {
-  position:absolute;
-  inset:0;
-  border-radius:14px;
-  content:"";
+.nominationModeCard>.nominationModeCopy {
+  display:grid;
+  gap:8px;
+  min-width:0;
+  font-size:14px;
+  font-family:var(--o-body);
+  line-height:1.65;
+  color:var(--o-ink);
+  letter-spacing:normal;
 }
-.nominationModeTitle>.nominationModeSelect:focus-visible { outline:none; }
-.nominationModeSelect:focus-visible::after {
-  outline:3px solid var(--o-coral);
+.nominationModeHeading {
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:8px;
+}
+.nominationModeHeading strong { font-size:19px; line-height:1.5; }
+.nominationModeHeading>span { font-size:12px; font-weight:700; color:#405a83; }
+.nominationModeCopy small { font-size:13px; color:#515b70; }
+.nominationModeCard.isActive { border:2px solid #617ba7; padding:13px 15px 14px; background:#e8eef7; }
+.nominationModeCard:hover { border-color:#617ba7; }
+.nominationModeCard:focus-within {
+  outline:3px solid #8099c4;
   outline-offset:3px;
 }
-.nominationModeTitle>.inlineHelpTrigger { position:relative; z-index:1; }
+.nominationNextStep { margin:12px 0; font-size:14px; line-height:1.65; }
 
 
 @media(max-width:860px){

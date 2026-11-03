@@ -48,7 +48,15 @@
 | --- | --- | --- |
 | 公開站 | 無 | 根 layout 的公開樣式已包含首頁狀態標籤 |
 | `/admin` | [styles/admin/site.css](../styles/admin/site.css) | 由後台 layout 載入，保留入口內所有 `@import` 的順序 |
-| `/order` 及點餐預覽 | [styles/ordering/site.css](../styles/ordering/site.css) | 由相應頁面載入，順序為 `base.css` → `modern.css` → `shared/inline-help.css` → `shared/select.css` → `shared/icon-actions.css` |
+| `/order` 及點餐預覽 | [styles/ordering/site.css](../styles/ordering/site.css) | 由相應頁面載入，順序為 `base.css` → `modern.css` → `customer-workspace.css` → `shared/inline-help.css` → `shared/select.css` → `shared/icon-actions.css` |
+
+### 顧客點餐導覽與預約方式（2026-11-03）
+
+正式顧客流程 `/order` 使用 `orderCustomerShell` 範圍：桌面 230px 分組側欄，1100px 以下使用 Base UI Dialog 左側抽屜；選頁後關閉、Escape 與焦點返回沿用共用 Dialog。1480px 以下摘要移至內容下方，不維持側欄／表單／摘要三欄，也不固定遮住手機表單。顧客名稱、完整 ID、餘額與營業狀態保留可見。舊 `/order/preview` 是獨立模擬流程，不能用它驗收本次正式點餐元件。
+
+預約方式使用 `NominationModeCard.tsx` 原生單選控制項，初始不選方式，明示基礎費與服務商品費的差異；選購服務後須選商品才顯示排程。指名表單切頁採隱藏而不卸載，保留當前草稿；切換店員／方式的商品清除、節數重設會顯示說明。價格、可指名資格、報價、提交及付款仍沿用既有流程，不新增 API。新導覽元件使用 TSX；既有大型 `OrderClient.jsx` 只調整組合、方式選擇與顯示，保留 JSX，避免將這次 UX 修改擴大為整份交易流程的型別遷移。後續遷移應獨立盤點完整 API 契約，不放寬 strict 或加入 `any`。
+
+產物宣告可使用 [customer-order-navigation.json](../scripts/preview-css/customer-order-navigation.json) 檢查。手機 360／390／430px、平板及桌面應另確認完整 ID、單選卡換行、抽屜關閉與返回焦點、切頁後的方式／商品／節數保留；假資料驗證不得宣稱已驗證正式交易或庫存衝突。
 
 後台與點餐仍繼承根 layout 的公開樣式及字型設定，不是完全獨立的 CSS 作用域。
 

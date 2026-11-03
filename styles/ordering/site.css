@@ -1,5 +1,6 @@
 @import "./base.css";
 @import "./modern.css";
+@import "./customer-workspace.css";
 @import "../shared/inline-help.css";
 @import "../shared/select.css";
 @import "../shared/icon-actions.css";

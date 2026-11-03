@@ -92,7 +92,7 @@
   .orderCustomerShell .orderAside::before,.orderCustomerShell .orderAside>dl,.orderCustomerShell .orderAside>.isSecondary { display:none; }
   .orderCustomerShell .orderAside>div { display:flex; gap:12px; flex-wrap:wrap; margin:0; }
   .orderCustomerShell .orderAside>div span,.orderCustomerShell .orderAside>div strong { font-size:18px; }
-  .orderCustomerShell .orderAside>button { min-width:0; min-height:44px; margin:0; padding:8px 14px; }
+  .orderCustomerShell .orderAside>button { width:auto; min-width:88px; min-height:44px; margin:0; padding:8px 14px; white-space:normal; }
 }
 @media(max-width:1100px) {
   .orderCustomerBody { grid-template-columns:minmax(0,1fr); gap:18px; padding:0 18px 24px; }

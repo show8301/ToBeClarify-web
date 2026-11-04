@@ -29,18 +29,17 @@ export function serviceActionLabel(action: ServiceAction, kind?: string) {
 }
 
 type ServiceDialogProps = {
+  onDirtyChange?: (dirty: boolean) => void; onPendingChange?: (pending: boolean) => void;
   entry: ServiceEntry; action: ServiceAction; orderUnits?: WorkbenchUnit[]; onSaved: () => Promise<void>; onBusy: (busy: boolean) => void;
 };
 
 export function WorkbenchServiceDialog(props: ServiceDialogProps) {
   if (props.entry.unit?.kind !== "addon" && ["accept", "start_now", "backfill"].includes(props.action))
-    return <OrderServiceActions orderId={props.entry.order.id} refreshKey={String(props.entry.unit?.version || 0)} onChanged={props.onSaved} onBusy={props.onBusy} />;
+    return <OrderServiceActions orderId={props.entry.order.id} refreshKey={String(props.entry.unit?.version || 0)} onChanged={props.onSaved} onBusy={props.onBusy} onDirtyChange={props.onDirtyChange} onPendingChange={props.onPendingChange} />;
   return <WorkbenchAdvancedServiceDialog {...props} />;
 }
 
-function WorkbenchAdvancedServiceDialog({ entry, action, orderUnits, onSaved, onBusy }: {
-  entry: ServiceEntry; action: ServiceAction; orderUnits?: WorkbenchUnit[]; onSaved: () => Promise<void>; onBusy: (busy: boolean) => void;
-}) {
+function WorkbenchAdvancedServiceDialog({ entry, action, orderUnits, onSaved, onBusy, onDirtyChange, onPendingChange }: ServiceDialogProps) {
   const { order, nominee, unit } = entry;
   const [reason, setReason] = useState("");
   const [startsAt, setStartsAt] = useState("");
@@ -69,6 +68,9 @@ function WorkbenchAdvancedServiceDialog({ entry, action, orderUnits, onSaved, on
     }
     return () => controller.abort();
   }, [action, order.id, unit]);
+  const dirty = reason !== "" || startsAt !== "" || actualEnd !== "" || targetPeriod !== "" || segments !== Math.max(nominee.minimumSegments || 1, nominee.segmentCount - 1);
+  useEffect(() => { onDirtyChange?.(dirty); }, [dirty, onDirtyChange]);
+  useEffect(() => { onPendingChange?.(busy || retrying); return () => onPendingChange?.(false); }, [busy, retrying, onPendingChange]);
   const early = action === "complete" && Date.parse(unit?.scheduledEndsAt || nominee.requestedServiceEndsAt) > now;
   const requiredReason = ["decline", "cancel", "reschedule", "backfill", "carry_forward", "shorten"].includes(action) || early;
   const requiresStart = action === "reschedule" || action === "backfill" || action === "carry_forward" && Boolean(targetPeriod);

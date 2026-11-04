@@ -43,16 +43,18 @@ function ReasonButton({ label, accessibleLabel, reason, disabled, busy, onClick 
   </Popover.Root>;
 }
 
-export function OrderServiceActions({ orderId, refreshKey = "", disabled = false, onChanged, onBusy }: {
+export function OrderServiceActions({ orderId, refreshKey = "", disabled = false, onChanged, onBusy, presentation = "default", primaryAction = "accept", onDirtyChange, onPendingChange }: {
+  presentation?: "default" | "workbench"; primaryAction?: "accept" | "start_now" | "none"; onDirtyChange?: (dirty: boolean) => void; onPendingChange?: (pending: boolean) => void;
   orderId: string; refreshKey?: string; disabled?: boolean; onChanged: () => Promise<void> | void; onBusy?: (busy: boolean) => void;
 }) {
   const { user } = useAdminAuth();
   const accountKey = `${user?.id || user?.loginName || "anonymous"}:${orderId}`;
-  return <OrderServiceActionsForAccount key={accountKey} accountKey={accountKey} orderId={orderId} refreshKey={refreshKey} disabled={disabled} onChanged={onChanged} onBusy={onBusy} />;
+  return <OrderServiceActionsForAccount key={accountKey} accountKey={accountKey} orderId={orderId} refreshKey={refreshKey} disabled={disabled} onChanged={onChanged} onBusy={onBusy} presentation={presentation} primaryAction={primaryAction} onDirtyChange={onDirtyChange} onPendingChange={onPendingChange} />;
 }
 
-function OrderServiceActionsForAccount({ accountKey, orderId, refreshKey, disabled, onChanged, onBusy }: {
+function OrderServiceActionsForAccount({ accountKey, orderId, refreshKey, disabled, onChanged, onBusy, presentation, primaryAction, onDirtyChange, onPendingChange }: {
   accountKey: string; orderId: string; refreshKey: string; disabled: boolean;
+  presentation: "default" | "workbench"; primaryAction: "accept" | "start_now" | "none"; onDirtyChange?: (dirty: boolean) => void; onPendingChange?: (pending: boolean) => void;
   onChanged: () => Promise<void> | void; onBusy?: (busy: boolean) => void;
 }) {
   const [data, setData] = useState<OrderServiceEligibility | null>(null);
@@ -71,6 +73,8 @@ function OrderServiceActionsForAccount({ accountKey, orderId, refreshKey, disabl
   const lock = useRef(false);
   const generation = useRef(0);
   const [loadedKey, setLoadedKey] = useState("");
+  useEffect(() => { onPendingChange?.(busy || Boolean(retry)); return () => onPendingChange?.(false); }, [busy, retry, onPendingChange]);
+  useEffect(() => { onDirtyChange?.(customOpen); }, [customOpen, onDirtyChange]);
   const loadKey = `${accountKey}:${refreshKey}:${revision}`;
   const ready = loadedKey === loadKey && data?.orderId === orderId;
   useEffect(() => {
@@ -140,17 +144,17 @@ function OrderServiceActionsForAccount({ accountKey, orderId, refreshKey, disabl
   const customInvalid = !reason.trim() || draftTargets.some(t => !custom[t.id]?.start || !custom[t.id]?.progress ||
     custom[t.id]?.progress === "completed" && !custom[t.id]?.end);
   return <Popover.Root open={customOpen} onOpenChange={(open) => { if (!busy && !retry) setCustomOpen(open); }}>
-    <section className="orderServiceActions" aria-label="整單指名服務快捷操作">
-    <div className="orderServiceHeading"><strong>整單指名服務</strong><AdminHelp title="兩種開始情境">現在才接待，按「整單現在開始」；已按預約開始但忘記按鍵，核對每位時間後按「按預約時間補登」。任一名本單指名人員即可代辦全單，餐點與收款分開處理。</AdminHelp><AdminButton variant="ghost" className="iconActionButton orderServiceRefresh" aria-label="重讀資格" title="重讀資格" disabled={busy || customOpen} onClick={() => setRevision(r => r + 1)}><RefreshCw aria-hidden="true" /></AdminButton></div>
+    <section className={`orderServiceActions${presentation === "workbench" ? " dwServiceCommands" : ""}`} aria-label="整單指名服務快捷操作">
+    <div className="orderServiceHeading"><strong>{presentation === "workbench" ? "本單指名操作" : "整單指名服務"}</strong><AdminHelp title="兩種開始情境">現在才接待，按「整單現在開始」；已按預約開始但忘記按鍵，核對每位時間後按「按預約時間補登」。任一名本單指名人員即可代辦全單，餐點與收款分開處理。</AdminHelp><AdminButton variant="ghost" className="iconActionButton orderServiceRefresh" aria-label="重讀資格" title="重讀資格" disabled={busy || customOpen} onClick={() => setRevision(r => r + 1)}><RefreshCw aria-hidden="true" /></AdminButton></div>
     <p>{allTargets.map(t => t.name).join("／") || "正在核對服務人員…"} · 共 {allTargets.length} 位</p>
-    <div className="orderServiceMainActions"><ReasonButton label={labels.accept} reason={blockedReason("accept")} disabled={Boolean(blockedReason("accept"))} busy={busy} onClick={() => void execute("accept")} />
+    <div className="orderServiceMainActions">{primaryAction !== "none" && <ReasonButton label={presentation === "workbench" ? `${primaryAction === "accept" ? "承接本單指名" : "現在開始本單指名"}（${allTargets.length}位）` : labels[primaryAction]} reason={blockedReason(primaryAction)} disabled={Boolean(blockedReason(primaryAction))} busy={busy} onClick={() => void execute(primaryAction)} />}
     <details className="orderServiceMore" onToggle={(event) => {
       if (event.currentTarget.open) { setMoreOpen(true); return; }
       if (customOpen && (busy || retry)) { event.currentTarget.open = true; return; }
       setMoreOpen(false);
       setCustomOpen(false);
     }}>
-    <AdminDisclosureSummary aria-controls={moreContentId}>更多處理</AdminDisclosureSummary></details></div>
+    <AdminDisclosureSummary aria-controls={moreContentId}>{presentation === "workbench" ? "補登與更正" : "更多處理"}</AdminDisclosureSummary></details></div>
     <div id={moreContentId} className="orderServiceMoreContent" hidden={!moreOpen}>
     {backfill && <ul className="orderServiceTimes">{backfill.targets.map(t => <li key={t.id}>
       <strong>{t.name}</strong><span>{t.skipped ? "已有進度或已結束，本次開始略過" : `按有效預約 ${showTime(t.startsAt)} 開始，服務至 ${showTime(t.endsAt)}，休息至 ${showTime(t.busyUntil)}`}</span>

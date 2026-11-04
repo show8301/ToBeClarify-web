@@ -21,10 +21,11 @@ type Props = {
   orders: OperationsOrder[]; units: Record<string, WorkbenchUnit[]>; unavailable: boolean; disabled: boolean;
   cashPeriodId: string; businessDate: string; staffId: string; entries: ServiceEntry[];
   canAct: (entry: ServiceEntry, action: ServiceAction) => boolean;
+  onOpenDetail?: (detail: GuestOrderDialog) => void;
   onServiceAction: (entry: ServiceEntry, action: ServiceAction) => void;
   onChanged: () => Promise<void>; onBusy: (busy: boolean) => void;
 };
-type Dialog = { kind: "complete"; order: OperationsOrder; unit: WorkbenchUnit }
+export type GuestOrderDialog = { kind: "complete"; order: OperationsOrder; unit: WorkbenchUnit }
   | { kind: "receipt"; order: OperationsOrder; account: FinanceAccount };
 
 const kindLabels: Record<string, string> = { meal: "餐點", room: "包廂", nominee: "指名", addon: "加購", tip: "小費", other: "費用" };
@@ -51,11 +52,11 @@ function GuestOrderDisclosure({ orderNumber, progressLabel, financeLabel, finish
   </details>;
 }
 
-export function WorkbenchGuestOrders({ orders, units, unavailable, disabled, cashPeriodId, businessDate, staffId, entries, canAct, onServiceAction, onChanged, onBusy }: Props) {
+export function WorkbenchGuestOrders({ orders, units, unavailable, disabled, cashPeriodId, businessDate, staffId, entries, canAct, onServiceAction, onChanged, onBusy, onOpenDetail }: Props) {
   const sessionId = orders[0]?.sessionId || "";
   const [revision, setRevision] = useState(0);
   const [finance, setFinance] = useState<{ orders: OperationsOrder[]; revision: number; account: FinanceAccount | null; error: string } | null>(null);
-  const [dialog, setDialog] = useState<Dialog | null>(null);
+  const [dialog, setDialog] = useState<GuestOrderDialog | null>(null);
   const [feedback, setFeedback] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   useEffect(() => {
@@ -76,6 +77,7 @@ export function WorkbenchGuestOrders({ orders, units, unavailable, disabled, cas
     void onChanged().catch(() => setFeedback("操作已記錄，但進度更新失敗，請重新整理。"))
       .finally(() => setRefreshing(false));
   };
+  const openDetail = (detail: GuestOrderDialog) => { if (onOpenDetail) onOpenDetail(detail); else setDialog(detail); };
   const committed = (message: string) => { setDialog(null); setFeedback(message); refresh(); };
   const close = () => { setDialog(null); refresh(); };
   return <div className="dwList dwGuestOrders">
@@ -92,7 +94,7 @@ export function WorkbenchGuestOrders({ orders, units, unavailable, disabled, cas
       const finished = !unavailable && financeReady && order.storeConfirmationStatus !== "pending" && progressLabel === "全部完成" && financeLabel === "已收清";
       return <GuestOrderDisclosure key={order.id} orderNumber={order.orderNumber} progressLabel={progressLabel} financeLabel={financeLabel} finished={finished}>
         {!unavailable && order.status === "completed" && progress.total > progress.completed && <p className="adminFormError">整單狀態與分項進度不一致，請至完整點單管理核對。</p>}
-        {order.nominees.length > 0 && <OrderServiceActions orderId={order.id} refreshKey={orderUnits.map(u => `${u.id}:${u.version}`).join(",")} disabled={blocked} onChanged={onChanged} onBusy={onBusy} />}
+        {order.nominees.length > 0 && <OrderServiceActions presentation={onOpenDetail ? "workbench" : "default"} primaryAction={!onOpenDetail ? "accept" : orderUnits.some(u => u.kind === "nominee" && u.status === "waiting") ? "accept" : orderUnits.some(u => u.kind === "nominee" && ["accepted", "confirmed"].includes(u.status)) ? "start_now" : "none"} orderId={order.id} refreshKey={orderUnits.map(u => `${u.id}:${u.version}`).join(",")} disabled={blocked} onChanged={onChanged} onBusy={onBusy} />}
         {(order.flowVersion || 1) >= 2 ? <div className="dwOrderUnits">
           {orderUnits.map((unit) => {
             const entry = entries.find((value) => value.unit?.id === unit.id);
@@ -108,7 +110,7 @@ export function WorkbenchGuestOrders({ orders, units, unavailable, disabled, cas
                 {unit.scheduledStartsAt && <span>{formatClock(unit.scheduledStartsAt)}–{formatClock(unit.scheduledEndsAt)}</span>}
               </div>
               <div className="dwOrderUnitActions">
-                {action && <AdminButton variant="secondary" disabled={completionBlocked} onClick={() => setDialog({ kind: "complete", order, unit })}>{unit.kind === "meal" ? "確認已送達" : "確認使用完成"}</AdminButton>}
+                {action && <AdminButton variant="secondary" disabled={completionBlocked} onClick={() => openDetail({ kind: "complete", order, unit })}>{unit.kind === "meal" ? "確認已送達" : "確認使用完成"}</AdminButton>}
                 {canRepresent && entry && (unit.kind === "nominee" ? ["complete"] as const : ["start", "complete"] as const).filter((value) => canAct(entry, value)).map((value) => <AdminButton key={value} variant="secondary" disabled={completionBlocked} onClick={() => onServiceAction(entry, value)}>{value === "complete" ? unit.kind === "addon" ? "完成此加購" : "完成此指名" : unit.kind === "addon" ? "開始此加購" : "開始此指名"}</AdminButton>)}
               </div>
             </div>;
@@ -119,7 +121,7 @@ export function WorkbenchGuestOrders({ orders, units, unavailable, disabled, cas
         {order.customerNote && <p>顧客備註：{order.customerNote}</p>}
         <div className="dwOrderCash">
           {summary && !summary.blockedReason ? <dl><div><dt>本單應收</dt><dd>{formatMoney(summary.receivable)}</dd></div><div><dt>已收（扣除退款）</dt><dd>{formatMoney(summary.netCash)}</dd></div><div><dt>{summary.balance < 0 ? "待退款" : "尚欠"}</dt><dd>{formatMoney(Math.abs(summary.balance))}</dd></div></dl> : summary?.blockedReason ? <p>{summary.blockedReason}</p> : <p>{financeReady ? "帳款未確認，暫無法記錄收款。" : "讀取本單帳款中…"}</p>}
-          <div className="dwActions"><AdminButton disabled={blocked || !summary || Boolean(summary.blockedReason) || summary.balance <= 0 || !cashPeriodId} onClick={() => { if (account) setDialog({ kind: "receipt", order, account }); }}>同單收款</AdminButton><Link href={`/admin/orders?${new URLSearchParams({ date: order.sessionBusinessDate || businessDate, session: order.sessionId, order: order.id })}`}>完整點單管理</Link></div>
+          <div className="dwActions"><AdminButton disabled={blocked || !summary || Boolean(summary.blockedReason) || summary.balance <= 0 || !cashPeriodId} onClick={() => { if (account) openDetail({ kind: "receipt", order, account }); }}>同單收款</AdminButton><Link href={`/admin/orders?${new URLSearchParams({ date: order.sessionBusinessDate || businessDate, session: order.sessionId, order: order.id })}`}>完整點單管理</Link></div>
           {!cashPeriodId && <p>尚未確認收款營業日，請重新整理。</p>}
         </div>
       </GuestOrderDisclosure>;

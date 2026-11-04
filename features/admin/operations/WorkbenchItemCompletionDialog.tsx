@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { adminRequest, ApiError } from "@/features/admin/api/client.js";
 import { AdminButton, AdminDialog, AdminField } from "@/features/admin/shared/AdminShared.jsx";
 import { DeliveryItems } from "@/features/admin/shared/DeliveryItems";
@@ -16,7 +16,8 @@ type CompletionRequest = {
   restMinutes: number; compensationAmount: number;
 };
 
-export function WorkbenchItemCompletionDialog({ order, unit, onClose, onCommitted, onBusy }: {
+export function WorkbenchItemCompletionDialog({ order, unit, onClose, onCommitted, onBusy, embedded = false, onDirtyChange, onPendingChange }: {
+  embedded?: boolean; onDirtyChange?: (dirty: boolean) => void; onPendingChange?: (pending: boolean) => void;
   order: OperationsOrder; unit: WorkbenchUnit; onClose: () => void;
   onCommitted: (message: string) => void; onBusy: (busy: boolean) => void;
 }) {
@@ -30,6 +31,9 @@ export function WorkbenchItemCompletionDialog({ order, unit, onClose, onCommitte
   const [mustReload, setMustReload] = useState(false);
   const [openedAt] = useState(Date.now);
   const lock = useRef(false);
+  const dirty = quantity !== (option?.quantity ?? 1) || reason !== "";
+  useEffect(() => { onDirtyChange?.(dirty); }, [dirty, onDirtyChange]);
+  useEffect(() => { onPendingChange?.(busy || Boolean(retry)); return () => onPendingChange?.(false); }, [busy, retry, onPendingChange]);
   const early = unit.kind === "room" && Date.parse(unit.scheduledEndsAt) > openedAt;
   const save = async () => {
     if (lock.current || mustReload || !option || !Number.isSafeInteger(quantity) || quantity < 1 || quantity > option.quantity || early && !reason.trim()) return;
@@ -55,7 +59,7 @@ export function WorkbenchItemCompletionDialog({ order, unit, onClose, onCommitte
       }
     } finally { lock.current = false; setBusy(false); onBusy(false); }
   };
-  return <AdminDialog open title={label} description={`${order.orderNumber} · ${unit.name}`} className="adminDesignatedWorkbenchDialog" onClose={() => { if (!busy && !retry) onClose(); }} actions={null}>
+  const form = (
     <form className="dwOrderActionForm" onSubmit={(event) => { event.preventDefault(); void save(); }}>
       <p>{unit.kind === "meal" ? "確認本次已實際送達的數量。" : "確認顧客已結束這段包廂使用。"}</p>
       {unit.kind === "meal" && <DeliveryItems items={unit.deliveryItems} />}
@@ -73,5 +77,8 @@ export function WorkbenchItemCompletionDialog({ order, unit, onClose, onCommitte
         <AdminButton variant="ghost" disabled={busy || Boolean(retry)} onClick={onClose}>返回</AdminButton>
       </div>
     </form>
-  </AdminDialog>;
+  );
+  if (embedded) return form;
+  return <AdminDialog open title={label} description={`${order.orderNumber} · ${unit.name}`} className="adminDesignatedWorkbenchDialog" onClose={() => { if (!busy && !retry) onClose(); }} actions={null}>
+{form}</AdminDialog>;
 }

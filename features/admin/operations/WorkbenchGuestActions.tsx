@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { adminApi } from "@/features/admin/api/client.js";
 import { financeApi } from "@/features/admin/orders/finance-api";
 import { AdminButton, AdminField } from "@/features/admin/shared/AdminShared.jsx";
@@ -56,13 +56,14 @@ export function WorkbenchDeliveryAction({ session, orderId, businessDate, user, 
   return <CreateDeliveryPanel sessionId={session.id} orderId={orderId} businessDate={businessDate} staff={[{ id: user.staffMemberId, displayName: user.displayName }]} defaultStaffId={user.staffMemberId} available showSourceLink={false} lockOwner onBusy={onBusy} onDirty={onDirty} onIssued={(value) => { setIssued(value); onDirty(false); onBusy(false); }} />;
 }
 
-export function WorkbenchDepartureAction({ session, onSaved, onBusy }: { session: OperationsSession; onSaved: () => Promise<void>; onBusy: (busy: boolean) => void }) {
+export function WorkbenchDepartureAction({ session, onSaved, onBusy, onDirtyChange }: { onDirtyChange?: (dirty: boolean) => void; session: OperationsSession; onSaved: () => Promise<void>; onBusy: (busy: boolean) => void }) {
   const departed = session.entryStatus === "departed" || session.status === "readonly";
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const lock = useRef(false);
   const operationId = useRef("");
+  useEffect(() => { onDirtyChange?.(reason !== ""); }, [reason, onDirtyChange]);
   const save = async () => {
     if (lock.current) return;
     lock.current = true; setBusy(true); onBusy(true); setError("");

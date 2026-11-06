@@ -6,6 +6,7 @@ import { OrderPageHeading as PageHeading } from './OrderPageHeading';
 import { InlineHelp } from '@/components/InlineHelp';
 import { NominationModeCard } from './NominationModeCard';
 import { OrderNavigation } from './OrderNavigation';
+import { OrderThemeToggle, useOrderTheme } from './OrderThemeToggle';
 
 import { useEffect, useRef, useState } from 'react';
 import { orderingApi } from '../api/client.js';
@@ -28,6 +29,7 @@ function defaultStart() {
 }
 
 export default function OrderClient() {
+  const orderTheme = useOrderTheme();
   const [token, setToken] = useState('');
   const [session, setSession] = useState(null);
   const [businessContext, setBusinessContext] = useState(null);
@@ -151,8 +153,8 @@ export default function OrderClient() {
     finally { setRecovering(false); }
   };
 
-  if (loading && !session && !recovering) return <OrderLoading />;
-  if (!session || !catalog) return <OrderAccess notice={notice} onAccess={(value) => load(value)} onRecover={recover} loading={loading} />;
+  if (loading && !session && !recovering) return <OrderLoading isDark={orderTheme.isDark} />;
+  if (!session || !catalog) return <OrderAccess notice={notice} onAccess={(value) => load(value)} onRecover={recover} loading={loading} theme={orderTheme} />;
 
   const tabs = [
     ['meal', '一般點餐'],
@@ -163,11 +165,12 @@ export default function OrderClient() {
   ];
 
   return (
-    <main className="orderShell orderCustomerShell">
+    <main className={`orderShell orderCustomerShell${orderTheme.isDark ? ' isDark' : ''}`}>
       <header className="orderTopbar">
         <a href="/" className="orderBrand"><img src="/favicon.ico" alt="" /><span><strong>清醒夢</strong><small>LUCID DREAM / ORDER</small></span></a>
         <div className="orderSessionChip"><span>今日點餐</span><strong>{session.customerName}</strong><small>ID {session.gameId}</small></div>
         <div className="orderCredit"><span>可折抵餘額</span><strong>{money(session.remainingMealCredit)}</strong></div>
+        <OrderThemeToggle isDark={orderTheme.isDark} ready={orderTheme.ready} onToggle={orderTheme.toggle} />
       </header>
       <CustomerOrderingStatus context={businessContext} session={session} />
       {catalog.settings.nominationPaused ? <div className="orderPauseBanner">目前暫停受理指名服務；一般餐點與小費仍可正常加點。</div> : null}
@@ -197,8 +200,8 @@ export default function OrderClient() {
   );
 }
 
-function OrderLoading() {
-  return <main className="orderGate"><div className="orderGateCard"><span className="orderGateMark">LD</span><p>正在確認今日點餐資格…</p></div></main>;
+function OrderLoading({ isDark }) {
+  return <main className={`orderGate${isDark ? ' isDark' : ''}`}><div className="orderGateCard"><span className="orderGateMark">LD</span><p>正在確認今日點餐資格…</p></div></main>;
 }
 
 function CustomerOrderingStatus({ context, session }) {
@@ -210,11 +213,12 @@ function CustomerOrderingStatus({ context, session }) {
   return <div className="orderBusinessBanner isOpen"><strong>目前可正常點餐</strong><span>預計接單至 {new Date(context.projectedCloseAt || context.referenceEndsAt).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}</span></div>;
 }
 
-function OrderAccess({ notice, onAccess, onRecover, loading }) {
+function OrderAccess({ notice, onAccess, onRecover, loading, theme }) {
   const [code, setCode] = useState('');
   const [showRecover, setShowRecover] = useState(false);
   return (
-    <main className="orderGate"><section className="orderGateCard">
+    <main className={`orderGate${theme.isDark ? ' isDark' : ''}`}><section className="orderGateCard">
+      <OrderThemeToggle isDark={theme.isDark} ready={theme.ready} onToggle={theme.toggle} />
       <a href="/" className="orderBrand"><img src="/favicon.ico" alt="" /><span><strong>清醒夢</strong><small>LUCID DREAM / ORDER</small></span></a>
       <p className="orderEyebrow">TODAY&apos;S ORDER PASS</p><h1>{showRecover ? '請洽店員' : '輸入今日點餐碼'}</h1>
       <p>{showRecover ? '向店員取得六位數協助碼，填寫人物 ID 並選擇角色所屬伺服器，即可找回今天的點餐網址。' : '若由店員提供專屬網址，頁面會自動帶入；也可手動貼上點餐碼。'}</p>

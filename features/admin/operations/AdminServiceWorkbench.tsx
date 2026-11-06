@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { adminRequest } from "@/features/admin/api/client.js";
-import { AdminButton, AdminField, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
+import { AdminButton, AdminDialog, AdminField, AdminPanel } from "@/features/admin/shared/AdminShared.jsx";
 import { AdminHelp } from "@/features/admin/shared/AdminHelp";
 import { WorkbenchShiftBar } from "./WorkbenchShiftBar";
 import { ServiceGuestPanel } from "./ServiceGuestPanel";
@@ -28,6 +28,8 @@ export function AdminServiceDashboard({ data, user, navigate, actionState, onCha
   const [page, setPage] = useState(1);
   const [opened, setOpened] = useState<{ order: OperationsOrder; periodId: string } | null>(null);
   const [pendingReceipt, setPendingReceipt] = useState(false);
+  const [detailDirty, setDetailDirty] = useState(false);
+  const [confirmClose, setConfirmClose] = useState(false);
   const [selected, setSelected] = useState("");
   const [busy, setBusy] = useState(false);
   const [revision, setRevision] = useState(0);
@@ -35,6 +37,8 @@ export function AdminServiceDashboard({ data, user, navigate, actionState, onCha
   const [guestScope, setGuestScope] = useState<ServiceGuestScope>({ entryScope: "all", periodScope: "all" });
   const workspaceId = useId();
   const scrollRequest = useRef<number | null>(null);
+  const orderTrigger = useRef<HTMLElement | null>(null);
+  const nextOrderTrigger = useRef<HTMLElement | null>(null);
   useEffect(() => () => { if (scrollRequest.current !== null) cancelAnimationFrame(scrollRequest.current); }, []);
   const scrollTo = (selector: string) => {
     if (scrollRequest.current !== null) cancelAnimationFrame(scrollRequest.current);
@@ -78,19 +82,22 @@ export function AdminServiceDashboard({ data, user, navigate, actionState, onCha
   const activeOrder = active ? data.orders.find((order) => order.id === active.order.id) || active.order : null;
   const openOrder = (order: OperationsOrder) => {
     if (busy || pendingReceipt) return;
+    orderTrigger.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    nextOrderTrigger.current = orderTrigger.current?.closest("article")?.nextElementSibling?.querySelector<HTMLElement>("button") || null;
+    setDetailDirty(false);
+    setConfirmClose(false);
     setOpened({ order, periodId });
+  };
+  const closeOrder = () => {
+    if (busy || pendingReceipt) return;
+    if (detailDirty) { setConfirmClose(true); return; }
+    setOpened(null);
   };
   const clearTasks = () => { setSearch(""); changeFilter("unfinished"); };
   const taskConditions = search.trim() !== "" || filter !== "unfinished";
   // Preserve the existing independent-room scope; the search is for orders.
   const visibleRooms = filter === "unfinished" || filter === "room" ? standaloneRooms : [];
   const taskReady = !disabled && Boolean(current) && !current?.error;
-  const activeOrderId = activeOrder?.id;
-  useEffect(() => {
-    if (!activeOrderId) return;
-    const frame = requestAnimationFrame(() => document.getElementById("service-current-order")?.scrollIntoView({ block: "start" }));
-    return () => cancelAnimationFrame(frame);
-  }, [activeOrderId]);
   return <div className="adminRoleDashboard adminRoleDashboard-service">
     <div className="adminPageHeading serviceWorkbenchHeading">
       <div><p className="eyebrow">{eyebrow}</p><h1 className="adminFieldHeading">服務員工作台<AdminHelp title="服務員工作台說明">顧客入場、確認訂單、包廂與現場協助。待辦依服務進度列示，服務完成不代表已收款；顧客搜尋保留跨期履約。</AdminHelp></h1></div>
@@ -141,12 +148,34 @@ export function AdminServiceDashboard({ data, user, navigate, actionState, onCha
       <ServiceGuestPanel data={data} user={user} selectedId={selected} onSelect={setSelected} disabled={disabled || busy || pendingReceipt} onBusy={setBusy} onChanged={refresh} onOpenOrder={openOrder} loading={loading} loadError={loadError} onRetry={refresh} scope={guestScope} onScopeChange={setGuestScope} />
     </div>
     </div>
-    <div id="service-current-order" hidden={!activeOrder}>
-      {activeOrder && <AdminPanel className="serviceCurrentOrder" title={`目前處理：${activeOrder.customerName} · ${activeOrder.orderNumber}`} actions={<AdminButton variant="ghost" disabled={busy || pendingReceipt} onClick={() => setOpened(null)}>關閉處理面板</AdminButton>}>
+    {activeOrder && <AdminDialog
+      open
+      title={`目前處理：${activeOrder.customerName} · ${activeOrder.orderNumber}`}
+      description={`顧客位置：${activeOrder.customerLocation || "未提供"}`}
+      className="serviceOrderDialog"
+      closeLabel="關閉處理面板"
+      closeDisabled={busy || pendingReceipt}
+      finalFocus={() => orderTrigger.current?.isConnected ? orderTrigger.current
+        : nextOrderTrigger.current?.isConnected ? nextOrderTrigger.current
+        : document.querySelector<HTMLElement>(".serviceSearch input")}
+      onClose={closeOrder}
+      actions={confirmClose ? <div className="serviceOrderDiscard" role="alert">
+        <p>有尚未儲存的修改，確定放棄並關閉？</p>
+        <AdminButton variant="secondary" onClick={() => setConfirmClose(false)}>繼續編輯</AdminButton>
+        <AdminButton variant="danger" disabled={busy || pendingReceipt}
+          onClick={() => { setConfirmClose(false); setOpened(null); }}>放棄修改並關閉</AdminButton>
+      </div> : null}
+    >
+      <div id="service-current-order">
         {pendingReceipt && <p role="status">請先完成或查回目前的收款操作，再關閉或切換訂單。</p>}
-        <ServiceOrderDetail key={`${periodId}:${activeOrder.id}`} order={activeOrder} disabled={disabled || busy} periodId={periodId} businessDate={date} refreshKey={data.refreshedAt} sourceMissing={!data.orders.some((order) => order.id === activeOrder.id)} onChanged={refresh} onBusy={setBusy} onPendingChange={setPendingReceipt} />
-      </AdminPanel>}
-    </div>
+        <ServiceOrderDetail
+          key={`${periodId}:${activeOrder.id}`} order={activeOrder} disabled={disabled || busy}
+          periodId={periodId} businessDate={date} refreshKey={data.refreshedAt}
+          sourceMissing={!data.orders.some((order) => order.id === activeOrder.id)}
+          onChanged={refresh} onBusy={setBusy} onPendingChange={setPendingReceipt} onDirtyChange={setDetailDirty}
+        />
+      </div>
+    </AdminDialog>}
     <nav className="serviceQuickLinks" aria-label="其他管理入口"><span className="adminFieldHeading">其他管理<AdminHelp title="其他管理入口">完整訂單：完整點單、顧客與帳款管理。包廂管理：查看完整排程及例外處理。查詢訂單：跨日查詢與訂單明細。皆沿用目前營業日。</AdminHelp></span>{([ ["完整訂單", "/admin/orders"], ["包廂管理", "/admin/rooms/service"], ["查詢訂單", "/admin/order-list"] ] as const).map(([label, path]) => <AdminButton key={path} variant="ghost" disabled={busy} onClick={() => navigate(`${path}?${new URLSearchParams({ date })}`)}>{label}</AdminButton>)}</nav>
   </div>;
 }

@@ -1,0 +1,124 @@
+/* Customer navigation borrows the admin shell's visual language, not its roles. */
+.orderCustomerShell { overflow-x:clip; }
+.orderCustomerBody {
+  display:grid;
+  grid-template-columns:230px minmax(0,1fr);
+  align-items:start;
+  gap:24px;
+  width:min(1800px,100%);
+  margin:0 auto;
+  padding:24px;
+}
+.orderNavigationDesktop {
+  position:sticky;
+  top:100px;
+  max-height:calc(100dvh - 124px);
+  overflow:auto;
+  padding:12px;
+  border:1px solid var(--o-line);
+  border-radius:22px;
+  background:rgba(249,250,252,.94);
+  box-shadow:0 8px 24px rgba(82,87,120,.07);
+}
+.orderCustomerNav { display:grid; gap:18px; }
+.orderCustomerNav section+section { border-top:1px solid #dfe3eb; padding-top:14px; }
+.orderCustomerNav h2 { margin:8px 12px; color:#59657c; font-size:12px; font-weight:700; letter-spacing:.08em; }
+.orderCustomerNav button {
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  width:100%;
+  min-height:48px;
+  margin:4px 0;
+  padding:10px 14px;
+  border:1px solid transparent;
+  border-radius:14px;
+  background:transparent;
+  color:#31334a;
+  text-align:left;
+  white-space:normal;
+  font:600 15px/1.5 var(--font-noto-sans-tc, "Noto Sans TC"),sans-serif;
+  cursor:pointer;
+}
+.orderCustomerNav button:hover { background:#f0f3f8; border-color:#dfe3eb; }
+.orderCustomerNav button.isActive { background:#e1e8f3; border-color:#9baeca; font-weight:800; }
+.orderCustomerNav button.isActive::before { position:absolute; left:0; top:12px; bottom:12px; width:3px; border-radius:3px; background:#617ba7; content:""; }
+.orderNavCount { border-radius:999px; padding:1px 8px; background:#d6e0ef; font-size:12px; font-weight:800; }
+.orderNavigationMobile { display:none; }
+.orderCustomerShell .orderWorkspace { width:100%; min-width:0; margin:0; padding:0 0 48px; grid-template-columns:minmax(0,1fr) 260px; gap:24px; }
+.orderCustomerShell .orderAside { top:100px; }
+/* Keep the banner above the body stacking context; the shared shell sets both to 1. */
+.orderCustomerShell .orderTopbar { z-index:40; background:#f9fafc; gap:16px; grid-template-columns:auto minmax(0,1fr) auto; }
+.orderCustomerShell .orderSessionChip { display:block; min-width:0; padding:8px 14px; }
+.orderCustomerShell .orderSessionChip strong { font-size:19px; overflow-wrap:anywhere; }
+.orderCustomerShell .orderSessionChip small { display:block; margin-top:6px; font:500 12px/1.5 var(--o-body); letter-spacing:0; overflow-wrap:anywhere; }
+.orderCustomerShell .orderCredit { max-width:none; }
+.orderCustomerShell .orderCredit span { display:block; }
+.orderCustomerShell .orderCredit strong { white-space:normal; overflow-wrap:anywhere; }
+.orderCustomerShell .nominationStaffGrid { grid-template-columns:repeat(auto-fill,minmax(112px,1fr)); gap:10px; }
+.orderCustomerShell .nominationStaffGrid>button { min-height:0; padding:10px; white-space:normal; }
+.orderCustomerShell .nominationStaffGrid>button>span { width:72px; height:80px; aspect-ratio:auto; margin:0 0 8px; }
+.orderCustomerShell .nominationStaffGrid>button>strong { white-space:normal; overflow:visible; overflow-wrap:anywhere; font-size:14px; }
+.orderCustomerShell .nominationStaffGrid>button>small { position:static; max-width:100%; white-space:normal; overflow:visible; line-height:1.5; padding:4px 0 0; border:0; background:transparent; box-shadow:none; }
+.orderCustomerShell .nominationStaffGrid>button.isActive::before { left:6px; top:6px; }
+.orderCustomerShell .nominationSection { margin-bottom:18px; }
+.orderCustomerShell .nominationServiceGrid>button { white-space:normal; overflow-wrap:anywhere; }
+.orderCustomerShell .nominationControls input { min-width:0; max-width:100%; box-sizing:border-box; }
+.orderCustomerShell .orderPrimaryAction { min-height:44px; white-space:normal; }
+.orderMenuBackdrop { position:fixed; inset:0; z-index:100; background:rgba(24,32,45,.5); }
+.orderMenuDrawer {
+  position:fixed;
+  z-index:101;
+  inset:0 auto 0 0;
+  width:min(320px,calc(100vw - 32px));
+  overflow:auto;
+  overscroll-behavior:contain;
+  padding:20px 16px max(20px,env(safe-area-inset-bottom));
+  border:1px solid #dfe3eb;
+  border-radius:0 22px 22px 0;
+  color:#31334a;
+  background:#f9fafc;
+  box-shadow:0 20px 60px rgba(24,32,45,.2);
+  font-family:var(--font-noto-sans-tc, "Noto Sans TC"),sans-serif;
+}
+.orderMenuDrawer>header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px; }
+.orderMenuDrawer h2 { font-size:18px; }
+.orderMenuDrawer>header button { min-width:44px; min-height:44px; padding:8px; border:1px solid #cbd5e5; border-radius:12px; cursor:pointer; }
+.orderMenuDrawer button:focus-visible { outline:3px solid #8099c4; outline-offset:2px; }
+@media(max-width:1479px) {
+  .orderCustomerShell .orderWorkspace { grid-template-columns:minmax(0,1fr); }
+  .orderCustomerShell .orderAside { position:static; inset:auto; display:grid; grid-template-columns:minmax(0,1fr) minmax(88px,max-content); gap:12px; width:auto; padding:14px; }
+  .orderCustomerShell .orderAside::before,.orderCustomerShell .orderAside>dl,.orderCustomerShell .orderAside>.isSecondary { display:none; }
+  .orderCustomerShell .orderAside>div { display:flex; gap:12px; flex-wrap:wrap; margin:0; }
+  .orderCustomerShell .orderAside>div span,.orderCustomerShell .orderAside>div strong { font-size:18px; }
+  .orderCustomerShell .orderAside>button { box-sizing:border-box; width:100%; min-width:88px; max-width:100%; min-height:44px; margin:0; padding:8px 14px; white-space:normal; }
+}
+@media(max-width:1100px) {
+  .orderCustomerBody { grid-template-columns:minmax(0,1fr); gap:18px; padding:0 18px 24px; }
+  .orderNavigationDesktop { display:none; }
+  .orderNavigationMobile { position:sticky; z-index:35; top:0; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; margin:0 -18px; padding:8px 18px; border-bottom:1px solid var(--o-line); background:#f9fafc; }
+  .orderNavigationMobile>strong { font-size:15px; }
+  .orderNavigationMobile button { min-height:44px; padding:8px 12px; border:1px solid #b6c4d9; border-radius:12px; background:#e8eef7; white-space:normal; font-size:14px; }
+  .orderCustomerShell .orderTopbar { position:relative; }
+  .orderCustomerShell .orderCategoryRail { top:64px; }
+  .orderCustomerShell .nominationModeGrid { grid-template-columns:minmax(0,1fr); }
+}
+@media(max-width:620px) {
+  .orderCustomerBody { padding-inline:14px; }
+  .orderNavigationMobile { margin-inline:-14px; padding-inline:14px; }
+  .orderCustomerShell .orderTopbar { grid-template-columns:minmax(0,1fr) minmax(0,1fr); padding:12px 14px; gap:10px; overflow:visible; }
+  .orderCustomerShell .orderTopbar .orderBrand { grid-column:1; grid-row:1; transform:none; }
+  .orderCustomerShell .orderSessionChip { grid-column:1/-1; grid-row:2; display:grid; grid-template-columns:auto minmax(0,1fr); align-items:center; gap:4px 8px; padding:8px; text-align:left; }
+  .orderCustomerShell .orderSessionChip small { grid-column:1/-1; margin:0; }
+  .orderCustomerShell .orderSessionChip>span { font-size:10px; }
+  .orderCustomerShell .orderSessionChip strong { font-size:16px; line-height:1.5; }
+  .orderCustomerShell .orderCredit { grid-column:2; grid-row:1; width:100%; min-width:0; padding:8px; align-self:center; }
+  .orderCustomerShell .orderCredit strong { font-size:16px; line-height:1.5; }
+  .orderCustomerShell .orderCredit span { font-size:10px; letter-spacing:0; }
+  .orderCustomerShell .orderAside { grid-template-columns:minmax(0,1fr); }
+  .orderCustomerShell .orderNotice { bottom:16px; }
+  .orderCustomerShell .nominationPrice>div { grid-template-columns:minmax(0,1fr) auto; }
+  .orderCustomerShell .nominationPrice b { overflow-wrap:anywhere; }
+}

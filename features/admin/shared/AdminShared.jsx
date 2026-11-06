@@ -160,7 +160,8 @@ export function AdminState({ loading, error, onRetry }) {
   return null;
 }
 
-export function AdminDialog({ open, title, description, children, onClose, actions, className = '', showHeader = true }) {
+/** @param {{ open: boolean, title: import('react').ReactNode, description?: import('react').ReactNode, children?: import('react').ReactNode, onClose?: () => void, actions?: import('react').ReactNode, className?: string, showHeader?: boolean, closeLabel?: string, closeDisabled?: boolean, finalFocus?: import('react').ComponentProps<typeof Dialog.Popup>['finalFocus'] }} props */
+export function AdminDialog({ open, title, description, children, onClose, actions, className = '', showHeader = true, closeLabel = '關閉編輯視窗', closeDisabled = false, finalFocus = undefined }) {
   const reduceMotion = useReducedMotion();
   const popupClassName = `adminDialogPopup${className.includes('adminStaffEditDialog') ? ' adminStaffEditDialogPopup' : ''}`;
 
@@ -175,6 +176,7 @@ export function AdminDialog({ open, title, description, children, onClose, actio
               />
               <Dialog.Popup
                 className={popupClassName}
+                finalFocus={finalFocus}
                 render={(
                   <div>
                     <motion.section
@@ -189,7 +191,7 @@ export function AdminDialog({ open, title, description, children, onClose, actio
                           <Dialog.Title className="adminDialogTitle">{title}</Dialog.Title>
                           {description ? <Dialog.Description className="adminDialogDescription">{description}</Dialog.Description> : null}
                         </div>
-                        <Dialog.Close className="adminButton adminButton-ghost" aria-label="關閉編輯視窗">關閉</Dialog.Close>
+                        <Dialog.Close className="adminButton adminButton-ghost" aria-label={closeLabel} disabled={closeDisabled}>關閉</Dialog.Close>
                       </header> : <><Dialog.Title className="adminVisuallyHidden">{title}</Dialog.Title>{description ? <Dialog.Description className="adminVisuallyHidden">{description}</Dialog.Description> : null}</>}
                       <div className="adminDialogBody">{children}</div>
                       {actions ? <footer className="adminDialogFooter">{actions}</footer> : null}

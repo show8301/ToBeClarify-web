@@ -5,6 +5,8 @@ import { OrderRecoveryForm } from './OrderRecoveryForm';
 import { OrderPageHeading as PageHeading } from './OrderPageHeading';
 import { InlineHelp } from '@/components/InlineHelp';
 import { NominationModeCard } from './NominationModeCard';
+import { OrderNavigation } from './OrderNavigation';
+import { OrderThemeToggle, useOrderTheme } from './OrderThemeToggle';
 
 import { useEffect, useRef, useState } from 'react';
 import { orderingApi } from '../api/client.js';
@@ -27,6 +29,7 @@ function defaultStart() {
 }
 
 export default function OrderClient() {
+  const orderTheme = useOrderTheme();
   const [token, setToken] = useState('');
   const [session, setSession] = useState(null);
   const [businessContext, setBusinessContext] = useState(null);
@@ -150,8 +153,8 @@ export default function OrderClient() {
     finally { setRecovering(false); }
   };
 
-  if (loading && !session && !recovering) return <OrderLoading />;
-  if (!session || !catalog) return <OrderAccess notice={notice} onAccess={(value) => load(value)} onRecover={recover} loading={loading} />;
+  if (loading && !session && !recovering) return <OrderLoading isDark={orderTheme.isDark} />;
+  if (!session || !catalog) return <OrderAccess notice={notice} onAccess={(value) => load(value)} onRecover={recover} loading={loading} theme={orderTheme} />;
 
   const tabs = [
     ['meal', '一般點餐'],
@@ -162,23 +165,23 @@ export default function OrderClient() {
   ];
 
   return (
-    <main className="orderShell">
+    <main className={`orderShell orderCustomerShell${orderTheme.isDark ? ' isDark' : ''}`}>
       <header className="orderTopbar">
         <a href="/" className="orderBrand"><img src="/favicon.ico" alt="" /><span><strong>清醒夢</strong><small>LUCID DREAM / ORDER</small></span></a>
         <div className="orderSessionChip"><span>今日點餐</span><strong>{session.customerName}</strong><small>ID {session.gameId}</small></div>
         <div className="orderCredit"><span>可折抵餘額</span><strong>{money(session.remainingMealCredit)}</strong></div>
+        <OrderThemeToggle isDark={orderTheme.isDark} ready={orderTheme.ready} onToggle={orderTheme.toggle} />
       </header>
       <CustomerOrderingStatus context={businessContext} session={session} />
       {catalog.settings.nominationPaused ? <div className="orderPauseBanner">目前暫停受理指名服務；一般餐點與小費仍可正常加點。</div> : null}
       {notice.message ? <div className={`orderNotice ${notice.error ? 'isError' : ''}`} role="status"><span>{notice.message}</span><button type="button" aria-label="關閉提示" onClick={() => setNotice({ message: '', error: false })}>×</button></div> : null}
-      <nav className="orderTabs" aria-label="點餐功能">
-        {tabs.map(([key, label], index) => <button key={key} type="button" aria-current={tab === key ? 'page' : undefined} className={tab === key ? 'isActive' : ''} onClick={() => setTab(key)}><span>{String(index + 1).padStart(2, '0')}</span>{label}</button>)}
-      </nav>
+      <div className="orderCustomerBody">
+      <OrderNavigation items={tabs} current={tab} cartCount={cartCount} onNavigate={setTab} />
       <section className="orderWorkspace">
         <div className="orderMain">
           {tab === 'meal' ? <MealOrderPage menu={catalog.menu} staff={catalog.staff} cart={cart} setCart={setCart} /> : null}
           {tab === 'room' ? <RoomBookingPage rooms={catalog.rooms || []} settings={catalog.settings} cart={cart} setCart={setCart} onNotice={setNotice} /> : null}
-          {tab === 'nomination' ? <NominationPage session={session} settings={catalog.settings} businessContext={businessContext} staff={catalog.staff} cart={cart} setCart={setCart} onNotice={setNotice} /> : null}
+          {!catalog.settings.nominationPaused ? <div hidden={tab !== 'nomination'}><NominationPage session={session} settings={catalog.settings} businessContext={businessContext} staff={catalog.staff} cart={cart} setCart={setCart} onNotice={setNotice} /></div> : null}
           {tab === 'tip' ? <TipPage staff={catalog.staff} settings={catalog.settings} setCart={setCart} onAdded={() => setNotice({ message: '小費分配已加入本次點餐。', error: false })} /> : null}
           {tab==='cart'&&quote?<OrderQuoteReview quote={quote} loading={loading} onConfirm={submit} onRefresh={()=>setQuoteDraft(null)}/>:null}
           {tab === 'cart' ? <CartPage cart={cart} setCart={setCart} session={session} businessContext={businessContext} subtotal={cartSubtotal} onSubmit={()=>{if(quote){document.getElementById('order-quote-review')?.scrollIntoView({behavior:'smooth'});return;}void submit();}} loading={loading} quoteRequired={catalog.menu.contractVersion===2} /> : null}
@@ -192,12 +195,13 @@ export default function OrderClient() {
           <button type="button" onClick={() => setTab('cart')}>購物車</button>
         </aside>
       </section>
+      </div>
     </main>
   );
 }
 
-function OrderLoading() {
-  return <main className="orderGate"><div className="orderGateCard"><span className="orderGateMark">LD</span><p>正在確認今日點餐資格…</p></div></main>;
+function OrderLoading({ isDark }) {
+  return <main className={`orderGate${isDark ? ' isDark' : ''}`}><div className="orderGateCard"><span className="orderGateMark">LD</span><p>正在確認今日點餐資格…</p></div></main>;
 }
 
 function CustomerOrderingStatus({ context, session }) {
@@ -209,11 +213,12 @@ function CustomerOrderingStatus({ context, session }) {
   return <div className="orderBusinessBanner isOpen"><strong>目前可正常點餐</strong><span>預計接單至 {new Date(context.projectedCloseAt || context.referenceEndsAt).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}</span></div>;
 }
 
-function OrderAccess({ notice, onAccess, onRecover, loading }) {
+function OrderAccess({ notice, onAccess, onRecover, loading, theme }) {
   const [code, setCode] = useState('');
   const [showRecover, setShowRecover] = useState(false);
   return (
-    <main className="orderGate"><section className="orderGateCard">
+    <main className={`orderGate${theme.isDark ? ' isDark' : ''}`}><section className="orderGateCard">
+      <OrderThemeToggle isDark={theme.isDark} ready={theme.ready} onToggle={theme.toggle} />
       <a href="/" className="orderBrand"><img src="/favicon.ico" alt="" /><span><strong>清醒夢</strong><small>LUCID DREAM / ORDER</small></span></a>
       <p className="orderEyebrow">TODAY&apos;S ORDER PASS</p><h1>{showRecover ? '請洽店員' : '輸入今日點餐碼'}</h1>
       <p>{showRecover ? '向店員取得六位數協助碼，填寫人物 ID 並選擇角色所屬伺服器，即可找回今天的點餐網址。' : '若由店員提供專屬網址，頁面會自動帶入；也可手動貼上點餐碼。'}</p>
@@ -277,12 +282,31 @@ function NominationPage({ session, settings, businessContext, staff, cart, setCa
   const [staffId, setStaffId] = useState(visibleStaff[0]?.id || '');
   const selectedStaff = staff.find((person) => person.id === staffId);
   const services = [...(selectedStaff?.commonServices || []), ...(selectedStaff?.specialServices || [])].filter((item) => item.isNominatable && item.price != null);
-  const [mode, setMode] = useState('companionship');
+  const [mode, setMode] = useState('');
   const [serviceId, setServiceId] = useState('');
   const [segments, setSegments] = useState(1);
   const [participants, setParticipants] = useState(1);
   const [startsAt, setStartsAt] = useState(defaultStart);
-  useEffect(() => { setServiceId(''); setSegments(1); setMode('companionship'); }, [staffId]);
+  const [selectionMessage, setSelectionMessage] = useState('');
+  const selectStaff = (id) => {
+    if (id === staffId) return;
+    setStaffId(id);
+    setServiceId('');
+    setSegments(1);
+    setMode('');
+    setSelectionMessage('已切換店員，請重新選擇預約方式；開始時間保留。');
+  };
+  const selectMode = (nextMode) => {
+    if (mode === nextMode) return;
+    setMode(nextMode);
+    if (nextMode === 'companionship') {
+      setServiceId('');
+      setSegments(1);
+      setSelectionMessage(mode === 'service' ? '已改為稍後選服務：已清除加購商品，節數重設為 1 節；開始時間保留。' : '已選擇稍後選服務，接著安排時間與確認基礎指名費。');
+    } else {
+      setSelectionMessage('接著選擇一項服務，選好後即可安排時間。');
+    }
+  };
   const service = services.find((item) => item.id === serviceId);
   const minimumSegments = service?.durationMinutes ? Math.ceil(service.durationMinutes / settings.segmentMinutes) : 1;
   const safeSegments = Math.max(segments, minimumSegments);
@@ -292,25 +316,33 @@ function NominationPage({ session, settings, businessContext, staff, cart, setCa
   const requestedBusyUntil = new Date(startsAt).getTime() + (safeSegments * settings.segmentMinutes + Number(selectedStaff?.bufferMinutes || 0)) * 60_000;
   const needsCloseCoordination = businessContext?.projectedCloseAt && requestedBusyUntil > new Date(businessContext.projectedCloseAt).getTime();
   const already = cart.nominations.filter((line) => !line.baseRemoved).length;
+  const nextStep = !mode ? selectionMessage || '請先選擇預約方式'
+    : mode === 'service' ? service ? `已選擇「${service.serviceName}」，接著安排時間與確認費用。`
+      : services.length ? '接著選擇一項服務，選好後顯示排程與費用。'
+        : '這位店員目前沒有可選購的服務。可改選稍後選服務，或選擇其他店員。'
+    : selectionMessage;
   const add = () => {
-    if (!selectedStaff || (mode === 'service' && !service)) return onNotice({ message: '請先選擇店員與指名方式。', error: true });
+    if (!selectedStaff || !mode || (mode === 'service' && !service)) return onNotice({ message: '請先選擇店員與預約方式；選購服務時還需選擇一項服務。', error: true });
     if (already >= session.maxNominatedStaff) return onNotice({ message: `本次最多可同時指名 ${session.maxNominatedStaff} 位店員。`, error: true });
     if (cart.nominations.some((line) => line.staffId === selectedStaff.id && !line.baseRemoved)) return onNotice({ message: '同一張訂單每位店員只能加入一次；追加時數請另開新訂單。', error: true });
     setCart((current) => ({ ...current, nominations: [...current.nominations, { id: crypto.randomUUID(), mode, staffId: selectedStaff.id, staffName: selectedStaff.displayName, serviceId: service?.id || null, serviceName: service?.serviceName || '指名聊天', segments: safeSegments, participants, startsAt, duration: service?.durationMinutes || safeSegments * settings.segmentMinutes, baseFee: settings.baseNominationFee, baseTotal, serviceUnit, serviceTotal, serviceRemoved: false, baseRemoved: false }] }));
-    onNotice({ message: mode === 'companionship' ? '指名聊天與基礎指名費已加入本次點餐；成立後仍可在原時段內追加服務。' : '指名服務與基礎指名費已分列加入本次點餐。', error: false });
+    onNotice({ message: mode === 'companionship' ? '預約時段與基礎指名費已加入本次點餐；成立後仍可在原時段內追加服務。' : '指名服務與基礎指名費已分列加入本次點餐。', error: false });
   };
   return <div className="orderPage"><PageHeading kicker="STAFF FIRST" title="指名服務" text={`先選店員，再查看該店員提供的服務。每節 ${settings.segmentMinutes} 分鐘，最多同時指名 ${session.maxNominatedStaff} 人。`} />
     <section className="nominationSection"><header><span>01</span><div className="orderSectionTitle"><h2>選擇店員</h2><InlineHelp title="選擇店員說明">顯示開放指名人員；目前忙碌仍可選擇班內稍後的空檔。</InlineHelp></div></header>
-      <div className="nominationStaffGrid">{visibleStaff.map((person) => { const label = person.currentStatus === 'busy' ? '目前忙碌，可選未來空檔' : person.isWorkingToday ? '可指名' : '班內可預約'; return <button key={person.id} className={staffId === person.id ? 'isActive' : ''} onClick={() => setStaffId(person.id)}><span>{person.avatarUrl ? <img src={person.avatarUrl} alt="" /> : person.displayName.slice(0, 1)}</span><strong>{person.displayName}</strong><small>{label}</small></button>; })}</div>
+      <div className="nominationStaffGrid">{visibleStaff.map((person) => { const label = person.currentStatus === 'busy' ? '目前忙碌，可選未來空檔' : person.isWorkingToday ? '可指名' : '班內可預約'; return <button type="button" key={person.id} aria-pressed={staffId === person.id} className={staffId === person.id ? 'isActive' : ''} onClick={() => selectStaff(person.id)}><span>{person.avatarUrl ? <img src={person.avatarUrl} alt="" /> : person.displayName.slice(0, 1)}</span><strong>{person.displayName}</strong><small>{label}</small></button>; })}</div>
+      {!visibleStaff.length ? <p>目前沒有開放指名的店員，請洽店員協助。</p> : null}
     </section>
-    {selectedStaff ? <section className="nominationSection"><header><span>02</span><div className="orderSectionTitle"><h2>選擇指名方式(二擇一)</h2><InlineHelp title="選擇指名方式說明">指名聊天只收基礎指名費；服務成立後仍可在原本時段內追加服務，不會再收一次基礎費。</InlineHelp></div></header>
-      <div className="nominationModeGrid">
-        <NominationModeCard kicker="COMPANIONSHIP" title="指名聊天" description="先保留陪伴時段，稍後再視現場需求追加服務。" selected={mode === 'companionship'} onSelect={() => { setMode('companionship'); setServiceId(''); setSegments(1); }} />
-        <NominationModeCard kicker="SERVICE" title="指名+加購服務" description="現在就選擇服務；基礎指名費與服務費分列。" selected={mode === 'service'} onSelect={() => setMode('service')} />
-      </div>
-      {mode === 'service' ? <div className="nominationServiceGrid">{services.map((item) => <button key={item.id} className={serviceId === item.id ? 'isActive' : ''} onClick={() => { setServiceId(item.id); setSegments(item.durationMinutes ? Math.ceil(item.durationMinutes / settings.segmentMinutes) : 1); }}><span>{item.serviceType === 'special' ? 'SPECIAL' : 'SERVICE'}</span><strong>{item.serviceName}</strong><p>{item.serviceDescription}</p><footer><b>{money(item.price)}</b><small>{item.durationMinutes ? `${item.durationMinutes} 分鐘／單次` : '每節計費'}</small></footer></button>)}</div> : null}
+    {selectedStaff ? <section className="nominationSection"><header><span>02</span><div><h2 id="nomination-method-title">這次要如何預約？</h2><p id="nomination-method-hint">為這位店員選一種預約方式。</p></div></header>
+      <fieldset className="nominationModeGrid" aria-labelledby="nomination-method-title" aria-describedby="nomination-method-hint">
+        <NominationModeCard value="companionship" title="先約時段" description="先排時間，服務稍後加購。" price={`基礎指名費 ${money(settings.baseNominationFee)}／節`} selected={mode === 'companionship'} onSelect={() => selectMode('companionship')} />
+        <NominationModeCard value="service" title="選服務再預約" description="先選一項服務，再安排時間。" price="基礎指名費＋所選服務費" selected={mode === 'service'} onSelect={() => selectMode('service')} />
+      </fieldset>
+      <details className="nominationMethodHelp"><summary>費用與追加服務說明</summary><p>兩種方式皆收基礎指名費，加購服務另計；費用會在排程區分別列出。預約成立後，可在原時段內追加服務，不重複收取該時段的基礎指名費。</p></details>
+      <p className="nominationNextStep" role="status">{nextStep}</p>
+      {mode === 'service' ? <div className="nominationServiceGrid">{services.map((item) => <button type="button" key={item.id} aria-pressed={serviceId === item.id} className={serviceId === item.id ? 'isActive' : ''} onClick={() => { setServiceId(item.id); setSegments(item.durationMinutes ? Math.ceil(item.durationMinutes / settings.segmentMinutes) : 1); }}><span>{item.serviceType === 'special' ? 'SPECIAL' : 'SERVICE'}</span><strong>{item.serviceName}</strong><p>{item.serviceDescription}</p><footer><b>{money(item.price)}</b><small>{item.durationMinutes ? `${item.durationMinutes} 分鐘／單次` : '每節計費'}</small></footer></button>)}</div> : null}
     </section> : null}
-    {selectedStaff && (mode === 'companionship' || service) ? <section className="nominationSection"><header><span>03</span><div><h2>排程與節數</h2><p>{selectedStaff.displayName}｜{mode === 'companionship' ? '指名聊天' : service.serviceName}</p></div></header>{needsCloseCoordination ? <p className="nominationCoordinationHint">此時段會超過目前預計關店時間；可以送出，但需現場協調並由店員接受後才成立。</p> : null}<div className="nominationControls">
+    {selectedStaff && (mode === 'companionship' || service) ? <section className="nominationSection"><header><span>03</span><div><h2>排程與節數</h2><p>已選店員：{selectedStaff.displayName}｜預約方式：{mode === 'companionship' ? '稍後選服務' : '現在選購服務'}<br />加購服務：{mode === 'companionship' ? '尚未選購（成立後可追加）' : service.serviceName}</p></div></header>{needsCloseCoordination ? <p className="nominationCoordinationHint">此時段會超過目前預計關店時間；可以送出，但需現場協調並由店員接受後才成立。</p> : null}<div className="nominationControls">
       <label>開始時間<input type="datetime-local" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} /></label>
       <label><span>節數 <small>涵蓋 {safeSegments * settings.segmentMinutes} 分鐘{service?.durationMinutes ? `；服務需 ${service.durationMinutes} 分鐘` : ''}</small></span><div className="stepper"><button type="button" onClick={() => setSegments(Math.max(minimumSegments, segments - 1))}>−</button><strong>{safeSegments}</strong><button type="button" onClick={() => setSegments(Math.min(72, segments + 1))}>＋</button></div></label>
       {mode === 'service' ? <label>參與人數<div className="stepper"><button type="button" onClick={() => setParticipants(Math.max(1, participants - 1))}>−</button><strong>{participants}</strong><button type="button" onClick={() => setParticipants(Math.min(20, participants + 1))}>＋</button></div></label> : null}

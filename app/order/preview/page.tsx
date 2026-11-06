@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import "../../../styles/ordering/site.css";
+import { OrderThemeToggle, useOrderTheme } from "@/features/ordering/components/OrderThemeToggle";
 
 const products = [
   { id: "moon", category: "特調", tag: "SIGNATURE", name: "月下特調", description: "藍柑橘、蝶豆花與清爽氣泡。", price: 600, tone: "isBlue" },
@@ -33,6 +34,7 @@ const tabs = [["meal", "一般點餐"], ["nomination", "指名服務"], ["tip", 
 const money = (value: number) => `${value.toLocaleString("zh-TW")} G`;
 
 export default function OrderPreviewPage() {
+  const orderTheme = useOrderTheme();
   const [tab, setTab] = useState<(typeof tabs)[number][0]>("meal");
   const [category, setCategory] = useState("推薦");
   const [scenario, setScenario] = useState<(typeof scenarios)[number]["id"]>("unwind");
@@ -88,12 +90,11 @@ export default function OrderPreviewPage() {
     return () => { document.body.style.overflow = previousOverflow; window.removeEventListener("keydown", closeOnEscape); };
   }, [profileStaff]);
 
-  return <main className="orderShell orderMockShell">
-    <header className="orderTopbar"><Link href="/" className="orderBrand"><img src="/favicon.ico" alt="" /><span><strong>清醒夢</strong><small>LUCID DREAM / ORDER</small></span></Link><div className="orderSessionChip"><span>今日點餐</span><strong>Mizuki Yoru</strong><small>ID MIZUKI-021</small></div><div className="orderCredit"><span>信物餐點餘額</span><strong>1,200 G</strong></div></header>
+  return <main className={`orderShell orderMockShell${orderTheme.isDark ? " isDark" : ""}`}>
+    <header className="orderTopbar"><Link href="/" className="orderBrand"><img src="/favicon.ico" alt="" /><span><strong>清醒夢</strong><small>LUCID DREAM / ORDER</small></span></Link><div className="orderSessionChip"><span>今日點餐</span><strong>Mizuki Yoru</strong><small>ID MIZUKI-021</small></div><div className="orderCredit"><span>信物餐點餘額</span><strong>1,200 G</strong></div><OrderThemeToggle isDark={orderTheme.isDark} ready={orderTheme.ready} onToggle={orderTheme.toggle} /></header>
     <div className="orderBusinessBanner isOpen"><strong>目前可正常點餐</strong><span>預計接單至 01:30</span></div>
     {notice ? <div className="orderNotice" role="status">{notice}<button type="button" onClick={() => setNotice("")}>×</button></div> : null}
-    <nav className="orderTabs" aria-label="點餐功能">{tabs.map(([key, label], index) => <button className={tab === key ? "isActive" : ""} key={key} type="button" onClick={() => setTab(key)}><span>{String(index + 1).padStart(2, "0")}</span>{label}{key === "cart" && cartCount ? ` ${cartCount}` : ""}</button>)}</nav>
-    <section className="orderWorkspace"><div className="orderMain"><div className="orderPage">
+    <section className="orderWorkspace"><nav className="orderTabs" aria-label="點餐功能"><p className="orderNavTitle">點餐導覽 <span>ORDER MENU</span></p>{tabs.map(([key, label], index) => <div className="orderNavEntry" key={key}>{(index === 0 || key === "cart") && <p className="orderNavGroup">{index === 0 ? "選購項目" : "我的點餐"}</p>}<button className={tab === key ? "isActive" : ""} aria-current={tab === key ? "page" : undefined} type="button" onClick={() => setTab(key)}><span>{String(index + 1).padStart(2, "0")}</span>{label}{key === "cart" && cartCount > 0 ? <b className="orderNavCount">{cartCount}</b> : null}</button></div>)}</nav><div className="orderMain"><div className="orderPage">
       {tab === "meal" ? <>
         <PageHeading eyebrow="TONIGHT'S MOOD" title="今晚想怎麼度過？">先選一個最接近現在心情的情境，我們再替你整理適合的餐點與服務。</PageHeading>
         <section className="orderScenarioGuide" aria-label="選擇今晚的情境">

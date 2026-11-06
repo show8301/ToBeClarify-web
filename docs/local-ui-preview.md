@@ -48,7 +48,17 @@
 | --- | --- | --- |
 | 公開站 | 無 | 根 layout 的公開樣式已包含首頁狀態標籤 |
 | `/admin` | [styles/admin/site.css](../styles/admin/site.css) | 由後台 layout 載入，保留入口內所有 `@import` 的順序 |
-| `/order` 及點餐預覽 | [styles/ordering/site.css](../styles/ordering/site.css) | 由相應頁面載入，順序為 `base.css` → `modern.css` → `shared/inline-help.css` → `shared/select.css` → `shared/icon-actions.css` |
+| `/order` 及點餐預覽 | [styles/ordering/site.css](../styles/ordering/site.css) | 由相應頁面載入，順序為 `base.css` → `modern.css` → `customer-workspace.css` → `shared/inline-help.css` → `shared/select.css` → `shared/icon-actions.css` |
+
+### 顧客點餐導覽與預約方式（2026-11-03）
+
+正式顧客流程 `/order` 使用 `orderCustomerShell` 範圍：桌面 230px 分組側欄，1100px 以下使用 Base UI Dialog 左側抽屜；選頁後關閉、Escape 與焦點返回沿用共用 Dialog。1480px 以下摘要移至內容下方，不維持側欄／表單／摘要三欄，也不固定遮住手機表單。顧客名稱、完整 ID、餘額與營業狀態保留可見。舊 `/order/preview` 是獨立模擬流程，不能用它驗收本次正式點餐元件。
+
+預約方式使用 `NominationModeCard.tsx` 原生單選控制項，初始不選方式，明示基礎費與服務商品費的差異；選購服務後須選商品才顯示排程。指名表單切頁採隱藏而不卸載，保留當前草稿；切換店員／方式的商品清除、節數重設會顯示說明。價格、可指名資格、報價、提交及付款仍沿用既有流程，不新增 API。新導覽元件使用 TSX；既有大型 `OrderClient.jsx` 只調整組合、方式選擇與顯示，保留 JSX，避免將這次 UX 修改擴大為整份交易流程的型別遷移。後續遷移應獨立盤點完整 API 契約，不放寬 strict 或加入 `any`。
+
+產物宣告可使用 [customer-order-navigation.json](../scripts/preview-css/customer-order-navigation.json) 檢查。手機 360／390／430px、平板及桌面應另確認完整 ID、單選卡換行、抽屜關閉與返回焦點、切頁後的方式／商品／節數保留；假資料驗證不得宣稱已驗證正式交易或庫存衝突。
+
+頂端橫幅須在內容的 stacking context 上方並使用不透明底色，不能讓捲動卡片覆蓋。1479px 以下的本次點餐摘要以至少 88px 的獨立欄容納購物車按鈕，按鈕填滿該欄；不得繼承寬版摘要的 `calc(100% - 36px)`。預約方式卡片只保留短標題、下一步差異與費用，追加服務規則放在原生可展開說明中；切換時的清除／重設提醒仍在結果狀態列直接顯示。這次 JSX 僅調整顯示文案及組合，延用上述漸進遷移例外，不更動交易流程。
 
 後台與點餐仍繼承根 layout 的公開樣式及字型設定，不是完全獨立的 CSS 作用域。
 
@@ -235,6 +245,14 @@ if ($LASTEXITCODE -ne 0) { throw 'CSS 產物檢查未通過；請依輸出的分
 
 ## 5. 本次問題的紀錄與排查原則
 
+### 服務員訂單處理視窗（2026-11-03）
+
+服務員工作台的「服務處理／收款」沿用既有內容，改以共用 `AdminDialog` 顯示：桌面最大 1120px、90dvh，760px 以下全螢幕單欄。標題與關閉固定，只有內容區捲動；關閉回到觸發按鈕，已完成訂單移出清單則回下一筆或搜尋欄。收款、位置與備註尚未儲存時先顯示放棄確認，送出或收款結果未確認時不能關閉。
+
+本次數量僅在服務員面板啟用最大可操作量預設，依動作扣除已完成／取消數量，仍可手動減少；其他履約頁面保留原預設。單筆訂單內既有批次餐點操作維持，不增加跨單批次功能或更改 API 狀態規則。
+
+共用 `AdminShared.jsx` 僅新增可選的關閉標籤、停用與返回焦點 props，保留 JSX 以避免把本次修改擴大為整個共用模組的型別遷移；Dialog props 以 JSDoc 契約提供 TypeScript 檢查。驗收使用隔離的 3002 模擬伺服器；它的業務 API 只讀記憶體假資料，3001 提供 production build 與靜態資源。模擬結果不代表正式交易／收款驗證。
+
 2026-09-29 比對本地與正式站時，首頁狀態標籤的相關 CSS 規則相同；正式站 HTML 有字型 CSS 與變數宣告，本地 `vinext dev` 的 HTML 缺少該段。字型檔可回應並不代表瀏覽器已套用它。本次觀察不能推論所有 Vinext 開發模式都一定失敗，後續仍須檢查當次實際輸出。
 
 [40-refinements.css](../styles/public/layers/40-refinements.css) 的當時設定為：
@@ -247,3 +265,13 @@ if ($LASTEXITCODE -ne 0) { throw 'CSS 產物檢查未通過；請依輸出的分
 `var(--font-geist-mono)` 未定義且沒有 `var()` 內建 fallback 時，整條 `font` shorthand 會在計算階段失效，字級、粗細也可能隨之改變；逗號後面的 `monospace` 不能補救缺失的變數。同理，body 的 `var(--font-noto-sans-tc)` 缺失可能使整條 `font-family` 宣告失效，不能保證會使用後面的系統字型清單。
 
 因此排查順序是：確認 checkout／3001 建置程序 → 核對入口與匯入順序 → 核對字型變數和載入 → 比對 Computed／Rendered Fonts。只有取得新的設計需求時才調整上述字級，並同步更新此基準。
+
+### 指名人員顧客視窗（2026-11-04）
+
+指名工作台的目前服務優先顯示：服務中直接開「完成此指名」既有確認表單；已承接服務使用既有整單 `start_now` 指令，待承接使用既有整單 `accept` 指令。整單按鈕保留人數與姓名，不能改成只更新自己。補登與更正放在各顧客卡片內收合，使用既有服務資格、snapshot、operationId 與送出邏輯。
+
+各處「顧客處理」及顧客姓名開啟同一個共用 AdminDialog：桌面最大1120px／90dvh，760px以下全螢幕。標題固定顯示顧客姓名、完整遊戲ID與位置，內容區獨立捲動；表單及餐點完成／收款在同一視窗切換。返回顧客處理時保留仍掛載的當次表單，透過「繼續編輯草稿」恢復；關閉或換另一份表單前先確認放棄。草稿只在本次開啟的視窗中保留，不跨重新整理、關閉視窗或帳號保存；未確認的訂單、履約與收款操作結果不能藉返回／關閉卸載。加購沿用既有結果不明時先返回重新整理的規則。
+
+代點與包廂表單預填目前顧客位置，仍可修改。`WorkbenchGuestOrders` 的外部表單入口與 `WorkbenchItemCompletionDialog` 的 embedded 模式僅在本頁啟用；其他呼叫者沿用原視窗與按鈕。沒有修改API請求建立、交易授權、報價token、服務時長、價格或財務分配。
+
+隔離預覽在3002，3001只提供本地production build。3002的模擬寫入只更新程序記憶體／回傳合約形狀，不能當成正式交易、排程衝突或收款驗證；測試資料含雙人指名，用來核對整單操作範圍。必要檢查包含：桌面及360／390／430px、長姓名與ID、明暗主題、返回草稿、放棄確認、Escape與焦點返回、整單承接及單人完成的端點與欄位。正式驗收仍需使用者在測試站完成。

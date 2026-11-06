@@ -1,0 +1,193 @@
+/* Ordering uses its own saved theme, like the admin shell. */
+.orderTopbar { grid-template-columns:minmax(0,1fr) auto auto auto; }
+.orderCustomerShell .orderTopbar { grid-template-columns:auto minmax(0,1fr) auto auto; }
+.orderThemeToggle {
+  display:grid;
+  place-items:center;
+  width:42px;
+  min-width:42px;
+  height:42px;
+  padding:0;
+  border:1px solid #cbd5e5;
+  border-radius:10px;
+  background:rgba(255,255,255,.66);
+  color:var(--o-ink);
+  font:700 21px/1 var(--o-display);
+}
+.orderThemeToggle:hover:not(:disabled) { border-color:#8ca3c3; background:#fff; }
+.orderThemeToggle:disabled { cursor:default; opacity:.6; }
+.orderGateCard { position:relative; }
+.orderGateCard>.orderThemeToggle { position:absolute; top:18px; right:18px; }
+
+@media (min-width:1101px) {
+  .orderMockShell .orderTabs {
+    border-color:#dfe5ee;
+    background:linear-gradient(165deg,#fbfcfe,#edf2f8);
+    box-shadow:0 12px 30px rgba(82,87,120,.1);
+  }
+  .orderMockShell .orderNavTitle { border-color:#dce3ed; color:#2e3b52; }
+  .orderMockShell .orderNavTitle span,.orderMockShell .orderNavGroup { color:#687d99; }
+  .orderMockShell .orderTabs button { color:#35435b; }
+  .orderMockShell .orderTabs button span { background:#e8edf5; color:#60718d; }
+  .orderMockShell .orderTabs button:hover { border-color:#cbd7e7; background:#e7edf6; color:#27364f; }
+  .orderMockShell .orderTabs button.isActive {
+    border-color:#9eb3cf;
+    background:linear-gradient(110deg,#d3e0f1,#c4d6eb);
+    color:#263850;
+    box-shadow:inset 3px 0 #6c88b1,0 4px 12px rgba(89,112,150,.12);
+  }
+  .orderMockShell .orderTabs button.isActive span { background:#829bc0; color:#fff; }
+  .orderMockShell .orderNavCount { background:#b9dedc; color:#203644; }
+}
+
+.orderShell.isDark,.orderGate.isDark {
+  --o-ink:#edf4f7;
+  --o-paper:#111d2a;
+  --o-coral:#9fc7e8;
+  --o-coral-dark:#b9d8f1;
+  --o-mint:#8fd6c6;
+  --o-lilac:#c8bdff;
+  --o-line:rgba(218,234,244,.22);
+  color-scheme:dark;
+  color:#edf4f7;
+  background:radial-gradient(circle at 8% 8%,rgba(126,167,204,.2),transparent 30rem),radial-gradient(circle at 92% 12%,rgba(86,170,154,.15),transparent 32rem),linear-gradient(145deg,#172636,#0e1824 60%,#0a1119);
+}
+.orderShell.isDark .orderTopbar {
+  border-color:rgba(218,234,244,.2);
+  background:linear-gradient(110deg,#1d3042,#142332);
+  box-shadow:0 12px 32px rgba(0,0,0,.25);
+}
+.orderShell.isDark .orderSessionChip,.orderShell.isDark .orderCredit {
+  border-color:rgba(218,234,244,.24);
+  background:rgba(13,23,34,.62);
+}
+.orderShell.isDark .orderSessionChip span,.orderShell.isDark .orderSessionChip small,
+.orderShell.isDark .orderCredit span { color:#aebfcd; }
+.orderShell.isDark .orderBrand img { border-color:rgba(218,234,244,.38); }
+.orderCustomerShell.isDark .orderNavigationDesktop,
+.orderCustomerShell.isDark .orderNavigationMobile {
+  border-color:var(--o-line);
+  background:#1a2a3a;
+  box-shadow:0 14px 36px rgba(0,0,0,.2);
+}
+.orderCustomerShell.isDark .orderCustomerNav section+section { border-color:var(--o-line); }
+.orderCustomerShell.isDark .orderCustomerNav h2 { color:#aebfcd; }
+.orderCustomerShell.isDark .orderCustomerNav button { color:#edf4f7; }
+.orderCustomerShell.isDark .orderCustomerNav button:hover { border-color:var(--o-line); background:#2a4055; }
+.orderCustomerShell.isDark .orderCustomerNav button.isActive { border-color:#9fc7e8; background:#36536c; }
+.orderCustomerShell.isDark .orderCustomerNav button.isActive::before { background:#8fd6c6; }
+.orderCustomerShell.isDark .orderNavCount { background:#547c93; color:#fff; }
+.orderCustomerShell.isDark .orderNavigationMobile button { border-color:#9fc7e8; background:#36536c; color:#fff; }
+:root[data-order-theme="dark"] .orderMenuDrawer { border-color:rgba(218,234,244,.24); background:#1a2a3a; color:#edf4f7; }
+:root[data-order-theme="dark"] .orderMenuDrawer .orderCustomerNav section+section { border-color:rgba(218,234,244,.22); }
+:root[data-order-theme="dark"] .orderMenuDrawer .orderCustomerNav h2 { color:#aebfcd; }
+:root[data-order-theme="dark"] .orderMenuDrawer .orderCustomerNav button { color:#edf4f7; }
+:root[data-order-theme="dark"] .orderMenuDrawer .orderCustomerNav button.isActive { border-color:#9fc7e8; background:#36536c; }
+:root[data-order-theme="dark"] .orderMenuDrawer>header button { border-color:#9fc7e8; background:#36536c; color:#fff; }
+.orderShell.isDark .orderThemeToggle,.orderGate.isDark .orderThemeToggle {
+  border-color:rgba(159,199,232,.4);
+  background:rgba(62,91,117,.5);
+  color:#edf4f7;
+}
+.orderShell.isDark .orderThemeToggle:hover:not(:disabled),.orderGate.isDark .orderThemeToggle:hover:not(:disabled) {
+  border-color:#b9d8f1;
+  background:rgba(82,118,151,.6);
+}
+.orderShell.isDark .orderBusinessBanner.isOpen { border-color:#397367; background:#234c48; color:#e4fff6; }
+.orderShell.isDark .orderBusinessBanner.isCoordination { background:#554b30; color:#fff0c6; }
+.orderShell.isDark .orderBusinessBanner.isStaffOnly { background:#573845; color:#ffe6ee; }
+.orderShell.isDark .orderBusinessBanner.isClosed,.orderShell.isDark .orderPauseBanner { background:#3b4256; color:#fff; }
+.orderShell.isDark .orderPageHeading { border-color:var(--o-line); }
+.orderShell.isDark .orderPageHeading p,.orderShell.isDark .nominationSection header p,
+.orderShell.isDark .nominationServiceGrid p,.orderShell.isDark .orderProductCard p,
+.orderShell.isDark .roomBookingCopy em,.orderShell.isDark .helpCard p,
+.orderShell.isDark .orderEmpty p { color:#b8c9d4; }
+.orderShell.isDark .orderCategoryRail { background:linear-gradient(180deg,rgba(18,30,43,.97) 75%,transparent); }
+.orderShell.isDark .orderCategoryRail button,.orderShell.isDark .tipAmountButtons button,
+.orderShell.isDark .nominationServiceGrid>button,.orderShell.isDark .nominationModeCard,
+.orderShell.isDark .roomBookingCard,.orderShell.isDark .orderScenarioGuide button {
+  border-color:rgba(218,234,244,.25);
+  background:#1c2c3c;
+  color:#edf4f7;
+  box-shadow:none;
+}
+.orderShell.isDark .orderCategoryRail button.isActive,.orderShell.isDark .tipAmountButtons button.isActive,
+.orderShell.isDark .nominationServiceGrid>button.isActive,.orderShell.isDark .nominationModeCard.isActive,
+.orderShell.isDark .roomBookingCard.isActive,.orderShell.isDark .orderScenarioGuide button.isActive {
+  border-color:#9fc7e8;
+  background:#36536c;
+  color:#fff;
+}
+.orderShell.isDark .orderProductCard,.orderShell.isDark .nominationSection,
+.orderShell.isDark .tipComposer,.orderShell.isDark .cartLine,.orderShell.isDark .cartSummary,
+.orderShell.isDark .myOrderCard,.orderShell.isDark .myOrderDetail,.orderShell.isDark .helpCard,
+.orderShell.isDark .orderAside,.orderShell.isDark .orderEmpty,
+.orderShell.isDark .orderRecommendationHead,.orderShell.isDark .nominationComposer {
+  border-color:rgba(218,234,244,.24);
+  background:#1a2a3a;
+  color:#edf4f7;
+  box-shadow:0 14px 36px rgba(0,0,0,.2);
+}
+.orderShell.isDark .orderProductCard:hover { border-color:#9fc7e8; }
+.orderShell.isDark .orderProductCard footer,.orderShell.isDark .cartSummary dl div,
+.orderShell.isDark .orderAside dl,.orderShell.isDark .nominationServiceGrid footer { border-color:var(--o-line); }
+.orderShell.isDark .orderProductImage,.orderShell.isDark .roomBookingImage { background:linear-gradient(145deg,#354760,#284b50); color:#c6d7e4; }
+.orderShell.isDark .roomBookingImage::after { background:linear-gradient(90deg,transparent,#1c2c3c); }
+.orderShell.isDark .roomBookingCard.isActive .roomBookingImage::after { background:linear-gradient(90deg,transparent,#36536c); }
+.orderShell.isDark .nominationSection>header>span,.orderShell.isDark .helpIndex,
+.orderShell.isDark .orderAside::before,.orderShell.isDark .cartNominationGroup>header,
+.orderShell.isDark .cartRoomGroup>header { background:#304760; color:#edf4f7; }
+.orderShell.isDark .orderAside>p,.orderShell.isDark .cartSummary p { color:#b8c9d4; }
+.orderShell.isDark .orderStaffCard,.orderShell.isDark .nominationStaffGrid button,
+.orderShell.isDark .tipSplit>div,.orderShell.isDark .customerAddonComposer>div,
+.orderShell.isDark .myOrderAddon,.orderShell.isDark .myOrderNominee,
+.orderShell.isDark .myOrderRoom,.orderShell.isDark .orderNotice {
+  border-color:var(--o-line);
+  background:#23374a;
+  color:#edf4f7;
+}
+.orderShell.isDark .orderStaffCard.isActive,.orderShell.isDark .nominationStaffGrid button.isActive { border-color:#9fc7e8; background:#36536c; }
+.orderShell.isDark :is(input,textarea,select) {
+  border-color:rgba(218,234,244,.34);
+  background:#10202f;
+  color:#edf4f7;
+}
+.orderShell.isDark :is(input,textarea)::placeholder { color:#aebfcd; opacity:1; }
+.orderShell.isDark :is(button,select,input,textarea):focus-visible,.orderGate.isDark :is(button,input):focus-visible { outline-color:#9fc7e8; }
+.orderShell.isDark .orderProductCard footer button,.orderShell.isDark .orderPrimaryAction,
+.orderShell.isDark .cartSummary button,.orderShell.isDark .orderAside>button:not(.isSecondary) {
+  border-color:#91b8de;
+  background:#688eb8;
+  color:#fff;
+}
+.orderShell.isDark .orderAside>button.isSecondary { border-color:var(--o-line); background:#22374b; color:#edf4f7; }
+.orderShell.isDark .orderNotice.isError { background:#633e50; }
+.orderShell.isDark .orderMockShell,.orderShell.isDark .orderMockCartLayout { color:#edf4f7; }
+.orderGate.isDark .orderGateCard { border-color:var(--o-line); background:#1a2a3a; box-shadow:0 22px 58px rgba(0,0,0,.3); }
+.orderGate.isDark .orderGateCard>p:not(.orderEyebrow) { color:#b8c9d4; }
+.orderGate.isDark .orderGateCard input { border-color:var(--o-line); background:#10202f; color:#edf4f7; }
+.orderGate.isDark .orderGateCard form button { border-color:#91b8de; background:#688eb8; color:#fff; }
+
+@media (min-width:1101px) {
+  .orderShell.isDark .orderTabs { border-color:rgba(218,234,244,.22); background:linear-gradient(165deg,#1d3040,#172631); box-shadow:0 18px 42px rgba(0,0,0,.28); }
+  .orderShell.isDark .orderNavTitle { border-color:rgba(205,226,236,.16); color:#f5f9fb; }
+  .orderShell.isDark .orderNavTitle span,.orderShell.isDark .orderNavGroup { color:#9fb9c8; }
+  .orderShell.isDark .orderTabs button { color:#dce9ef; }
+  .orderShell.isDark .orderTabs button span { background:rgba(193,216,229,.13); color:#c3d5de; }
+  .orderShell.isDark .orderTabs button:hover { border-color:rgba(202,223,237,.22); background:rgba(219,235,245,.1); color:#fff; }
+  .orderShell.isDark .orderTabs button.isActive { border-color:rgba(224,239,249,.32); background:linear-gradient(105deg,#526b83,#3d536b); color:#fff; box-shadow:inset 3px 0 #b9dedc,0 6px 15px rgba(0,0,0,.14); }
+  .orderShell.isDark .orderTabs button.isActive span { background:rgba(255,255,255,.2); color:#fff; }
+}
+
+@media (max-width:1100px) {
+  .orderShell.isDark .orderTabs { border-color:var(--o-line); background:#1a2a3a; }
+  .orderShell.isDark .orderTabs button { color:#edf4f7; }
+  .orderShell.isDark .orderTabs button.isActive { border-color:#9fc7e8; background:#36536c; color:#fff; }
+}
+@media (max-width:620px) {
+  .orderTopbar { grid-template-columns:minmax(0,1fr) auto auto; }
+  .orderCustomerShell .orderTopbar { grid-template-columns:minmax(0,1fr) minmax(0,112px) 38px; }
+  .orderCustomerShell .orderSessionChip { grid-column:1/-1; }
+  .orderCustomerShell .orderThemeToggle { grid-column:3; grid-row:1; }
+  .orderThemeToggle { width:38px; min-width:38px; height:38px; }
+}

@@ -12,10 +12,11 @@ type Props = {
   order: OperationsOrder; cashPeriodId: string; businessDate: string; refreshKey: number; sourceMissing: boolean;
   disabled: boolean; onBusy: (busy: boolean) => void; onChanged: () => Promise<void>;
   onPendingChange: (pending: boolean) => void;
+  onDirtyChange?: (dirty: boolean) => void;
 };
 type ReceiptData = { account: FinanceAccount; pricing: Awaited<ReturnType<typeof workbenchApi.orderPricing>> };
 
-export function ServiceOrderReceiptPanel({ order, cashPeriodId, businessDate, refreshKey, sourceMissing, disabled, onBusy, onChanged, onPendingChange }: Props) {
+export function ServiceOrderReceiptPanel({ order, cashPeriodId, businessDate, refreshKey, sourceMissing, disabled, onBusy, onChanged, onPendingChange, onDirtyChange }: Props) {
   const [revision, setRevision] = useState(0);
   const [result, setResult] = useState<{ key: string; data: ReceiptData | null; error: string } | null>(null);
   const [feedback, setFeedback] = useState("");
@@ -58,7 +59,7 @@ export function ServiceOrderReceiptPanel({ order, cashPeriodId, businessDate, re
     {data && <WorkbenchOrderReceiptForm
       order={{ ...order, status: data.pricing.status, totalAmount: data.pricing.totalAmount }} account={data.account}
       cashPeriodId={cashPeriodId} businessDate={businessDate} disabled={disabled || !ready && !pending}
-      onCommitted={committed} onBusy={onBusy} onReload={reload} onPendingChange={reportPending} showOrderBreakdown={!sourceMissing}
+      onCommitted={committed} onBusy={onBusy} onReload={reload} onPendingChange={reportPending} onDirtyChange={onDirtyChange} showOrderBreakdown={!sourceMissing}
     />}
     <a className="adminButton adminButton-ghost" href={`/admin/orders?${new URLSearchParams({ date: order.sessionBusinessDate || businessDate, session: order.sessionId, order: order.id })}`}>完整點單管理</a>
   </section>;

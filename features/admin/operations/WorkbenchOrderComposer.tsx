@@ -55,7 +55,8 @@ function taipeiNextStart(): string {
   return value.toISOString().slice(0, 16);
 }
 
-export function WorkbenchOrderComposer({ sessionId, businessDate, mode, staffId: ownStaffId, onSaved, onBusy }: {
+export function WorkbenchOrderComposer({ sessionId, businessDate, mode, staffId: ownStaffId, onSaved, onBusy, initialLocation = "", onDirtyChange, onPendingChange }: {
+  initialLocation?: string; onDirtyChange?: (dirty: boolean) => void; onPendingChange?: (pending: boolean) => void;
   sessionId: string; businessDate: string; mode: ComposerMode; staffId: string;
   onSaved: () => Promise<void>; onBusy: (busy: boolean) => void;
 }) {
@@ -76,7 +77,8 @@ export function WorkbenchOrderComposer({ sessionId, businessDate, mode, staffId:
   const [participants, setParticipants] = useState(1);
   const [startsAt, setStartsAt] = useState(taipeiNextStart);
   const [note, setNote] = useState("");
-  const [location, setLocation] = useState("");
+  const [location, setLocation] = useState(initialLocation);
+  const [initialStartsAt] = useState(startsAt);
   const [quote, setQuote] = useState<Quote | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [now, setNow] = useState(Date.now);
@@ -100,6 +102,11 @@ export function WorkbenchOrderComposer({ sessionId, businessDate, mode, staffId:
     tips: [], customerNote: note.trim() || null, customerLocation: location.trim() || null,
     isManagerTransfer: mode === "transfer",
   };
+  const dirty = !submitted && (cart.length > 0 || Boolean(productKey) || Boolean(roomId) || Boolean(serviceId) ||
+    note !== "" || location !== initialLocation || quantity !== 1 || segments !== 1 || participants !== 1 || startsAt !== initialStartsAt ||
+    mode === "transfer" && staffId !== "");
+  useEffect(() => { onDirtyChange?.(dirty); }, [dirty, onDirtyChange]);
+  useEffect(() => { onPendingChange?.(busy || uncertain); return () => onPendingChange?.(false); }, [busy, uncertain, onPendingChange]);
   const source = JSON.stringify(body);
   const validQuote = quote?.source === source && quote.expiresAt > now ? quote : null;
   const hasLines = body.meals.length + body.rooms.length + body.nominations.length > 0;

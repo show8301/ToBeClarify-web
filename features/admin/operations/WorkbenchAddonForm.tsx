@@ -8,7 +8,7 @@ import { errorText, integer, list, record, textValue } from "./workbenchApi";
 import type { ServiceEntry } from "./WorkbenchServiceDialog";
 type Option = { id: string; name: string; price: number; duration: number; extraPrice: number };
 
-export function WorkbenchAddonForm({ entry, onSaved, onBusy }: { entry: ServiceEntry; onSaved: () => Promise<void>; onBusy: (busy: boolean) => void }) {
+export function WorkbenchAddonForm({ entry, onSaved, onBusy, onDirtyChange }: { onDirtyChange?: (dirty: boolean) => void; entry: ServiceEntry; onSaved: () => Promise<void>; onBusy: (busy: boolean) => void }) {
   const [options, setOptions] = useState<Option[]>([]);
   const [loading, setLoading] = useState(true);
   const [serviceId, setServiceId] = useState("");
@@ -29,6 +29,8 @@ export function WorkbenchAddonForm({ entry, onSaved, onBusy }: { entry: ServiceE
     const timer = window.setInterval(() => setNow(Date.now()), 10_000);
     return () => { controller.abort(); window.clearInterval(timer); };
   }, [entry.nominee.id]);
+  const dirty = !submitted && (Boolean(serviceId) || segments !== 1 || participants !== 1);
+  useEffect(() => { onDirtyChange?.(dirty); }, [dirty, onDirtyChange]);
   const option = options.find((s) => s.id === serviceId);
   const segmentMinutes = entry.nominee.segmentMinutes || 20;
   const remaining = Math.max(0, Math.floor((Date.parse(entry.unit?.scheduledEndsAt || entry.nominee.requestedServiceEndsAt) - Math.max(now, Date.parse(entry.unit?.scheduledStartsAt || entry.nominee.requestedStartsAt))) / 60_000));

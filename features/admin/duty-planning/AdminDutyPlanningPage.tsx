@@ -74,7 +74,7 @@ function addDays(value: string, days: number) {
 function displayDate(value: string) {
   if (!value) return "讀取營業日中…";
   const date = new Date(`${value}T12:00:00`);
-  return date.toLocaleDateString("zh-TW", { month: "numeric", day: "numeric", weekday: "short" });
+  return date.toLocaleDateString("zh-TW", { year: "numeric", month: "numeric", day: "numeric", weekday: "short" });
 }
 
 function normalizePlan(input: unknown): DutyPlan | null {
@@ -126,6 +126,7 @@ export function AdminDutyPlanningPage({ navigate }: { navigate: Navigate }) {
   const [rangeStart, setRangeStart] = useState("");
   const rangeEnd = useMemo(() => addDays(rangeStart, 13), [rangeStart]);
   const [plans, setPlans] = useState<DutyPlan[]>([]);
+  const [loadedRangeStart, setLoadedRangeStart] = useState("");
   const [staff, setStaff] = useState<StaffOption[]>([]);
   const [draft, setDraft] = useState<DutyPlanDraft | null>(null);
   const editorRef = useRef<HTMLDivElement>(null);
@@ -167,6 +168,7 @@ export function AdminDutyPlanningPage({ navigate }: { navigate: Navigate }) {
       const nextStaff = (Array.isArray(staffResult) ? staffResult : [])
         .map((value: Record<string, unknown>) => ({ id: String(value.id), displayName: String(value.displayName || "未命名店員"), roleTitle: value.roleTitle ? String(value.roleTitle) : null, canUseManagerPayrollRole: value.canUseManagerPayrollRole === true, canUseBackstage: value.canUseBackstage === true }));
       setPlans(nextPlans);
+      setLoadedRangeStart(rangeStart);
       setStaff(nextStaff);
       setDraft((current) => current && nextStaff.some((item) => item.id === current.staffId) ? current : null);
     } catch (loadError) {
@@ -184,6 +186,8 @@ export function AdminDutyPlanningPage({ navigate }: { navigate: Navigate }) {
   }, [load]);
 
   const ownStaff = staff.find((item) => item.id === user?.staffMemberId);
+  const rangeLoaded = Boolean(rangeStart) && loadedRangeStart === rangeStart && !loading;
+  const isPastRange = Boolean(businessDate && rangeEnd) && rangeEnd < businessDate;
   const editableStaff = canManageAll ? staff : (ownStaff ? [ownStaff] : []);
   const pendingCount = plans.filter((plan) => plan.approvalStatus === "pending").length;
   const approvedCount = plans.filter((plan) => plan.approvalStatus === "approved").length;
@@ -285,21 +289,29 @@ export function AdminDutyPlanningPage({ navigate }: { navigate: Navigate }) {
 
     <section className="adminDutyPlanningMetrics" aria-label="值班規劃摘要">
       <article><span>顯示期間</span><strong>{displayDate(rangeStart)} ～ {displayDate(rangeEnd)}</strong><small>共 14 天</small></article>
-      <article><span>待核准</span><strong>{pendingCount}</strong><small>需要經理確認</small></article>
-      <article><span>已核准</span><strong>{approvedCount}</strong><small>會帶入營運判斷</small></article>
-      <article><span>已退回</span><strong>{rejectedCount}</strong><small>可修改後重新送出</small></article>
+      <article><span>待核准</span><strong>{rangeLoaded ? pendingCount : "—"}</strong><small>查詢期間待核准規劃</small></article>
+      <article><span>已核准</span><strong>{rangeLoaded ? approvedCount : "—"}</strong><small>查詢期間已核准規劃</small></article>
+      <article><span>已退回</span><strong>{rangeLoaded ? rejectedCount : "—"}</strong><small>查詢期間已退回規劃</small></article>
     </section>
 
     <div className="adminDutyPlanningToolbar">
-      <AdminField label="從哪一天開始顯示"><input type="date" min={businessDate} value={rangeStart} onChange={(event) => setRangeStart(event.target.value || businessDate)} /></AdminField>
-      <div className="adminDutyPlanningToolbarNote"><strong>{canManageAll ? "經理／開發者視角" : "個人值班規劃"}</strong><small>{canManageAll ? "可查看、編輯與核准所有店員的規劃。" : "可預先填寫自己的日期與時段，送出後由經理核准。"}</small></div>
+      <AdminField label="從哪一天開始顯示"><input type="date" value={rangeStart} onChange={(event) => setRangeStart(event.target.value || businessDate)} /></AdminField>
+      <div className="adminDutyPlanningToolbarNote">
+        <strong>{canManageAll ? "經理／開發者視角" : "個人值班規劃"}</strong>
+        <small>{canManageAll ? "可查看、編輯與核准所有店員的規劃。" : "可預先填寫自己的日期與時段，送出後由經理核准。"} 可選擇過去日期查詢歷史值班規劃。</small>
+        <div className="adminDutyPlanningLinks" role="group" aria-label="切換值班規劃查詢期間">
+          <AdminButton variant="ghost" disabled={!rangeStart || loading} onClick={() => setRangeStart(addDays(rangeStart, -14))}>前 14 天</AdminButton>
+          <AdminButton variant="ghost" disabled={!rangeStart || loading} onClick={() => setRangeStart(addDays(rangeStart, 14))}>後 14 天</AdminButton>
+          <AdminButton variant="ghost" disabled={!businessDate || loading || rangeStart === businessDate} onClick={() => setRangeStart(businessDate)}>回到當前營業日</AdminButton>
+        </div>
+      </div>
     </div>
 
     <div className="adminDutyPlanningLayout">
       <div className="adminDutyPlanningList">
         {loading ? <div className="adminInlineState">載入值班規劃中…</div> : null}
-        {!loading && groupedPlans.length === 0 ? <AdminPanel title="目前尚無值班規劃" description="先新增一筆未來日期的規劃，讓經理可以安排與核准。"><AdminButton disabled={!businessDate || loading} onClick={() => startNew()}>建立第一筆規劃</AdminButton></AdminPanel> : null}
-        {groupedPlans.map(([date, datePlans]) => <AdminPanel key={date} className="adminDutyDatePanel" title={displayDate(date)} description={`${datePlans.length} 位店員已填寫規劃`}>
+        {rangeLoaded && !error && groupedPlans.length === 0 ? <AdminPanel title="此期間沒有值班規劃紀錄" description={isPastRange ? "可選擇其他日期，查詢歷史值班規劃。" : "可選擇其他日期查詢，或新增一筆值班規劃。"}>{!isPastRange ? <AdminButton disabled={!businessDate || loading} onClick={() => startNew()}>建立第一筆規劃</AdminButton> : null}</AdminPanel> : null}
+        {(rangeLoaded ? groupedPlans : []).map(([date, datePlans]) => <AdminPanel key={date} className="adminDutyDatePanel" title={displayDate(date)} description={`${datePlans.length} 位店員已填寫規劃`}>
           <div className="adminDutyPlanList">
             {datePlans.map((plan) => <article className={`adminDutyPlanCard is-${plan.approvalStatus}`} key={plan.id}>
               <div className="adminDutyPlanIdentity"><strong>{plan.staffName}</strong><small>{shiftLabel(plan)}</small></div>

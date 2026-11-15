@@ -49,8 +49,8 @@ export default function BusinessCalendar() {
 
   return <section className="live-calendar" aria-labelledby="business-calendar-title">
     <header>
-      <div><span className="section-kicker">BUSINESS CALENDAR</span><h2 id="business-calendar-title">營業與值班行事曆</h2></div>
-      <p>查看已公告的營業安排與預定班表。未公告的日期不代表休店；即時執勤狀態請以上方卡片為準。</p>
+      <div><span className="section-kicker">BUSINESS CALENDAR</span><h2 id="business-calendar-title">行事曆</h2></div>
+      <p>即時執勤狀態請以上方卡片為準。</p>
     </header>
     <div className="live-calendar-toolbar">
       <h3 aria-live="polite">{title}</h3>

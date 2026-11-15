@@ -39,7 +39,7 @@ export default function LiveRoomSection({ rooms, catalog }: LiveRoomSectionProps
   return (
     <section className="live-room-status">
       <header>
-        <div><span>ROOM STATUS</span><h2>包廂目前狀態</h2></div>
+        <div><span>ROOM STATUS</span><h2>包廂狀態</h2></div>
         <b>{String(rooms.length).padStart(2, "0")} ROOMS</b>
       </header>
       {rooms.length ? (

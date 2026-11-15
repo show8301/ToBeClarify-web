@@ -5,6 +5,7 @@ import type { LiveRoomStatus, LiveUpdateConfig, StaffReservation } from "@/featu
 import type { StaffSummary } from "@/features/staff/types";
 import type { Room } from "@/features/rooms/types";
 import LiveRoomSection from "./LiveRoomSection";
+import BusinessCalendar from "./BusinessCalendar";
 
 function tonightRange(){
   const from=new Date();
@@ -198,6 +199,7 @@ export default function LiveUpdateBoard({staff,rooms,config}:{staff:StaffSummary
 
     <section className="live-timeline"><header><div><span>RESERVATION TIMELINE</span><h2>今夜時序</h2></div><p>{reservations.length?`目前公開 ${reservations.length} 筆預約時段。`:"公開預約會在這裡顯示；店員的即時狀態請以上方卡片為準。"}</p></header>{reservations.length?<div className="timeline-scroll"><div className="timeline-board" style={{minWidth:`${Math.max(760,slots.length*100)}px`}}><div className="timeline-times"><span>STAFF</span>{slots.map(slot=><b key={slot}>{slot}</b>)}</div>{working.map(person=><div className="timeline-row" key={person.id}><div><img src={person.avatarUrl||"/og.png"} alt="" loading="lazy" decoding="async"/><span>{person.displayName}</span></div><div className="timeline-line">{(barsByStaff.get(person.id)??[]).map(bar=><span key={bar.id} className={bar.status} style={{left:`${bar.left}%`,width:`${bar.width}%`}}><b>{bar.serviceLabel}</b><small>{new Date(bar.startsAt).toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit",hour12:false})}</small></span>)}</div></div>)}</div></div>:<div className="timeline-empty"><span>NO PUBLIC RESERVATIONS</span><strong>今晚尚無公開預約</strong><p>有公開時段後會自動出現在這裡，不需要重新整理頁面。</p></div>}</section>
 
+    <BusinessCalendar />
     <LiveRoomSection rooms={roomStatuses} catalog={rooms}/>
   </div>;
 }

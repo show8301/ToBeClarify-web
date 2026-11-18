@@ -1417,10 +1417,10 @@
   margin:0;
   border:0;
   border-radius:0;
-  background:linear-gradient(to right, #d5d5d5 var(--tip-position), var(--o-coral) var(--tip-position)) center / calc(100% - 16px) 4px no-repeat;
+  background:linear-gradient(to right, var(--o-tip-track-base, #d5d5d5) var(--tip-position), var(--o-tip-track-fill, var(--o-coral)) var(--tip-position)) center / calc(100% - 16px) 4px no-repeat;
 }
-.tipRange input::-webkit-slider-thumb { appearance:none; width:16px; height:16px; border-radius:50%; background:#617ba7; }
-.tipRange input::-moz-range-thumb { width:16px; height:16px; border:0; border-radius:50%; background:#617ba7; }
+.tipRange input::-webkit-slider-thumb { appearance:none; width:16px; height:16px; border-radius:50%; background:var(--o-tip-thumb, #617ba7); }
+.tipRange input::-moz-range-thumb { width:16px; height:16px; border:0; border-radius:50%; background:var(--o-tip-thumb, #617ba7); }
 
 /* Desktop ordering navigation follows the admin sidebar's grouped, numbered pattern. */
 @media (min-width:1101px) {

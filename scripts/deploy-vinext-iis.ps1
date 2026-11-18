@@ -893,16 +893,19 @@ foreach ($item in (Get-ChildItem -LiteralPath $artifactRoot -Force)) {
 }
 
 Push-Location $stagingRoot
+$npmInstallTimer = [System.Diagnostics.Stopwatch]::StartNew()
 try {
     $npmResult = Invoke-NativeCommand `
         -FilePath $npmCommand.Source `
-        -ArgumentList @('ci', '--omit=dev', '--no-audit', '--no-fund')
+        -ArgumentList @('ci', '--omit=dev', '--prefer-offline', '--no-audit', '--no-fund')
     $npmResult.Output | ForEach-Object { Write-Host $_ }
     if ($npmResult.ExitCode -ne 0) {
         throw "npm ci failed with exit code $($npmResult.ExitCode)"
     }
 }
 finally {
+    $npmInstallTimer.Stop()
+    Write-Host ('IIS staging npm ci elapsed: {0:F1} s' -f $npmInstallTimer.Elapsed.TotalSeconds)
     Pop-Location
 }
 

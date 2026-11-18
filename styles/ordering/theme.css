@@ -139,7 +139,7 @@
 .orderShell.isDark .cartRoomGroup>header { background:#304760; color:#edf4f7; }
 .orderShell.isDark .orderAside>p,.orderShell.isDark .cartSummary p { color:#b8c9d4; }
 .orderShell.isDark .orderStaffCard,.orderShell.isDark .nominationStaffGrid button,
-.orderShell.isDark .tipSplit>div,.orderShell.isDark .customerAddonComposer>div,
+.orderShell.isDark .tipSplit>div:not(.tipRange),.orderShell.isDark .customerAddonComposer>div,
 .orderShell.isDark .myOrderAddon,.orderShell.isDark .myOrderNominee,
 .orderShell.isDark .myOrderRoom,.orderShell.isDark .orderNotice {
   border-color:var(--o-line);
@@ -147,7 +147,47 @@
   color:#edf4f7;
 }
 .orderShell.isDark .orderStaffCard.isActive,.orderShell.isDark .nominationStaffGrid button.isActive { border-color:#9fc7e8; background:#36536c; }
-.orderShell.isDark :is(input,textarea,select) {
+.orderShell.isDark .myOrderCoordination {
+  border-color:#9d824b;
+  background:#554b30;
+  color:#fff0c6;
+}
+.orderShell.isDark .myOrderStage {
+  border-color:#8277ab;
+  background:#393453;
+  color:#ede7ff;
+}
+.orderShell.isDark .stepper,
+.orderShell.isDark .nominationDurationField > strong,
+.orderShell.isDark .tipAmountButtons label {
+  border-color:#657f94;
+  background:#22374b;
+  color:var(--o-ink);
+}
+.orderShell.isDark .stepper button { color:inherit; }
+.orderShell.isDark .stepper button:hover { background:#36536c; }
+.orderShell.isDark .stepper button:focus-visible { outline-offset:-4px; }
+.orderShell.isDark .tipRange {
+  --o-tip-track-base:#718ca2;
+  --o-tip-track-fill:var(--o-mint);
+  --o-tip-thumb:#c9e5f9;
+}
+.orderShell.isDark .tipRange small { color:#b8c9d4; }
+.orderShell.isDark .orderQuoteReview {
+  border-color:#5b9185;
+  background:#1a2a3a;
+  color:var(--o-ink);
+}
+.orderShell.isDark .orderQuoteReview dl > div { border-color:var(--o-line); }
+.orderShell.isDark .orderQuoteReview :focus-visible { outline-color:var(--o-coral); }
+.orderShell.isDark .orderQuoteReview button { background:#285b53; }
+.orderShell.isDark .orderQuoteReview button + button { background:#36536c; }
+.orderShell.isDark .orderQuoteReview button:disabled {
+  background:#22374b;
+  color:#b8c9d4;
+  opacity:1;
+}
+.orderShell.isDark :is(input:not([type="range"]),textarea,select) {
   border-color:rgba(218,234,244,.34);
   background:#10202f;
   color:#edf4f7;

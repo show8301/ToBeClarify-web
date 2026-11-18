@@ -21,7 +21,9 @@
 
 1. 在 Web 根目錄確認 `git status --short --branch` 與遠端 `dev`，檢視 `git diff --cached` 和 PR 全部差異，只提交本次範圍。推送 `codex/*` 工作分支，建立或沿用該分支到 `dev` 的 PR。
 2. 追蹤目前 PR head 的 CI。build、TypeScript、ESLint 與部署腳本語法檢查通過、可合併時，直接合併該 head。失敗時讀取該 job 的錯誤，修正後追蹤新 head。發布到 `dev` 預設略過所有自動化測試套件，只有使用者要求該次測試才執行。
-3. 從已合併 PR 取得目標分支的完整合併 SHA。以該 SHA、目標分支與 `push` 事件選取 [deploy.yml](../.github/workflows/deploy.yml) 的 run，等待 IIS 部署 job 成功。使用 GitHub 連接器即可操作。若使用已登入的 GitHub CLI，可用下列指令；run 尚未建立時，短暫等候後再查同一 SHA。
+3. 從已合併 PR 取得目標分支的完整合併 SHA。以該 SHA、目標分支與 `push` 事件選取 [deploy.yml](../.github/workflows/deploy.yml) 的 run，等待 IIS 部署 job 成功。run 尚未建立時，短暫等候後再查同一 SHA。
+
+可用專案的 GitHub 連接器追蹤 PR 與已知的 run。若連接器只列出 PR 事件，透過 GitHub CLI 或 REST API 以 `event=push`、`branch`、`head_sha` 查部署。若連接器缺少寫入權限而回傳 403，沿用本專案已授權的 CLI 或 REST API 帳號完成操作。重試開 PR 前先查同一 head 與 base 的現有 PR。以下為已登入 GitHub CLI 時的 PowerShell 範例。
 
 ```powershell
 # $pr、$headSha 為已檢查的 PR 編號與完整 head SHA，$branch 為目標分支

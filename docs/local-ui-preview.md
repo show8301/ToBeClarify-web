@@ -10,6 +10,7 @@
 
 - 在 `ToBeClarify-web` 目錄執行；相鄰的 `LUCID-DREAM` 是另一份 checkout，不得混用其伺服器或樣式。
 - 記錄 `git status --short --branch` 與 `git rev-parse HEAD`。比對正式站時，確認指定的正式版本來源；一般 UI 開發保留當前工作分支，不自動切到 `main` 或覆蓋未提交修改。
+- 提供畫面給使用者驗收時，依[換版流程](web-release.md)記錄本次建置使用的版本，讓後續換版能沿用相同內容的驗收結果。
 - 確認預覽連接埠的程序確實來自這份 checkout；沿用已確認的伺服器，不因連接埠被占用就把別的程序當成本站。
 - Node.js 與依賴安裝方式依 [README](../README.md)。首次安裝或 lockfile 變動時使用 `npm ci`；不要為了預覽另換套件版本。
 

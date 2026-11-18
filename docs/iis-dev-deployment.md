@@ -168,13 +168,13 @@ isolated from unrelated PM2 applications such as `D:\cron`.
   removed in a separate cleanup only after DEV and production have both proven
   stable.
 
-## Required Web release sequence
+## Release procedure
 
-1. Commit the change on a `codex/*` branch and open a pull request targeting
-   `dev`.
-2. Merge the change into `dev` (or otherwise push the reviewed commit to
-   `dev`) and wait for the DEV deployment to complete.
-3. Ask the user to verify the DEV site. Keep the change out of `main` until the
-   user confirms it is ready.
-4. Open a new pull request from `dev` to `main` and merge it manually after the
-   confirmation. The resulting `main` push triggers production deployment.
+Follow the [Web release runbook](web-release.md) for preview acceptance, PR
+checks, deployment verification and production promotion.
+
+On Windows, `setup-node` restores the npm download cache. The IIS deployer
+runs `npm ci --omit=dev --prefer-offline` in a fresh staging directory. npm
+uses cached packages when available and fetches missing content from the
+registry. The deploy log records the install duration as
+`IIS staging npm ci elapsed`, including failed attempts.

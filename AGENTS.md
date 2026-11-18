@@ -9,6 +9,7 @@
 
 ## Release authorization
 
+- Follow the [Web release runbook](docs/web-release.md) for each release. Reuse the accepted local preview when its build inputs match, let the PR run the build and static checks, and track the merged SHA through deployment and HTTP health verification.
 - A user request to release or deploy a version (「換版」) authorizes the GitHub operations required for that release, including pushing the scoped changes, opening the pull request, and merging it into the branch required by the release flow. Do not ask for a separate confirmation of those GitHub operations.
 - Web production promotion still requires the user's confirmation of the deployed `dev` version before opening and manually merging the `dev` → `main` pull request.
 

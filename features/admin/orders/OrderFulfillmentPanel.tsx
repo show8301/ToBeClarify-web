@@ -51,6 +51,8 @@ function parseUnits(value: unknown): Unit[] {
   });
 }
 
+const mealSteps = ["accept", "start", "complete"] as const;
+
 const labels: Record<string, string> = {
   accept: "接單", decline: "無法承接／交回經理", needs_coordination: "等待經理協調", start: "開始", start_now: "進階現在開始（休息／折讓）", backfill: "補登已服務", complete: "完成",
   cancel: "取消未服務項目", reschedule: "改期", carry_forward: "轉入新營業期／保留", waiting: "待接單", accepted: "已接單", in_service: "處理中",
@@ -67,6 +69,7 @@ export function OrderFulfillmentPanel({ orderId, onChanged, disabled = false, st
   const [units, setUnits] = useState<Unit[]>([]);
   const [error, setError] = useState("");
   const [revision, setRevision] = useState(0);
+  const [batchError, setBatchError] = useState("");
   const [batchBusy, setBatchBusy] = useState(false);
   const [loadedFor, setLoadedFor] = useState("");
   const loadKey = `${orderId}:${revision}:${refreshKey}`;
@@ -89,25 +92,33 @@ export function OrderFulfillmentPanel({ orderId, onChanged, disabled = false, st
       .catch((e: Error) => { if (!controller.signal.aborted) { setError(e.message); setLoadedFor(loadKey); onProgressChange?.({ kind: "error" }); } });
     return () => controller.abort();
   }, [orderId, revision, loadKey, onProgressChange]);
-  const batchMeals = async (action: "accept" | "start" | "complete") => {
+  const batchMeals = async (selection: typeof mealSteps[number] | "all") => {
     if (disabled || storeConfirmationPending || batchBusy || !ready || error) return;
-    const candidates = units.filter(unit => unit.kind === "meal" && unit.allowedActions.includes(action));
-    if (candidates.length === 0) return;
-    setBatchBusy(true); onBusy?.(true); setError("");
+    const path = `/orders/${encodeURIComponent(orderId)}/fulfillment`;
+    const steps = selection === "all" ? mealSteps : [selection];
+    const meals = units.filter(unit => unit.kind === "meal");
+    const mealIds = new Set(meals.map(unit => unit.id));
+    let current = meals;
+    setBatchBusy(true); onBusy?.(true); setBatchError("");
     try {
-      for (const unit of candidates) {
-        const quantity = action === "accept"
-          ? unit.quantity - unit.cancelledQuantity - unit.acceptedQuantity
-          : action === "start" ? unit.acceptedQuantity - unit.startedQuantity
-          : unit.startedQuantity - unit.completedQuantity;
-        if (quantity < 1) continue;
-        await adminRequest(`/orders/${encodeURIComponent(orderId)}/fulfillment/${encodeURIComponent(unit.id)}/transition`, {
-          method: "POST",
-          body: JSON.stringify({ operationId: crypto.randomUUID(), expectedVersion: unit.version, action, quantity, reason: "批次餐點作業", restMinutes: -1, compensationAmount: 0 })
-        });
+      for (const action of steps) {
+        let changed = false;
+        for (const unit of current) {
+          if (!unit.allowedActions.includes(action)) continue;
+          const quantity = getFulfillmentQuantityLimit(unit, action);
+          if (quantity < 1) continue;
+          await adminRequest(`${path}/${encodeURIComponent(unit.id)}/transition`, {
+            method: "POST",
+            body: JSON.stringify({ operationId: crypto.randomUUID(), expectedVersion: unit.version, action, quantity, reason: "批次餐點作業", restMinutes: -1, compensationAmount: 0 })
+          });
+          changed = true;
+        }
+        if (selection === "all" && changed && action !== "complete") {
+          current = parseUnits(await adminRequest(path)).filter(unit => mealIds.has(unit.id));
+        }
       }
-      setRevision(n => n + 1); await onChanged();
-    } catch (e) { setError(e instanceof Error ? e.message : "批次餐點操作失敗"); }
+      await onChanged();
+    } catch (e) { setBatchError(e instanceof Error ? e.message : "批次餐點操作失敗"); }
     finally { setBatchBusy(false); onBusy?.(false); setRevision(n => n + 1); }
   };
   return <section className="adminOrderCard adminOrderFulfillment" aria-label="分項接待進度">
@@ -121,8 +132,10 @@ export function OrderFulfillmentPanel({ orderId, onChanged, disabled = false, st
     </header>
     {units.some(unit => unit.kind === "nominee") && <OrderServiceActions orderId={orderId} refreshKey={loadKey} disabled={disabled || batchBusy} onBusy={onBusy} onChanged={async () => { setRevision(n => n + 1); await onChanged(); }} />}
     {!ready && <p role="status">讀取分項履約中…</p>}
+    {batchError && <p role="alert">{batchError}</p>}
     {ready && error && <p role="alert">{error}</p>}
     {actionableUnits.some(unit => unit.kind === "meal" && ["accept", "start", "complete"].some(action => unit.allowedActions.includes(action))) ? <div className="adminPageActions adminOrderFulfillmentActions">
+      <AdminButton disabled={disabled || batchBusy || !ready || Boolean(error)} onClick={() => void batchMeals("all")}>一鍵完成</AdminButton>
       {actionableUnits.some(unit => unit.kind === "meal" && unit.allowedActions.includes("accept")) && <AdminButton disabled={disabled || batchBusy || !ready || Boolean(error)} onClick={() => void batchMeals("accept")}>批次接單餐點</AdminButton>}
       {actionableUnits.some(unit => unit.kind === "meal" && unit.allowedActions.includes("start")) && <AdminButton disabled={disabled || batchBusy || !ready || Boolean(error)} onClick={() => void batchMeals("start")}>批次開始已接餐點</AdminButton>}
       {actionableUnits.some(unit => unit.kind === "meal" && unit.allowedActions.includes("complete")) && <AdminButton variant="secondary" disabled={disabled || batchBusy || !ready || Boolean(error)} onClick={() => void batchMeals("complete")}>批次送達已處理餐點</AdminButton>}

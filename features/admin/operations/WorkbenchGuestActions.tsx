@@ -20,30 +20,31 @@ function ShareFields({ fields }: { fields: Array<{ label: string; value: string 
   return <div className="dwForm">{fields.map((field) => <div className="dwShareField" key={field.label}><AdminField label={field.label}><textarea readOnly rows={field.value.includes("\n") ? 4 : 2} value={field.value} onFocus={(e) => e.currentTarget.select()} /></AdminField><AdminButton variant="secondary" onClick={() => void copy(field.value)}>複製{field.label}</AdminButton></div>)}{feedback && <p role="status">{feedback}</p>}</div>;
 }
 
-export function WorkbenchPassAction({ session, onChanged, onBusy }: { session: OperationsSession; onChanged: () => Promise<void>; onBusy: (busy: boolean) => void }) {
-  const [issued, setIssued] = useState<{ url: string; code: string } | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
+export function useWorkbenchPass(onBusy: (busy: boolean) => void) {
+  const [url, setUrl] = useState("");
+  const [message, setMessage] = useState("");
   const lock = useRef(false);
-  const reissue = async () => {
-    if (lock.current || issued) return;
-    lock.current = true; setBusy(true); onBusy(true); setError("");
+  const recover = async (sessionId: string) => {
+    if (lock.current) return;
+    lock.current = true;
+    setUrl("");
+    setMessage("正在尋回點餐碼…");
+    onBusy(true);
     try {
-      const result = record(await adminApi.reissueOrderSession(session.id));
+      const result = record(await adminApi.reissueOrderSession(sessionId));
       const original = new URL(textValue(result.orderUrl), window.location.origin);
-      if (original.pathname !== "/order") throw new Error("點餐連結格式異常，請重新整理確認。");
-      const url = new URL(original.pathname + original.search + original.hash, window.location.origin).toString();
-      setIssued({ url, code: textValue(result.recoveryCode) });
-      await onChanged();
-    } catch (e) { setError(errorText(e)); }
-    finally { lock.current = false; setBusy(false); onBusy(false); }
+      if (original.pathname !== "/order" || !original.search) throw new Error("點餐連結格式異常。");
+      setUrl(new URL(original.pathname + original.search + original.hash, window.location.origin).href);
+      setMessage("");
+    } catch (error) { setMessage(errorText(error)); }
+    finally { lock.current = false; onBusy(false); }
   };
-  return <div className="dwForm">
-    {issued ? <><p className="dwNotice" role="status">新點餐資料已建立，請當場交給 {session.customerName}。</p><ShareFields fields={[{ label: "點餐連結", value: issued.url }, { label: "恢復碼", value: issued.code }, { label: "分享文字", value: `${session.customerName}，您的點餐連結：\n${issued.url}\n恢復碼：${issued.code}` }]} /></> : <><p className="dwNotice">重發後，原點餐連結與恢復碼會失效。請確認顧客可以收到新資料。</p><AdminButton disabled={busy} onClick={() => void reissue()}>{busy ? "重發中…" : "確認重發點餐碼"}</AdminButton></>}
-    {error && <p className="adminFormError" role="alert">{error} 若連線中斷，請先確認顧客目前的點餐資料。</p>}
-  </div>;
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(url); setMessage("點餐網址已複製"); }
+    catch { setMessage("無法複製，請允許瀏覽器使用剪貼簿後再試。"); }
+  };
+  return { recover, controls: <>{url && <AdminButton onClick={() => void copy()}>複製點餐網址</AdminButton>}{message && <p role="status">{message}</p>}</> };
 }
-
 export function WorkbenchDeliveryAction({ session, orderId, businessDate, user, onBusy, onDirty }: {
   session: OperationsSession; orderId: string; businessDate: string; user: CurrentAdminUser;
   onBusy: (busy: boolean) => void; onDirty: (dirty: boolean) => void;

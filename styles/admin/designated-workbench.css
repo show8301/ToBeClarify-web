@@ -484,9 +484,36 @@
 }
 
 .adminDesignatedWorkbench .dwScheduleCopy {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 8px;
   min-width: 0;
   padding-left: 16px;
   border-left: 2px solid var(--color-border);
+}
+.dwScheduleItem {
+  container-type: inline-size;
+}
+.dwScheduleCopy > .dwScheduleGuest {
+  grid-column: 2;
+  grid-row: 1;
+}
+.dwScheduleCopy > :is(p, .dwActions, .dwExceptions) {
+  grid-column: 1 / -1;
+}
+.dwScheduleCopy > .dwActions:empty {
+  display: none;
+}
+@container (max-width: 420px) {
+  .adminDesignatedWorkbench .dwScheduleCopy {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .dwScheduleCopy > .dwScheduleGuest {
+    grid-area: auto;
+    justify-self: start;
+    margin-top: 8px;
+  }
 }
 
 .adminDesignatedWorkbench .isCurrent .dwScheduleCopy {
@@ -646,6 +673,25 @@
 }
 .dwCustomerDialog .dwReturnToGuest {
   margin-bottom: 16px;
+}
+.dwCustomerDialog .dwPassActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.dwCustomerDialog .dwPassActions > .adminButton:has(+ .adminButton) {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+.dwCustomerDialog .dwPassActions > .adminButton + .adminButton {
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+.dwCustomerDialog .dwPassActions > .adminButton:focus-visible {
+  z-index: 1;
+}
+.dwCustomerDialog .dwPassActions > [role="status"] {
+  flex-basis: 100%;
 }
 .dwCustomerDialog .dwDiscardPrompt {
   display: grid;

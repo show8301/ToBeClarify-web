@@ -9,7 +9,7 @@ import { canAct as canActAt, legacyStandalone, resolveServiceStatus } from "./wo
 import { WorkbenchShiftBar } from "./WorkbenchShiftBar";
 import { WorkbenchOrderComposer } from "./WorkbenchOrderComposer";
 import { WorkbenchAddonForm } from "./WorkbenchAddonForm";
-import { WorkbenchDeliveryAction, WorkbenchDepartureAction, WorkbenchPassAction } from "./WorkbenchGuestActions";
+import { WorkbenchDeliveryAction, WorkbenchDepartureAction, useWorkbenchPass } from "./WorkbenchGuestActions";
 import { WorkbenchServiceDialog, serviceActionLabel, serviceActionLabels } from "./WorkbenchServiceDialog";
 import { WorkbenchItemCompletionDialog } from "./WorkbenchItemCompletionDialog";
 import { WorkbenchOrderReceiptForm } from "./WorkbenchOrderReceiptDialog";
@@ -129,9 +129,12 @@ export function AdminDesignatedWorkbench({ data, user, onChanged, loading, loadE
   const captureTrigger = () => {
     if (!guestOpen && !dialog) rootTrigger.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   };
-  const openAction = (target: DialogTarget) => {
+  const openAction = (target: DialogTarget, onOpened?: () => void) => {
     captureTrigger();
-    navigate(() => { setDirty(false); setConfirmClose(false); setDialog(target); setActionVisible(true); });
+    navigate(() => {
+      setDirty(false); setConfirmClose(false); setDialog(target); setActionVisible(true);
+      onOpened?.();
+    });
   };
   const openService = (entry: ServiceEntry, action: ServiceAction) => {
     if (disabled || !canAct(entry, action)) return;
@@ -146,10 +149,12 @@ export function AdminDesignatedWorkbench({ data, user, onChanged, loading, loadE
     // Keep the mounted form and its quote/retry state when returning to this customer's overview.
     setGuestOpen(true); setActionVisible(false); setConfirmClose(false);
   };
+  const pass = useWorkbenchPass(onBusy);
   const openGuestAction = (kind: "meals" | "rooms" | "renew" | "delivery" | "pass" | "departure") => {
     if (!selected || disabled) return;
     if (kind === "meals" || kind === "rooms" || kind === "renew") openAction({ kind: "composer", session: selected, mode: kind });
     else if (kind === "delivery") openAction({ kind, session: selected, orderId: selectedEntry?.order.id || guestOrders[0]?.id || "" });
+    else if (kind === "pass") openAction({ kind, session: selected }, () => void pass.recover(selected.id));
     else openAction({ kind, session: selected });
   };
   const pendingAddons = mine.flatMap((order) => order.addons.filter((a) => a.staffId === user.staffMemberId && a.status === "waiting" && order.storeConfirmationStatus !== "pending").map((addon) => ({ order, addon, unit: units[order.id]?.find((u) => u.kind === "addon" && u.staffId === user.staffMemberId) })));
@@ -173,7 +178,7 @@ export function AdminDesignatedWorkbench({ data, user, onChanged, loading, loadE
   else if (dialog?.kind === "composer") dialogTitle = composerTitles[dialog.mode];
   else if (dialog?.kind === "addon") dialogTitle = "代客加購服務";
   else if (dialog?.kind === "delivery") dialogTitle = "建立委託與領取碼";
-  else if (dialog?.kind === "pass") dialogTitle = "重發點餐碼";
+  else if (dialog?.kind === "pass") dialogTitle = "尋回點餐碼";
   else if (dialog?.kind === "departure") dialogTitle = dialog.session.entryStatus === "departed" || dialog.session.status === "readonly" ? "重新開放點餐" : "顧客離店";
   else if (dialog?.kind === "complete") dialogTitle = dialog.unit.kind === "meal" ? "確認已送達" : "確認使用完成";
   else if (dialog?.kind === "receipt") dialogTitle = "同單收款";
@@ -249,7 +254,7 @@ export function AdminDesignatedWorkbench({ data, user, onChanged, loading, loadE
           <div className="dwGuestActions">
             <AdminButton variant="secondary" disabled={disabled || !canOrder} onClick={() => openGuestAction("meals")}>代點餐點</AdminButton>
             <AdminButton variant="secondary" disabled={disabled || !canOrder} onClick={() => openGuestAction("rooms")}>包廂訂購</AdminButton>
-            <AdminButton variant="secondary" disabled={disabled || !canOrder} onClick={() => openGuestAction("pass")}>重發點餐碼</AdminButton>
+            <AdminButton variant="secondary" disabled={disabled || !canOrder} onClick={() => openGuestAction("pass")}>尋回點餐碼</AdminButton>
             <AdminButton variant="secondary" disabled={disabled || !canOrder} onClick={() => openGuestAction("renew")}>建立續時</AdminButton>
             <AdminButton variant="secondary" disabled={disabled} onClick={() => openGuestAction("delivery")}>委託／領取碼</AdminButton>
             <AdminButton variant="ghost" disabled={disabled || !departed && guestEntries.some((e) => e.status === "in_service")} onClick={() => openGuestAction("departure")}>{departed ? "重新開放點餐" : "顧客離店"}</AdminButton>
@@ -264,7 +269,7 @@ export function AdminDesignatedWorkbench({ data, user, onChanged, loading, loadE
           {dialog?.kind === "addon" && <WorkbenchAddonForm key={dialog.entry.nominee.id} entry={dialog.entry} onSaved={saved} onBusy={onBusy} onDirtyChange={onDirty} />}
           {dialog?.kind === "composer" && <WorkbenchOrderComposer key={`${dialog.session.id}:${dialog.mode}`} sessionId={dialog.session.id} businessDate={businessDate} mode={dialog.mode} staffId={user.staffMemberId} initialLocation={ordersBySession[dialog.session.id]?.find(o => o.customerLocation)?.customerLocation || ""} onSaved={saved} onBusy={onBusy} onDirtyChange={onDirty} onPendingChange={onPending} />}
           {dialog?.kind === "delivery" && <WorkbenchDeliveryAction session={dialog.session} orderId={dialog.orderId} businessDate={businessDate} user={user} onBusy={onBusy} onDirty={onDirty} />}
-          {dialog?.kind === "pass" && <WorkbenchPassAction session={dialog.session} onChanged={refresh} onBusy={onBusy} />}
+          {dialog?.kind === "pass" && pass.controls}
           {dialog?.kind === "departure" && <WorkbenchDepartureAction session={dialog.session} onSaved={saved} onBusy={onBusy} onDirtyChange={onDirty} />}
           {dialog?.kind === "complete" && <WorkbenchItemCompletionDialog embedded key={dialog.unit.id} order={dialog.order} unit={dialog.unit} onClose={() => navigate(() => { setDialog(null); setDirty(false); })} onCommitted={message => { void saved(message); }} onBusy={onBusy} onDirtyChange={onDirty} onPendingChange={onPending} />}
           {dialog?.kind === "receipt" && <WorkbenchOrderReceiptForm key={dialog.order.id} order={dialog.order} account={dialog.account} cashPeriodId={data.context?.businessPeriodId || ""} businessDate={businessDate} onClose={() => navigate(() => { setDialog(null); setDirty(false); })} onCommitted={message => { void saved(message); }} onBusy={onBusy} onDirtyChange={onDirty} onPendingChange={onPending} />}

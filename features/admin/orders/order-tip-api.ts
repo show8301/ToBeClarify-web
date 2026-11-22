@@ -7,9 +7,10 @@ export interface OrderTip {
   distribution: { mode: FinanceTipDistributionMode; publicAmount: number; allocations: FinanceTipAllocation[] } | null;
   staffName: string | null; staffAmount: number; storeAmount: number;
 }
-export interface TipCorrection extends TipDistributionInput {
+export interface TipChange {
   operationId: string; expectedAccountVersion: number; expectedDistributionVersion: number; reason: string;
 }
+export interface TipCorrection extends TipChange, TipDistributionInput {}
 const object = (value: unknown): Record<string, unknown> => {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("小費資料格式錯誤。");
   return Object.fromEntries(Object.entries(value));
@@ -34,6 +35,8 @@ function parse(value: unknown): OrderTip {
 const path = (sessionId: string) => `/ordering-finance/sessions/${encodeURIComponent(sessionId)}/order-tips`;
 export const orderTipApi = {
   list: async (sessionId: string, signal?: AbortSignal): Promise<OrderTip[]> => array(await adminRequest(path(sessionId), { signal })).map(parse),
+  voidTip: (sessionId: string, itemId: string, body: TipChange) => adminRequest(`${path(sessionId)}/${encodeURIComponent(itemId)}/void`,
+    { method: "POST", body: JSON.stringify(body) }),
   correct: (sessionId: string, itemId: string, body: TipCorrection) => adminRequest(`${path(sessionId)}/${encodeURIComponent(itemId)}`,
     { method: "PUT", body: JSON.stringify(body) }),
 };

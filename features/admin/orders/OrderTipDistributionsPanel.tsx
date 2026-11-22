@@ -27,6 +27,8 @@ function TipDistributions({ sessionId, refreshKey, onSaved }: Props) {
   const [revision, setRevision] = useState(0);
   const requestKey = `${refreshKey}|${revision}`;
   const [data, setData] = useState<{ key: string; tips: OrderTip[]; staff: FinanceTipStaffOption[]; account: FinanceAccount } | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [refreshError, setRefreshError] = useState("");
   const [editing, setEditing] = useState<OrderTip | null>(null);
   const [error, setError] = useState<{ key: string; message: string } | null>(null);
   const loading = data?.key !== requestKey && error?.key !== requestKey;
@@ -47,15 +49,16 @@ function TipDistributions({ sessionId, refreshKey, onSaved }: Props) {
     <header className="adminOrderFinanceHeading">
       <div className="adminFieldHeading">
         <h3>訂單小費分配</h3>
-        <AdminHelp title="小費訂單與帳款">新增小費請使用「補登已成交訂單」，再到帳款登記實收。此處只更正原訂單的分配，不增加應收或實收；薪資依有效收款認列。</AdminHelp>
+        <AdminHelp title="小費訂單與帳款">新增小費請使用「補登已成交訂單」，再到帳款登記實收。更正分配只調整小費歸屬。刪除小費會扣除本單應收，已收款項請另行核對。</AdminHelp>
       </div>
       <AdminButton variant="ghost" disabled={loading || editing !== null} onClick={() => setRevision(n => n + 1)}>重新讀取分配</AdminButton>
     </header>
     {visibleError && <p className="adminOrderFinanceNotice isError" role="alert">{visibleError}</p>}
+    {refreshError && <p className="adminOrderFinanceNotice isError" role="alert">{refreshError}</p>}
     {loading && <p className="adminOrderTipStatus" role="status">正在讀取小費分配…</p>}
     {data?.tips.length === 0 && !loading && <p className="adminOrderFinanceEmpty">尚無小費訂單。</p>}
     <details className="adminOrderTipDisclosure" open>
-      <AdminDisclosureSummary>小費分配明細{data ? ` · ${data.tips.length} 筆 · 合計 ${money(data.tips.reduce((total, tip) => total + tip.amount, 0))}` : ""}{editing ? " · 更正中" : ""}</AdminDisclosureSummary>
+      <AdminDisclosureSummary>小費分配明細{data ? ` · ${data.tips.length} 筆 · 合計 ${money(data.tips.reduce((total, tip) => total + tip.amount, 0))}` : ""}{editing ? (deleting ? " · 刪除確認中" : " · 更正中") : ""}</AdminDisclosureSummary>
     <div className="adminOrderTipList">{data?.tips.map(tip => <article key={tip.itemId} className="adminOrderTipCard">
       <header className={`adminOrderTipSummary${data.account.canWrite && !editing ? " hasAction" : ""}`}>
         <div className="adminOrderTipIdentity">
@@ -66,7 +69,10 @@ function TipDistributions({ sessionId, refreshKey, onSaved }: Props) {
           </div>
         </div>
         <dl className="adminOrderTipAmount"><div><dt>小費總額</dt><dd>{money(tip.amount)}</dd></div></dl>
-        {data.account.canWrite && !editing && <AdminButton variant="secondary" disabled={loading || !!visibleError} onClick={() => setEditing(tip)}>更正此筆分配</AdminButton>}
+        {data.account.canWrite && !editing && <div className="adminOrderFinanceActions">
+          <AdminButton variant="secondary" disabled={loading || !!visibleError} onClick={() => { setDeleting(false); setEditing(tip); }}>更正此筆分配</AdminButton>
+          <AdminButton variant="danger" disabled={loading || !!visibleError} onClick={() => { setDeleting(true); setEditing(tip); }}>刪除小費</AdminButton>
+        </div>}
       </header>
       {tip.distribution?.mode === "public" ? <p className="adminOrderTipStatus">於結算依合資格計薪工時分配</p> : tip.distribution ? <ul className="adminOrderTipAllocations">{tip.distribution.allocations.map(a => <li key={a.staffId}>
         <span>{a.staffName}{a.percentage === null ? "" : `（${a.percentage}%）`}</span><strong>{money(a.amount)}</strong>
@@ -75,15 +81,20 @@ function TipDistributions({ sessionId, refreshKey, onSaved }: Props) {
         <div><dt>原店家份額</dt><dd>{money(tip.storeAmount)}</dd></div>
       </dl>}
       {tip.distribution && tip.distribution.mode !== "public" && tip.distribution.publicAmount > 0 && <p className="adminOrderTipStatus">另有公共小費 <strong>{money(tip.distribution.publicAmount)}</strong>，於結算按工時分配。</p>}
-      {editing?.itemId === tip.itemId && <Correction key={tip.itemId} tip={editing} account={data.account} staff={data.staff}
-        onCancel={() => setEditing(null)} onSaved={async () => { await onSaved(); setEditing(null); setRevision(n => n + 1); }} />}
+      {editing?.itemId === tip.itemId && <Correction key={tip.itemId} tip={editing} deleting={deleting} account={data.account} staff={data.staff}
+        onCancel={() => setEditing(null)} onSaved={async () => {
+          setRefreshError("");
+          try { await onSaved(); }
+          catch { setRefreshError("小費異動已儲存，請重新整理頁面以取得最新訂單與帳款。"); }
+          finally { setEditing(null); setRevision(n => n + 1); }
+        }} />}
     </article>)}</div>
     </details>
   </section>;
 }
 
-function Correction({ tip, account, staff, onCancel, onSaved }: {
-  tip: OrderTip; account: FinanceAccount; staff: FinanceTipStaffOption[]; onCancel: () => void; onSaved: () => Promise<void>;
+function Correction({ tip, deleting, account, staff, onCancel, onSaved }: {
+  tip: OrderTip; deleting: boolean; account: FinanceAccount; staff: FinanceTipStaffOption[]; onCancel: () => void; onSaved: () => Promise<void>;
 }) {
   const [value, setValue] = useState<TipDistributionInput>(() => ({ mode: tip.distribution?.mode === "equal" ? "public" : tip.distribution?.mode ?? "public",
     allocations: tip.distribution?.mode === "equal" ? [] : tip.distribution?.allocations.map(a => ({ staffId: a.staffId, percentage: a.percentage }))
@@ -101,7 +112,12 @@ function Correction({ tip, account, staff, onCancel, onSaved }: {
           expectedDistributionVersion: tip.version, reason: reason.trim() };
         setRetry(body);
         const prior = await financeApi.operation(account.sessionId, body.operationId);
-        if (!prior) await orderTipApi.correct(account.sessionId, tip.itemId, body);
+        if (!prior) {
+          if (deleting) {
+            const { operationId, expectedAccountVersion, expectedDistributionVersion, reason } = body;
+            await orderTipApi.voidTip(account.sessionId, tip.itemId, { operationId, expectedAccountVersion, expectedDistributionVersion, reason });
+          } else await orderTipApi.correct(account.sessionId, tip.itemId, body);
+        }
         setSaved(true);
         notifyFinanceUpdated(`/ordering-finance/sessions/${encodeURIComponent(account.sessionId)}`);
       }
@@ -111,21 +127,22 @@ function Correction({ tip, account, staff, onCancel, onSaved }: {
       if (e instanceof ApiError && e.status >= 400 && e.status < 500) setRetry(null);
     } finally { setBusy(false); }
   }
-  return <form className="adminOrderTipCorrection" aria-label={`更正訂單 ${tip.orderNumber} 小費分配`} onSubmit={e => { e.preventDefault(); void save(); }}>
+  return <form className="adminOrderTipCorrection" aria-label={`${deleting ? "刪除" : "更正"}訂單 ${tip.orderNumber} 小費分配`} onSubmit={e => { e.preventDefault(); void save(); }}>
     <header className="adminFieldHeading">
-      <h4>更正分配</h4>
-      <AdminHelp title="更正分配的影響">原分配將被取代並保留歷程。小費總額、應收與實收不變；已正式結算的薪資需由經理重新結算後才更新。</AdminHelp>
+      <h4>{deleting ? "刪除小費" : "更正分配"}</h4>
+      {!deleting && <AdminHelp title="更正分配的影響">原分配將被取代並保留歷程。小費總額、應收與實收不變；已正式結算的薪資需由經理重新結算後才更新。</AdminHelp>}
     </header>
     <fieldset className="adminOrderTipCorrectionFields" disabled={busy || !!retry || saved}>
-      <TipDistributionFields value={value} staff={staff} onChange={setValue} />
-      <AdminField label="更正原因" required><textarea required rows={2} maxLength={500} value={reason}
-        placeholder="說明原分配的問題與本次更正原因" onChange={e => setReason(e.target.value)} /></AdminField>
+      {deleting ? <p>確認刪除訂單 {tip.orderNumber} 的 {money(tip.amount)} 小費？本單應收將減少同額，已收款項需另行核對。已正式結算的薪資需重新結算才會更新。</p>
+        : <TipDistributionFields value={value} staff={staff} onChange={setValue} />}
+      <AdminField label={deleting ? "刪除原因" : "更正原因"} required><textarea required rows={2} maxLength={500} value={reason}
+        placeholder={deleting ? "請說明刪除這筆小費的原因" : "說明原分配的問題與本次更正原因"} onChange={e => setReason(e.target.value)} /></AdminField>
     </fieldset>
-    {!tip.distribution && tip.storeAmount > 0 && <p className="adminOrderFinanceNotice" role="alert">原店家份額 {money(tip.storeAmount)} 將依本次選擇改為員工分配，請確認歸屬。</p>}
+    {!deleting && !tip.distribution && tip.storeAmount > 0 && <p className="adminOrderFinanceNotice" role="alert">原店家份額 {money(tip.storeAmount)} 將依本次選擇改為員工分配，請確認歸屬。</p>}
     {error && <p className="adminOrderFinanceNotice isError" role="alert">{saved ? "已儲存分配，請重新讀取，勿再次新增。" : error}</p>}
     <footer className="adminOrderFinanceActions adminOrderTipActions">
       <AdminButton variant="ghost" disabled={busy || !!retry || saved} onClick={onCancel}>取消</AdminButton>
-      <AdminButton type="submit" busy={busy} busyLabel="處理中…" disabled={busy || (!retry && !saved && !reason.trim())}>{saved ? "重新讀取" : retry ? "查回／重試原更正" : "確認更正分配"}</AdminButton>
+      <AdminButton variant={deleting ? "danger" : "primary"} type="submit" busy={busy} busyLabel="處理中…" disabled={busy || (!retry && !saved && !reason.trim())}>{saved ? "重新讀取" : retry ? "查回／重試原操作" : deleting ? "確認刪除小費" : "確認更正分配"}</AdminButton>
     </footer>
   </form>;
 }

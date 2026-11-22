@@ -502,7 +502,7 @@
 @container order-tip-panel (max-width: 560px) {
   .adminOrdersPage .adminOrderTipSummary,
   .adminOrdersPage .adminOrderTipSummary.hasAction { grid-template-columns: minmax(0, 1fr) max-content; align-items: start; gap: 12px; }
-  .adminOrdersPage .adminOrderTipSummary > .adminButton { grid-column: 1 / -1; justify-self: end; }
+  .adminOrdersPage .adminOrderTipSummary > .adminOrderFinanceActions { grid-column: 1 / -1; justify-self: end; }
   .adminOrdersPage .adminOrderTipCard,
   .adminOrdersPage .adminOrderTipCorrection { padding: 12px; }
   .adminOrdersPage .adminOrderTipAmount dd { font-size: 18px; }
